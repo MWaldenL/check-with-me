@@ -2,13 +2,33 @@
   <div id="table">
     <table>
       <tr>
-        <CellDark />
+        <CellDark blackVis />
         <CellLight />
-        <CellDark />
+        <CellDark blackVis />
         <CellLight />
-        <CellDark />
+        <CellDark blackVis />
         <CellLight />
-        <CellDark />
+        <CellDark blackVis />
+        <CellLight />
+      </tr>
+      <tr>
+        <CellLight />
+        <CellDark blackVis />
+        <CellLight />
+        <CellDark blackVis />
+        <CellLight />
+        <CellDark blackVis />
+        <CellLight />
+        <CellDark blackVis />
+      </tr>
+      <tr>
+        <CellDark blackVis />
+        <CellLight />
+        <CellDark blackVis />
+        <CellLight />
+        <CellDark blackVis />
+        <CellLight />
+        <CellDark blackVis />
         <CellLight />
       </tr>
       <tr>
@@ -33,53 +53,33 @@
       </tr>
       <tr>
         <CellLight />
-        <CellDark />
+        <CellDark whiteVis />
         <CellLight />
-        <CellDark />
+        <CellDark whiteVis />
         <CellLight />
-        <CellDark />
+        <CellDark whiteVis />
         <CellLight />
-        <CellDark />
+        <CellDark whiteVis />
       </tr>
       <tr>
-        <CellDark />
+        <CellDark whiteVis />
         <CellLight />
-        <CellDark />
+        <CellDark whiteVis />
         <CellLight />
-        <CellDark />
+        <CellDark whiteVis />
         <CellLight />
-        <CellDark />
-        <CellLight />
-      </tr>
-      <tr>
-        <CellLight />
-        <CellDark />
-        <CellLight />
-        <CellDark />
-        <CellLight />
-        <CellDark />
-        <CellLight />
-        <CellDark />
-      </tr>
-      <tr>
-        <CellDark />
-        <CellLight />
-        <CellDark />
-        <CellLight />
-        <CellDark />
-        <CellLight />
-        <CellDark />
+        <CellDark whiteVis />
         <CellLight />
       </tr>
       <tr>
         <CellLight />
-        <CellDark />
+        <CellDark whiteVis />
         <CellLight />
-        <CellDark />
+        <CellDark whiteVis />
         <CellLight />
-        <CellDark />
+        <CellDark whiteVis />
         <CellLight />
-        <CellDark />
+        <CellDark whiteVis />
       </tr>
     </table>
   </div>
