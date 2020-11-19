@@ -52,7 +52,7 @@ export default {
 .light {
   background-color: #ebecd0;
   height: 100px;
-  width: 100px;w
+  width: 100px;
   margin: 0;
   padding: 0;
 }
