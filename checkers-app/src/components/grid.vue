@@ -1,106 +1,24 @@
 <template>
   <div id="table">
     <table>
-      <tr>
-        <CellDark blackVis />
-        <CellLight />
-        <CellDark blackVis />
-        <CellLight />
-        <CellDark blackVis />
-        <CellLight />
-        <CellDark blackVis />
-        <CellLight />
-      </tr>
-      <tr>
-        <CellLight />
-        <CellDark blackVis />
-        <CellLight />
-        <CellDark blackVis />
-        <CellLight />
-        <CellDark blackVis />
-        <CellLight />
-        <CellDark blackVis />
-      </tr>
-      <tr>
-        <CellDark blackVis />
-        <CellLight />
-        <CellDark blackVis />
-        <CellLight />
-        <CellDark blackVis />
-        <CellLight />
-        <CellDark blackVis />
-        <CellLight />
-      </tr>
-      <tr>
-        <CellLight />
-        <CellDark />
-        <CellLight />
-        <CellDark />
-        <CellLight />
-        <CellDark />
-        <CellLight />
-        <CellDark />
-      </tr>
-      <tr>
-        <CellDark />
-        <CellLight />
-        <CellDark />
-        <CellLight />
-        <CellDark />
-        <CellLight />
-        <CellDark />
-        <CellLight />
-      </tr>
-      <tr>
-        <CellLight />
-        <CellDark whiteVis />
-        <CellLight />
-        <CellDark whiteVis />
-        <CellLight />
-        <CellDark whiteVis />
-        <CellLight />
-        <CellDark whiteVis />
-      </tr>
-      <tr>
-        <CellDark whiteVis />
-        <CellLight />
-        <CellDark whiteVis />
-        <CellLight />
-        <CellDark whiteVis />
-        <CellLight />
-        <CellDark whiteVis />
-        <CellLight />
-      </tr>
-      <tr>
-        <CellLight />
-        <CellDark whiteVis />
-        <CellLight />
-        <CellDark whiteVis />
-        <CellLight />
-        <CellDark whiteVis />
-        <CellLight />
-        <CellDark whiteVis />
+      <tr v-for="row in 8" :key="row">
+        <Cell v-for="col in 8" :row="row" :col="col" :key="col" />
       </tr>
     </table>
   </div>
 </template>
 
 <script>
-import CellLight from './cell-light.vue'
-import CellDark from './cell-dark.vue'
+import Cell from './cell'
 
 export default {
   name: 'Grid',
   components: {
-    CellLight,
-    CellDark
-  },
-  props: {
+    Cell
   }
 }
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
 h3 {
   margin: 40px 0 0;
