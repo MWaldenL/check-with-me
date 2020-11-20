@@ -94,8 +94,12 @@ const mutations = {
       }
 
       if (bIsValid) {
-        state.cells[newCurr.nRow - 1][newCurr.nCol - 1] = newCurr
-        state.cells[newDest.nRow - 1][newDest.nCol - 1] = newDest
+        const stateClone = JSON.parse(JSON.stringify(state.cells))
+
+        stateClone[newCurr.nRow - 1][newCurr.nCol - 1] = newCurr
+        stateClone[newDest.nRow - 1][newDest.nCol - 1] = newDest
+
+        state.cells = stateClone
       }
 
       state.firstClick = null
