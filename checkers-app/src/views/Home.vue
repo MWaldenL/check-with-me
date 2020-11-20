@@ -5,7 +5,6 @@
 </template>
 
 <script>
-// @ is an alias to /src
 import Grid from '@/components/grid.vue'
 
 export default {
