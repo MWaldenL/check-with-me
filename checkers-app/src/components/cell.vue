@@ -1,12 +1,15 @@
 <template>
-  <td class="dark" @click="focus" v-if="isDark">
-    <div id="checker-black" class="chip black-chip" :style="blackOpacity" v-show="blackVis"></div>
-    <div id="checker-white" class="chip white-chip" :style="whiteOpacity" v-show="whiteVis"></div>
+  <td class="dark" @click="moveDiagonally" v-if="isDark">
+    {{row}}, {{col}}
+    <div id="checker-black" class="chip black-chip" :style="blackOpacity" v-show="getEntireBoard[row - 1][col - 1].bHasBlackChip"></div>
+    <div id="checker-white" class="chip white-chip" :style="whiteOpacity" v-show="getEntireBoard[row - 1][col - 1].bHasWhiteChip"></div>
   </td>
   <td class="light" v-else></td>
 </template>
 
 <script>
+import { mapGetters, mapActions } from 'vuex'
+
 export default {
   props: ['row', 'col'],
   data () {
@@ -16,22 +19,33 @@ export default {
     }
   },
   computed: {
+    ...mapGetters(['getEntireBoard', 'getFirstClick']),
     isDark () {
-      return (this.row % 2 === 0) ? this.col % 2 === 1 : this.col % 2 === 0
-    },
-
-    blackVis () {
-      return this.row >= 1 && this.row < 4 && this.isDark
-    },
-
-    whiteVis () {
-      return this.row > 5 && this.row <= 8 && this.isDark
+      return (this.row % 2 === 1) ? this.col % 2 === 1 : this.col % 2 === 0
     }
   },
   methods: {
+    ...mapActions(['aMoveForward', 'aHighlight']),
     focus () {
       this.blackOpacity.opacity = this.blackOpacity.opacity === '100%' ? '50%' : '100%'
       this.whiteOpacity.opacity = this.whiteOpacity.opacity === '100%' ? '50%' : '100%'
+    },
+    moveDiagonally () {
+      const source = this.getFirstClick
+
+      if (source != null) {
+        console.log('Move ' + this.row + ', ' + this.col)
+        const coords = {
+          nRow: source.nRow,
+          nCol: source.nCol,
+          nDestRow: this.row,
+          nDestCol: this.col
+        }
+        this.aMoveForward(coords)
+      } else {
+        console.log('Highlight ' + this.row + ', ' + this.col)
+        this.aHighlight({ nRow: this.row, nCol: this.col })
+      }
     }
   }
 }
