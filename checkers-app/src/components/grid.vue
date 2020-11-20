@@ -2,7 +2,7 @@
   <div id="table">
     <table>
       <tr v-for="row in 8" :key="row">
-        <Cell v-for="col in 8" :row="row" :col="col" :key="col" />
+        <Cell v-for="col in 8" :row="9 - row" :col="col" :key="col" />
       </tr>
     </table>
   </div>

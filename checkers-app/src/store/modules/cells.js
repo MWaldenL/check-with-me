@@ -24,16 +24,21 @@ for (let r = 0; r < 8; r++) {
 const state = {
   cells: board,
   nWhiteCount: 12,
-  nBlackCount: 12
+  nBlackCount: 12,
+  firstClick: null
 }
 
 const getters = {
   getEntireBoard: state => state.cells,
   getWhiteCount: state => state.nWhiteCount,
-  getBlackCount: state => state.nBlackCount
+  getBlackCount: state => state.nBlackCount,
+  getFirstClick: state => state.firstClick
 }
 
 const actions = {
+  async aHighlight ({ commit }, coords) {
+    commit('mHighlight', coords)
+  },
   /*
     aMoveForward moves a black or white chip to an empty cell 1 space diagonally
 
@@ -42,41 +47,59 @@ const actions = {
     @param nDestRow - 1-based row of empty destination cell
     @param nDestCol - 1-based column of empty destination cell
     */
-  aMoveForward ({ commit }, nRow, nCol, nDestRow, nDestCol) {
-    const newCurr = {
-      nRow: nRow,
-      nCol: nCol,
-      bHasBlackChip: false,
-      bHasWhiteChip: false
-    }
-    const newDest = {
-      nRow: nDestRow,
-      nCol: nDestCol,
-      bHasBlackChip: false,
-      bHasWhiteChip: false
-    }
-    let bIsValid = false
-    const bIsOpen = !(state.cells[nDestRow - 1][nDestCol - 1].bHasBlackChip || state.cells[nDestRow - 1][nDestCol - 1].bHasWhiteChip)
-    const bIsDiagonal = nCol - 1 === nDestCol || nCol + 1 === nDestCol
+  async aMoveForward ({ commit }, coords) {
+    console.log('Action ' + coords.nRow + ', ' + coords.nCol + ' to ' + coords.nDestRow + ', ' + coords.nDestCol)
 
-    if (bIsOpen && bIsDiagonal && state.cells[nRow - 1][nCol - 1].bHasBlackChip === true && nRow - 1 === nDestRow) {
-      bIsValid = true
-      newDest.bHasBlackChip = true
-    } else if (bIsOpen && bIsDiagonal && state.cells[nRow - 1][nCol - 1].bHasWhiteChip === true && nRow + 1 === nDestRow) {
-      bIsValid = true
-      newDest.bHasWhiteChip = true
-    }
-
-    if (bIsValid) {
-      commit('mMoveForward', newCurr, newDest)
-    }
+    commit('mMoveForward', coords)
   }
 }
 
 const mutations = {
-  mMoveForward: (state, newCurr, newDest) => {
-    state.cells[newCurr.nRow - 1][newCurr.nCol - 1] = newCurr
-    state.cells[newDest.nRow - 1][newDest.nCol - 1] = newDest
+  mHighlight: (state, coords) => {
+    // check if has moves
+    /*
+    bIsOpenLeft =
+    bIsOpenRight =
+
+    if(bIsOpenLeft || bIsOpenRight)
+      */
+    state.firstClick = coords
+  },
+  mMoveForward: (state, coords) => {
+    console.log('Mutate ' + coords.nRow + ', ' + coords.nCol)
+    if (coords.nDestCol >= 1 && coords.nDestCol <= 8 && coords.nDestRow >= 1 && coords.nDestRow <= 8) {
+      const newCurr = {
+        nRow: coords.nRow,
+        nCol: coords.nCol,
+        bHasBlackChip: false,
+        bHasWhiteChip: false
+      }
+      const newDest = {
+        nRow: coords.nDestRow,
+        nCol: coords.nDestCol,
+        bHasBlackChip: false,
+        bHasWhiteChip: false
+      }
+
+      let bIsValid = false
+      const bIsOpen = !(state.cells[coords.nDestRow - 1][coords.nDestCol - 1].bHasBlackChip || state.cells[coords.nDestRow - 1][coords.nDestCol - 1].bHasWhiteChip)
+      const bIsDiagonal = coords.nCol - 1 === coords.nDestCol || coords.nCol + 1 === coords.nDestCol
+
+      if (bIsOpen && bIsDiagonal && state.cells[coords.nRow - 1][coords.nCol - 1].bHasBlackChip === true && coords.nRow - 1 === coords.nDestRow) {
+        bIsValid = true
+        newDest.bHasBlackChip = true
+      } else if (bIsOpen && bIsDiagonal && state.cells[coords.nRow - 1][coords.nCol - 1].bHasWhiteChip === true && coords.nRow + 1 === coords.nDestRow) {
+        bIsValid = true
+        newDest.bHasWhiteChip = true
+      }
+
+      if (bIsValid) {
+        state.cells[newCurr.nRow - 1][newCurr.nCol - 1] = newCurr
+        state.cells[newDest.nRow - 1][newDest.nCol - 1] = newDest
+      }
+
+      state.firstClick = null
+    }
   }
 }
 
