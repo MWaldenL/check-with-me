@@ -34,6 +34,14 @@ const getters = {
 }
 
 const actions = {
+  /*
+    aMoveForward moves a black or white chip to an empty cell 1 space diagonally
+
+    @param nRow - 1-based row of active cell with piece to move
+    @param nCol - 1-based column of active cell with piece to move
+    @param nDestRow - 1-based row of empty destination cell
+    @param nDestCol - 1-based column of empty destination cell
+    */
   aMoveForward ({ commit }, nRow, nCol, nDestRow, nDestCol) {
     const newCurr = {
       nRow: nRow,
