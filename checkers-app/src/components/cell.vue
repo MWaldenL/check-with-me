@@ -64,8 +64,15 @@ export default {
           this.aCapturePiece(coords)
         } else if (bIsMoveForwardAttempt) {
           this.aMoveForward(coords)
+        } else {
+          if (this.hasBlackChip || this.hasWhiteChip) {
+            this.aHighlight({ nRow: this.row, nCol: this.col })
+          } else {
+            this.aHighlight(null)
+          }
         }
       } else {
+        console.log('Highlight')
         this.aHighlight({ nRow: this.row, nCol: this.col })
       }
     }

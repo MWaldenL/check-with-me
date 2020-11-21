@@ -50,13 +50,7 @@ const actions = {
 
 const mutations = {
   mHighlight: (state, coords) => {
-    // check if has moves
-    /*
-    bIsOpenLeft =
-    bIsOpenRight =
-
-    if(bIsOpenLeft || bIsOpenRight)
-      */
+    // TODO: Highlight legal
     state.firstClick = coords
   },
 
