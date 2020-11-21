@@ -101,7 +101,6 @@ const mutations = {
 
         state.cells = stateClone
       }
-
       state.firstClick = null
     }
   }

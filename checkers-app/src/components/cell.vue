@@ -1,8 +1,7 @@
 <template>
-  <td class="dark" @click="moveDiagonally" v-if="isDark">
-    {{row}}, {{col}}
-    <div id="checker-black" class="chip black-chip" :style="blackOpacity" v-show="getEntireBoard[row - 1][col - 1].bHasBlackChip"></div>
-    <div id="checker-white" class="chip white-chip" :style="whiteOpacity" v-show="getEntireBoard[row - 1][col - 1].bHasWhiteChip"></div>
+  <td class="dark" @click="moveDiagonally()" v-if="isDark">
+    <div id="checker-black" class="chip black-chip" :style="blackOpacity" v-show="hasBlackChip"></div>
+    <div id="checker-white" class="chip white-chip" :style="whiteOpacity" v-show="hasWhiteChip"></div>
   </td>
   <td class="light" v-else></td>
 </template>
@@ -22,6 +21,14 @@ export default {
     ...mapGetters(['getEntireBoard', 'getFirstClick']),
     isDark () {
       return (this.row % 2 === 1) ? this.col % 2 === 1 : this.col % 2 === 0
+    },
+
+    hasBlackChip () {
+      return this.getEntireBoard[this.row - 1][this.col - 1].bHasBlackChip
+    },
+
+    hasWhiteChip () {
+      return this.getEntireBoard[this.row - 1][this.col - 1].bHasWhiteChip
     }
   },
   methods: {
@@ -30,6 +37,7 @@ export default {
       this.blackOpacity.opacity = this.blackOpacity.opacity === '100%' ? '50%' : '100%'
       this.whiteOpacity.opacity = this.whiteOpacity.opacity === '100%' ? '50%' : '100%'
     },
+
     moveDiagonally () {
       const source = this.getFirstClick
 
