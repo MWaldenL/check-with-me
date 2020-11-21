@@ -7,7 +7,9 @@ const getBoard = () => {
         nRow: r + 1, // nRow number 1-8, 1 is bottom
         nCol: c + 1, // column number 1-8, 1 is leftmost
         bHasBlackChip: false, // boolean
-        bHasWhiteChip: false // boolean
+        bHasWhiteChip: false, // boolean
+        bHasBlackKing: false, // boolean
+        bHasWhiteKing: false // boolean
       }
 
       if (cell.nRow >= 6 && ((cell.nCol % 2 === 1 && cell.nRow % 2 === 1) || (cell.nCol % 2 === 0 && cell.nRow % 2 === 0))) {
