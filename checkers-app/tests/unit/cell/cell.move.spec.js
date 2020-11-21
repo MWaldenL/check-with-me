@@ -32,39 +32,11 @@ describe('Cell.vue normal piece movement', () => {
     }) 
   }),
   
-  describe('Moving a piece', () => {
-    beforeEach(() => {
-      getters = {
-        getEntireBoard: () => board,
-        getFirstClick: () => { 
-          return { row: 3, col: 3 }
-        }
-      }
-  
-      actions = {
-        aMoveForward: jest.fn(),
-        aHighlight: jest.fn()
-      }
-  
-      store = new Vuex.Store({ getters, actions })
-    })
-
-    it('dispatches aMoveForward when moveDiagonally is called with a source', () => {
-      const wrapper = shallowMount(Cell, { 
-        store, 
-        localVue, 
-        propsData: {row: 3, col: 3}
-      })
-      
-      wrapper.find('.dark').trigger('click')
-      expect(actions.aMoveForward).toHaveBeenCalled()
-    })
-  }),
-
   describe('Highlighting a piece', () => {
+    // Arrange
     beforeEach(() => {
       getters = {
-        getEntireBoard: () => board,
+        getEntireBoard: () => Board.getBoard(),
         getFirstClick: () => null
       }
   
@@ -76,15 +48,80 @@ describe('Cell.vue normal piece movement', () => {
       store = new Vuex.Store({ getters, actions })
     })
 
-    it('dispatches aHighlight when moveDiagonally is called without a source', () => {
+    it('dispatches aHighlight when onSquareClicked is called without a source square', () => {
       const wrapper = shallowMount(Cell, { 
         store, 
         localVue, 
-        propsData: {row: 3, col: 3}
+        propsData: { row: 3, col: 3 }
       })
 
+      // Act
       wrapper.find('.dark').trigger('click')
+
+      // Assert
       expect(actions.aHighlight).toHaveBeenCalled()
     })
   })
+
+  describe('Moving a piece', () => {
+    // Arrange 
+    beforeEach(() => {
+      getters = {
+        getEntireBoard: () => Board.getBoard(),
+        getFirstClick: () => { 
+          return { nRow: 1, nCol: 1 }
+        }
+      }
+  
+      actions = {
+        aMoveForward: jest.fn()
+      }
+  
+      store = new Vuex.Store({ getters, actions })
+    })
+
+    it('dispatches aMoveForward when onSquareClicked is called with an existing source square', () => {
+      const wrapper = shallowMount(Cell, { 
+        store, 
+        localVue, 
+        propsData: { row: 2, col: 2 }
+      })
+      
+      wrapper.find('.dark').trigger('click')
+      expect(actions.aMoveForward).toHaveBeenCalled()
+    })
+  }) 
+
+  describe('Capturing a piece', () => {
+    // Arrange 
+    beforeEach(() => {
+      getters = {
+        getEntireBoard: () => Board.getBoard(),
+        getFirstClick: () => { 
+          return { nRow: 1, nCol: 1 }
+        }
+      }
+  
+      actions = {
+        aCapturePiece: jest.fn()
+      }
+  
+      store = new Vuex.Store({ getters, actions })
+    })
+
+    it('dispatches aMoveForward when onSquareClicked is called with an existing source square', () => {
+      const wrapper = shallowMount(Cell, { 
+        store, 
+        localVue, 
+        propsData: { row: 3, col: 3 }
+      })
+      
+      // Act
+      wrapper.find('.dark').trigger('click')
+
+      // Assert
+      expect(actions.aCapturePiece).toHaveBeenCalled()
+    })
+  }) 
+
 })
