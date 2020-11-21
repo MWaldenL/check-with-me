@@ -9,7 +9,7 @@ const getBoard = () => {
         bHasBlackChip: false, // boolean
         bHasWhiteChip: false // boolean
       }
-  
+
       if (cell.nRow >= 6 && ((cell.nCol % 2 === 1 && cell.nRow % 2 === 1) || (cell.nCol % 2 === 0 && cell.nRow % 2 === 0))) {
         // put black chip
         cell.bHasBlackChip = true

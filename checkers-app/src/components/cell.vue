@@ -1,5 +1,5 @@
 <template>
-  <td class="dark" @click="moveDiagonally()" v-if="isDark">
+  <td class="dark" @click="onSquareClicked()" v-if="isDark">
     <div id="checker-black" class="chip black-chip" :style="blackOpacity" v-show="hasBlackChip"></div>
     <div id="checker-white" class="chip white-chip" :style="whiteOpacity" v-show="hasWhiteChip"></div>
   </td>
@@ -32,26 +32,40 @@ export default {
     }
   },
   methods: {
-    ...mapActions(['aMoveForward', 'aHighlight']),
+    ...mapActions(['aMoveForward', 'aHighlight', 'aCapturePiece']),
     focus () {
       this.blackOpacity.opacity = this.blackOpacity.opacity === '100%' ? '50%' : '100%'
       this.whiteOpacity.opacity = this.whiteOpacity.opacity === '100%' ? '50%' : '100%'
     },
 
-    moveDiagonally () {
+    onSquareClicked () {
       const source = this.getFirstClick
-
       if (source != null) {
-        console.log('Move ' + this.row + ', ' + this.col)
         const coords = {
           nRow: source.nRow,
           nCol: source.nCol,
           nDestRow: this.row,
           nDestCol: this.col
         }
-        this.aMoveForward(coords)
+
+        const bIsCaptureAttempt =
+          (this.row === source.nRow + 2 && this.col === source.nCol + 2) ||
+          (this.row === source.nRow + 2 && this.col === source.nCol - 2) ||
+          (this.row === source.nRow - 2 && this.col === source.nCol + 2) ||
+          (this.row === source.nRow - 2 && this.col === source.nCol - 2)
+
+        const bIsMoveForwardAttempt =
+          (this.row === source.nRow + 1 && this.col === source.nCol + 1) ||
+          (this.row === source.nRow + 1 && this.col === source.nCol - 1) ||
+          (this.row === source.nRow - 1 && this.col === source.nCol + 1) ||
+          (this.row === source.nRow - 1 && this.col === source.nCol - 1)
+
+        if (bIsCaptureAttempt) {
+          this.aCapturePiece(coords)
+        } else if (bIsMoveForwardAttempt) {
+          this.aMoveForward(coords)
+        }
       } else {
-        console.log('Highlight ' + this.row + ', ' + this.col)
         this.aHighlight({ nRow: this.row, nCol: this.col })
       }
     }

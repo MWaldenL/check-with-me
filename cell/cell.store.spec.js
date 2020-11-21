@@ -79,4 +79,6 @@ describe('Mutation testing', () => {
       expect(state.firstClick).toBe(null)
     })
   })
+
+  describe('Capturing a piece')
 })

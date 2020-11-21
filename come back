@@ -1,0 +1,95 @@
+
+
+  describe('bPieceExistsAfterAdj', () => {
+    it('checks if the adjacent square after that is empty', () => {
+      // Arrange
+      const board = getBoard()
+      const coords = {
+        nRow: 3, nCol: 3, nDestRow: 5, nDestCol: 5
+      }
+
+      board[2][2] = {
+        nRow: 3, nCol: 3, bHasWhiteChip: true, bHasBlackChip: false
+      }
+      board[4][4] = {
+        nRow: 5, nCol: 5, bHasWhiteChip: false, bHasBlackChip: false
+      }
+
+      const expected = false
+
+      // Act
+      const result = MoveCaptureService.bPieceExistsAfterAdj(board, coords);
+
+      // Assert
+      expect(result).toBe(expected)
+    }),
+
+    it('checks if the adjacent square after that is empty 2', () => {
+      // Arrange
+      const board = getBoard()
+      const coords = {
+        nRow: 3, nCol: 3, nDestRow: 5, nDestCol: 1
+      }
+
+      board[2][2] = {
+        nRow: 3, nCol: 3, bHasWhiteChip: true, bHasBlackChip: false
+      }
+      board[4][0] = {
+        nRow: 5, nCol: 1, bHasWhiteChip: false, bHasBlackChip: false
+      }
+
+      const expected = false
+
+      // Act
+      const result = MoveCaptureService.bPieceExistsAfterAdj(board, coords);
+
+      // Assert
+      expect(result).toBe(expected)
+    }),
+
+    it('checks if the adjacent square after that is not empty', () => {
+      // Arrange
+      const board = getBoard()
+      const coords = {
+        nRow: 3, nCol: 3, nDestRow: 5, nDestCol: 5
+      }
+
+      board[2][2] = {
+        nRow: 3, nCol: 3, bHasWhiteChip: true, bHasBlackChip: false
+      }
+      board[4][4] = {
+        nRow: 5, nCol: 5, bHasWhiteChip: true, bHasBlackChip: false
+      }
+
+      const expected = true
+
+      // Act
+      const result = MoveCaptureService.bPieceExistsAfterAdj(board, coords);
+
+      // Assert
+      expect(result).toBe(expected)
+    }),
+
+    it('checks if the adjacent square after that is not empty 2', () => {
+      // Arrange
+      const board = getBoard()
+      const coords = {
+        nRow: 3, nCol: 3, nDestRow: 5, nDestCol: 1
+      }
+
+      board[2][2] = {
+        nRow: 3, nCol: 3, bHasWhiteChip: true, bHasBlackChip: false
+      }
+      board[4][0] = {
+        nRow: 5, nCol: 1, bHasWhiteChip: false, bHasBlackChip: true
+      }
+
+      const expected = true
+
+      // Act
+      const result = MoveCaptureService.bPieceExistsAfterAdj(board, coords);
+
+      // Assert
+      expect(result).toBe(expected)
+    })
+  })

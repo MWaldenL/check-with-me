@@ -1,28 +1,14 @@
-const board = new Array(8).fill(null).map(() => Array(8))
-for (let r = 0; r < 8; r++) {
-  for (let c = 0; c < 8; c++) {
-    // initialize empty cell
-    const cell = {
-      nRow: r + 1, // nRow number 1-8, 1 is bottom
-      nCol: c + 1, // column number 1-8, 1 is leftmost
-      bHasBlackChip: false, // boolean
-      bHasWhiteChip: false // boolean
-    }
-
-    if (cell.nRow >= 6 && ((cell.nCol % 2 === 1 && cell.nRow % 2 === 1) || (cell.nCol % 2 === 0 && cell.nRow % 2 === 0))) {
-      // put black chip
-      cell.bHasBlackChip = true
-    } else if (cell.nRow <= 3 && ((cell.nCol % 2 === 1 && cell.nRow % 2 === 1) || (cell.nCol % 2 === 0 && cell.nRow % 2 === 0))) {
-      // put white chip
-      cell.bHasWhiteChip = true
-    }
-
-    board[r][c] = cell
-  }
-}
+import Board from './board'
+import {
+  bSourceHasBlack,
+  bSourceHasWhite,
+  bBlackExistsAdj,
+  bWhiteExistsAdj,
+  bPieceExistsAfterAdj
+} from '../services/moveCaptureService'
 
 const state = {
-  cells: board,
+  cells: Board.getBoard(),
   nWhiteCount: 12,
   nBlackCount: 12,
   firstClick: null
@@ -39,6 +25,7 @@ const actions = {
   async aHighlight ({ commit }, coords) {
     commit('mHighlight', coords)
   },
+
   /*
     aMoveForward moves a black or white chip to an empty cell 1 space diagonally
 
@@ -51,6 +38,11 @@ const actions = {
     console.log('Action ' + coords.nRow + ', ' + coords.nCol + ' to ' + coords.nDestRow + ', ' + coords.nDestCol)
 
     commit('mMoveForward', coords)
+  },
+
+  async aCapturePiece ({ commit }, coords) {
+    console.log(`Action: ${coords.nRow}, ${coords.nCol} to ${coords.nDestRow}, ${coords.nDestCol}`)
+    commit('mCapturePiece', coords)
   }
 }
 
@@ -65,6 +57,7 @@ const mutations = {
       */
     state.firstClick = coords
   },
+
   mMoveForward: (state, coords) => {
     console.log('Mutate ' + coords.nRow + ', ' + coords.nCol)
     if (coords.nDestCol >= 1 && coords.nDestCol <= 8 && coords.nDestRow >= 1 && coords.nDestRow <= 8) {
@@ -82,13 +75,18 @@ const mutations = {
       }
 
       let bIsValid = false
-      const bIsOpen = !(state.cells[coords.nDestRow - 1][coords.nDestCol - 1].bHasBlackChip || state.cells[coords.nDestRow - 1][coords.nDestCol - 1].bHasWhiteChip)
-      const bIsDiagonal = coords.nCol - 1 === coords.nDestCol || coords.nCol + 1 === coords.nDestCol
+      const bIsSquareOpen = !(state.cells[coords.nDestRow - 1][coords.nDestCol - 1].bHasBlackChip || state.cells[coords.nDestRow - 1][coords.nDestCol - 1].bHasWhiteChip)
+      const bIsColLeftOrRight = coords.nCol - 1 === coords.nDestCol || coords.nCol + 1 === coords.nDestCol
 
-      if (bIsOpen && bIsDiagonal && state.cells[coords.nRow - 1][coords.nCol - 1].bHasBlackChip === true && coords.nRow - 1 === coords.nDestRow) {
+      const bSourceHasBlack = state.cells[coords.nRow - 1][coords.nCol - 1].bHasBlackChip
+      const bNextRowBelow = coords.nRow - 1 === coords.nDestRow
+      const bSourceHasWhite = state.cells[coords.nRow - 1][coords.nCol - 1].bHasWhiteChip
+      const bNextRowAbove = coords.nRow + 1 === coords.nDestRow
+
+      if (bIsSquareOpen && bIsColLeftOrRight && bSourceHasBlack && bNextRowBelow) {
         bIsValid = true
         newDest.bHasBlackChip = true
-      } else if (bIsOpen && bIsDiagonal && state.cells[coords.nRow - 1][coords.nCol - 1].bHasWhiteChip === true && coords.nRow + 1 === coords.nDestRow) {
+      } else if (bIsSquareOpen && bIsColLeftOrRight && bSourceHasWhite && bNextRowAbove) {
         bIsValid = true
         newDest.bHasWhiteChip = true
       }
@@ -103,7 +101,62 @@ const mutations = {
       }
       state.firstClick = null
     }
+  },
+
+  mCapturePiece: (state, coords) => {
+    const newCur = {
+      nRow: coords.nRow,
+      nCol: coords.nCol,
+      bHasBlackChip: false,
+      bHasWhiteChip: false
+    }
+
+    const adjacent = {
+      nRow: Math.floor((coords.nRow + coords.nDestRow) / 2),
+      nCol: Math.floor((coords.nCol + coords.nDestCol) / 2),
+      bHasBlackChip: false,
+      bHasWhiteChip: false
+    }
+
+    const newDest = {
+      nRow: coords.nDestRow,
+      nCol: coords.nDestCol,
+      bHasBlackChip: false,
+      bHasWhiteChip: false
+    }
+
+    let bIsValidCapture = false
+    const bNextRowBelow = coords.nRow - 2 === coords.nDestRow
+    const bNextRowAbove = coords.nRow + 2 === coords.nDestRow
+    const bWhiteCanCapture = bSourceHasWhite(state.cells, coords) && bBlackExistsAdj(state.cells, coords) && bNextRowAbove
+    const bBlackCanCapture = bSourceHasBlack(state.cells, coords) && bWhiteExistsAdj(state.cells, coords) && bNextRowBelow
+
+    if (bWhiteCanCapture) {
+      if (!bPieceExistsAfterAdj(state.cells, coords)) {
+        bIsValidCapture = true
+        newDest.bHasWhiteChip = true
+      }
+    } else if (bBlackCanCapture) {
+      if (!bPieceExistsAfterAdj(state.cells, coords)) {
+        console.log('Black capture')
+        bIsValidCapture = true
+        newDest.bHasBlackChip = true
+      }
+    }
+
+    if (bIsValidCapture) {
+      const stateClone = JSON.parse(JSON.stringify(state.cells))
+
+      stateClone[newCur.nRow - 1][newCur.nCol - 1] = newCur
+      stateClone[adjacent.nRow - 1][adjacent.nCol - 1] = adjacent
+      stateClone[newDest.nRow - 1][newDest.nCol - 1] = newDest
+
+      state.cells = stateClone
+    }
+
+    state.firstClick = null
   }
+
 }
 
 export default {
