@@ -1,7 +1,11 @@
 <template>
   <td class="dark" @click="onSquareClicked()" v-if="isDark">
-    <div id="checker-black" class="chip black-chip" :style="blackOpacity" v-show="hasBlackChip"></div>
-    <div id="checker-white" class="chip white-chip" :style="whiteOpacity" v-show="hasWhiteChip"></div>
+    <div id="checker-black" class="chip black-chip" :style="blackOpacity" v-show="hasBlackChip">
+      <img class="king" src="../../public/assets/king.png" v-show="hasBlackKing"/>
+    </div>
+    <div id="checker-white" class="chip white-chip" :style="whiteOpacity" v-show="hasWhiteChip">
+      <img class="king" src="../../public/assets/king.png" v-show="hasWhiteKing"/>
+    </div>
   </td>
   <td class="light" v-else></td>
 </template>
@@ -29,6 +33,14 @@ export default {
 
     hasWhiteChip () {
       return this.getEntireBoard[this.row - 1][this.col - 1].bHasWhiteChip
+    },
+
+    hasBlackKing () {
+      return this.getEntireBoard[this.row - 1][this.col - 1].bHasBlackKing
+    },
+
+    hasWhiteKing () {
+      return this.getEntireBoard[this.row - 1][this.col - 1].bHasWhiteKing
     }
   },
   methods: {
@@ -106,6 +118,9 @@ export default {
   height: 75px;
   box-sizing: border-box;
   opacity: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .black-chip {
@@ -116,5 +131,10 @@ export default {
 .white-chip {
   background: radial-gradient(50% 50% at 50% 50%, #FFFFFF 28.12%, #dacece 100%, #FFFFFF 100%);
   border: 12px solid #EDEDED;
+}
+
+.king {
+  height: 40px;
+  width: 40px;
 }
 </style>

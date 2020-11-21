@@ -61,25 +61,43 @@ const mutations = {
         nRow: coords.nRow,
         nCol: coords.nCol,
         bHasBlackChip: false,
-        bHasWhiteChip: false
+        bHasWhiteChip: false,
+        bHasBlackKing: false,
+        bHasWhiteKing: false
       }
       const newDest = {
         nRow: coords.nDestRow,
         nCol: coords.nDestCol,
         bHasBlackChip: false,
-        bHasWhiteChip: false
+        bHasWhiteChip: false,
+        bHasBlackKing: false,
+        bHasWhiteKing: false
       }
 
       let bIsValid = false
-      const bIsSquareOpen = !(state.cells[coords.nDestRow - 1][coords.nDestCol - 1].bHasBlackChip || state.cells[coords.nDestRow - 1][coords.nDestCol - 1].bHasWhiteChip)
+
+      const srcCell = state.cells[coords.nRow - 1][coords.nCol - 1]
+      const destCell = state.cells[coords.nDestRow - 1][coords.nDestCol - 1]
+
+      const bIsSquareOpen = !(destCell.bHasBlackChip || destCell.bHasWhiteChip)
       const bIsColLeftOrRight = coords.nCol - 1 === coords.nDestCol || coords.nCol + 1 === coords.nDestCol
 
-      const bSourceHasBlack = state.cells[coords.nRow - 1][coords.nCol - 1].bHasBlackChip
+      const bSourceHasBlack = srcCell.bHasBlackChip
       const bNextRowBelow = coords.nRow - 1 === coords.nDestRow
-      const bSourceHasWhite = state.cells[coords.nRow - 1][coords.nCol - 1].bHasWhiteChip
+      const bLastRowBelow = coords.nDestRow === 1
+      const bSourceHasWhite = srcCell.bHasWhiteChip
       const bNextRowAbove = coords.nRow + 1 === coords.nDestRow
+      const bLastRowAbove = coords.nDestRow === 8
 
-      if (bIsSquareOpen && bIsColLeftOrRight && bSourceHasBlack && bNextRowBelow) {
+      if (bIsSquareOpen && bIsColLeftOrRight && bSourceHasBlack && bNextRowBelow && bLastRowBelow) {
+        bIsValid = true
+        newDest.bHasBlackChip = true
+        newDest.bHasBlackKing = true
+      } else if (bIsSquareOpen && bIsColLeftOrRight && bSourceHasWhite && bNextRowAbove && bLastRowAbove) {
+        bIsValid = true
+        newDest.bHasWhiteChip = true
+        newDest.bHasWhiteKing = true
+      } else if (bIsSquareOpen && bIsColLeftOrRight && bSourceHasBlack && bNextRowBelow) {
         bIsValid = true
         newDest.bHasBlackChip = true
       } else if (bIsSquareOpen && bIsColLeftOrRight && bSourceHasWhite && bNextRowAbove) {
