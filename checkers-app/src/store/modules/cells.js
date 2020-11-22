@@ -152,7 +152,6 @@ const mutations = {
       }
     } else if (bBlackCanCapture) {
       if (!bPieceExistsAfterAdj(state.cells, coords)) {
-        console.log('Black capture')
         bIsValidCapture = true
         newDest.bHasBlackChip = true
       }

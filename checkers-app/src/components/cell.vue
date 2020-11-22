@@ -84,7 +84,6 @@ export default {
           }
         }
       } else {
-        console.log('Highlight')
         this.aHighlight({ nRow: this.row, nCol: this.col })
       }
     }
@@ -113,6 +112,8 @@ export default {
 }
 
 .chip {
+  position: absolute;
+  z-index: 2;
   border-radius: 50%;
   width: 75px;
   height: 75px;
