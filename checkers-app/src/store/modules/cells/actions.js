@@ -15,7 +15,7 @@ const actions = {
   },
 
   /**
-   * aCapturePiece moves a black or white chip to capture an opposite-colored piece
+   * aCapturePiece moves a non-king black or white chip to capture an opposite-colored piece
    * diagonally adjacent from it.
    *
    * @param coords - an object containing the source and destination coordinates

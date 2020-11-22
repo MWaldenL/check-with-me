@@ -1,5 +1,5 @@
 <template>
-  <td class="dark" @click="onSquareClicked()" v-if="isDark">
+  <td class="square dark" :class="highlight" @click="onSquareClicked()" v-if="isDark">
     <div id="checker-black" class="chip black-chip" :style="blackOpacity" v-show="hasBlackChip">
       <img class="king" src="../../public/assets/king.png" v-show="hasBlackKing"/>
     </div>
@@ -7,7 +7,7 @@
       <img class="king" src="../../public/assets/king.png" v-show="hasWhiteKing"/>
     </div>
   </td>
-  <td class="light" @click="onSquareClicked()" v-else></td>
+  <td class="square light" @click="onSquareClicked()" v-else></td>
 </template>
 
 <script>
@@ -18,7 +18,8 @@ export default {
   data () {
     return {
       blackOpacity: { opacity: '100%' },
-      whiteOpacity: { opacity: '100%' }
+      whiteOpacity: { opacity: '100%' },
+      isSelected: false
     }
   },
   computed: {
@@ -45,6 +46,10 @@ export default {
 
     hasWhiteKing () {
       return this.board[this.row - 1][this.col - 1].bHasWhiteKing
+    },
+
+    highlight () {
+      return { highlight: this.isSelected }
     }
   },
   methods: {
@@ -58,6 +63,7 @@ export default {
       const source = this.firstClick
 
       if (source != null) {
+        this.isSelected = false
         const coords = {
           nRow: source.nRow,
           nCol: source.nCol,
@@ -92,6 +98,7 @@ export default {
         }
       } else {
         if (this.hasBlackChip || this.hasWhiteChip || this.hasBlackKing || this.hasWhiteKing) {
+          this.isSelected = true
           this.aHighlight({ nRow: this.row, nCol: this.col })
         }
       }
@@ -101,12 +108,15 @@ export default {
 </script>
 
 <style scoped>
-.dark {
-  background-color: #779556;
+.square {
   height: 100px;
   width: 100px;
   margin: 0;
   padding: 0;
+}
+
+.dark {
+  background-color: #779556;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -114,10 +124,10 @@ export default {
 
 .light {
   background-color: #ebecd0;
-  height: 100px;
-  width: 100px;
-  margin: 0;
-  padding: 0;
+}
+
+.highlight {
+  background-color: #B1DC82;
 }
 
 .chip {
