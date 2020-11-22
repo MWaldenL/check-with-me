@@ -7,7 +7,7 @@
       <img class="king" src="../../public/assets/king.png" v-show="hasWhiteKing"/>
     </div>
   </td>
-  <td class="light" v-else></td>
+  <td class="light" @click="onSquareClicked()" v-else></td>
 </template>
 
 <script>
@@ -83,8 +83,11 @@ export default {
         } else if (bIsMoveForwardAttempt) {
           this.aMoveForward(coords)
         } else {
+          // Try to select the next clicked chip
           if (this.hasBlackChip || this.hasWhiteChip) {
             this.aHighlight({ nRow: this.row, nCol: this.col })
+          } else { // Illegal move
+            this.aHighlight(null)
           }
         }
       } else {

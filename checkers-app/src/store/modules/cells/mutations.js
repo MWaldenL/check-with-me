@@ -66,6 +66,7 @@ const mutations = {
 
       // Check if the move is valid
       if (bIsValid) {
+        // Perform a deep copy of the board with the new positions of chips
         const stateClone = JSON.parse(JSON.stringify(state.cells))
 
         stateClone[newCurr.nRow - 1][newCurr.nCol - 1] = newCurr
@@ -74,12 +75,23 @@ const mutations = {
         state.cells = stateClone
         state.firstClick = null
       } else {
-        // Highlight the new square
-        if (bSourceHasBlack(state.cells, coords) || bSourceHasWhite(state.cells, coords)) {
-          const newCoords = { nRow: coords.nDestRow, nCol: coords.nDestCol }
-          mutations.mHighlight(state.cells, newCoords)
-          state.firstClick = newCoords
+        const bDestHasWhite = state.cells[coords.nDestRow - 1][coords.nDestCol - 1].bHasWhiteChip
+        const bDestHasBlack = state.cells[coords.nDestRow - 1][coords.nDestCol - 1].bHasBlackChip
+        const bSrcDestBlack = bSourceHasBlack(state.cells, coords) && bDestHasBlack
+        const bSrcDestWhite = bSourceHasWhite(state.cells, coords) && bDestHasWhite
+        let newCoords
+
+        // If both the source and destination pieces have the same color -
+        // this happens when clicking on a piece followed by clicking another
+        // same-colored piece adjacent to it
+        if (bSrcDestBlack || bSrcDestWhite) {
+          newCoords = { nRow: coords.nDestRow, nCol: coords.nDestCol }
+        } else { // Otherwise, simply set it to the current coordinates
+          newCoords = { nRow: coords.nRow, nCol: coords.nCol }
         }
+
+        mutations.mHighlight(state.cells, newCoords)
+        state.firstClick = newCoords
       }
     }
   },
@@ -132,15 +144,9 @@ const mutations = {
       stateClone[newDest.nRow - 1][newDest.nCol - 1] = newDest
 
       state.cells = stateClone
-      state.firstClick = null
-    } else {
-      // Highlight the new square
-      if (bSourceHasBlack(state.cells, coords) || bSourceHasWhite(state.cells, coords)) {
-        const newCoords = { nRow: coords.nDestRow, nCol: coords.nDestCol }
-        mutations.mHighlight(state.cells, newCoords)
-        state.firstClick = newCoords
-      }
     }
+
+    state.firstClick = null
   }
 }
 
