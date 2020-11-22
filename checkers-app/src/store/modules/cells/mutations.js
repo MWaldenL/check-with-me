@@ -101,7 +101,9 @@ const mutations = {
       nRow: coords.nRow,
       nCol: coords.nCol,
       bHasBlackChip: false,
-      bHasWhiteChip: false
+      bHasWhiteChip: false,
+      bHasBlackKing: false,
+      bHasWhiteKing: false
     }
 
     const adjacent = {
@@ -115,12 +117,16 @@ const mutations = {
       nRow: coords.nDestRow,
       nCol: coords.nDestCol,
       bHasBlackChip: false,
-      bHasWhiteChip: false
+      bHasWhiteChip: false,
+      bHasBlackKing: false,
+      bHasWhiteKing: false
     }
 
     let bIsValidCapture = false
     const bNextRowBelow = coords.nRow - 2 === coords.nDestRow
     const bNextRowAbove = coords.nRow + 2 === coords.nDestRow
+    const bLastRowBelow = coords.nDestRow === 1
+    const bLastRowAbove = coords.nDestRow === 8
     const bWhiteCanCapture = bSourceHasWhite(state.cells, coords) && bBlackExistsAdj(state.cells, coords) && bNextRowAbove
     const bBlackCanCapture = bSourceHasBlack(state.cells, coords) && bWhiteExistsAdj(state.cells, coords) && bNextRowBelow
 
@@ -128,11 +134,17 @@ const mutations = {
       if (!bPieceExistsAfterAdj(state.cells, coords)) {
         bIsValidCapture = true
         newDest.bHasWhiteChip = true
+        if (bLastRowAbove) {
+          newDest.bHasWhiteKing = true
+        }
       }
     } else if (bBlackCanCapture) {
       if (!bPieceExistsAfterAdj(state.cells, coords)) {
         bIsValidCapture = true
         newDest.bHasBlackChip = true
+        if (bLastRowBelow) {
+          newDest.bHasBlackKing = true
+        }
       }
     }
 
