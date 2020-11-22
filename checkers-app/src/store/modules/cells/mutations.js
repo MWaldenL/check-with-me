@@ -1,56 +1,14 @@
-import Board from './board'
 import {
   bSourceHasBlack,
   bSourceHasWhite,
   bBlackExistsAdj,
   bWhiteExistsAdj,
   bPieceExistsAfterAdj
-} from '../services/moveCaptureService'
-
-const state = {
-  cells: Board.getBoard(),
-  nWhiteCount: 12,
-  nBlackCount: 12,
-  firstClick: null
-}
-
-const getters = {
-  getEntireBoard: state => state.cells,
-  getWhiteCount: state => state.nWhiteCount,
-  getBlackCount: state => state.nBlackCount,
-  getFirstClick: state => state.firstClick
-}
-
-const actions = {
-  async aHighlight ({ commit }, coords) {
-    commit('mHighlight', coords)
-  },
-
-  /**
-   * aMoveForward moves a black or white chip to an empty cell 1 space diagonally
-   * @param nRow - 1-based row of active cell with piece to move
-   * @param nCol - 1-based column of active cell with piece to move
-   * @param nDestRow - 1-based row of empty destination cell
-   * @param nDestCol - 1-based column of empty destination cell
-   */
-  async aMoveForward ({ commit }, coords) {
-    commit('mMoveForward', coords)
-  },
-
-  /**
-   * aCapturePiece moves a black or white chip to capture an opposite-colored piece
-   * diagonally adjacent from it.
-   *
-   * @param coords - an object containing the source and destination coordinates
-   */
-  async aCapturePiece ({ commit }, coords) {
-    commit('mCapturePiece', coords)
-  }
-}
+} from '../../services/moveCaptureService'
 
 const mutations = {
   mHighlight: (state, coords) => {
-    // TODO: Highlight legal
+    // TODO: Highlight legal moves
     state.firstClick = coords
   },
 
@@ -76,35 +34,37 @@ const mutations = {
 
       let bIsValid = false
 
+      // Check for adjacent squares
       const srcCell = state.cells[coords.nRow - 1][coords.nCol - 1]
       const destCell = state.cells[coords.nDestRow - 1][coords.nDestCol - 1]
 
       const bIsSquareOpen = !(destCell.bHasBlackChip || destCell.bHasWhiteChip)
       const bIsColLeftOrRight = coords.nCol - 1 === coords.nDestCol || coords.nCol + 1 === coords.nDestCol
 
-      const bSourceHasBlack = srcCell.bHasBlackChip
+      const _bSourceHasBlack = srcCell.bHasBlackChip
       const bNextRowBelow = coords.nRow - 1 === coords.nDestRow
       const bLastRowBelow = coords.nDestRow === 1
-      const bSourceHasWhite = srcCell.bHasWhiteChip
+      const _bSourceHasWhite = srcCell.bHasWhiteChip
       const bNextRowAbove = coords.nRow + 1 === coords.nDestRow
       const bLastRowAbove = coords.nDestRow === 8
 
-      if (bIsSquareOpen && bIsColLeftOrRight && bSourceHasBlack && bNextRowBelow && bLastRowBelow) {
+      if (bIsSquareOpen && bIsColLeftOrRight && _bSourceHasBlack && bNextRowBelow && bLastRowBelow) {
         bIsValid = true
         newDest.bHasBlackChip = true
         newDest.bHasBlackKing = true
-      } else if (bIsSquareOpen && bIsColLeftOrRight && bSourceHasWhite && bNextRowAbove && bLastRowAbove) {
+      } else if (bIsSquareOpen && bIsColLeftOrRight && _bSourceHasWhite && bNextRowAbove && bLastRowAbove) {
         bIsValid = true
         newDest.bHasWhiteChip = true
         newDest.bHasWhiteKing = true
-      } else if (bIsSquareOpen && bIsColLeftOrRight && bSourceHasBlack && bNextRowBelow) {
+      } else if (bIsSquareOpen && bIsColLeftOrRight && _bSourceHasBlack && bNextRowBelow) {
         bIsValid = true
         newDest.bHasBlackChip = true
-      } else if (bIsSquareOpen && bIsColLeftOrRight && bSourceHasWhite && bNextRowAbove) {
+      } else if (bIsSquareOpen && bIsColLeftOrRight && _bSourceHasWhite && bNextRowAbove) {
         bIsValid = true
         newDest.bHasWhiteChip = true
       }
 
+      // Check if the move is valid
       if (bIsValid) {
         const stateClone = JSON.parse(JSON.stringify(state.cells))
 
@@ -112,8 +72,15 @@ const mutations = {
         stateClone[newDest.nRow - 1][newDest.nCol - 1] = newDest
 
         state.cells = stateClone
+        state.firstClick = null
+      } else {
+        // Highlight the new square
+        if (bSourceHasBlack(state.cells, coords) || bSourceHasWhite(state.cells, coords)) {
+          const newCoords = { nRow: coords.nDestRow, nCol: coords.nDestCol }
+          mutations.mHighlight(state.cells, newCoords)
+          state.firstClick = newCoords
+        }
       }
-      state.firstClick = null
     }
   },
 
@@ -165,16 +132,16 @@ const mutations = {
       stateClone[newDest.nRow - 1][newDest.nCol - 1] = newDest
 
       state.cells = stateClone
+      state.firstClick = null
+    } else {
+      // Highlight the new square
+      if (bSourceHasBlack(state.cells, coords) || bSourceHasWhite(state.cells, coords)) {
+        const newCoords = { nRow: coords.nDestRow, nCol: coords.nDestCol }
+        mutations.mHighlight(state.cells, newCoords)
+        state.firstClick = newCoords
+      }
     }
-
-    state.firstClick = null
   }
-
 }
 
-export default {
-  state,
-  getters,
-  actions,
-  mutations
-}
+export default mutations

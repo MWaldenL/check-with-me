@@ -1,14 +1,14 @@
 import { shallowMount, createLocalVue } from '@vue/test-utils'
 import Vuex from 'vuex'
 import Cell from '@/components/cell'
-import Board from '@/store/modules/board' 
+import { getBoard } from '@/store/modules/board' 
 
 const localVue = createLocalVue()
 localVue.use(Vuex)
 
 describe('Cell.vue normal piece movement', () => {
   let getters, actions, store
-  let board = Board.getBoard()
+  let board = getBoard()
   
   beforeEach(() => {
     getters = {
@@ -36,7 +36,7 @@ describe('Cell.vue normal piece movement', () => {
     // Arrange
     beforeEach(() => {
       getters = {
-        getEntireBoard: () => Board.getBoard(),
+        getEntireBoard: () => getBoard(),
         getFirstClick: () => null
       }
   
@@ -67,7 +67,7 @@ describe('Cell.vue normal piece movement', () => {
     // Arrange 
     beforeEach(() => {
       getters = {
-        getEntireBoard: () => Board.getBoard(),
+        getEntireBoard: () => getBoard(),
         getFirstClick: () => { 
           return { nRow: 1, nCol: 1 }
         }
@@ -96,7 +96,7 @@ describe('Cell.vue normal piece movement', () => {
     // Arrange 
     beforeEach(() => {
       getters = {
-        getEntireBoard: () => Board.getBoard(),
+        getEntireBoard: () => getBoard(),
         getFirstClick: () => { 
           return { nRow: 1, nCol: 1 }
         }

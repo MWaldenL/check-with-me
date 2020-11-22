@@ -1,4 +1,4 @@
-import Cells from '@/store/modules/cells.js'
+import Cells from '@/store/modules/cells/index.js'
 
 describe('Mutation testing', () => {
   describe('Highlighting the selected cell', () => {
@@ -48,12 +48,32 @@ describe('Mutation testing', () => {
 
       const expected = [
         [
-          { nRow: 1, nCol: 1, bHasBlackChip: false, bHasWhiteChip: false },
-          { nRow: 1, nCol: 2, bHasBlackChip: false, bHasWhiteChip: false }
+          { nRow: 1, nCol: 1, 
+            bHasBlackChip: false,
+            bHasBlackKing: false, 
+            bHasWhiteChip: false,
+            bHasWhiteKing: false 
+          },
+          { nRow: 1, nCol: 2,             
+            bHasBlackChip: false,
+            bHasBlackKing: false, 
+            bHasWhiteChip: false,
+            bHasWhiteKing: false 
+          }
         ],
         [
-          { nRow: 2, nCol: 1, bHasBlackChip: false, bHasWhiteChip: false },
-          { nRow: 2, nCol: 2, bHasBlackChip: false, bHasWhiteChip: true }
+          { nRow: 2, nCol: 1, 
+            bHasBlackChip: false,
+            bHasBlackKing: false, 
+            bHasWhiteChip: false,
+            bHasWhiteKing: false
+          },
+          { nRow: 2, nCol: 2,
+            bHasBlackChip: false,
+            bHasBlackKing: false, 
+            bHasWhiteChip: false,
+            bHasWhiteKing: false
+          }
         ]
       ]
 
@@ -75,19 +95,35 @@ describe('Mutation testing', () => {
 
       // Fake 2x2 board for testing
       board[0][0] = {
-        nRow: 1, nCol: 1, bHasBlackChip: false, bHasWhiteChip: false
+        nRow: 1, nCol: 1,  
+        bHasBlackChip: false,
+        bHasBlackKing: false, 
+        bHasWhiteChip: false,
+        bHasWhiteKing: false 
       }
 
       board[0][1] = {
-        nRow: 1, nCol: 2, bHasBlackChip: false, bHasWhiteChip: false
+        nRow: 1, nCol: 2, 
+        bHasBlackChip: false,
+        bHasBlackKing: false, 
+        bHasWhiteChip: false,
+        bHasWhiteKing: false 
       }
 
       board[1][0] = {
-        nRow: 2, nCol: 1, bHasBlackChip: false, bHasWhiteChip: false
+        nRow: 2, nCol: 1, 
+        bHasBlackChip: false,
+        bHasBlackKing: false, 
+        bHasWhiteChip: false,
+        bHasWhiteKing: false 
       }
 
       board[1][1] = {
-        nRow: 2, nCol: 2, bHasBlackChip: true, bHasWhiteChip: false
+        nRow: 2, nCol: 2, 
+        bHasBlackChip: true,
+        bHasBlackKing: false, 
+        bHasWhiteChip: false,
+        bHasWhiteKing: false 
       }
 
       /**
@@ -103,12 +139,32 @@ describe('Mutation testing', () => {
 
       const expected = [
         [
-          { nRow: 1, nCol: 1, bHasBlackChip: true, bHasWhiteChip: false },
-          { nRow: 1, nCol: 2, bHasBlackChip: false, bHasWhiteChip: false }
+          { nRow: 1, nCol: 1, 
+            bHasBlackChip: true,
+            bHasBlackKing: false, 
+            bHasWhiteChip: false,
+            bHasWhiteKing: false 
+          },
+          { nRow: 1, nCol: 2,  
+            bHasBlackChip: false,
+            bHasBlackKing: false, 
+            bHasWhiteChip: false,
+            bHasWhiteKing: false  
+          }
         ],
         [
-          { nRow: 2, nCol: 1, bHasBlackChip: false, bHasWhiteChip: false },
-          { nRow: 2, nCol: 2, bHasBlackChip: false, bHasWhiteChip: false }
+          { nRow: 2, nCol: 1,  
+            bHasBlackChip: false,
+            bHasBlackKing: false, 
+            bHasWhiteChip: false,
+            bHasWhiteKing: false 
+          },
+          { nRow: 2, nCol: 2, 
+            bHasBlackChip: false,
+            bHasBlackKing: false, 
+            bHasWhiteChip: false,
+            bHasWhiteKing: false 
+          }
         ]
       ]
 
@@ -133,7 +189,7 @@ describe('Mutation testing', () => {
         for (let i=0; i < 3; i++) {
           for (let j=0; j < 3; j++) {
             if (i == 0 && j == 0) {
-              board[i][j] = {
+              board[i][j] = { 
                 nRow: i + 1, 
                 nCol: j + 1, 
                 bHasBlackChip: false, 
@@ -171,19 +227,64 @@ describe('Mutation testing', () => {
   
         const expected = [
           [
-            { nRow: 1, nCol: 1, bHasBlackChip: false, bHasWhiteChip: false },
-            { nRow: 1, nCol: 2, bHasBlackChip: false, bHasWhiteChip: false },
-            { nRow: 1, nCol: 3, bHasBlackChip: false, bHasWhiteChip: false}
+            { nRow: 1, nCol: 1,  
+              bHasBlackChip: false,
+              bHasBlackKing: false, 
+              bHasWhiteChip: false,
+              bHasWhiteKing: false 
+            },
+            { nRow: 1, nCol: 2, 
+              bHasBlackChip: false,
+              bHasBlackKing: false, 
+              bHasWhiteChip: false,
+              bHasWhiteKing: false 
+            },
+            { nRow: 1, nCol: 3, 
+              bHasBlackChip: false,
+              bHasBlackKing: false, 
+              bHasWhiteChip: false,
+              bHasWhiteKing: false 
+            }
           ],
           [
-            { nRow: 2, nCol: 1, bHasBlackChip: false, bHasWhiteChip: false },
-            { nRow: 2, nCol: 2, bHasBlackChip: false, bHasWhiteChip: false },
-            { nRow: 2, nCol: 3, bHasBlackChip: false, bHasWhiteChip: false }
+            { nRow: 2, nCol: 1,  
+              bHasBlackChip: false,
+              bHasBlackKing: false, 
+              bHasWhiteChip: false,
+              bHasWhiteKing: false 
+            },
+            { nRow: 2, nCol: 2,  
+              bHasBlackChip: false,
+              bHasBlackKing: false, 
+              bHasWhiteChip: false,
+              bHasWhiteKing: false 
+            },
+            { nRow: 2, nCol: 3,  
+              bHasBlackChip: false,
+              bHasBlackKing: false, 
+              bHasWhiteChip: false,
+              bHasWhiteKing: false  
+            }
           ],
           [
-            { nRow: 3, nCol: 1, bHasBlackChip: false, bHasWhiteChip: false },
-            { nRow: 3, nCol: 2, bHasBlackChip: false, bHasWhiteChip: false },
-            { nRow: 3, nCol: 3, bHasBlackChip: false, bHasWhiteChip: true }
+            { nRow: 3, nCol: 1, 
+              bHasBlackChip: false,
+              bHasBlackKing: false, 
+              bHasWhiteChip: false,
+              bHasWhiteKing: false 
+            },
+            { nRow: 3, nCol: 2, 
+              bHasBlackChip: false,
+              bHasBlackKing: false, 
+              bHasWhiteChip: false,
+              bHasWhiteKing: false 
+            },
+            { nRow: 3, nCol: 3, 
+              bHasBlackChip: false,
+              bHasBlackKing: false, 
+              bHasWhiteChip: true,
+              bHasWhiteKing: false 
+            }
           ]
         ]
 
@@ -199,7 +300,7 @@ describe('Mutation testing', () => {
         Cells.mutations.mCapturePiece(state, coords)
 
         // Assert
-        expect(state.cells).toStrictEqual(expected)
+        expect(state.cells).toEqual(expected)
         expect(state.firstClick).toBe(null)
     }),
 
@@ -248,19 +349,64 @@ describe('Mutation testing', () => {
 
       const expected = [
         [
-          { nRow: 1, nCol: 1, bHasBlackChip: true, bHasWhiteChip: false },
-          { nRow: 1, nCol: 2, bHasBlackChip: false, bHasWhiteChip: false },
-          { nRow: 1, nCol: 3, bHasBlackChip: false, bHasWhiteChip: false}
+          { nRow: 1, nCol: 1,  
+            bHasBlackChip: true,
+            bHasBlackKing: false, 
+            bHasWhiteChip: false,
+            bHasWhiteKing: false 
+          },
+          { nRow: 1, nCol: 2, 
+            bHasBlackChip: false,
+            bHasBlackKing: false, 
+            bHasWhiteChip: false,
+            bHasWhiteKing: false 
+          },
+          { nRow: 1, nCol: 3, 
+            bHasBlackChip: false,
+            bHasBlackKing: false, 
+            bHasWhiteChip: false,
+            bHasWhiteKing: false 
+          }
         ],
         [
-          { nRow: 2, nCol: 1, bHasBlackChip: false, bHasWhiteChip: false },
-          { nRow: 2, nCol: 2, bHasBlackChip: false, bHasWhiteChip: false },
-          { nRow: 2, nCol: 3, bHasBlackChip: false, bHasWhiteChip: false }
+          { nRow: 2, nCol: 1,  
+            bHasBlackChip: false,
+            bHasBlackKing: false, 
+            bHasWhiteChip: false,
+            bHasWhiteKing: false 
+          },
+          { nRow: 2, nCol: 2,  
+            bHasBlackChip: false,
+            bHasBlackKing: false, 
+            bHasWhiteChip: false,
+            bHasWhiteKing: false 
+          },
+          { nRow: 2, nCol: 3,  
+            bHasBlackChip: false,
+            bHasBlackKing: false, 
+            bHasWhiteChip: false,
+            bHasWhiteKing: false  
+          }
         ],
         [
-          { nRow: 3, nCol: 1, bHasBlackChip: false, bHasWhiteChip: false },
-          { nRow: 3, nCol: 2, bHasBlackChip: false, bHasWhiteChip: false },
-          { nRow: 3, nCol: 3, bHasBlackChip: false, bHasWhiteChip: false }
+          { nRow: 3, nCol: 1, 
+            bHasBlackChip: false,
+            bHasBlackKing: false, 
+            bHasWhiteChip: false,
+            bHasWhiteKing: false 
+          },
+          { nRow: 3, nCol: 2, 
+            bHasBlackChip: false,
+            bHasBlackKing: false, 
+            bHasWhiteChip: false,
+            bHasWhiteKing: false 
+          },
+          { nRow: 3, nCol: 3, 
+            bHasBlackChip: false,
+            bHasBlackKing: false, 
+            bHasWhiteChip: false,
+            bHasWhiteKing: false 
+          }
         ]
       ]
 
@@ -276,7 +422,7 @@ describe('Mutation testing', () => {
       Cells.mutations.mCapturePiece(state, coords)
 
       // Assert
-      expect(state.cells).toStrictEqual(expected)
+      expect(state.cells).toMatchObject(expected)
       expect(state.firstClick).toBe(null)
     })
   })

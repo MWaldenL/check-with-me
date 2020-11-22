@@ -22,25 +22,29 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(['getEntireBoard', 'getFirstClick']),
+    ...mapGetters({
+      board: 'getEntireBoard',
+      firstClick: 'getFirstClick'
+    }),
+
     isDark () {
       return (this.row % 2 === 1) ? this.col % 2 === 1 : this.col % 2 === 0
     },
 
     hasBlackChip () {
-      return this.getEntireBoard[this.row - 1][this.col - 1].bHasBlackChip
+      return this.board[this.row - 1][this.col - 1].bHasBlackChip
     },
 
     hasWhiteChip () {
-      return this.getEntireBoard[this.row - 1][this.col - 1].bHasWhiteChip
+      return this.board[this.row - 1][this.col - 1].bHasWhiteChip
     },
 
     hasBlackKing () {
-      return this.getEntireBoard[this.row - 1][this.col - 1].bHasBlackKing
+      return this.board[this.row - 1][this.col - 1].bHasBlackKing
     },
 
     hasWhiteKing () {
-      return this.getEntireBoard[this.row - 1][this.col - 1].bHasWhiteKing
+      return this.board[this.row - 1][this.col - 1].bHasWhiteKing
     }
   },
   methods: {
@@ -51,7 +55,8 @@ export default {
     },
 
     onSquareClicked () {
-      const source = this.getFirstClick
+      const source = this.firstClick
+
       if (source != null) {
         const coords = {
           nRow: source.nRow,
@@ -60,6 +65,7 @@ export default {
           nDestCol: this.col
         }
 
+        // Check if there is either a move or capture attempt. No legality checking
         const bIsCaptureAttempt =
           (this.row === source.nRow + 2 && this.col === source.nCol + 2) ||
           (this.row === source.nRow + 2 && this.col === source.nCol - 2) ||
@@ -79,12 +85,12 @@ export default {
         } else {
           if (this.hasBlackChip || this.hasWhiteChip) {
             this.aHighlight({ nRow: this.row, nCol: this.col })
-          } else {
-            this.aHighlight(null)
           }
         }
       } else {
-        this.aHighlight({ nRow: this.row, nCol: this.col })
+        if (this.hasBlackChip || this.hasWhiteChip || this.hasBlackKing || this.hasWhiteKing) {
+          this.aHighlight({ nRow: this.row, nCol: this.col })
+        }
       }
     }
   }

@@ -1,7 +1,7 @@
 import { shallowMount, createLocalVue } from '@vue/test-utils'
 import Vuex from 'vuex'
 import Cell from '@/components/cell'
-import Board from '@/store/modules/board' 
+import { getBoard } from '@/store/modules/board' 
 
 const localVue = createLocalVue()
 localVue.use(Vuex)
@@ -12,7 +12,7 @@ describe('Cell.vue initial piece placement', () => {
   let store
 
   beforeEach(() => {
-    let board = Board.getBoard()
+    let board = getBoard()
 
     getters = {
       getEntireBoard: () => board

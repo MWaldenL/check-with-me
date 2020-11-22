@@ -1,4 +1,4 @@
-const getBoard = () => {
+export const getBoard = () => {
   const board = new Array(8).fill(null).map(() => Array(8))
   for (let r = 0; r < 8; r++) {
     for (let c = 0; c < 8; c++) {
@@ -25,8 +25,4 @@ const getBoard = () => {
   }
 
   return board
-}
-
-export default {
-  getBoard
 }

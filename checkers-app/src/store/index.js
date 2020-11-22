@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-import cells from './modules/cells.js'
+import cells from './modules/cells/index.js'
 
 // load vuex
 Vue.use(Vuex)
