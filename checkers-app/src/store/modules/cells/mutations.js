@@ -147,11 +147,11 @@ const mutations = {
       const bDoesNoWhiteJumps = bNoWhiteJumps(state.cells, coords)
       // console.log(bDoesNoBlackJumps + bDoesNoWhiteJumps)
 
-      if (bIsSquareOpen && _bSourceHasBlack && _bSourceHasBlackKing && bDoesNoBlackJumps && bOnDiagonal) {
+      if (bIsSquareOpen && _bSourceHasBlack && _bSourceHasBlackKing && bDoesNoBlackJumps && bDoesNoWhiteJumps && bOnDiagonal) {
         bIsValid = true
         newDest.bHasBlackChip = true
         newDest.bHasBlackKing = true
-      } else if (bIsSquareOpen && _bSourceHasWhite && _bSourceHasWhiteKing && bDoesNoWhiteJumps && bOnDiagonal) {
+      } else if (bIsSquareOpen && _bSourceHasWhite && _bSourceHasWhiteKing && bDoesNoBlackJumps && bDoesNoWhiteJumps && bOnDiagonal) {
         bIsValid = true
         newDest.bHasWhiteChip = true
         newDest.bHasWhiteKing = true
