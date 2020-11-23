@@ -1,8 +1,7 @@
 import {
-  bSourceHasBlack, 
+  bSourceHasBlack,
   bSourceHasWhite
 } from '@/store/services/moveCaptureService'
-
 
 /**
  * Top Left
@@ -17,10 +16,10 @@ export const bPieceExistsOnTargetTopLeft = (board, coords, targetPiece) => {
   let prevCol = srcCol
   let curPos
 
-  // Always check the previous diagonally adjacent square 
+  // Always check the previous diagonally adjacent square
   for (let i = srcRow; i <= destRow; i++) {
     for (let j = srcCol; j >= destCol; j--) {
-      if ( i === prevRow + 1 && j === prevCol - 1 ) {
+      if (i === prevRow + 1 && j === prevCol - 1) {
         curPos = { nRow: i, nCol: j }
         if (bSourceHasBlack(board, curPos) || bSourceHasWhite(board, curPos)) {
           return true
@@ -29,7 +28,7 @@ export const bPieceExistsOnTargetTopLeft = (board, coords, targetPiece) => {
         prevCol = j
       }
     }
-  }      
+  }    
   return false 
 }
 
@@ -297,14 +296,16 @@ export const bIsValidCapture = (board, coords, color) => {
   if (color === 'white') {
     let checkOther = bOtherExistsAfterSource(board, coords, bSourceHasWhite, bSourceHasBlack)
     let targetPiece = checkOther.targetPiece
-
-    return checkOther.pieceExists && 
+    const validCapture = checkOther.pieceExists && 
       !bPieceExistsBetweenTargetAndDest(board, coords, targetPiece)
+
+    return { validCapture, targetPiece }
   } else {
     let checkOther = bOtherExistsAfterSource(board, coords, bSourceHasBlack, bSourceHasWhite)
     let targetPiece = checkOther.targetPiece
-
-    return checkOther.pieceExists && 
+    const validCapture = checkOther.pieceExists && 
       !bPieceExistsBetweenTargetAndDest(board, coords, targetPiece)
+
+    return { validCapture, targetPiece }
   }
 }

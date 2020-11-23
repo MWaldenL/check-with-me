@@ -1,5 +1,5 @@
 <template>
-  <td class="square dark" :class="highlight" @click="onSquareClicked()" v-if="isDark">
+  <td class="square dark" @click="onSquareClicked()" v-if="isDark">
     <div id="checker-black" class="chip black-chip" :style="blackOpacity" v-show="hasBlackChip">
       <img class="king" src="../../public/assets/king.png" v-show="hasBlackKing"/>
     </div>
@@ -46,14 +46,10 @@ export default {
 
     hasWhiteKing () {
       return this.board[this.row - 1][this.col - 1].bHasWhiteKing
-    },
-
-    highlight () {
-      return { highlight: this.isSelected }
     }
   },
   methods: {
-    ...mapActions(['aMoveForward', 'aHighlight', 'aCapturePiece']),
+    ...mapActions(['aMoveForward', 'aHighlight', 'aCapturePiece', 'aKingCapturePiece']),
     focus () {
       this.blackOpacity.opacity = this.blackOpacity.opacity === '100%' ? '50%' : '100%'
       this.whiteOpacity.opacity = this.whiteOpacity.opacity === '100%' ? '50%' : '100%'
@@ -71,23 +67,13 @@ export default {
           nDestCol: this.col
         }
 
-        // Check if there is either a move or capture attempt. No legality checking
-        const bIsCaptureAttempt =
-          (this.row === source.nRow + 2 && this.col === source.nCol + 2) ||
-          (this.row === source.nRow + 2 && this.col === source.nCol - 2) ||
-          (this.row === source.nRow - 2 && this.col === source.nCol + 2) ||
-          (this.row === source.nRow - 2 && this.col === source.nCol - 2)
-
-        const bIsMoveForwardAttempt =
-          (this.row === source.nRow + 1 && this.col === source.nCol + 1) ||
-          (this.row === source.nRow + 1 && this.col === source.nCol - 1) ||
-          (this.row === source.nRow - 1 && this.col === source.nCol + 1) ||
-          (this.row === source.nRow - 1 && this.col === source.nCol - 1)
-
-        if (bIsCaptureAttempt) {
+        // Check for move or capture attempts. No legality checking
+        if (this.isCaptureAttempt(source)) {
           this.aCapturePiece(coords)
-        } else if (bIsMoveForwardAttempt) {
+        } else if (this.isMoveForwardAttempt(source)) {
           this.aMoveForward(coords)
+        } else if (this.isKingCaptureAttempt(source)) {
+          this.aKingCapturePiece(coords)
         } else {
           if (this.hasBlackChip || this.hasWhiteChip) {
             this.aHighlight({ nRow: this.row, nCol: this.col })
@@ -99,6 +85,27 @@ export default {
           this.aHighlight({ nRow: this.row, nCol: this.col })
         }
       }
+    },
+
+    isCaptureAttempt (source) {
+      return (this.row === source.nRow + 2 && this.col === source.nCol + 2) ||
+        (this.row === source.nRow + 2 && this.col === source.nCol - 2) ||
+        (this.row === source.nRow - 2 && this.col === source.nCol + 2) ||
+        (this.row === source.nRow - 2 && this.col === source.nCol - 2)
+    },
+
+    isMoveForwardAttempt (source) {
+      return (this.row === source.nRow + 1 && this.col === source.nCol + 1) ||
+        (this.row === source.nRow + 1 && this.col === source.nCol - 1) ||
+        (this.row === source.nRow - 1 && this.col === source.nCol + 1) ||
+        (this.row === source.nRow - 1 && this.col === source.nCol - 1)
+    },
+
+    isKingCaptureAttempt (source) {
+      return (this.row < source.nRow && this.col > source.nCol) ||
+        (this.row < source.nRow + 1 && this.col < source.nCol) ||
+        (this.row > source.nRow - 1 && this.col > source.nCol) ||
+        (this.row > source.nRow - 1 && this.col < source.nCol)
     }
   }
 }
@@ -121,10 +128,6 @@ export default {
 
 .light {
   background-color: #ebecd0;
-}
-
-.highlight {
-  background-color: #B1DC82;
 }
 
 .chip {

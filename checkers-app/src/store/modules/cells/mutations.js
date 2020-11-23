@@ -6,6 +6,8 @@ import {
   bPieceExistsAfterAdj
 } from '../../services/moveCaptureService'
 
+import { bIsValidCapture } from '../../services/kingCaptureService'
+
 const mutations = {
   mHighlight: (state, coords) => {
     // TODO: Highlight legal moves
@@ -140,6 +142,67 @@ const mutations = {
         mutations.mHighlight(state.cells, newCoords)
         state.firstClick = newCoords
       }
+    }
+  },
+
+  mKingCapturePiece: (state, coords) => {
+    const newCur = {
+      nRow: coords.nRow,
+      nCol: coords.nCol,
+      bHasWhiteChip: false,
+      bHasBlackChip: false,
+      bHasWhiteKing: false,
+      bHasBlackKing: false
+    }
+
+    const newDest = {
+      nRow: coords.nDestRow,
+      nCol: coords.nDestCol,
+      bHasWhiteChip: false,
+      bHasBlackChip: false,
+      bHasWhiteKing: false,
+      bHasBlackKing: false
+    }
+
+    let color
+    if (bSourceHasWhite(state.cells, coords)) {
+      color = 'white'
+    } else if (bSourceHasBlack(state.cells, coords)) {
+      color = 'black'
+    }
+
+    const result = bIsValidCapture(state.cells, coords, color)
+    if (result.validCapture) {
+      if (bSourceHasWhite(state.cells, coords)) {
+        newDest.bHasWhiteChip = true
+        newDest.bHasWhiteKing = true        
+        newTarget = {
+          ...result.targetPiece,
+          bHasWhiteChip: false,
+          bHasBlackChip: false,
+          bHasWhiteKing: false,
+          bHasBlackKing: false
+        }
+      } else if (bSourceHasBlack(state.cells, coords)) {
+        newDest.bHasBlackChip = true
+        newDest.bHasBlackKing = true
+      }
+
+      const newTarget = {
+        ...result.targetPiece,
+        bHasWhiteChip: false,
+        bHasBlackChip: false,
+        bHasWhiteKing: false,
+        bHasBlackKing: false
+      }
+      const stateClone = JSON.parse(JSON.stringify(state.cells))
+
+      stateClone[newCur.nRow - 1][newCur.nCol - 1] = newCur
+      stateClone[newTarget.nRow - 1][newTarget.nCol - 1] = newTarget
+      stateClone[newDest.nRow - 1][newDest.nCol - 1] = newDest
+
+      state.cells = stateClone
+      state.firstClick = null
     }
   }
 }
