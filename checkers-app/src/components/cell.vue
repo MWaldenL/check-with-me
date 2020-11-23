@@ -1,6 +1,5 @@
 <template>
   <td class="dark" @click="onSquareClicked()" v-if="isDark">
-    {{ row }} {{ col }}
     <div id="checker-black" class="chip black-chip" :style="blackOpacity" v-show="hasBlackChip">
       <img class="king" src="../../public/assets/king.png" v-show="hasBlackKing"/>
     </div>
@@ -79,10 +78,6 @@ export default {
           (this.row === source.nRow - 1 && this.col === source.nCol + 1) ||
           (this.row === source.nRow - 1 && this.col === source.nCol - 1)
 
-        // const bIsKingMovement = (this.row > source.nRow + 1 && this.col > source.nCol + 1) ||
-        //   (this.row > source.nRow + 1 && this.col < source.nCol - 1) ||
-        //   (this.row < source.nRow - 1 && this.col > source.nCol + 1) ||
-        //   (this.row < source.nRow - 1 && this.col < source.nCol - 1)
         const bIsKingMovement = source.bHasBlackKing || source.bHasWhiteKing
         if (bIsKingMovement) {
           this.aKingMovement(coords)

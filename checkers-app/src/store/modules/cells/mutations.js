@@ -3,9 +3,9 @@ import {
   bSourceHasWhite,
   bBlackExistsAdj,
   bWhiteExistsAdj,
-  bPieceExistsAfterAdj
-  // bHasBlackJumps,
-  // bHasWhiteJumps
+  bPieceExistsAfterAdj,
+  bNoBlackJumps,
+  bNoWhiteJumps
 } from '../../services/moveCaptureService'
 
 const mutations = {
@@ -95,7 +95,7 @@ const mutations = {
         if (bSrcDestBlack || bSrcDestWhite) {
           newCoords = { nRow: coords.nDestRow, nCol: coords.nDestCol, bHasBlackKing: bDestHasBlackKing, bHasWhiteKing: bDestHasWhiteKing }
         } else { // Otherwise, simply set it to the current coordinates
-          newCoords = { nRow: coords.nDestRow, nCol: coords.nDestCol, bHasBlackKing: bSrcHasBlackKing, bHasWhiteKing: bSrcHasWhiteKing }
+          newCoords = { nRow: coords.nRow, nCol: coords.nCol, bHasBlackKing: bSrcHasBlackKing, bHasWhiteKing: bSrcHasWhiteKing }
         }
 
         mutations.mHighlight(state.cells, newCoords)
@@ -143,14 +143,15 @@ const mutations = {
       const bOnDiagonal = xDiff === yDiff
 
       // Check for jumps
-      // const bJumpsOnBlack = bHasBlackJumps(state.cells, coords)
-      // const bJumpsOnWhite = bHasWhiteJumps(state.cells, coords)
+      const bDoesNoBlackJumps = bNoBlackJumps(state.cells, coords)
+      const bDoesNoWhiteJumps = bNoWhiteJumps(state.cells, coords)
+      // console.log(bDoesNoBlackJumps + bDoesNoWhiteJumps)
 
-      if (bIsSquareOpen && _bSourceHasBlack && _bSourceHasBlackKing && bOnDiagonal) {
+      if (bIsSquareOpen && _bSourceHasBlack && _bSourceHasBlackKing && bDoesNoBlackJumps && bOnDiagonal) {
         bIsValid = true
         newDest.bHasBlackChip = true
         newDest.bHasBlackKing = true
-      } else if (bIsSquareOpen && _bSourceHasWhite && _bSourceHasWhiteKing && bOnDiagonal) {
+      } else if (bIsSquareOpen && _bSourceHasWhite && _bSourceHasWhiteKing && bDoesNoWhiteJumps && bOnDiagonal) {
         bIsValid = true
         newDest.bHasWhiteChip = true
         newDest.bHasWhiteKing = true
@@ -167,6 +168,7 @@ const mutations = {
         state.cells = stateClone
         state.firstClick = null
       } else {
+        console.log('in invalid')
         const bDestHasWhite = state.cells[coords.nDestRow - 1][coords.nDestCol - 1].bHasWhiteChip
         const bDestHasBlack = state.cells[coords.nDestRow - 1][coords.nDestCol - 1].bHasBlackChip
         const bSrcDestBlack = bSourceHasBlack(state.cells, coords) && bDestHasBlack
@@ -183,9 +185,11 @@ const mutations = {
         // this happens when clicking on a piece followed by clicking another
         // same-colored piece adjacent to it
         if (bSrcDestBlack || bSrcDestWhite) {
+          console.log('in if')
           newCoords = { nRow: coords.nDestRow, nCol: coords.nDestCol, bHasBlackKing: bDestHasBlackKing, bHasWhiteKing: bDestHasWhiteKing }
         } else { // Otherwise, simply set it to the current coordinates
-          newCoords = { nRow: coords.nDestRow, nCol: coords.nDestCol, bHasBlackKing: bSrcHasBlackKing, bHasWhiteKing: bSrcHasWhiteKing }
+          console.log('in else')
+          newCoords = { nRow: coords.nRow, nCol: coords.nCol, bHasBlackKing: bSrcHasBlackKing, bHasWhiteKing: bSrcHasWhiteKing }
         }
 
         mutations.mHighlight(state.cells, newCoords)

@@ -36,3 +36,129 @@ export const bWhiteExistsAdj = (board, coords) => {
 export const bPieceExistsAfterAdj = (board, coords) =>
   board[coords.nDestRow - 1][coords.nDestCol - 1].bHasBlackChip ||
   board[coords.nDestRow - 1][coords.nDestCol - 1].bHasWhiteChip
+
+export const bNoBlackJumps = (board, coords) => {
+  let bFound = true
+
+  if (coords.nRow < coords.nDestRow && coords.nCol < coords.nDestCol) { // Check northeast
+    let nRowTraverser = coords.nRow + 1
+    let nColTraverser = coords.nCol + 1
+    while (nRowTraverser <= 8 && nColTraverser <= 8) {
+      if (board[nRowTraverser - 1][nColTraverser - 1].bHasBlackChip) {
+        break
+      } else {
+        nRowTraverser++
+        nColTraverser++
+      }
+    }
+    if (coords.nDestRow >= nRowTraverser && coords.nDestCol >= nColTraverser) {
+      bFound = false
+    }
+  } else if (coords.nRow > coords.nDestRow && coords.nCol < coords.nDestCol) { // Check southeast
+    let nRowTraverser = coords.nRow - 1
+    let nColTraverser = coords.nCol + 1
+    while (nRowTraverser >= 1 && nColTraverser <= 8) {
+      if (board[nRowTraverser - 1][nColTraverser - 1].bHasBlackChip) {
+        break
+      } else {
+        nRowTraverser--
+        nColTraverser++
+      }
+    }
+    if (coords.nDestRow <= nRowTraverser && coords.nDestCol >= nColTraverser) {
+      bFound = false
+    }
+  } else if (coords.nRow > coords.nDestRow && coords.nCol > coords.nDestCol) { // Check southwest
+    let nRowTraverser = coords.nRow - 1
+    let nColTraverser = coords.nCol - 1
+    while (nRowTraverser >= 1 && nColTraverser >= 1) {
+      if (board[nRowTraverser - 1][nColTraverser - 1].bHasBlackChip) {
+        break
+      } else {
+        nRowTraverser--
+        nColTraverser--
+      }
+    }
+    if (coords.nDestRow <= nRowTraverser && coords.nDestCol <= nColTraverser) {
+      bFound = false
+    }
+  } else if (coords.nRow < coords.nDestRow && coords.nCol > coords.nDestCol) { // Check northwest
+    let nRowTraverser = coords.nRow + 1
+    let nColTraverser = coords.nCol - 1
+    while (nRowTraverser <= 8 && nColTraverser >= 1) {
+      if (board[nRowTraverser - 1][nColTraverser - 1].bHasBlackChip) {
+        break
+      } else {
+        nRowTraverser++
+        nColTraverser--
+      }
+    }
+    if (coords.nDestRow >= nRowTraverser && coords.nDestCol <= nColTraverser) {
+      bFound = false
+    }
+  }
+  return bFound
+}
+
+export const bNoWhiteJumps = (board, coords) => {
+  let bFound = true
+
+  if (coords.nRow < coords.nDestRow && coords.nCol < coords.nDestCol) { // Check northeast
+    let nRowTraverser = coords.nRow + 1
+    let nColTraverser = coords.nCol + 1
+    while (nRowTraverser <= 8 && nColTraverser <= 8) {
+      if (board[nRowTraverser - 1][nColTraverser - 1].bHasWhiteChip) {
+        break
+      } else {
+        nRowTraverser++
+        nColTraverser++
+      }
+    }
+    if (coords.nDestRow >= nRowTraverser && coords.nDestCol >= nColTraverser) {
+      bFound = false
+    }
+  } else if (coords.nRow > coords.nDestRow && coords.nCol < coords.nDestCol) { // Check southeast
+    let nRowTraverser = coords.nRow - 1
+    let nColTraverser = coords.nCol + 1
+    while (nRowTraverser >= 1 && nColTraverser <= 8) {
+      if (board[nRowTraverser - 1][nColTraverser - 1].bHasWhiteChip) {
+        break
+      } else {
+        nRowTraverser--
+        nColTraverser++
+      }
+    }
+    if (coords.nDestRow <= nRowTraverser && coords.nDestCol >= nColTraverser) {
+      bFound = false
+    }
+  } else if (coords.nRow > coords.nDestRow && coords.nCol > coords.nDestCol) { // Check southwest
+    let nRowTraverser = coords.nRow - 1
+    let nColTraverser = coords.nCol - 1
+    while (nRowTraverser >= 1 && nColTraverser >= 1) {
+      if (board[nRowTraverser - 1][nColTraverser - 1].bHasWhiteChip) {
+        break
+      } else {
+        nRowTraverser--
+        nColTraverser--
+      }
+    }
+    if (coords.nDestRow <= nRowTraverser && coords.nDestCol <= nColTraverser) {
+      bFound = false
+    }
+  } else if (coords.nRow < coords.nDestRow && coords.nCol > coords.nDestCol) { // Check northwest
+    let nRowTraverser = coords.nRow + 1
+    let nColTraverser = coords.nCol - 1
+    while (nRowTraverser <= 8 && nColTraverser >= 1) {
+      if (board[nRowTraverser - 1][nColTraverser - 1].bHasWhiteChip) {
+        break
+      } else {
+        nRowTraverser++
+        nColTraverser--
+      }
+    }
+    if (coords.nDestRow >= nRowTraverser && coords.nDestCol <= nColTraverser) {
+      bFound = false
+    }
+  }
+  return bFound
+}
