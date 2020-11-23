@@ -129,7 +129,34 @@ export const bOtherExistsOnTopRight = (board, coords, squareHasSameColoredPiece,
 /**
  * Bottom
  */
-export const bPieceExistsOnBottomLeft = (board, coords, squareHasSameColoredPiece, squareHasOtherColoredPiece) => {
+
+export const bPieceExistsOnTargetBottomLeft = (board, coords, targetPiece) => {
+  const srcRow = targetPiece.nRow
+  const srcCol = targetPiece.nCol
+  const destRow = coords.nDestRow
+  const destCol = coords.nDestCol
+
+  let prevRow = srcRow
+  let prevCol = srcCol
+  let curPos
+
+  // Always check the previous diagonally adjacent square 
+  for (let i = srcRow; i >= destRow; i--) {
+    for (let j = srcCol; j >= destCol; j--) {
+      if ( i === prevRow - 1 && j === prevCol - 1 ) {
+        curPos = { nRow: i, nCol: j }
+        if (bSourceHasBlack(board, curPos) || bSourceHasWhite(board, curPos)) {
+          return true
+        }
+        prevRow = i
+        prevCol = j
+      }
+    }
+  }      
+  return false 
+}
+
+export const bOtherExistsOnBottomLeft = (board, coords, squareHasSameColoredPiece, squareHasOtherColoredPiece) => {
   const srcRow = coords.nRow
   const srcCol = coords.nCol
 
@@ -163,7 +190,34 @@ export const bPieceExistsOnBottomLeft = (board, coords, squareHasSameColoredPiec
   return { targetPiece: null, pieceExists: false }
 }
 
-export const bPieceExistsOnBottomRight = (board, coords, pieceExistsAdj) => {
+export const bPieceExistsOnTargetBottomRight = (board, coords, targetPiece) => {
+  const srcRow = targetPiece.nRow
+  const srcCol = targetPiece.nCol
+  const destRow = coords.nDestRow
+  const destCol = coords.nDestCol
+
+  let prevRow = srcRow
+  let prevCol = srcCol
+  let curPos
+
+  // Always check the previous diagonally adjacent square 
+  for (let i = srcRow; i >= destRow; i--) {
+    for (let j = srcCol; j <= destCol; j++) {
+      if ( i === prevRow - 1 && j === prevCol + 1 ) {
+        curPos = { nRow: i, nCol: j }
+        if (bSourceHasBlack(board, curPos) || bSourceHasWhite(board, curPos)) {
+          return true
+        }
+        prevRow = i
+        prevCol = j
+      }
+    }
+  }      
+  return false 
+}
+
+
+export const bOtherExistsOnBottomRight = (board, coords, squareHasSameColoredPiece, squareHasOtherColoredPiece) => {
   const srcRow = coords.nRow
   const srcCol = coords.nCol
 
@@ -174,13 +228,13 @@ export const bPieceExistsOnBottomRight = (board, coords, pieceExistsAdj) => {
     let prevCol = srcCol
     let curPos
 
-    for (let i = srcRow; i <= destRow; i++) {
-      for (let j = srcCol; i >= destCol; j--) {
+    for (let i = srcRow; i >= destRow; i--) {
+      for (let j = srcCol; j <= destCol; j++) {
         if ( i === prevRow - 1 && j === prevCol + 1 ) {
           curPos = { nRow: i, nCol: j }
           if ( squareHasOtherColoredPiece(board, curPos) ) {
             return {
-              targetPiece: { nRow: i, nCol: i },
+              targetPiece: curPos,
               pieceExists: true
             }
           } else if ( squareHasSameColoredPiece(board, curPos) ) {
@@ -198,28 +252,33 @@ export const bPieceExistsOnBottomRight = (board, coords, pieceExistsAdj) => {
 }
 
 
-
 export const bOtherExistsAfterSource = (board, coords, squareHasSameColoredPiece, squareHasOtherColoredPiece) => {
   // coords = {nrow, ncol, ndestrow, ndestcol}
   const bTopLeft = coords.nRow < coords.nDestRow && coords.nCol > coords.nDestCol
   const bTopRight = coords.nRow < coords.nDestRow && coords.nCol < coords.nDestCol
+  const bBottomRight = coords.nRow > coords.nDestRow && coords.nCol < coords.nDestCol
 
   if (bTopLeft) {
     return bOtherExistsOnTopLeft(board, coords, squareHasSameColoredPiece, squareHasOtherColoredPiece)
   } else if (bTopRight) {
     return bOtherExistsOnTopRight(board, coords, squareHasSameColoredPiece, squareHasOtherColoredPiece)
+  } else if (bBottomRight) {
+    return bOtherExistsOnBottomRight(board, coords, squareHasSameColoredPiece, squareHasOtherColoredPiece)
   }
 }
 
 export const bPieceExistsBetweenTargetAndDest = (board, coords, targetPiece) => {
   const bTopLeft = targetPiece.nRow < coords.nDestRow && targetPiece.nCol > coords.nDestCol
   const bTopRight = targetPiece.nRow < coords.nDestRow && targetPiece.nCol < coords.nDestCol
+  const bBottomRight = targetPiece.nRow > coords.nDestRow && targetPiece.nCol < coords.nDestCol
 
   // Check top right diag
   if (bTopLeft) {
     return bPieceExistsOnTargetTopLeft(board, coords, targetPiece)
   } else if (bTopRight) {
     return bPieceExistsOnTargetTopRight(board, coords, targetPiece)
+  } else if (bBottomRight) {
+    return bPieceExistsOnTargetBottomRight(board, coords, targetPiece)
   }
 }   
 
