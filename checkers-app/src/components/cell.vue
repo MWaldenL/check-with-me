@@ -65,7 +65,8 @@ export default {
 
     onSquareClicked () {
       const source = this.firstClick
-
+      const bContainsPiece = this.hasBlackChip || this.hasWhiteChip || this.hasWhiteKing || this.hasBlackKing
+      
       if (source != null) {
         this.isSelected = false
         const coords = {
@@ -76,7 +77,6 @@ export default {
         }
         
         const bIsKingMovement = source.bHasBlackKing || source.bHasWhiteKing
-        const bContainsPiece = this.hasBlackChip || this.hasWhiteChip || this.hasWhiteKing || this.hasBlackKing
 
         // Check for move or capture attempts. No legality checking
         if (bIsKingMovement) {
