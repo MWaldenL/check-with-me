@@ -25,12 +25,6 @@ describe('Cell.vue normal piece movement', () => {
 
     store = new Vuex.Store({ getters, actions })
   })
-
-  describe('Legal square highlighting', () => {
-    it('highlights the legal squares a piece can move to when clicked', () => {
-
-    }) 
-  }),
   
   describe('Highlighting a piece', () => {
     // Arrange

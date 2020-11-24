@@ -1,5 +1,22 @@
 import Cells from '@/store/modules/cells/index.js'
 
+const getBoard = () => {
+  const board = new Array(3).fill(null).map(() => Array(3))
+  for (let i = 0; i < 3; i++) {
+    for (let j = 0; j < 3; j++) {
+      board[i][j] = { 
+        nRow: i + 1, 
+        nCol: j + 1, 
+        bHasBlackChip: false, 
+        bHasWhiteChip: false,
+        bHasBlackKing: false,
+        bHasWhiteKing: false
+      }
+    }
+  }
+  return board
+}
+
 describe('Mutation testing', () => {
   describe('Highlighting the selected cell', () => {
     it(`sets the firstClick cell's to the coordinates of the cell
@@ -20,19 +37,36 @@ describe('Mutation testing', () => {
       const board = new Array(2).fill(null).map(() => Array(2))
 
       // Fake 2x2 board for testing
-      board[0][0] = {
-        nRow: 1, nCol: 1, bHasBlackChip: false, bHasWhiteChip: true
+      board[0][0] = { 
+        nRow: 1, nCol: 1, 
+        bHasBlackChip: false,
+        bHasBlackKing: false, 
+        bHasWhiteChip: true,
+        bHasWhiteKing: false 
       }
-      board[0][1] = {
-        nRow: 1, nCol: 2, bHasBlackChip: false, bHasWhiteChip: false
+      
+      board[0][1] = { 
+        nRow: 1, nCol: 2, 
+        bHasBlackChip: false,
+        bHasBlackKing: false, 
+        bHasWhiteChip: false,
+        bHasWhiteKing: false 
       }
 
-      board[1][0] = {
-        nRow: 2, nCol: 1, bHasBlackChip: false, bHasWhiteChip: false
+      board[1][0] = { 
+        nRow: 2, nCol: 1, 
+        bHasBlackChip: false,
+        bHasBlackKing: false, 
+        bHasWhiteChip: false,
+        bHasWhiteKing: false 
       }
 
-      board[1][1] = {
-        nRow: 2, nCol: 2, bHasBlackChip: false, bHasWhiteChip: false
+      board[1][1] = { 
+        nRow: 2, nCol: 2, 
+        bHasBlackChip: false,
+        bHasBlackKing: false, 
+        bHasWhiteChip: false,
+        bHasWhiteKing: false 
       }
 
       /**
@@ -71,7 +105,7 @@ describe('Mutation testing', () => {
           { nRow: 2, nCol: 2,
             bHasBlackChip: false,
             bHasBlackKing: false, 
-            bHasWhiteChip: false,
+            bHasWhiteChip: true,
             bHasWhiteKing: false
           }
         ]
@@ -141,7 +175,7 @@ describe('Mutation testing', () => {
         [
           { nRow: 1, nCol: 1, 
             bHasBlackChip: true,
-            bHasBlackKing: false, 
+            bHasBlackKing: true, 
             bHasWhiteChip: false,
             bHasWhiteKing: false 
           },
@@ -185,32 +219,23 @@ describe('Mutation testing', () => {
     it('Replaces the board with a deep copy of the updated board which \
       contains the new position of a white chip', () => {
         // Arrange
-        const board = new Array(3).fill(null).map(() => Array(3))
-        for (let i=0; i < 3; i++) {
-          for (let j=0; j < 3; j++) {
-            if (i == 0 && j == 0) {
-              board[i][j] = { 
-                nRow: i + 1, 
-                nCol: j + 1, 
-                bHasBlackChip: false, 
-                bHasWhiteChip: true
-              }
-            } else if (i == 1 && j == 1) { 
-              board[i][j] = {
-                nRow: i + 1, 
-                nCol: j + 1, 
-                bHasBlackChip: true, 
-                bHasWhiteChip: false
-              }
-            } else {
-              board[i][j] = {
-                nRow: i + 1, 
-                nCol: j + 1, 
-                bHasBlackChip: false, 
-                bHasWhiteChip: false
-              }
-            }
-          }
+        const board = getBoard()
+        board[0][0] = { 
+          nRow: 1, 
+          nCol: 1, 
+          bHasBlackChip: false, 
+          bHasWhiteChip: true,
+          bHasBlackKing: false,
+          bHasWhiteKing: false
+        }
+
+        board[1][1] = {
+          nRow: 2, 
+          nCol: 2, 
+          bHasBlackChip: true, 
+          bHasWhiteChip: false,
+          bHasBlackKing: false,
+          bHasWhiteKing: false
         }
 
         /**
@@ -300,39 +325,29 @@ describe('Mutation testing', () => {
         Cells.mutations.mCapturePiece(state, coords)
 
         // Assert
-        expect(state.cells).toEqual(expected)
+        expect(state.cells).toStrictEqual(expected)
         expect(state.firstClick).toBe(null)
     }),
 
     it('Replaces the board with a deep copy of the updated board which \
       contains the new position of a black chip', () => {
       // Arrange
-      const board = new Array(3).fill(null).map(() => Array(3))
-      for (let i=0; i < 3; i++) {
-        for (let j=0; j < 3; j++) {
-          if (i == 2 && j == 2) {
-            board[i][j] = {
-              nRow: i + 1, 
-              nCol: j + 1, 
-              bHasBlackChip: true, 
-              bHasWhiteChip: false
-            }
-          } else if (i == 1 && j == 1) { 
-            board[i][j] = {
-              nRow: i + 1, 
-              nCol: j + 1, 
-              bHasBlackChip: false, 
-              bHasWhiteChip: true
-            }
-          } else {
-            board[i][j] = {
-              nRow: i + 1, 
-              nCol: j + 1, 
-              bHasBlackChip: false, 
-              bHasWhiteChip: false
-            }
-          }
-        }
+      const board = getBoard()
+      board[2][2] = {
+        nRow: 3,
+        nCol: 3, 
+        bHasBlackChip: true, 
+        bHasWhiteChip: false,
+        bHasBlackKing: false,
+        bHasWhiteKing: false
+      }
+      board[1][1] = {
+        nRow: 2, 
+        nCol: 2, 
+        bHasBlackChip: false, 
+        bHasWhiteChip: true,
+        bHasBlackKing: false,
+        bHasWhiteKing: false
       }
 
       /**
@@ -351,7 +366,7 @@ describe('Mutation testing', () => {
         [
           { nRow: 1, nCol: 1,  
             bHasBlackChip: true,
-            bHasBlackKing: false, 
+            bHasBlackKing: true, 
             bHasWhiteChip: false,
             bHasWhiteKing: false 
           },

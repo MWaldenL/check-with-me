@@ -75,7 +75,7 @@ const mutations = {
 
         stateClone[newCurr.nRow - 1][newCurr.nCol - 1] = newCurr
         stateClone[newDest.nRow - 1][newDest.nCol - 1] = newDest
-
+        
         state.cells = stateClone
         state.firstClick = null
       } else {
@@ -177,7 +177,6 @@ const mutations = {
         state.cells = stateClone
         state.firstClick = null
       } else {
-        console.log('in invalid')
         const bDestHasWhite = state.cells[coords.nDestRow - 1][coords.nDestCol - 1].bHasWhiteChip
         const bDestHasBlack = state.cells[coords.nDestRow - 1][coords.nDestCol - 1].bHasBlackChip
         const bSrcDestBlack = bSourceHasBlack(state.cells, coords) && bDestHasBlack
@@ -194,10 +193,8 @@ const mutations = {
         // this happens when clicking on a piece followed by clicking another
         // same-colored piece adjacent to it
         if (bSrcDestBlack || bSrcDestWhite) {
-          console.log('in if')
           newCoords = { nRow: coords.nDestRow, nCol: coords.nDestCol, bHasBlackKing: bDestHasBlackKing, bHasWhiteKing: bDestHasWhiteKing }
         } else { // Otherwise, simply set it to the current coordinates
-          console.log('in else')
           newCoords = { nRow: coords.nRow, nCol: coords.nCol, bHasBlackKing: bSrcHasBlackKing, bHasWhiteKing: bSrcHasWhiteKing }
         }
 
@@ -221,7 +218,9 @@ const mutations = {
       nRow: Math.floor((coords.nRow + coords.nDestRow) / 2),
       nCol: Math.floor((coords.nCol + coords.nDestCol) / 2),
       bHasBlackChip: false,
-      bHasWhiteChip: false
+      bHasWhiteChip: false,
+      bHasBlackKing: false,
+      bHasWhiteKing: false
     }
 
     const newDest = {
@@ -267,6 +266,7 @@ const mutations = {
       stateClone[newDest.nRow - 1][newDest.nCol - 1] = newDest
 
       state.cells = stateClone
+      state.firstClick = null
     }
   },
 

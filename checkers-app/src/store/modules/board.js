@@ -27,7 +27,7 @@ export const getBoard = () => {
   return board
 }
 
-export const getBoaaard = () => {
+export const getBoaaaaard = () => {
   const board = new Array(8).fill(null).map(() => Array(8))
   for (let r = 0; r < 8; r++) {
     for (let c = 0; c < 8; c++) {
