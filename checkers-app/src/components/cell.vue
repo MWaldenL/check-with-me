@@ -53,7 +53,7 @@ export default {
     }
   },
   methods: {
-    ...mapActions(['aMoveForward', 'aHighlight', 'aCapturePiece']),
+    ...mapActions(['aKingMovement', 'aMoveForward', 'aHighlight', 'aCapturePiece']),
     focus () {
       this.blackOpacity.opacity = this.blackOpacity.opacity === '100%' ? '50%' : '100%'
       this.whiteOpacity.opacity = this.whiteOpacity.opacity === '100%' ? '50%' : '100%'
@@ -84,22 +84,24 @@ export default {
           (this.row === source.nRow - 1 && this.col === source.nCol + 1) ||
           (this.row === source.nRow - 1 && this.col === source.nCol - 1)
 
-        if (bIsCaptureAttempt) {
+        const bIsKingMovement = source.bHasBlackKing || source.bHasWhiteKing
+        if (bIsKingMovement) {
+          this.aKingMovement(coords)
+        } else if (bIsCaptureAttempt) {
           this.aCapturePiece(coords)
         } else if (bIsMoveForwardAttempt) {
           this.aMoveForward(coords)
         } else {
           // Try to select the next clicked chip
           if (this.hasBlackChip || this.hasWhiteChip) {
-            this.aHighlight({ nRow: this.row, nCol: this.col })
+            this.aHighlight({ nRow: this.row, nCol: this.col, bHasBlackKing: this.hasBlackKing, bHasWhiteKing: this.hasWhiteKing })
           } else { // Illegal move
             this.aHighlight(null)
           }
         }
       } else {
         if (this.hasBlackChip || this.hasWhiteChip || this.hasBlackKing || this.hasWhiteKing) {
-          this.isSelected = true
-          this.aHighlight({ nRow: this.row, nCol: this.col })
+          this.aHighlight({ nRow: this.row, nCol: this.col, bHasBlackKing: this.hasBlackKing, bHasWhiteKing: this.hasWhiteKing })
         }
       }
     }
