@@ -70,32 +70,30 @@ export default {
         const bIsKingMovement = source.bHasBlackKing || source.bHasWhiteKing
 
         // Check for move or capture attempts. No legality checking
-        if (this.isCaptureAttempt(source)) {  
-          if (bIsKingMovement) {
+        if (bIsKingMovement) {
+          if (this.isKingCaptureAttempt) {
             this.aKingCapturePiece(coords)
           } else {
-            this.aCapturePiece(coords)
-          }
-        } else if (this.isMoveForwardAttempt(source)) {
-          if (bIsKingMovement) {
             this.aKingMovement(coords)
-          } else {
-            this.aMoveForward(coords)
           }
-        } else if (this.isKingCaptureAttempt(source)) {
-          this.aKingCapturePiece(coords)
         } else {
-          // Try to select the next clicked chip
-          if (this.hasBlackChip || this.hasWhiteChip) {
-            this.aHighlight({ 
-              nRow: this.row, 
-              nCol: this.col, 
-              bHasBlackKing: this.hasBlackKing,
-              bHasWhiteKing: this.hasWhiteKing 
-            })
-          } else { // Illegal move
-            this.aHighlight(null)
-          }
+          if (this.isCaptureAttempt(source)) {  
+            this.aCapturePiece(coords)
+          } else if (this.isMoveForwardAttempt(source)) {
+            this.aMoveForward(coords)
+          } else {
+            // Try to select the next clicked chip
+            if (this.hasBlackChip || this.hasWhiteChip) {
+              this.aHighlight({ 
+                nRow: this.row, 
+                nCol: this.col, 
+                bHasBlackKing: this.hasBlackKing,
+                bHasWhiteKing: this.hasWhiteKing 
+              })
+            } else { // Illegal move
+              this.aHighlight(null)
+            }
+          } 
         }
       } else {
         if (this.hasBlackChip || this.hasWhiteChip || this.hasBlackKing || this.hasWhiteKing) {
