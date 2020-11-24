@@ -1,5 +1,5 @@
 const actions = {
-  async aHighlight ({ commit }, coords) {
+  aHighlight ({ commit }, coords) {
     commit('mHighlight', coords)
   },
 
@@ -10,7 +10,7 @@ const actions = {
    * @param nDestRow - 1-based row of empty destination cell
    * @param nDestCol - 1-based column of empty destination cell
    */
-  async aMoveForward ({ commit }, coords) {
+  aMoveForward ({ commit }, coords) {
     commit('mMoveForward', coords)
   },
 
@@ -21,7 +21,7 @@ const actions = {
    * @param nDestRow - 1-based row of empty destination cell
    * @param nDestCol - 1-based column of empty destination cell
    */
-  async aKingMovement ({ commit }, coords) {
+  aKingMovement ({ commit }, coords) {
     commit('mKingMovement', coords)
   },
 
@@ -31,11 +31,11 @@ const actions = {
    *
    * @param coords - an object containing the source and destination coordinates
    */
-  async aCapturePiece ({ commit }, coords) {
+  aCapturePiece ({ commit }, coords) {
     commit('mCapturePiece', coords)
   },
 
-  async aKingCapturePiece ({ commit }, coords) {
+  aKingCapturePiece ({ commit }, coords) {
     commit('mKingCapturePiece', coords)
   }
 }

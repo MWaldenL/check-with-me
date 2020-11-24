@@ -78,6 +78,7 @@ export const bPieceExistsOnTargetTopRight = (board, coords, targetPiece) => {
   const srcRow = targetPiece.nRow
   const srcCol = targetPiece.nCol
   const destRow = coords.nDestRow
+  const destCol = coords.nDestCol
 
   let prevRow = srcRow
   let prevCol = srcCol
@@ -85,13 +86,15 @@ export const bPieceExistsOnTargetTopRight = (board, coords, targetPiece) => {
 
   // Always check the previous diagonally adjacent square 
   for (let i = srcRow; i <= destRow; i++) {
-    if ( i === prevRow + 1 && i === prevCol + 1 ) {
-      curPos = { nRow: i, nCol: i }
-      if (bSourceHasBlack(board, curPos) || bSourceHasWhite(board, curPos)) {
-        return true
+    for (let j = srcCol; j <= destCol; j++) {
+      if ( i === prevRow + 1 && j === prevCol + 1 ) {
+        curPos = { nRow: i, nCol: j }
+        if (bSourceHasBlack(board, curPos) || bSourceHasWhite(board, curPos)) {
+          return true
+        }
+        prevRow = i
+        prevCol = j
       }
-      prevRow = i
-      prevCol = i
     }
   }      
   return false 
@@ -103,24 +106,27 @@ export const bOtherExistsOnTopRight = (board, coords, squareHasSameColoredPiece,
 
   if (coords.nDestRow && coords.nDestCol) {
     const destRow = coords.nDestRow
+    const destCol = coords.nDestCol
     let prevRow = srcRow
     let prevCol = srcCol
     let curPos
 
     for (let i = srcRow; i <= destRow; i++) {
-      if ( i === prevRow + 1 && i === prevCol + 1 ) {
-        curPos = { nRow: i, nCol: i }
-        if ( squareHasOtherColoredPiece(board, curPos) ) {
-          return {
-            targetPiece: { nRow: i, nCol: i },
-            pieceExists: true
+      for (let j = srcCol; j <= destCol; j++) {
+        if ( i === prevRow + 1 && j === prevCol + 1 ) {
+          curPos = { nRow: i, nCol: j }
+          if ( squareHasOtherColoredPiece(board, curPos) ) {
+            return {
+              targetPiece: curPos,
+              pieceExists: true
+            }
+          } else if ( squareHasSameColoredPiece(board, curPos) ) {
+            return { targetPiece: null, pieceExists: false }
           }
-        } else if ( squareHasSameColoredPiece(board, curPos) ) {
-          return { targetPiece: null, pieceExists: false }
-        }
 
-        prevRow = i
-        prevCol = i
+          prevRow = i
+          prevCol = j
+        }
       }
     }
     return { targetPiece: null, pieceExists: false }
@@ -194,6 +200,7 @@ export const bOtherExistsOnBottomLeft = (board, coords, squareHasSameColoredPiec
 /**
  * Bottom Right
  */
+
 export const bPieceExistsOnTargetBottomRight = (board, coords, targetPiece) => {
   const srcRow = targetPiece.nRow
   const srcCol = targetPiece.nCol
@@ -203,6 +210,7 @@ export const bPieceExistsOnTargetBottomRight = (board, coords, targetPiece) => {
   let prevRow = srcRow
   let prevCol = srcCol
   let curPos
+
 
   // Always check the previous diagonally adjacent square 
   for (let i = srcRow; i >= destRow; i--) {
@@ -256,7 +264,6 @@ export const bOtherExistsOnBottomRight = (board, coords, squareHasSameColoredPie
 
 
 export const bOtherExistsAfterSource = (board, coords, squareHasSameColoredPiece, squareHasOtherColoredPiece) => {
-  // coords = {nrow, ncol, ndestrow, ndestcol}
   const isDiag = Math.abs(coords.nRow - coords.nDestRow) === Math.abs(coords.nCol - coords.nDestCol)
   
   const bTopLeft = coords.nRow < coords.nDestRow && coords.nCol > coords.nDestCol && isDiag
@@ -278,12 +285,21 @@ export const bOtherExistsAfterSource = (board, coords, squareHasSameColoredPiece
 }
 
 export const bPieceExistsBetweenTargetAndDest = (board, coords, targetPiece) => {
-  const bTopLeft = targetPiece.nRow < coords.nDestRow && targetPiece.nCol > coords.nDestCol
-  const bTopRight = targetPiece.nRow < coords.nDestRow && targetPiece.nCol < coords.nDestCol
-  const bBottomLeft = targetPiece.nRow > coords.nDestRow && targetPiece.nCol > coords.nDestCol
-  const bBottomRight = targetPiece.nRow > coords.nDestRow && targetPiece.nCol < coords.nDestCol
+  if (targetPiece === null) {
+    return false
+  }
 
-  // Check top right diag
+  if (targetPiece.nRow === coords.nDestRow && targetPiece.nCol === coords.nDestCol) {
+    return true
+  }
+
+  const isDiag = Math.abs(targetPiece.nRow - coords.nDestRow) === Math.abs(targetPiece.nCol - coords.nDestCol)
+
+  const bTopLeft = targetPiece.nRow <= coords.nDestRow && targetPiece.nCol >= coords.nDestCol && isDiag
+  const bTopRight = targetPiece.nRow <= coords.nDestRow && targetPiece.nCol <= coords.nDestCol && isDiag
+  const bBottomLeft = targetPiece.nRow >= coords.nDestRow && targetPiece.nCol >= coords.nDestCol && isDiag
+  const bBottomRight = targetPiece.nRow >= coords.nDestRow && targetPiece.nCol <= coords.nDestCol && isDiag
+
   if (bTopLeft) {
     return bPieceExistsOnTargetTopLeft(board, coords, targetPiece)
   } else if (bTopRight) {
@@ -292,23 +308,28 @@ export const bPieceExistsBetweenTargetAndDest = (board, coords, targetPiece) => 
     return bPieceExistsOnTargetBottomLeft(board, coords, targetPiece)
   } else if (bBottomRight) {
     return bPieceExistsOnTargetBottomRight(board, coords, targetPiece)
+  } else {
+    return false
   }
 }   
 
 export const bIsValidCapture = (board, coords, color) => {
+  let hasFriendly, hasEnemy
   if (color === 'white') {
-    let checkOther = bOtherExistsAfterSource(board, coords, bSourceHasWhite, bSourceHasBlack)
-    let targetPiece = checkOther.targetPiece
-    const validCapture = checkOther.pieceExists && 
-      !bPieceExistsBetweenTargetAndDest(board, coords, targetPiece)
+    hasFriendly = bSourceHasWhite
+    hasEnemy = bSourceHasBlack
+  } else {
+    hasFriendly = bSourceHasBlack
+    hasEnemy = bSourceHasWhite
+  }
 
+  const checkOther = bOtherExistsAfterSource(board, coords, hasFriendly, hasEnemy)
+  if (checkOther) {
+    const targetPiece = checkOther.targetPiece
+    const noPieceBetween = !bPieceExistsBetweenTargetAndDest(board, coords, targetPiece)
+    const validCapture = checkOther.pieceExists && noPieceBetween
     return { validCapture, targetPiece }
   } else {
-    let checkOther = bOtherExistsAfterSource(board, coords, bSourceHasBlack, bSourceHasWhite)
-    let targetPiece = checkOther.targetPiece
-    const validCapture = checkOther.pieceExists && 
-      !bPieceExistsBetweenTargetAndDest(board, coords, targetPiece)
-
-    return { validCapture, targetPiece }
+    return { validCapture: false, targetPiece: null }
   }
 }

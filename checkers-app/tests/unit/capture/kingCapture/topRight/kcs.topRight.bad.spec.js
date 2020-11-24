@@ -323,9 +323,11 @@ describe('bIsValidCapture', () => {
       }
 
       /**
-       * _ _ _
-       * _ b _
-       * _ _ b
+       * _ _ _ _ _
+       * _ _ _ b _
+       * _ _ b _ _
+       * _ _ _ _ _
+       * w _ _ _ _
        */
 
       const expected = false
@@ -335,6 +337,36 @@ describe('bIsValidCapture', () => {
 
       // Assert
       expect(result).toBe(expected)
+    }),
+
+    it('returns false if the target = destination', () => {
+      // Arrange
+      const board = getBoard()
+      const coords = { nRow: 1, nCol: 1, nDestRow: 2, nDestCol: 2 }
+
+      board[0][0] = {
+        nRow: 1, nCol: 1, bHasWhiteChip: true, bHasBlackChip: false, bHasWhiteKing: true, bHasBlackKing: false
+      }
+
+      board[1][1] = {
+        nRow: 2, nCol: 2, bHasWhiteChip: false, bHasBlackChip: true, bHasWhiteKing: false, bHasBlackKing: false
+      }
+
+      /**
+       * _ _ _ _ _
+       * _ _ _ b _
+       * _ _ b _ _
+       * _ _ _ _ _
+       * w _ _ _ _
+       */
+
+      const expected = { validCapture: false, targetPiece: null }
+
+      // Act
+      const result = bIsValidCapture(board, coords, 'white')
+
+      // Assert
+      expect(result).toStrictEqual(expected)
     })
   }),
 

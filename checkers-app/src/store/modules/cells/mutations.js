@@ -79,7 +79,6 @@ const mutations = {
         state.cells = stateClone
         state.firstClick = null
       } else {
-        console.log('Move else')
         const bDestHasWhite = state.cells[coords.nDestRow - 1][coords.nDestCol - 1].bHasWhiteChip
         const bDestHasBlack = state.cells[coords.nDestRow - 1][coords.nDestCol - 1].bHasBlackChip
         const bSrcDestBlack = bSourceHasBlack(state.cells, coords) && bDestHasBlack
@@ -96,10 +95,15 @@ const mutations = {
         // this happens when clicking on a piece followed by clicking another
         // same-colored piece adjacent to it
         if (bSrcDestBlack || bSrcDestWhite) {
-          console.log('Move selected piece')
-          newCoords = { nRow: coords.nDestRow, nCol: coords.nDestCol, bHasBlackKing: bDestHasBlackKing, bHasWhiteKing: bDestHasWhiteKing }
+          newCoords = { 
+            nRow: coords.nDestRow, 
+            nCol: coords.nDestCol, 
+            bHasWhiteChip: bDestHasWhite,
+            bHasBlackChip: bDestHasBlack,
+            bHasWhiteKing: bDestHasWhiteKing,
+            bHasBlackKing: bDestHasBlackKing
+          } 
         } else { // Otherwise, simply set it to the current coordinates
-          console.log('cur coords')
           newCoords = { nRow: coords.nRow,  nCol: coords.nCol, bHasBlackKing: bSrcHasBlackKing, bHasWhiteKing: bSrcHasWhiteKing }
         }
 
