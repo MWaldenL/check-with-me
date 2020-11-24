@@ -69,7 +69,12 @@ export default {
 
         // Check for move or capture attempts. No legality checking
         if (this.isCaptureAttempt(source)) {
-          this.aCapturePiece(coords)
+          console.log(source)
+          if (source.bHasWhiteKing || source.bHasBlackKing) {
+            this.aKingCapturePiece(coords)
+          } else {
+            this.aCapturePiece(coords)
+          }
         } else if (this.isMoveForwardAttempt(source)) {
           this.aMoveForward(coords)
         } else if (this.isKingCaptureAttempt(source)) {
@@ -82,7 +87,29 @@ export default {
       } else {
         if (this.hasBlackChip || this.hasWhiteChip || this.hasBlackKing || this.hasWhiteKing) {
           this.isSelected = true
-          this.aHighlight({ nRow: this.row, nCol: this.col })
+
+          let location
+          if (this.hasWhiteKing) {
+            location = { 
+              nRow: this.row, 
+              nCol: this.col, 
+              bHasWhiteChip: true,  
+              bHasWhiteKing: true,
+              bHasBlackChip: false,
+              bHasBlackKing: false
+            }
+          } else if (this.hasBlackKing) {
+            location = { 
+              nRow: this.row, 
+              nCol: this.col, 
+              bHasWhiteChip: false,
+              bHasWhiteKing: false,
+              bHasBlackChip: true,
+              bHasBlackKing: true,
+            }
+          }
+          
+          this.aHighlight(location)
         }
       }
     },
