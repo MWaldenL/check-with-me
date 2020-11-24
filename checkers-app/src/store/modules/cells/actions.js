@@ -33,6 +33,10 @@ const actions = {
    */
   async aCapturePiece ({ commit }, coords) {
     commit('mCapturePiece', coords)
+  },
+
+  async aKingCapturePiece ({ commit }, coords) {
+    commit('mKingCapturePiece', coords)
   }
 }
 

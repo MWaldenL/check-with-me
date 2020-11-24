@@ -8,6 +8,8 @@ import {
   bNoWhiteJumps
 } from '../../services/moveCaptureService'
 
+import { bIsValidCapture } from '../../services/kingCaptureService'
+
 const mutations = {
   mHighlight: (state, coords) => {
     // TODO: Highlight legal moves
@@ -77,6 +79,7 @@ const mutations = {
         state.cells = stateClone
         state.firstClick = null
       } else {
+        console.log('Move else')
         const bDestHasWhite = state.cells[coords.nDestRow - 1][coords.nDestCol - 1].bHasWhiteChip
         const bDestHasBlack = state.cells[coords.nDestRow - 1][coords.nDestCol - 1].bHasBlackChip
         const bSrcDestBlack = bSourceHasBlack(state.cells, coords) && bDestHasBlack
@@ -93,9 +96,11 @@ const mutations = {
         // this happens when clicking on a piece followed by clicking another
         // same-colored piece adjacent to it
         if (bSrcDestBlack || bSrcDestWhite) {
+          console.log('Move selected piece')
           newCoords = { nRow: coords.nDestRow, nCol: coords.nDestCol, bHasBlackKing: bDestHasBlackKing, bHasWhiteKing: bDestHasWhiteKing }
         } else { // Otherwise, simply set it to the current coordinates
-          newCoords = { nRow: coords.nRow, nCol: coords.nCol, bHasBlackKing: bSrcHasBlackKing, bHasWhiteKing: bSrcHasWhiteKing }
+          console.log('cur coords')
+          newCoords = { nRow: coords.nRow,  nCol: coords.nCol, bHasBlackKing: bSrcHasBlackKing, bHasWhiteKing: bSrcHasWhiteKing }
         }
 
         mutations.mHighlight(state.cells, newCoords)
@@ -259,8 +264,61 @@ const mutations = {
 
       state.cells = stateClone
     }
+  },
 
-    state.firstClick = null
+  mKingCapturePiece: (state, coords) => {
+    console.log('king capture')
+    const newCur = {
+      nRow: coords.nRow,
+      nCol: coords.nCol,
+      bHasWhiteChip: false,
+      bHasBlackChip: false,
+      bHasWhiteKing: false,
+      bHasBlackKing: false
+    }
+
+    const newDest = {
+      nRow: coords.nDestRow,
+      nCol: coords.nDestCol,
+      bHasWhiteChip: false,
+      bHasBlackChip: false,
+      bHasWhiteKing: false,
+      bHasBlackKing: false
+    }
+
+    let color
+    if (bSourceHasWhite(state.cells, coords)) {
+      color = 'white'
+    } else if (bSourceHasBlack(state.cells, coords)) {
+      color = 'black'
+    }
+
+    const result = bIsValidCapture(state.cells, coords, color)
+    if (result.validCapture) {
+      if (bSourceHasWhite(state.cells, coords)) {
+        newDest.bHasWhiteChip = true
+        newDest.bHasWhiteKing = true        
+      } else if (bSourceHasBlack(state.cells, coords)) {
+        newDest.bHasBlackChip = true
+        newDest.bHasBlackKing = true
+      }
+
+      const newTarget = {
+        ...result.targetPiece,
+        bHasWhiteChip: false,
+        bHasBlackChip: false,
+        bHasWhiteKing: false,
+        bHasBlackKing: false
+      }
+      const stateClone = JSON.parse(JSON.stringify(state.cells))
+
+      stateClone[newCur.nRow - 1][newCur.nCol - 1] = newCur
+      stateClone[newTarget.nRow - 1][newTarget.nCol - 1] = newTarget
+      stateClone[newDest.nRow - 1][newDest.nCol - 1] = newDest
+
+      state.cells = stateClone
+      state.firstClick = null
+    }
   }
 }
 
