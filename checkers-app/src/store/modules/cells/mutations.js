@@ -267,7 +267,6 @@ const mutations = {
   },
 
   mKingCapturePiece: (state, coords) => {
-    console.log('king capture')
     const newCur = {
       nRow: coords.nRow,
       nCol: coords.nCol,

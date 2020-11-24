@@ -220,7 +220,6 @@ export const bPieceExistsOnTargetBottomRight = (board, coords, targetPiece) => {
   return false 
 }
 
-
 export const bOtherExistsOnBottomRight = (board, coords, squareHasSameColoredPiece, squareHasOtherColoredPiece) => {
   const srcRow = coords.nRow
   const srcCol = coords.nCol
@@ -258,10 +257,12 @@ export const bOtherExistsOnBottomRight = (board, coords, squareHasSameColoredPie
 
 export const bOtherExistsAfterSource = (board, coords, squareHasSameColoredPiece, squareHasOtherColoredPiece) => {
   // coords = {nrow, ncol, ndestrow, ndestcol}
-  const bTopLeft = coords.nRow < coords.nDestRow && coords.nCol > coords.nDestCol
-  const bTopRight = coords.nRow < coords.nDestRow && coords.nCol < coords.nDestCol
-  const bBottomLeft = coords.nRow > coords.nDestRow && coords.nCol > coords.nDestCol
-  const bBottomRight = coords.nRow > coords.nDestRow && coords.nCol < coords.nDestCol
+  const isDiag = Math.abs(coords.nRow - coords.nDestRow) === Math.abs(coords.nCol - coords.nDestCol)
+  
+  const bTopLeft = coords.nRow < coords.nDestRow && coords.nCol > coords.nDestCol && isDiag
+  const bTopRight = coords.nRow < coords.nDestRow && coords.nCol < coords.nDestCol && isDiag
+  const bBottomLeft = coords.nRow > coords.nDestRow && coords.nCol > coords.nDestCol && isDiag
+  const bBottomRight = coords.nRow > coords.nDestRow && coords.nCol < coords.nDestCol && isDiag
 
   if (bTopLeft) {
     return bOtherExistsOnTopLeft(board, coords, squareHasSameColoredPiece, squareHasOtherColoredPiece)
@@ -271,6 +272,8 @@ export const bOtherExistsAfterSource = (board, coords, squareHasSameColoredPiece
     return bOtherExistsOnBottomLeft(board, coords, squareHasSameColoredPiece, squareHasOtherColoredPiece)
   } else if (bBottomRight) {
     return bOtherExistsOnBottomRight(board, coords, squareHasSameColoredPiece, squareHasOtherColoredPiece)
+  } else {
+    return { targetPiece: null, pieceExists: false }
   }
 }
 

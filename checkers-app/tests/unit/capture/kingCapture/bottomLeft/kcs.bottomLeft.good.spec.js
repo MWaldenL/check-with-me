@@ -212,11 +212,16 @@ describe('bIsValidCapture', () => {
         nRow: 5, nCol: 5, bHasWhiteChip: false, bHasBlackChip: true, bHasWhiteKing: false, bHasBlackKing: true
       }
 
-      board[2][2] = {
+      targetPiece = {
         nRow: 3, nCol: 3, bHasWhiteChip: true, bHasBlackChip: false, bHasWhiteKing: false, bHasBlackKing: false
       }
 
-      const expected = true
+      board[2][2] = targetPiece
+
+      const expected = {
+        validCapture: true,
+        targetPiece
+      }
 
       // Act
       const result = bIsValidCapture(board, coords, 'black')
