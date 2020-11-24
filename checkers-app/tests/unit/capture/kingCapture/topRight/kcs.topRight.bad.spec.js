@@ -294,13 +294,13 @@ describe('bIsValidCapture', () => {
        * _ _ W
        */
 
-      const expected = false
+      const expected = { validCapture: false, targetPiece: null }
 
       // Act
       const result = bIsValidCapture(board, coords, 'white')
 
       // Assert
-      expect(result).toBe(expected)
+      expect(result).toStrictEqual(expected)
     })
   }),
 
@@ -330,13 +330,13 @@ describe('bIsValidCapture', () => {
        * w _ _ _ _
        */
 
-      const expected = false
+      const expected = { validCapture: false, targetPiece: { nRow: 3, nCol: 3 } }
 
       // Act
       const result = bIsValidCapture(board, coords, 'white')
 
       // Assert
-      expect(result).toBe(expected)
+      expect(result).toStrictEqual(expected)
     }),
 
     it('returns false if the target = destination', () => {
@@ -360,7 +360,7 @@ describe('bIsValidCapture', () => {
        * w _ _ _ _
        */
 
-      const expected = { validCapture: false, targetPiece: null }
+      const expected = { validCapture: false, targetPiece: { nRow: 2, nCol: 2 } }
 
       // Act
       const result = bIsValidCapture(board, coords, 'white')
@@ -394,13 +394,13 @@ describe('bIsValidCapture', () => {
        * _ _ b
        */
 
-      const expected = false
+      const expected = { validCapture: false, targetPiece: { nRow: 3, nCol: 3 } }
 
       // Act
       const result = bIsValidCapture(board, coords, 'white')
 
       // Assert
-      expect(result).toBe(expected)
+      expect(result).toStrictEqual(expected)
     })
   })
 })
