@@ -11,13 +11,8 @@
 </template>
 
 <script>
-import {
-  bSourceHasBlack,
-  bSourceHasWhite
-} from '@/store/services/moveCaptureService'
-
 import { 
-  bOtherExistsAfterSource
+  bIsValidCapture
 } from '@/store/services/kingCaptureService'
 import { mapGetters, mapActions } from 'vuex'
 
@@ -63,10 +58,25 @@ export default {
       this.whiteOpacity.opacity = this.whiteOpacity.opacity === '100%' ? '50%' : '100%'
     },
 
+    cancelCurrentMove () {
+      const bContainsPiece = this.hasBlackChip || this.hasWhiteChip || this.hasWhiteKing || this.hasBlackKing
+      if (bContainsPiece) {
+        console.log('contains piece')
+        this.aHighlight({
+          nRow: this.row, 
+          nCol: this.col, 
+          bHasBlackKing: this.hasBlackKing,
+          bHasWhiteKing: this.hasWhiteKing 
+        })
+      } else { // Illegal move
+        this.aHighlight(null)
+      }
+    },
+
     onSquareClicked () {
       const source = this.firstClick
       const bContainsPiece = this.hasBlackChip || this.hasWhiteChip || this.hasWhiteKing || this.hasBlackKing
-      
+
       if (source != null) {
         this.isSelected = false
         const coords = {
@@ -77,25 +87,16 @@ export default {
         }
         
         const bIsKingMovement = source.bHasBlackKing || source.bHasWhiteKing
-
+  
         // Check for move or capture attempts. No legality checking
         if (bIsKingMovement) {
-          if (this.isKingCaptureAttempt(source, coords)) {
-            this.aKingCapturePiece(coords)
-          } else if (this.isKingMoveAttempt(source, coords)) {
+          if (this.isKingMoveAttempt(source, coords)) {
+            console.log('king move attempt')
             this.aKingMovement(coords)
+          } else if (this.isKingCaptureAttempt(source, coords)) {
+            this.aKingCapturePiece(coords)
           } else {
-            // Try to select the next clicked chip
-            if (bContainsPiece) {
-              this.aHighlight({ 
-                nRow: this.row, 
-                nCol: this.col, 
-                bHasBlackKing: this.hasBlackKing,
-                bHasWhiteKing: this.hasWhiteKing 
-              })
-            } else { // Illegal move
-              this.aHighlight(null)
-            }
+            this.cancelCurrentMove()
           }
         } else { 
           if (this.isCaptureAttempt(source)) {  
@@ -103,23 +104,12 @@ export default {
           } else if (this.isMoveForwardAttempt(source)) {
             this.aMoveForward(coords)
           } else {
-            // Try to select the next clicked chip
-            if (bContainsPiece) {
-              this.aHighlight({ 
-                nRow: this.row, 
-                nCol: this.col, 
-                bHasBlackKing: this.hasBlackKing,
-                bHasWhiteKing: this.hasWhiteKing 
-              })
-            } else { // Illegal move
-              this.aHighlight(null)
-            }
+            this.cancelCurrentMove()
           }
         }
       } else {
         if (bContainsPiece) {
           this.isSelected = true
-
           this.aHighlight({ 
             nRow: this.row, 
             nCol: this.col, 
@@ -132,7 +122,7 @@ export default {
       }
     },
 
-    isDiag (coords) {
+    isDiagonal (coords) {
       return Math.abs(coords.nRow - coords.nDestRow) === Math.abs(coords.nCol - coords.nDestCol)
     },
 
@@ -147,30 +137,29 @@ export default {
       return (this.row === source.nRow + 1 && this.col === source.nCol + 1) ||
         (this.row === source.nRow + 1 && this.col === source.nCol - 1) ||
         (this.row === source.nRow - 1 && this.col === source.nCol + 1) ||
-        (this.row === source.nRow - 1 && this.col === source.nCol - 1)
+        (this.row === source.nRow - 1 && this.col === source.nCol - 1) &&
+        !(this.hasBlackChip || this.hasWhiteChip || this.hasBlackKing || this.hasWhiteKing)
     },
 
     isKingCaptureAttempt (source, coords) {
-      console.log('capturing?')
-      
       let ans
       if (source.bHasWhiteKing) {
-        ans = bOtherExistsAfterSource(this.board, coords, bSourceHasWhite, bSourceHasBlack).pieceExists
+        ans = bIsValidCapture(this.board, coords, 'white').validCapture
       } else if (source.bHasBlackKing){
-        ans = bOtherExistsAfterSource(this.board, coords, bSourceHasBlack, bSourceHasWhite).pieceExists
-      } else {
-        ans = false
+        ans = bIsValidCapture(this.board, coords, 'black').validCapture
       }
 
-      return this.isDiag(coords) && ans
+      return this.isDiagonal(coords) && ans
     },
 
     isKingMoveAttempt(source, coords) {
-      return this.isDiag(coords) && (
+      return !this.isKingCaptureAttempt(source, coords) &&
+        this.isDiagonal(coords) && (
           (this.row < source.nRow && this.col > source.nCol) ||
           (this.row < source.nRow && this.col < source.nCol) ||
           (this.row > source.nRow && this.col > source.nCol) ||
-          (this.row > source.nRow && this.col < source.nCol))
+          (this.row > source.nRow && this.col < source.nCol)) &&
+        !(this.hasBlackChip || this.hasWhiteChip || this.hasBlackKing || this.hasWhiteKing)
     }
   }
 }

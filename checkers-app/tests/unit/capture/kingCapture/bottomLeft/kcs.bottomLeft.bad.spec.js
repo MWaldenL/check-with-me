@@ -280,7 +280,6 @@ describe('bIsValidCapture', () => {
         nRow: 5, nCol: 5, bHasWhiteChip: true, bHasBlackChip: false, bHasWhiteKing: true, bHasBlackKing: false
       }
 
-
       board[3][3] = {
         nRow: 4, nCol: 4, bHasWhiteChip: true, bHasBlackChip: false, bHasWhiteKing: false, bHasBlackKing: false
       }
@@ -290,13 +289,13 @@ describe('bIsValidCapture', () => {
         nRow: 3, nCol: 3, bHasWhiteChip: false, bHasBlackChip: true, bHasWhiteKing: false, bHasBlackKing: false
       }
 
-      const expected = false
+      const expected = { validCapture: false, targetPiece: null }
 
       // Act
       const result = bIsValidCapture(board, coords, 'white')
 
       // Assert
-      expect(result).toBe(expected)
+      expect(result).toStrictEqual(expected)
     })
   }),
 
@@ -320,13 +319,13 @@ describe('bIsValidCapture', () => {
         nRow: 1, nCol: 1, bHasWhiteChip: false, bHasBlackChip: false, bHasWhiteKing: false, bHasBlackKing: false
       }
 
-      const expected = false
+      const expected = { validCapture: false, targetPiece: { nRow: 3, nCol: 3 } }
 
       // Act
       const result = bIsValidCapture(board, coords, 'white')
 
       // Assert
-      expect(result).toBe(expected)
+      expect(result).toStrictEqual(expected)
     })
   }),
 
@@ -341,13 +340,13 @@ describe('bIsValidCapture', () => {
         nRow: 1, nCol: 1, bHasWhiteChip: true, bHasBlackChip: false, bHasWhiteKing: false, bHasBlackKing: false
       }
 
-      const expected = false
+      const expected = { validCapture: false, targetPiece: null }
 
       // Act
       const result = bIsValidCapture(board, coords, 'white')
 
       // Assert
-      expect(result).toBe(expected)
+      expect(result).toStrictEqual(expected)
     })
   })
 })

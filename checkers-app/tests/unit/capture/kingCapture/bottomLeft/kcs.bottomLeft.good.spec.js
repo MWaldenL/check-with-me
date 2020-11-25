@@ -192,13 +192,16 @@ describe('bIsValidCapture', () => {
         nRow: 3, nCol: 3, bHasWhiteChip: false, bHasBlackChip: true, bHasWhiteKing: false, bHasBlackKing: false
       }
 
-      const expected = true
+      const expected = {
+        validCapture: true,
+        targetPiece: { nRow: 3, nCol: 3 }
+      }
 
       // Act
       const result = bIsValidCapture(board, coords, 'white')
 
       // Assert
-      expect(result).toBe(expected)
+      expect(result).toStrictEqual(expected)
     })
   }),
 
@@ -212,7 +215,7 @@ describe('bIsValidCapture', () => {
         nRow: 5, nCol: 5, bHasWhiteChip: false, bHasBlackChip: true, bHasWhiteKing: false, bHasBlackKing: true
       }
 
-      targetPiece = {
+      let targetPiece = {
         nRow: 3, nCol: 3, bHasWhiteChip: true, bHasBlackChip: false, bHasWhiteKing: false, bHasBlackKing: false
       }
 
@@ -220,14 +223,14 @@ describe('bIsValidCapture', () => {
 
       const expected = {
         validCapture: true,
-        targetPiece
+        targetPiece: { nRow: 3, nCol: 3 }
       }
 
       // Act
       const result = bIsValidCapture(board, coords, 'black')
 
       // Assert
-      expect(result).toBe(expected)
+      expect(result).toStrictEqual(expected)
     })
   })
 })
