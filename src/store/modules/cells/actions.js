@@ -1,5 +1,5 @@
 const actions = {
-  aHighlight ({ commit }, coords) {
+  aHighlight({ commit }, coords) {
     commit('mHighlight', coords)
   },
 
@@ -10,7 +10,7 @@ const actions = {
    * @param nDestRow - 1-based row of empty destination cell
    * @param nDestCol - 1-based column of empty destination cell
    */
-  aMoveForward ({ commit }, coords) {
+  aMoveForward({ commit }, coords) {
     commit('mMoveForward', coords)
   },
 
@@ -21,7 +21,7 @@ const actions = {
    * @param nDestRow - 1-based row of empty destination cell
    * @param nDestCol - 1-based column of empty destination cell
    */
-  aKingMovement ({ commit }, coords) {
+  aKingMovement({ commit }, coords) {
     commit('mKingMovement', coords)
   },
 
@@ -31,11 +31,17 @@ const actions = {
    *
    * @param coords - an object containing the source and destination coordinates
    */
-  aCapturePiece ({ commit }, coords) {
+  aCapturePiece({ commit }, coords) {
     commit('mCapturePiece', coords)
   },
 
-  aKingCapturePiece ({ commit }, coords) {
+  /**
+   * aKingCapturePiece moves a black or white king to capture an opposite-colored piece
+   * in its diagonal
+   *
+   * @param coords - an object containing the source and destination coordinates
+   */
+  aKingCapturePiece({ commit }, coords) {
     commit('mKingCapturePiece', coords)
   }
 }

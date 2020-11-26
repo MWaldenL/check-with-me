@@ -75,7 +75,7 @@ const mutations = {
 
         stateClone[newCurr.nRow - 1][newCurr.nCol - 1] = newCurr
         stateClone[newDest.nRow - 1][newDest.nCol - 1] = newDest
-        
+
         state.cells = stateClone
         state.firstClick = null
       } else {
@@ -95,16 +95,16 @@ const mutations = {
         // this happens when clicking on a piece followed by clicking another
         // same-colored piece adjacent to it
         if (bSrcDestBlack || bSrcDestWhite) {
-          newCoords = { 
-            nRow: coords.nDestRow, 
-            nCol: coords.nDestCol, 
+          newCoords = {
+            nRow: coords.nDestRow,
+            nCol: coords.nDestCol,
             bHasWhiteChip: bDestHasWhite,
             bHasBlackChip: bDestHasBlack,
             bHasWhiteKing: bDestHasWhiteKing,
             bHasBlackKing: bDestHasBlackKing
-          } 
+          }
         } else { // Otherwise, simply set it to the current coordinates
-          newCoords = { nRow: coords.nRow,  nCol: coords.nCol, bHasBlackKing: bSrcHasBlackKing, bHasWhiteKing: bSrcHasWhiteKing }
+          newCoords = { nRow: coords.nRow, nCol: coords.nCol, bHasBlackKing: bSrcHasBlackKing, bHasWhiteKing: bSrcHasWhiteKing }
         }
 
         mutations.mHighlight(state.cells, newCoords)
@@ -267,6 +267,30 @@ const mutations = {
 
       state.cells = stateClone
       state.firstClick = null
+    } else {
+      const bDestHasWhite = state.cells[coords.nDestRow - 1][coords.nDestCol - 1].bHasWhiteChip
+      const bDestHasBlack = state.cells[coords.nDestRow - 1][coords.nDestCol - 1].bHasBlackChip
+      const bSrcDestBlack = bSourceHasBlack(state.cells, coords) && bDestHasBlack
+      const bSrcDestWhite = bSourceHasWhite(state.cells, coords) && bDestHasWhite
+
+      const bSrcHasWhiteKing = state.cells[coords.nRow - 1][coords.nCol - 1].bHasWhiteKing
+      const bSrcHasBlackKing = state.cells[coords.nRow - 1][coords.nCol - 1].bHasBlackKing
+      const bDestHasWhiteKing = state.cells[coords.nDestRow - 1][coords.nDestCol - 1].bHasWhiteKing
+      const bDestHasBlackKing = state.cells[coords.nDestRow - 1][coords.nDestCol - 1].bHasBlackKing
+
+      let newCoords
+
+      // If both the source and destination pieces have the same color -
+      // this happens when clicking on a piece followed by clicking another
+      // same-colored piece adjacent to it
+      if (bSrcDestBlack || bSrcDestWhite) {
+        newCoords = { nRow: coords.nDestRow, nCol: coords.nDestCol, bHasBlackKing: bDestHasBlackKing, bHasWhiteKing: bDestHasWhiteKing }
+      } else { // Otherwise, simply set it to the current coordinates
+        newCoords = { nRow: coords.nRow, nCol: coords.nCol, bHasBlackKing: bSrcHasBlackKing, bHasWhiteKing: bSrcHasWhiteKing }
+      }
+
+      mutations.mHighlight(state.cells, newCoords)
+      state.firstClick = newCoords
     }
   },
 
@@ -300,7 +324,7 @@ const mutations = {
     if (result.validCapture) {
       if (bSourceHasWhite(state.cells, coords)) {
         newDest.bHasWhiteChip = true
-        newDest.bHasWhiteKing = true        
+        newDest.bHasWhiteKing = true
       } else if (bSourceHasBlack(state.cells, coords)) {
         newDest.bHasBlackChip = true
         newDest.bHasBlackKing = true
