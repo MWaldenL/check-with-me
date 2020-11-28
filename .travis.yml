@@ -2,6 +2,19 @@ language: node_js
 node_js:
   - lts/*
 
-script:
-  - npm run test:unit
-  - npm run build
+jobs:
+  include:
+    stages: 
+      name: develop
+      script:
+        - npm run test:unit
+
+      name: release
+      if: branch = Release
+      script:
+        - npm run build
+      
+      # deploy:
+      #   provider: heroku
+      #   api_key:
+      #   secure: "<HEROKU_GENERATED_ENCRYPTED_API_KEY>"
