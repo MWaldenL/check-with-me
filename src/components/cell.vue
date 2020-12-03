@@ -14,6 +14,10 @@
 import { 
   bIsValidCapture
 } from '@/store/services/kingCaptureService'
+import { 
+  checkIfWhiteStuck,
+  checkIfBlackStuck
+} from '@/store/services/winCheckerService'
 import { mapGetters, mapActions } from 'vuex'
 
 export default {
@@ -28,7 +32,9 @@ export default {
   computed: {
     ...mapGetters({
       board: 'getEntireBoard',
-      firstClick: 'getFirstClick'
+      firstClick: 'getFirstClick',
+      whiteCount: 'getWhiteCount',
+      blackCount: 'getBlackCount'
     }),
 
     isDark () {
@@ -52,7 +58,7 @@ export default {
     }
   },
   methods: {
-    ...mapActions(['aKingMovement', 'aMoveForward', 'aHighlight', 'aCapturePiece', 'aKingCapturePiece']),
+    ...mapActions(['aKingMovement', 'aMoveForward', 'aHighlight', 'aCapturePiece', 'aKingCapturePiece', 'aReducePiece']),
     focus () {
       this.blackOpacity.opacity = this.blackOpacity.opacity === '100%' ? '50%' : '100%'
       this.whiteOpacity.opacity = this.whiteOpacity.opacity === '100%' ? '50%' : '100%'
@@ -95,12 +101,16 @@ export default {
             this.aKingMovement(coords)
           } else if (this.isKingCaptureAttempt(source, coords)) {
             this.aKingCapturePiece(coords)
+            //reduce board piece
+            this.aReducePiece(this.hasWhiteKing || this.hasWhiteChip)
           } else {
             this.cancelCurrentMove()
           }
         } else { 
           if (this.isCaptureAttempt(source)) {  
             this.aCapturePiece(coords)
+            //reduce board piece
+            this.aReducePiece(this.hasWhiteKing || this.hasWhiteChip)
           } else if (this.isMoveForwardAttempt(source)) {
             this.aMoveForward(coords)
           } else {
@@ -119,6 +129,18 @@ export default {
             bHasBlackKing: this.hasBlackKing
           })
         }
+      }
+
+      let bWhiteStuck = checkIfWhiteStuck(this.board)
+      let bBlackStuck = checkIfBlackStuck(this.board)
+      if(bWhiteStuck && bBlackStuck) {
+        console.log("DRAW!")
+      } else if (bWhiteStuck || this.whiteCount === 0) {
+        console.log("BLACK WINS!")
+      } else if (bBlackStuck || this.blackCount === 0) {
+        console.log("WHITE WINS!")
+      } else {
+        //console.log("No winner yet")
       }
     },
 

@@ -43,6 +43,15 @@ const actions = {
    */
   aKingCapturePiece({ commit }, coords) {
     commit('mKingCapturePiece', coords)
+  },
+
+  /**
+   * aReducePiece reduces nBlackCount if param is true, reduces nWhiteCount otherwise
+   * 
+   * @param whiteTakes - if white is the taking piece
+   */
+  aReducePiece({ commit }, whiteTakes) {
+    commit('mReducePiece', whiteTakes)
   }
 }
 

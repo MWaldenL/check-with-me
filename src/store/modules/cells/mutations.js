@@ -346,6 +346,14 @@ const mutations = {
       state.cells = stateClone
       state.firstClick = null
     }
+  },
+
+  mReducePiece: (state, whiteTakes) => {
+    if (!whiteTakes) {
+      state.nWhiteCount = state.nWhiteCount - 1
+    } else {
+      state.nBlackCount = state.nBlackCount - 1
+    }
   }
 }
 
