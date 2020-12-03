@@ -1,6 +1,7 @@
 <template>
   <div class="home">
     <Grid />
+    <ResultModal />
   </div>
 </template>
 

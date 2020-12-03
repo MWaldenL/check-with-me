@@ -59,7 +59,7 @@ export default {
     }
   },
   methods: {
-    ...mapActions(['aKingMovement', 'aMoveForward', 'aHighlight', 'aCapturePiece', 'aKingCapturePiece', 'aReducePiece', 'aSetActiveGame']),
+    ...mapActions(['aKingMovement', 'aMoveForward', 'aHighlight', 'aCapturePiece', 'aKingCapturePiece', 'aReducePiece', 'aSetActiveGame', 'aSetWinner']),
     focus () {
       this.blackOpacity.opacity = this.blackOpacity.opacity === '100%' ? '50%' : '100%'
       this.whiteOpacity.opacity = this.whiteOpacity.opacity === '100%' ? '50%' : '100%'
@@ -138,12 +138,15 @@ export default {
         if(bWhiteStuck && bBlackStuck) {
           console.log("DRAW!")
           this.aSetActiveGame(false)
+          this.aSetWinner('D')
         } else if (bWhiteStuck || this.whiteCount === 0) {
           console.log("BLACK WINS!")
           this.aSetActiveGame(false)
+          this.aSetWinner('B')
         } else if (bBlackStuck || this.blackCount === 0) {
           console.log("WHITE WINS!")
           this.aSetActiveGame(false)
+          this.aSetWinner('W')
         } else {
           //console.log("No winner yet")
         }

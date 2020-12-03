@@ -61,6 +61,17 @@ const actions = {
    */
   aSetActiveGame({ commit }, bIsActive) {
     commit('mSetActiveGame', bIsActive)
+  },
+
+  /**
+   * Resets state to initial
+   */
+  aResetGame({ commit }) {
+    commit('mResetGame')
+  },
+
+  aSetWinner({ commit }, winner) {
+    commit('mSetWinner', winner)
   }
 }
 

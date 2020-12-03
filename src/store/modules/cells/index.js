@@ -9,7 +9,8 @@ const state = {
   nWhiteCount: 12,
   nBlackCount: 12,
   firstClick: null,
-  bActiveGame: true
+  bActiveGame: true,
+  cWinner: 'N' //'B' black 'W' white 'N' none 'D' draw
 }
 
 export default {

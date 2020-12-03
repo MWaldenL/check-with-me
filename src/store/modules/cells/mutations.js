@@ -9,6 +9,7 @@ import {
 } from '../../services/moveCaptureService'
 
 import { bIsValidCapture } from '../../services/kingCaptureService'
+import { getBoard } from '../board'
 
 const mutations = {
   mHighlight: (state, coords) => {
@@ -358,6 +359,19 @@ const mutations = {
 
   mSetActiveGame: (state, bIsActive) => {
     state.bActiveGame = bIsActive
+  },
+
+  mResetGame: (state) => {
+    state.cells = getBoard()
+    state.nWhiteCount = 12
+    state.nBlackCount = 12
+    state.firstClick = null
+    state.bActiveGame = true
+    state.cWinner = 'N'
+  },
+
+  mSetWinner: (state, winner) => {
+    state.cWinner = winner
   }
 }
 

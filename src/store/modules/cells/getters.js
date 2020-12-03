@@ -3,7 +3,8 @@ const getters = {
   getWhiteCount: state => state.nWhiteCount,
   getBlackCount: state => state.nBlackCount,
   getFirstClick: state => state.firstClick,
-  getActiveGame: state => state.bActiveGame
+  getActiveGame: state => state.bActiveGame,
+  getWinner: state => state.cWinner
 }
 
 export default getters
