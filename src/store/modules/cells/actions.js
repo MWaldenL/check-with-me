@@ -52,6 +52,15 @@ const actions = {
    */
   aReducePiece({ commit }, whiteTakes) {
     commit('mReducePiece', whiteTakes)
+  },
+
+  /**
+   * Sets the active state of the game. Turns clickability on/off
+   * 
+   * @param bIsActive
+   */
+  aSetActiveGame({ commit }, bIsActive) {
+    commit('mSetActiveGame', bIsActive)
   }
 }
 

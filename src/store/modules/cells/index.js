@@ -8,7 +8,8 @@ const state = {
   cells: getBoard(),
   nWhiteCount: 12,
   nBlackCount: 12,
-  firstClick: null
+  firstClick: null,
+  bActiveGame: true
 }
 
 export default {

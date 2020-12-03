@@ -354,6 +354,10 @@ const mutations = {
     } else {
       state.nBlackCount = state.nBlackCount - 1
     }
+  },
+
+  mSetActiveGame: (state, bIsActive) => {
+    state.bActiveGame = bIsActive
   }
 }
 

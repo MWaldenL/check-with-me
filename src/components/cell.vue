@@ -34,7 +34,8 @@ export default {
       board: 'getEntireBoard',
       firstClick: 'getFirstClick',
       whiteCount: 'getWhiteCount',
-      blackCount: 'getBlackCount'
+      blackCount: 'getBlackCount',
+      bActiveGame: 'getActiveGame'
     }),
 
     isDark () {
@@ -58,7 +59,7 @@ export default {
     }
   },
   methods: {
-    ...mapActions(['aKingMovement', 'aMoveForward', 'aHighlight', 'aCapturePiece', 'aKingCapturePiece', 'aReducePiece']),
+    ...mapActions(['aKingMovement', 'aMoveForward', 'aHighlight', 'aCapturePiece', 'aKingCapturePiece', 'aReducePiece', 'aSetActiveGame']),
     focus () {
       this.blackOpacity.opacity = this.blackOpacity.opacity === '100%' ? '50%' : '100%'
       this.whiteOpacity.opacity = this.whiteOpacity.opacity === '100%' ? '50%' : '100%'
@@ -80,67 +81,72 @@ export default {
     },
 
     onSquareClicked () {
-      const source = this.firstClick
-      const bContainsPiece = this.hasBlackChip || this.hasWhiteChip || this.hasWhiteKing || this.hasBlackKing
+      if(this.bActiveGame) {
+        const source = this.firstClick
+        const bContainsPiece = this.hasBlackChip || this.hasWhiteChip || this.hasWhiteKing || this.hasBlackKing
 
-      if (source != null) {
-        this.isSelected = false
-        const coords = {
-          nRow: source.nRow,
-          nCol: source.nCol,
-          nDestRow: this.row,
-          nDestCol: this.col
-        }
-        
-        const bIsKingMovement = source.bHasBlackKing || source.bHasWhiteKing
-  
-        // Check for move or capture attempts. No legality checking
-        if (bIsKingMovement) {
-          if (this.isKingMoveAttempt(source, coords)) {
-            console.log('king move attempt')
-            this.aKingMovement(coords)
-          } else if (this.isKingCaptureAttempt(source, coords)) {
-            this.aKingCapturePiece(coords)
-            //reduce board piece
-            this.aReducePiece(this.hasWhiteKing || this.hasWhiteChip)
-          } else {
-            this.cancelCurrentMove()
+        if (source != null) {
+          this.isSelected = false
+          const coords = {
+            nRow: source.nRow,
+            nCol: source.nCol,
+            nDestRow: this.row,
+            nDestCol: this.col
           }
-        } else { 
-          if (this.isCaptureAttempt(source)) {  
-            this.aCapturePiece(coords)
-            //reduce board piece
-            this.aReducePiece(this.hasWhiteKing || this.hasWhiteChip)
-          } else if (this.isMoveForwardAttempt(source)) {
-            this.aMoveForward(coords)
-          } else {
-            this.cancelCurrentMove()
+          
+          const bIsKingMovement = source.bHasBlackKing || source.bHasWhiteKing
+    
+          // Check for move or capture attempts. No legality checking
+          if (bIsKingMovement) {
+            if (this.isKingMoveAttempt(source, coords)) {
+              console.log('king move attempt')
+              this.aKingMovement(coords)
+            } else if (this.isKingCaptureAttempt(source, coords)) {
+              this.aKingCapturePiece(coords)
+              //reduce board piece
+              this.aReducePiece(this.hasWhiteKing || this.hasWhiteChip)
+            } else {
+              this.cancelCurrentMove()
+            }
+          } else { 
+            if (this.isCaptureAttempt(source)) {  
+              this.aCapturePiece(coords)
+              //reduce board piece
+              this.aReducePiece(this.hasWhiteKing || this.hasWhiteChip)
+            } else if (this.isMoveForwardAttempt(source)) {
+              this.aMoveForward(coords)
+            } else {
+              this.cancelCurrentMove()
+            }
+          }
+        } else {
+          if (bContainsPiece) {
+            this.isSelected = true
+            this.aHighlight({ 
+              nRow: this.row, 
+              nCol: this.col, 
+              bHasWhiteChip: this.hasWhiteChip,  
+              bHasWhiteKing: this.hasWhiteKing,
+              bHasBlackChip: this.hasBlackChip,
+              bHasBlackKing: this.hasBlackKing
+            })
           }
         }
-      } else {
-        if (bContainsPiece) {
-          this.isSelected = true
-          this.aHighlight({ 
-            nRow: this.row, 
-            nCol: this.col, 
-            bHasWhiteChip: this.hasWhiteChip,  
-            bHasWhiteKing: this.hasWhiteKing,
-            bHasBlackChip: this.hasBlackChip,
-            bHasBlackKing: this.hasBlackKing
-          })
-        }
-      }
 
-      let bWhiteStuck = checkIfWhiteStuck(this.board)
-      let bBlackStuck = checkIfBlackStuck(this.board)
-      if(bWhiteStuck && bBlackStuck) {
-        console.log("DRAW!")
-      } else if (bWhiteStuck || this.whiteCount === 0) {
-        console.log("BLACK WINS!")
-      } else if (bBlackStuck || this.blackCount === 0) {
-        console.log("WHITE WINS!")
-      } else {
-        //console.log("No winner yet")
+        let bWhiteStuck = checkIfWhiteStuck(this.board)
+        let bBlackStuck = checkIfBlackStuck(this.board)
+        if(bWhiteStuck && bBlackStuck) {
+          console.log("DRAW!")
+          this.aSetActiveGame(false)
+        } else if (bWhiteStuck || this.whiteCount === 0) {
+          console.log("BLACK WINS!")
+          this.aSetActiveGame(false)
+        } else if (bBlackStuck || this.blackCount === 0) {
+          console.log("WHITE WINS!")
+          this.aSetActiveGame(false)
+        } else {
+          //console.log("No winner yet")
+        }
       }
     },
 

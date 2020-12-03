@@ -6,11 +6,13 @@
 
 <script>
 import Grid from '@/components/grid.vue'
+import ResultModal from '@/components/resultModal.vue'
 
 export default {
   name: 'Home',
   components: {
-    Grid
+    Grid,
+    ResultModal
   }
 }
 </script>
