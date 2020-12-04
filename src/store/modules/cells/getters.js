@@ -2,7 +2,9 @@ const getters = {
   getEntireBoard: state => state.cells,
   getWhiteCount: state => state.nWhiteCount,
   getBlackCount: state => state.nBlackCount,
-  getFirstClick: state => state.firstClick
+  getFirstClick: state => state.firstClick,
+  getActiveGame: state => state.bActiveGame,
+  getWinner: state => state.cWinner
 }
 
 export default getters
