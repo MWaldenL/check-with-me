@@ -24,8 +24,6 @@ export default {
   props: ['row', 'col'],
   data () {
     return {
-      blackOpacity: { opacity: '100%' },
-      whiteOpacity: { opacity: '100%' },
       isSelected: false
     }
   },
@@ -60,10 +58,6 @@ export default {
   },
   methods: {
     ...mapActions(['aKingMovement', 'aMoveForward', 'aHighlight', 'aCapturePiece', 'aKingCapturePiece', 'aReducePiece', 'aSetActiveGame', 'aSetWinner']),
-    focus () {
-      this.blackOpacity.opacity = this.blackOpacity.opacity === '100%' ? '50%' : '100%'
-      this.whiteOpacity.opacity = this.whiteOpacity.opacity === '100%' ? '50%' : '100%'
-    },
 
     cancelCurrentMove () {
       const bContainsPiece = this.hasBlackChip || this.hasWhiteChip || this.hasWhiteKing || this.hasBlackKing
