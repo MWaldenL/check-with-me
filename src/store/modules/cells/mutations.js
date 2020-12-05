@@ -12,15 +12,31 @@ import { bIsValidCapture } from '../../services/kingCaptureService'
 import { getBoard } from '../board'
 
 const mutations = {
+  mUnhighlight: (state, coords) => {
+    console.log('Hello')
+    console.log(coords)
+    const boardClone = JSON.parse(JSON.stringify(state.cells))
+    boardClone[coords.nRow-1][coords.nCol-1]
+      .isHighlighted = false
+
+    state.cells = boardClone
+    state.firstClick = null
+  },
+
   mHighlight: (state, coords) => {
-    // TODO: Highlight legal moves
-    state.firstClick = coords
-    console.log(state.cells[coords.nRow-1][coords.nCol-1])
-    if (coords !== null) {
-      const boardClone = JSON.parse(JSON.stringify(state.cells))
-      boardClone[coords.nRow-1][coords.nCol-1].isHighlighted = true
-      state.cells = boardClone
+    // If there is already a previously highlighted square, cancel it 
+    if (state.firstClick !== null) {
+      mutations.mUnhighlight(state, state.firstClick)
+      state.firstClick = null
     }
+
+    state.firstClick = coords
+
+    const boardClone = JSON.parse(JSON.stringify(state.cells))
+    boardClone[coords.nRow-1][coords.nCol-1]
+      .isHighlighted = true
+      
+    state.cells = boardClone
   },
 
   mMoveForward: (state, coords) => {
@@ -114,8 +130,9 @@ const mutations = {
           newCoords = { nRow: coords.nRow, nCol: coords.nCol, bHasBlackKing: bSrcHasBlackKing, bHasWhiteKing: bSrcHasWhiteKing }
         }
 
-        mutations.mHighlight(state.cells, newCoords)
+        mutations.mUnhighlight(state, coords)
         state.firstClick = newCoords
+        mutations.mHighlight(state, newCoords)
       }
     }
   },
