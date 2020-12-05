@@ -4,12 +4,11 @@ node_js:
 
 jobs:
   include:
-    stages: 
-      name: develop
+    - stage: develop
       script:
         - npm run test:unit
 
-      name: release
+    - stage: release
       if: branch = Release
       script:
         - npm run build
