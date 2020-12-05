@@ -1,8 +1,6 @@
 import {
   bSourceHasBlack,
   bSourceHasWhite,
-  bSourceHasBlackKing,
-  bSourceHasWhiteKing,
   bBlackExistsAdj,
   bWhiteExistsAdj,
   bPieceExistsAfterAdj,
@@ -12,7 +10,9 @@ import {
 
 import {
   getPossibleMoveBlack,
-  getPossibleMoveWhite
+  getPossibleMoveWhite,
+  getPossibleMoveBlackKing,
+  getPossibleMoveWhiteKing
 } from '../../services/highlightService'
 
 import { bIsValidCapture } from '../../services/kingCaptureService'
@@ -53,11 +53,15 @@ const mutations = {
 
     let aPossibleCells = []
     
-    if (srcCell.bHasBlackChip) {
+    if (srcCell.bHasBlackKing) {
+      aPossibleCells = getPossibleMoveBlackKing(boardClone, coords.nRow, coords.nCol)
+    } else if (srcCell.bHasWhiteKing) {
+      aPossibleCells = getPossibleMoveWhiteKing(boardClone, coords.nRow, coords.nCol)
+    } else if (srcCell.bHasBlackChip) {
       aPossibleCells = getPossibleMoveBlack(boardClone, coords.nRow, coords.nCol)
     } else if (srcCell.bHasWhiteChip) {
       aPossibleCells = getPossibleMoveWhite(boardClone, coords.nRow, coords.nCol)
-    }
+    } 
 
     for (const array of aPossibleCells) {
       if (array[2] === 0)
