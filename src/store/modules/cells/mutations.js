@@ -222,8 +222,9 @@ const mutations = {
           newCoords = { nRow: coords.nRow, nCol: coords.nCol, bHasBlackKing: bSrcHasBlackKing, bHasWhiteKing: bSrcHasWhiteKing }
         }
 
-        mutations.mHighlight(state.cells, newCoords)
+        mutations.mUnhighlight(state, coords)
         state.firstClick = newCoords
+        mutations.mHighlight(state, newCoords)
       }
     }
   },
@@ -313,8 +314,10 @@ const mutations = {
         newCoords = { nRow: coords.nRow, nCol: coords.nCol, bHasBlackKing: bSrcHasBlackKing, bHasWhiteKing: bSrcHasWhiteKing }
       }
 
-      mutations.mHighlight(state.cells, newCoords)
+
+      mutations.mUnhighlight(state, coords)
       state.firstClick = newCoords
+      mutations.mHighlight(state, newCoords)
     }
   },
 
