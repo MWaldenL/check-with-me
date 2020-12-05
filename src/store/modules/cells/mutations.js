@@ -15,6 +15,12 @@ const mutations = {
   mHighlight: (state, coords) => {
     // TODO: Highlight legal moves
     state.firstClick = coords
+    console.log(state.cells[coords.nRow-1][coords.nCol-1])
+    if (coords !== null) {
+      const boardClone = JSON.parse(JSON.stringify(state.cells))
+      boardClone[coords.nRow-1][coords.nCol-1].isHighlighted = true
+      state.cells = boardClone
+    }
   },
 
   mMoveForward: (state, coords) => {

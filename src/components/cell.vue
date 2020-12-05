@@ -1,9 +1,9 @@
 <template>
-  <td class="square dark" @click="onSquareClicked()" v-if="isDark">
-    <div id="checker-black" class="chip black-chip" :style="blackOpacity" v-show="hasBlackChip">
+  <td :class="highlight" class="square" @click="onSquareClicked()" v-if="isDark">
+    <div id="checker-black" class="chip black-chip" v-show="hasBlackChip">
       <img class="king" src="../../public/assets/king.png" v-show="hasBlackKing"/>
     </div>
-    <div id="checker-white" class="chip white-chip" :style="whiteOpacity" v-show="hasWhiteChip">
+    <div id="checker-white" class="chip white-chip" v-show="hasWhiteChip">
       <img class="king" src="../../public/assets/king.png" v-show="hasWhiteKing"/>
     </div>
   </td>
@@ -24,7 +24,7 @@ export default {
   props: ['row', 'col'],
   data () {
     return {
-      isSelected: false
+      dIsSelected: false
     }
   },
   computed: {
@@ -35,6 +35,22 @@ export default {
       blackCount: 'getBlackCount',
       bActiveGame: 'getActiveGame'
     }),
+
+    isSelected: {
+      get () {
+        return this.board[this.row-1][this.col-1].isHighlighted
+      },
+      set (val) {
+        this.dIsSelected = val
+      }
+    },  
+
+    highlight () {
+      return {
+        'highlight': this.isSelected,
+        'dark': !this.isSelected
+      }
+    },
 
     isDark () {
       return (this.row % 2 === 1) ? this.col % 2 === 1 : this.col % 2 === 0
@@ -57,7 +73,16 @@ export default {
     }
   },
   methods: {
-    ...mapActions(['aKingMovement', 'aMoveForward', 'aHighlight', 'aCapturePiece', 'aKingCapturePiece', 'aReducePiece', 'aSetActiveGame', 'aSetWinner']),
+    ...mapActions([
+      'aKingMovement', 
+      'aMoveForward', 
+      'aHighlight', 
+      'aCapturePiece', 
+      'aKingCapturePiece', 
+      'aReducePiece', 
+      'aSetActiveGame', 
+      'aSetWinner'
+    ]),
 
     cancelCurrentMove () {
       const bContainsPiece = this.hasBlackChip || this.hasWhiteChip || this.hasWhiteKing || this.hasBlackKing
@@ -75,6 +100,7 @@ export default {
     },
 
     onSquareClicked () {
+      console.log('Highlighting square')
       if(this.bActiveGame) {
         const source = this.firstClick
         const bContainsPiece = this.hasBlackChip || this.hasWhiteChip || this.hasWhiteKing || this.hasBlackKing
@@ -115,7 +141,7 @@ export default {
           }
         } else {
           if (bContainsPiece) {
-            this.isSelected = true
+            console.log('is Selected')
             this.aHighlight({ 
               nRow: this.row, 
               nCol: this.col, 
@@ -124,6 +150,7 @@ export default {
               bHasBlackChip: this.hasBlackChip,
               bHasBlackKing: this.hasBlackKing
             })
+            console.log(this.isSelected)
           }
         }
 
@@ -196,6 +223,13 @@ export default {
   width: 100px;
   margin: 0;
   padding: 0;
+}
+
+.highlight {
+  background-color: #ffff00;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .dark {

@@ -9,7 +9,8 @@ export const getBoard = () => {
         bHasBlackChip: false, // boolean
         bHasWhiteChip: false, // boolean
         bHasBlackKing: false, // boolean
-        bHasWhiteKing: false // boolean
+        bHasWhiteKing: false, // boolean
+        isHighlighted: false
       }
 
       if (cell.nRow >= 6 && ((cell.nCol % 2 === 1 && cell.nRow % 2 === 1) || (cell.nCol % 2 === 0 && cell.nRow % 2 === 0))) {
