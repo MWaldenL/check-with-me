@@ -10,7 +10,10 @@ const getBoard = () => {
         bHasBlackChip: false, 
         bHasWhiteChip: false,
         bHasBlackKing: false,
-        bHasWhiteKing: false
+        bHasWhiteKing: false,
+        isHighlighted: false,
+        isPossibleCapture: false,
+        isPossibleMove: false
       }
     }
   }
@@ -22,10 +25,11 @@ describe('Mutation testing', () => {
     it(`sets the firstClick cell's to the coordinates of the cell
       clicked`, () => {
         const state = {
-          firstClick: null
+          firstClick: null,
+          cells: getBoard()
         }
         
-        let coords = { row: 4, col: 4 }
+        let coords = { nRow: 2, nCol: 2 }
         Cells.mutations.mHighlight(state, coords)
         expect(state.firstClick).toBe(coords)
       })
@@ -42,7 +46,10 @@ describe('Mutation testing', () => {
         bHasBlackChip: false,
         bHasBlackKing: false, 
         bHasWhiteChip: true,
-        bHasWhiteKing: false 
+        bHasWhiteKing: false,
+        isHighlighted: false,
+        isPossibleCapture: false,
+        isPossibleMove: false
       }
       
       board[0][1] = { 
@@ -50,7 +57,10 @@ describe('Mutation testing', () => {
         bHasBlackChip: false,
         bHasBlackKing: false, 
         bHasWhiteChip: false,
-        bHasWhiteKing: false 
+        bHasWhiteKing: false,
+        isHighlighted: false,
+        isPossibleCapture: false,
+        isPossibleMove: false
       }
 
       board[1][0] = { 
@@ -58,7 +68,10 @@ describe('Mutation testing', () => {
         bHasBlackChip: false,
         bHasBlackKing: false, 
         bHasWhiteChip: false,
-        bHasWhiteKing: false 
+        bHasWhiteKing: false,
+        isHighlighted: false,
+        isPossibleCapture: false,
+        isPossibleMove: false
       }
 
       board[1][1] = { 
@@ -66,7 +79,10 @@ describe('Mutation testing', () => {
         bHasBlackChip: false,
         bHasBlackKing: false, 
         bHasWhiteChip: false,
-        bHasWhiteKing: false 
+        bHasWhiteKing: false,
+        isHighlighted: false,
+        isPossibleCapture: false,
+        isPossibleMove: false
       }
 
       /**
@@ -86,13 +102,19 @@ describe('Mutation testing', () => {
             bHasBlackChip: false,
             bHasBlackKing: false, 
             bHasWhiteChip: false,
-            bHasWhiteKing: false 
+            bHasWhiteKing: false,
+            isHighlighted: false,
+            isPossibleCapture: false,
+            isPossibleMove: false
           },
           { nRow: 1, nCol: 2,             
             bHasBlackChip: false,
             bHasBlackKing: false, 
             bHasWhiteChip: false,
-            bHasWhiteKing: false 
+            bHasWhiteKing: false,
+            isHighlighted: false,
+            isPossibleCapture: false,
+            isPossibleMove: false
           }
         ],
         [
@@ -100,13 +122,19 @@ describe('Mutation testing', () => {
             bHasBlackChip: false,
             bHasBlackKing: false, 
             bHasWhiteChip: false,
-            bHasWhiteKing: false
+            bHasWhiteKing: false,
+            isHighlighted: false,
+            isPossibleCapture: false,
+            isPossibleMove: false
           },
           { nRow: 2, nCol: 2,
             bHasBlackChip: false,
             bHasBlackKing: false, 
             bHasWhiteChip: true,
-            bHasWhiteKing: false
+            bHasWhiteKing: false,
+            isHighlighted: false,
+            isPossibleCapture: false,
+            isPossibleMove: false
           }
         ]
       ]
@@ -133,7 +161,10 @@ describe('Mutation testing', () => {
         bHasBlackChip: false,
         bHasBlackKing: false, 
         bHasWhiteChip: false,
-        bHasWhiteKing: false 
+        bHasWhiteKing: false,
+        isHighlighted: false,
+        isPossibleCapture: false,
+        isPossibleMove: false
       }
 
       board[0][1] = {
@@ -141,7 +172,10 @@ describe('Mutation testing', () => {
         bHasBlackChip: false,
         bHasBlackKing: false, 
         bHasWhiteChip: false,
-        bHasWhiteKing: false 
+        bHasWhiteKing: false,
+        isHighlighted: false,
+        isPossibleCapture: false,
+        isPossibleMove: false
       }
 
       board[1][0] = {
@@ -149,7 +183,10 @@ describe('Mutation testing', () => {
         bHasBlackChip: false,
         bHasBlackKing: false, 
         bHasWhiteChip: false,
-        bHasWhiteKing: false 
+        bHasWhiteKing: false,
+        isHighlighted: false,
+        isPossibleCapture: false,
+        isPossibleMove: false
       }
 
       board[1][1] = {
@@ -157,7 +194,10 @@ describe('Mutation testing', () => {
         bHasBlackChip: true,
         bHasBlackKing: false, 
         bHasWhiteChip: false,
-        bHasWhiteKing: false 
+        bHasWhiteKing: false,
+        isHighlighted: false,
+        isPossibleCapture: false,
+        isPossibleMove: false
       }
 
       /**
@@ -177,13 +217,19 @@ describe('Mutation testing', () => {
             bHasBlackChip: true,
             bHasBlackKing: true, 
             bHasWhiteChip: false,
-            bHasWhiteKing: false 
+            bHasWhiteKing: false,
+            isHighlighted: false,
+            isPossibleCapture: false,
+            isPossibleMove: false
           },
           { nRow: 1, nCol: 2,  
             bHasBlackChip: false,
             bHasBlackKing: false, 
             bHasWhiteChip: false,
-            bHasWhiteKing: false  
+            bHasWhiteKing: false,
+            isHighlighted: false,
+            isPossibleCapture: false,
+            isPossibleMove: false
           }
         ],
         [
@@ -191,13 +237,19 @@ describe('Mutation testing', () => {
             bHasBlackChip: false,
             bHasBlackKing: false, 
             bHasWhiteChip: false,
-            bHasWhiteKing: false 
+            bHasWhiteKing: false,
+            isHighlighted: false,
+            isPossibleCapture: false,
+            isPossibleMove: false
           },
           { nRow: 2, nCol: 2, 
             bHasBlackChip: false,
             bHasBlackKing: false, 
             bHasWhiteChip: false,
-            bHasWhiteKing: false 
+            bHasWhiteKing: false,
+            isHighlighted: false,
+            isPossibleCapture: false,
+            isPossibleMove: false
           }
         ]
       ]
@@ -226,7 +278,10 @@ describe('Mutation testing', () => {
           bHasBlackChip: false, 
           bHasWhiteChip: true,
           bHasBlackKing: false,
-          bHasWhiteKing: false
+          bHasWhiteKing: false,
+          isHighlighted: false,
+          isPossibleCapture: false,
+          isPossibleMove: false
         }
 
         board[1][1] = {
@@ -235,7 +290,10 @@ describe('Mutation testing', () => {
           bHasBlackChip: true, 
           bHasWhiteChip: false,
           bHasBlackKing: false,
-          bHasWhiteKing: false
+          bHasWhiteKing: false,
+          isHighlighted: false,
+          isPossibleCapture: false,
+          isPossibleMove: false
         }
 
         /**
@@ -256,19 +314,28 @@ describe('Mutation testing', () => {
               bHasBlackChip: false,
               bHasBlackKing: false, 
               bHasWhiteChip: false,
-              bHasWhiteKing: false 
+              bHasWhiteKing: false,
+              isHighlighted: false,
+              isPossibleCapture: false,
+              isPossibleMove: false
             },
             { nRow: 1, nCol: 2, 
               bHasBlackChip: false,
               bHasBlackKing: false, 
               bHasWhiteChip: false,
-              bHasWhiteKing: false 
+              bHasWhiteKing: false,
+              isHighlighted: false,
+              isPossibleCapture: false,
+              isPossibleMove: false
             },
             { nRow: 1, nCol: 3, 
               bHasBlackChip: false,
               bHasBlackKing: false, 
               bHasWhiteChip: false,
-              bHasWhiteKing: false 
+              bHasWhiteKing: false,
+              isHighlighted: false,
+              isPossibleCapture: false,
+              isPossibleMove: false
             }
           ],
           [
@@ -276,19 +343,28 @@ describe('Mutation testing', () => {
               bHasBlackChip: false,
               bHasBlackKing: false, 
               bHasWhiteChip: false,
-              bHasWhiteKing: false 
+              bHasWhiteKing: false,
+              isHighlighted: false,
+              isPossibleCapture: false,
+              isPossibleMove: false
             },
             { nRow: 2, nCol: 2,  
               bHasBlackChip: false,
               bHasBlackKing: false, 
               bHasWhiteChip: false,
-              bHasWhiteKing: false 
+              bHasWhiteKing: false,
+              isHighlighted: false,
+              isPossibleCapture: false,
+              isPossibleMove: false
             },
             { nRow: 2, nCol: 3,  
               bHasBlackChip: false,
               bHasBlackKing: false, 
               bHasWhiteChip: false,
-              bHasWhiteKing: false  
+              bHasWhiteKing: false,
+              isHighlighted: false,
+              isPossibleCapture: false,
+              isPossibleMove: false
             }
           ],
           [
@@ -296,19 +372,28 @@ describe('Mutation testing', () => {
               bHasBlackChip: false,
               bHasBlackKing: false, 
               bHasWhiteChip: false,
-              bHasWhiteKing: false 
+              bHasWhiteKing: false,
+              isHighlighted: false,
+              isPossibleCapture: false,
+              isPossibleMove: false
             },
             { nRow: 3, nCol: 2, 
               bHasBlackChip: false,
               bHasBlackKing: false, 
               bHasWhiteChip: false,
-              bHasWhiteKing: false 
+              bHasWhiteKing: false,
+              isHighlighted: false,
+              isPossibleCapture: false,
+              isPossibleMove: false
             },
             { nRow: 3, nCol: 3, 
               bHasBlackChip: false,
               bHasBlackKing: false, 
               bHasWhiteChip: true,
-              bHasWhiteKing: false 
+              bHasWhiteKing: false,
+              isHighlighted: false,
+              isPossibleCapture: false,
+              isPossibleMove: false
             }
           ]
         ]
