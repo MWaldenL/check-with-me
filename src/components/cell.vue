@@ -1,5 +1,6 @@
 <template>
   <td :class="highlight" class="square" @click="onSquareClicked()" v-if="isDark">
+    {{ row - 1 }} {{ col - 1 }}
     <div id="checker-black" class="chip black-chip" v-show="hasBlackChip">
       <img class="king" src="../../public/assets/king.png" v-show="hasBlackKing"/>
     </div>
@@ -24,7 +25,9 @@ export default {
   props: ['row', 'col'],
   data () {
     return {
-      dIsSelected: false
+      dIsSelected: false,
+      dIsPossibleMove: false,
+      dIsPossibleCapture: false
     }
   },
   computed: {
@@ -45,10 +48,30 @@ export default {
       }
     },  
 
+    isPossibleMove: {
+      get () {
+        return this.board[this.row-1][this.col-1].isPossibleMove
+      },
+      set (val) {
+        this.dIsPossibleMove = val
+      }
+    },
+
+    isPossibleCapture: {
+      get () {
+        return this.board[this.row-1][this.col-1].isPossibleCapture
+      },
+      set (val) {
+        this.dIsPossibleCapture = val
+      }
+    },
+
     highlight () {
       return {
-        'highlight': this.isSelected,
-        'dark': !this.isSelected
+        'highlight-selected': this.isSelected,
+        'highlight-possible-move': this.isPossibleMove,
+        'highlight-possible-capture': this.isPossibleCapture,
+        'dark': !this.isSelected && !this.isPossibleMove && !this.isPossibleCapture
       }
     },
 
@@ -225,8 +248,22 @@ export default {
   padding: 0;
 }
 
-.highlight {
-  background-color: #ffff00;
+.highlight-selected {
+  background-color: #b3c79e;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.highlight-possible-move {
+  background-color: #569585;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.highlight-possible-capture {
+  background-color: #955656;
   display: flex;
   align-items: center;
   justify-content: center;

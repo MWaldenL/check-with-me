@@ -1,12 +1,19 @@
 import {
   bSourceHasBlack,
   bSourceHasWhite,
+  bSourceHasBlackKing,
+  bSourceHasWhiteKing,
   bBlackExistsAdj,
   bWhiteExistsAdj,
   bPieceExistsAfterAdj,
   bNoBlackJumps,
   bNoWhiteJumps
 } from '../../services/moveCaptureService'
+
+import {
+  getPossibleMoveBlack,
+  getPossibleMoveWhite
+} from '../../services/highlightService'
 
 import { bIsValidCapture } from '../../services/kingCaptureService'
 import { getBoard } from '../board'
@@ -16,8 +23,14 @@ const mutations = {
     console.log('Hello')
     console.log(coords)
     const boardClone = JSON.parse(JSON.stringify(state.cells))
-    boardClone[coords.nRow-1][coords.nCol-1]
-      .isHighlighted = false
+
+    for (let i in boardClone) {
+      for (let j in boardClone[i]) {
+        boardClone[i][j].isPossibleMove = false
+        boardClone[i][j].isPossibleCapture = false
+        boardClone[i][j].isHighlighted = false
+      }
+    }
 
     state.cells = boardClone
     state.firstClick = null
@@ -26,16 +39,33 @@ const mutations = {
   mHighlight: (state, coords) => {
     // If there is already a previously highlighted square, cancel it 
     if (state.firstClick !== null) {
-      mutations.mUnhighlight(state, state.firstClick)
+      // console.log("calling munhighlight")
+      mutations.mUnhighlight(state, coords)
       state.firstClick = null
     }
 
     state.firstClick = coords
 
     const boardClone = JSON.parse(JSON.stringify(state.cells))
-    boardClone[coords.nRow-1][coords.nCol-1]
-      .isHighlighted = true
-      
+    const srcCell = boardClone[coords.nRow - 1][coords.nCol - 1]
+
+    srcCell.isHighlighted = true
+
+    let aPossibleCells = []
+    
+    if (srcCell.bHasBlackChip) {
+      aPossibleCells = getPossibleMoveBlack(boardClone, coords.nRow, coords.nCol)
+    } else if (srcCell.bHasWhiteChip) {
+      aPossibleCells = getPossibleMoveWhite(boardClone, coords.nRow, coords.nCol)
+    }
+
+    for (const array of aPossibleCells) {
+      if (array[2] === 0)
+        boardClone[array[0]][array[1]].isPossibleMove = true
+      else 
+        boardClone[array[0]][array[1]].isPossibleCapture = true
+    }
+
     state.cells = boardClone
   },
 
@@ -101,6 +131,7 @@ const mutations = {
 
         state.cells = stateClone
         state.firstClick = null
+        mutations.mUnhighlight(state, coords)
       } else {
         const bDestHasWhite = state.cells[coords.nDestRow - 1][coords.nDestCol - 1].bHasWhiteChip
         const bDestHasBlack = state.cells[coords.nDestRow - 1][coords.nDestCol - 1].bHasBlackChip
@@ -200,6 +231,7 @@ const mutations = {
 
         state.cells = stateClone
         state.firstClick = null
+        mutations.mUnhighlight(state, coords)
       } else {
         const bDestHasWhite = state.cells[coords.nDestRow - 1][coords.nDestCol - 1].bHasWhiteChip
         const bDestHasBlack = state.cells[coords.nDestRow - 1][coords.nDestCol - 1].bHasBlackChip
@@ -292,6 +324,7 @@ const mutations = {
 
       state.cells = stateClone
       state.firstClick = null
+      mutations.mUnhighlight(state, coords)
     } else {
       const bDestHasWhite = state.cells[coords.nDestRow - 1][coords.nDestCol - 1].bHasWhiteChip
       const bDestHasBlack = state.cells[coords.nDestRow - 1][coords.nDestCol - 1].bHasBlackChip
@@ -372,6 +405,7 @@ const mutations = {
 
       state.cells = stateClone
       state.firstClick = null
+      mutations.mUnhighlight(state, coords)
     }
   },
 

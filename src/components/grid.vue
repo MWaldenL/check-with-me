@@ -16,7 +16,7 @@
       <h1 id="p2-count" class="pb-4"> Pieces left: {{ whiteCount }} </h1>
       <h1> <span id="p2-time"> {{ printTime(nP2minutes) }}:{{ printTime(nP2seconds) }} </span> {{ strP2Name }}</h1>
     </div>
-    <b-button id="resign" class="btn-danger">Resign</b-button>
+    <b-button id="resign" class="btn-danger" style="display: none">Resign</b-button>
   </div>
 </template>
 
