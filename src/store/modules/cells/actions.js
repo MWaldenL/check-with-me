@@ -3,6 +3,10 @@ const actions = {
     commit('mHighlight', coords)
   },
 
+  aUnhighlight({ commit }, coords) {
+    commit('mUnhighlight', coords)
+  },
+
   /**
    * aMoveForward moves a black or white chip to an empty cell 1 space diagonally
    * @param nRow - 1-based row of active cell with piece to move
