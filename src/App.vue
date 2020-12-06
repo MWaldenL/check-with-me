@@ -18,6 +18,7 @@
   background-color: #2d2d2d;
   height: 100vh;
   width: 100vw;
+  overflow: auto
 }
 
 #nav {
