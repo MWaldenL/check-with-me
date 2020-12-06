@@ -259,8 +259,8 @@ const mutations = {
         }
 
         mutations.mUnhighlight(state, coords)
-        state.firstClick = newCoords
-        mutations.mHighlight(state, newCoords)
+        // state.firstClick = newCoords
+        // mutations.mHighlight(state, newCoords)
       }
     }
   },
@@ -308,6 +308,7 @@ const mutations = {
         if (bLastRowAbove) {
           newDest.bHasWhiteKing = true
         }
+        mutations.mReducePiece(state, true)
       }
     } else if (bBlackCanCapture) {
       if (!bPieceExistsAfterAdj(state.cells, coords)) {
@@ -316,6 +317,7 @@ const mutations = {
         if (bLastRowBelow) {
           newDest.bHasBlackKing = true
         }
+        mutations.mReducePiece(state, false)
       }
     }
 
@@ -351,10 +353,9 @@ const mutations = {
         newCoords = { nRow: coords.nRow, nCol: coords.nCol, bHasBlackKing: bSrcHasBlackKing, bHasWhiteKing: bSrcHasWhiteKing }
       }
 
-
       mutations.mUnhighlight(state, coords)
-      state.firstClick = newCoords
-      mutations.mHighlight(state, newCoords)
+      // state.firstClick = newCoords
+      // mutations.mHighlight(state, newCoords)
     }
   },
 
@@ -389,9 +390,11 @@ const mutations = {
       if (bSourceHasWhite(state.cells, coords)) {
         newDest.bHasWhiteChip = true
         newDest.bHasWhiteKing = true
+        mutations.mReducePiece(state, true)
       } else if (bSourceHasBlack(state.cells, coords)) {
         newDest.bHasBlackChip = true
         newDest.bHasBlackKing = true
+        mutations.mReducePiece(state, false)
       }
 
       const newTarget = {

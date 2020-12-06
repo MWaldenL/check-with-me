@@ -3,6 +3,10 @@ const actions = {
     commit('mHighlight', coords)
   },
 
+  aUnhighlight({ commit }, coords) {
+    commit('mUnhighlight', coords)
+  },
+
   /**
    * aMoveForward moves a black or white chip to an empty cell 1 space diagonally
    * @param nRow - 1-based row of active cell with piece to move
@@ -43,15 +47,6 @@ const actions = {
    */
   aKingCapturePiece({ commit }, coords) {
     commit('mKingCapturePiece', coords)
-  },
-
-  /**
-   * aReducePiece reduces nBlackCount if param is true, reduces nWhiteCount otherwise
-   * 
-   * @param whiteTakes - if white is the taking piece
-   */
-  aReducePiece({ commit }, whiteTakes) {
-    commit('mReducePiece', whiteTakes)
   },
 
   /**

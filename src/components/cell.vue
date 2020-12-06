@@ -100,9 +100,9 @@ export default {
       'aKingMovement', 
       'aMoveForward', 
       'aHighlight', 
+      'aUnhighlight', 
       'aCapturePiece', 
       'aKingCapturePiece', 
-      'aReducePiece', 
       'aSetActiveGame', 
       'aSetWinner'
     ]),
@@ -118,7 +118,8 @@ export default {
           bHasWhiteKing: this.hasWhiteKing 
         })
       } else { // Illegal move
-        this.aHighlight(null)
+        console.log('does not contain piece')
+        this.aUnhighlight(null)
       }
     },
 
@@ -146,16 +147,12 @@ export default {
               this.aKingMovement(coords)
             } else if (this.isKingCaptureAttempt(source, coords)) {
               this.aKingCapturePiece(coords)
-              //reduce board piece
-              this.aReducePiece(this.hasWhiteKing || this.hasWhiteChip)
             } else {
               this.cancelCurrentMove()
             }
           } else { 
             if (this.isCaptureAttempt(source)) {  
               this.aCapturePiece(coords)
-              //reduce board piece
-              this.aReducePiece(this.hasWhiteKing || this.hasWhiteChip)
             } else if (this.isMoveForwardAttempt(source)) {
               this.aMoveForward(coords)
             } else {

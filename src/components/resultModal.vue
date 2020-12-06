@@ -6,10 +6,10 @@
       <input type="button" @click='exitModal()' value="Exit">
     </div>
   </div> -->
-  <b-modal v-model="this.inactiveGame" id="modal" centered hide-footer no-close-on-backdrop no-close-on-esc hide-header>
+  <b-modal v-model="this.inactiveGame" ref="modal" id="modal" centered hide-footer no-close-on-backdrop no-close-on-esc hide-header>
     <h1 id="modal-body"> {{ winnerMessage }} </h1>
-    <b-button class="btn-block btn-success" @click="restartGame()">Restart</b-button>
-    <b-button class="btn-block btn-danger" @click="exitModal()">Exit</b-button>
+    <b-button block variant="success" @click="restartGame()">Restart</b-button>
+    <b-button block variant="danger" @click="exitModal()">Exit</b-button>
   </b-modal>
 </template>
 
@@ -40,8 +40,9 @@ export default {
       this.aResetGame()
     },
     exitModal () {
-      let element = document.getElementById("modal");
-      element.classList.add("modal-reset");
+      // let element = document.getElementById("modal");
+      // element.classList.add("modal-reset");
+      this.$refs['modal'].hide()
     }
   }
 }
