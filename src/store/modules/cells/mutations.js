@@ -18,12 +18,59 @@ import {
 import { bIsValidCapture } from '../../services/kingCaptureService'
 import { getBoard } from '../board'
 
-const mutations = {
-  mUnhighlight: (state, coords) => {
-    console.log('Hello')
-    console.log(coords)
+const helpers = {
+  handleValidMove: (state, coords, newCurr, newDest, adjacent) => {
+    // Perform a deep copy for board updating
     const boardClone = JSON.parse(JSON.stringify(state.cells))
 
+    boardClone[newCurr.nRow - 1][newCurr.nCol - 1] = newCurr
+    boardClone[newDest.nRow - 1][newDest.nCol - 1] = newDest
+    if (adjacent) {
+      boardClone[adjacent.nRow - 1][adjacent.nCol - 1] = adjacent
+    }
+
+    // Update the state
+    state.cells = boardClone
+    state.firstClick = null
+    mutations.mUnhighlight(state, coords)
+  },
+
+  handleIllegalMove: (state, coords) => {
+    const bDestHasWhite = state.cells[coords.nDestRow - 1][coords.nDestCol - 1].bHasWhiteChip
+    const bDestHasBlack = state.cells[coords.nDestRow - 1][coords.nDestCol - 1].bHasBlackChip
+    const bSrcDestBlack = bSourceHasBlack(state.cells, coords) && bDestHasBlack
+    const bSrcDestWhite = bSourceHasWhite(state.cells, coords) && bDestHasWhite
+
+    const bDestHasWhiteKing = state.cells[coords.nDestRow - 1][coords.nDestCol - 1].bHasWhiteKing
+    const bDestHasBlackKing = state.cells[coords.nDestRow - 1][coords.nDestCol - 1].bHasBlackKing
+
+    // If both the source and destination pieces have the same color -
+    // this happens when clicking on a piece followed by clicking another
+    // same-colored piece adjacent to it, highlight the new piece
+    if (bSrcDestBlack || bSrcDestWhite) {
+      let newCoords = {
+        nRow: coords.nDestRow,
+        nCol: coords.nDestCol,
+        bHasWhiteChip: bDestHasWhite,
+        bHasBlackChip: bDestHasBlack,
+        bHasWhiteKing: bDestHasWhiteKing,
+        bHasBlackKing: bDestHasBlackKing
+      }
+      mutations.mUnhighlight(state, coords)
+      state.firstClick = newCoords
+      mutations.mHighlight(state, newCoords)
+    } else { // Otherwise, simply unhighlight the square
+      mutations.mUnhighlight(state, coords)
+    }
+  }
+}
+
+const mutations = {
+  mUnhighlight: state => {
+    // Perform a deep copy for board updating
+    const boardClone = JSON.parse(JSON.stringify(state.cells))
+
+    // Reset all cells' highlight states 
     for (let i in boardClone) {
       for (let j in boardClone[i]) {
         boardClone[i][j].isPossibleMove = false
@@ -32,6 +79,7 @@ const mutations = {
       }
     }
 
+    // Update states
     state.cells = boardClone
     state.firstClick = null
   },
@@ -39,20 +87,22 @@ const mutations = {
   mHighlight: (state, coords) => {
     // If there is already a previously highlighted square, cancel it 
     if (state.firstClick !== null) {
-      // console.log("calling munhighlight")
       mutations.mUnhighlight(state, coords)
       state.firstClick = null
     }
 
+    // Set the first click to the current square clicked 
     state.firstClick = coords
 
+    // Perform a deep copy for board updating
     const boardClone = JSON.parse(JSON.stringify(state.cells))
-    const srcCell = boardClone[coords.nRow - 1][coords.nCol - 1]
 
+    // Highlight the source cell
+    const srcCell = boardClone[coords.nRow - 1][coords.nCol - 1]
     srcCell.isHighlighted = true
 
+    // Fetch and store legal squares 
     let aPossibleCells = []
-    
     if (srcCell.bHasBlackKing) {
       aPossibleCells = getPossibleMoveBlackKing(boardClone, coords.nRow, coords.nCol)
     } else if (srcCell.bHasWhiteKing) {
@@ -63,18 +113,21 @@ const mutations = {
       aPossibleCells = getPossibleMoveWhite(boardClone, coords.nRow, coords.nCol)
     } 
 
+    // Set these legal squares on the square object
     for (const array of aPossibleCells) {
-      if (array[2] === 0)
+      if (array[2] === 0) {
         boardClone[array[0]][array[1]].isPossibleMove = true
-      else 
+      } else { 
         boardClone[array[0]][array[1]].isPossibleCapture = true
+      }
     }
 
+    // Update the board state
     state.cells = boardClone
   },
 
   mMoveForward: (state, coords) => {
-    console.log('Mutate ' + coords.nRow + ', ' + coords.nCol)
+    // If the move is within the board's range
     if (coords.nDestCol >= 1 && coords.nDestCol <= 8 && coords.nDestRow >= 1 && coords.nDestRow <= 8) {
       const newCurr = {
         nRow: coords.nRow,
@@ -93,7 +146,7 @@ const mutations = {
         bHasWhiteKing: false
       }
 
-      let bIsValid = false
+      let bIsValidMove = false
 
       // Check for adjacent squares
       const srcCell = state.cells[coords.nRow - 1][coords.nCol - 1]
@@ -109,70 +162,42 @@ const mutations = {
       const bNextRowAbove = coords.nRow + 1 === coords.nDestRow
       const bLastRowAbove = coords.nDestRow === 8
 
+      // Set the black king
       if (bIsSquareOpen && bIsColLeftOrRight && _bSourceHasBlack && bNextRowBelow && bLastRowBelow) {
-        bIsValid = true
+        bIsValidMove = true
         newDest.bHasBlackChip = true
         newDest.bHasBlackKing = true
-      } else if (bIsSquareOpen && bIsColLeftOrRight && _bSourceHasWhite && bNextRowAbove && bLastRowAbove) {
-        bIsValid = true
+      } 
+
+      // Set the white king
+      else if (bIsSquareOpen && bIsColLeftOrRight && _bSourceHasWhite && bNextRowAbove && bLastRowAbove) {
+        bIsValidMove = true
         newDest.bHasWhiteChip = true
         newDest.bHasWhiteKing = true
-      } else if (bIsSquareOpen && bIsColLeftOrRight && _bSourceHasBlack && bNextRowBelow) {
-        bIsValid = true
+      } 
+      
+      // Set the black piece
+      else if (bIsSquareOpen && bIsColLeftOrRight && _bSourceHasBlack && bNextRowBelow) {
+        bIsValidMove = true
         newDest.bHasBlackChip = true
-      } else if (bIsSquareOpen && bIsColLeftOrRight && _bSourceHasWhite && bNextRowAbove) {
-        bIsValid = true
+      } 
+
+      // Set the white piece
+      else if (bIsSquareOpen && bIsColLeftOrRight && _bSourceHasWhite && bNextRowAbove) {
+        bIsValidMove = true
         newDest.bHasWhiteChip = true
       }
 
       // Check if the move is valid
-      if (bIsValid) {
-        // Perform a deep copy of the board with the new positions of chips
-        const stateClone = JSON.parse(JSON.stringify(state.cells))
-
-        stateClone[newCurr.nRow - 1][newCurr.nCol - 1] = newCurr
-        stateClone[newDest.nRow - 1][newDest.nCol - 1] = newDest
-
-        state.cells = stateClone
-        state.firstClick = null
-        mutations.mUnhighlight(state, coords)
+      if (bIsValidMove) {
+        helpers.handleValidMove(state, coords, newCurr, newDest)
       } else {
-        const bDestHasWhite = state.cells[coords.nDestRow - 1][coords.nDestCol - 1].bHasWhiteChip
-        const bDestHasBlack = state.cells[coords.nDestRow - 1][coords.nDestCol - 1].bHasBlackChip
-        const bSrcDestBlack = bSourceHasBlack(state.cells, coords) && bDestHasBlack
-        const bSrcDestWhite = bSourceHasWhite(state.cells, coords) && bDestHasWhite
-
-        const bSrcHasWhiteKing = state.cells[coords.nRow - 1][coords.nCol - 1].bHasWhiteKing
-        const bSrcHasBlackKing = state.cells[coords.nRow - 1][coords.nCol - 1].bHasBlackKing
-        const bDestHasWhiteKing = state.cells[coords.nDestRow - 1][coords.nDestCol - 1].bHasWhiteKing
-        const bDestHasBlackKing = state.cells[coords.nDestRow - 1][coords.nDestCol - 1].bHasBlackKing
-
-        let newCoords
-
-        // If both the source and destination pieces have the same color -
-        // this happens when clicking on a piece followed by clicking another
-        // same-colored piece adjacent to it
-        if (bSrcDestBlack || bSrcDestWhite) {
-          newCoords = {
-            nRow: coords.nDestRow,
-            nCol: coords.nDestCol,
-            bHasWhiteChip: bDestHasWhite,
-            bHasBlackChip: bDestHasBlack,
-            bHasWhiteKing: bDestHasWhiteKing,
-            bHasBlackKing: bDestHasBlackKing
-          }
-          mutations.mUnhighlight(state, coords)
-          state.firstClick = newCoords
-          mutations.mHighlight(state, newCoords)
-        } else { // Otherwise, unhighlight
-          mutations.mUnhighlight(state, coords)
-        }
+        helpers.handleIllegalMove(state, coords)
       }
     }
   },
 
   mKingMovement: (state, coords) => {
-    console.log('Mutate ' + coords.nRow + ', ' + coords.nCol)
     if (coords.nDestCol >= 1 && coords.nDestCol <= 8 && coords.nDestRow >= 1 && coords.nDestRow <= 8) {
       const newCurr = {
         nRow: coords.nRow,
@@ -191,87 +216,49 @@ const mutations = {
         bHasWhiteKing: false
       }
 
-      let bIsValid = false
+      let bIsValidKingMove = false
 
       // Check for adjacent squares
       const srcCell = state.cells[coords.nRow - 1][coords.nCol - 1]
       const destCell = state.cells[coords.nDestRow - 1][coords.nDestCol - 1]
-
       const bIsSquareOpen = !(destCell.bHasBlackChip || destCell.bHasWhiteChip)
 
+      // Check if the source square has a piece at all
       const _bSourceHasBlack = srcCell.bHasBlackChip
       const _bSourceHasBlackKing = srcCell.bHasBlackKing
       const _bSourceHasWhite = srcCell.bHasWhiteChip
       const _bSourceHasWhiteKing = srcCell.bHasWhiteKing
 
       // Check if the movement is on the diagonal
-      const xDiff = Math.abs(coords.nRow - coords.nDestRow)
-      const yDiff = Math.abs(coords.nCol - coords.nDestCol)
+      const xDiff = Math.abs(coords.nCol - coords.nDestCol)
+      const yDiff = Math.abs(coords.nRow - coords.nDestRow)
       const bOnDiagonal = xDiff === yDiff
 
       // Check for jumps
       const bDoesNoBlackJumps = bNoBlackJumps(state.cells, coords)
       const bDoesNoWhiteJumps = bNoWhiteJumps(state.cells, coords)
-      // console.log(bDoesNoBlackJumps + bDoesNoWhiteJumps)
 
       if (bIsSquareOpen && _bSourceHasBlack && _bSourceHasBlackKing && bDoesNoBlackJumps && bDoesNoWhiteJumps && bOnDiagonal) {
-        bIsValid = true
+        bIsValidKingMove = true
         newDest.bHasBlackChip = true
         newDest.bHasBlackKing = true
       } else if (bIsSquareOpen && _bSourceHasWhite && _bSourceHasWhiteKing && bDoesNoBlackJumps && bDoesNoWhiteJumps && bOnDiagonal) {
-        bIsValid = true
+        bIsValidKingMove = true
         newDest.bHasWhiteChip = true
         newDest.bHasWhiteKing = true
       }
 
       // Check if the move is valid
-      if (bIsValid) {
-        // Perform a deep copy of the board with the new positions of chips
-        const stateClone = JSON.parse(JSON.stringify(state.cells))
-
-        stateClone[newCurr.nRow - 1][newCurr.nCol - 1] = newCurr
-        stateClone[newDest.nRow - 1][newDest.nCol - 1] = newDest
-
-        state.cells = stateClone
-        state.firstClick = null
-        mutations.mUnhighlight(state, coords)
+      if (bIsValidKingMove) {
+        helpers.handleValidMove(state, coords, newCurr, newDest)
       } else {
-        const bDestHasWhite = state.cells[coords.nDestRow - 1][coords.nDestCol - 1].bHasWhiteChip
-        const bDestHasBlack = state.cells[coords.nDestRow - 1][coords.nDestCol - 1].bHasBlackChip
-        const bSrcDestBlack = bSourceHasBlack(state.cells, coords) && bDestHasBlack
-        const bSrcDestWhite = bSourceHasWhite(state.cells, coords) && bDestHasWhite
-
-        const bSrcHasWhiteKing = state.cells[coords.nRow - 1][coords.nCol - 1].bHasWhiteKing
-        const bSrcHasBlackKing = state.cells[coords.nRow - 1][coords.nCol - 1].bHasBlackKing
-        const bDestHasWhiteKing = state.cells[coords.nDestRow - 1][coords.nDestCol - 1].bHasWhiteKing
-        const bDestHasBlackKing = state.cells[coords.nDestRow - 1][coords.nDestCol - 1].bHasBlackKing
-
-        let newCoords
-
-        // If both the source and destination pieces have the same color -
-        // this happens when clicking on a piece followed by clicking another
-        // same-colored piece adjacent to it
-        if (bSrcDestBlack || bSrcDestWhite) {
-          newCoords = { 
-            nRow: coords.nDestRow, 
-            nCol: coords.nDestCol, 
-            bHasBlackKing: bDestHasBlackKing, 
-            bHasWhiteKing: bDestHasWhiteKing 
-          }
-          mutations.mUnhighlight(state, coords)
-          state.firstClick = newCoords
-          mutations.mHighlight(state, newCoords)
-        } else { // Otherwise, unhighlight
-          mutations.mUnhighlight(state, coords)
-        }
-
-        
+        helpers.handleIllegalMove(state, coords)
       }
     }
   },
 
   mCapturePiece: (state, coords) => {
-    const newCur = {
+    const newCurr = {
       nRow: coords.nRow,
       nCol: coords.nCol,
       bHasBlackChip: false,
@@ -299,13 +286,20 @@ const mutations = {
     }
 
     let bIsValidCapture = false
+
+    // Check surrounding rows
     const bNextRowBelow = coords.nRow - 2 === coords.nDestRow
     const bNextRowAbove = coords.nRow + 2 === coords.nDestRow
     const bLastRowBelow = coords.nDestRow === 1
     const bLastRowAbove = coords.nDestRow === 8
+
+    // Check if white and black can capture
     const bWhiteCanCapture = bSourceHasWhite(state.cells, coords) && bBlackExistsAdj(state.cells, coords) && bNextRowAbove
     const bBlackCanCapture = bSourceHasBlack(state.cells, coords) && bWhiteExistsAdj(state.cells, coords) && bNextRowBelow
 
+    // A piece can make a capture if the following conditions are met:
+    // 1. An opposing piece exists diagonally adjacent to the current piece
+    // 2. There is no piece of any color diagonally adjacent to the target piece 
     if (bWhiteCanCapture) {
       if (!bPieceExistsAfterAdj(state.cells, coords)) {
         bIsValidCapture = true
@@ -327,51 +321,14 @@ const mutations = {
     }
 
     if (bIsValidCapture) {
-      const stateClone = JSON.parse(JSON.stringify(state.cells))
-
-      stateClone[newCur.nRow - 1][newCur.nCol - 1] = newCur
-      stateClone[adjacent.nRow - 1][adjacent.nCol - 1] = adjacent
-      stateClone[newDest.nRow - 1][newDest.nCol - 1] = newDest
-
-      state.cells = stateClone
-      state.firstClick = null
-      mutations.mUnhighlight(state, coords)
+      helpers.handleValidMove(state, coords, newCurr, newDest, adjacent)
     } else {
-      const bDestHasWhite = state.cells[coords.nDestRow - 1][coords.nDestCol - 1].bHasWhiteChip
-      const bDestHasBlack = state.cells[coords.nDestRow - 1][coords.nDestCol - 1].bHasBlackChip
-      const bSrcDestBlack = bSourceHasBlack(state.cells, coords) && bDestHasBlack
-      const bSrcDestWhite = bSourceHasWhite(state.cells, coords) && bDestHasWhite
-
-      const bSrcHasWhiteKing = state.cells[coords.nRow - 1][coords.nCol - 1].bHasWhiteKing
-      const bSrcHasBlackKing = state.cells[coords.nRow - 1][coords.nCol - 1].bHasBlackKing
-      const bDestHasWhiteKing = state.cells[coords.nDestRow - 1][coords.nDestCol - 1].bHasWhiteKing
-      const bDestHasBlackKing = state.cells[coords.nDestRow - 1][coords.nDestCol - 1].bHasBlackKing
-
-      let newCoords
-
-      // If both the source and destination pieces have the same color -
-      // this happens when clicking on a piece followed by clicking another
-      // same-colored piece adjacent to it
-      if (bSrcDestBlack || bSrcDestWhite) {
-        newCoords = { 
-          nRow: coords.nDestRow, 
-          nCol: coords.nDestCol, 
-          bHasBlackKing: bDestHasBlackKing, 
-          bHasWhiteKing: bDestHasWhiteKing 
-        }
-        mutations.mUnhighlight(state, coords)
-        state.firstClick = newCoords
-        mutations.mHighlight(state, newCoords)
-      } else { // Otherwise, unhighlight
-        mutations.mUnhighlight(state, coords)
-      }
-
-      
+      helpers.handleIllegalMove(state, coords)
     }
   },
 
   mKingCapturePiece: (state, coords) => {
-    const newCur = {
+    const newCurr = {
       nRow: coords.nRow,
       nCol: coords.nCol,
       bHasWhiteChip: false,
@@ -389,6 +346,7 @@ const mutations = {
       bHasBlackKing: false
     }
 
+    // Set color depending on the source square
     let color
     if (bSourceHasWhite(state.cells, coords)) {
       color = 'white'
@@ -396,6 +354,7 @@ const mutations = {
       color = 'black'
     }
 
+    // isValidCapture returns a boolean and a newTarget coordinate tuple
     const result = bIsValidCapture(state.cells, coords, color)
     if (result.validCapture) {
       if (bSourceHasWhite(state.cells, coords)) {
@@ -415,23 +374,16 @@ const mutations = {
         bHasWhiteKing: false,
         bHasBlackKing: false
       }
-      const stateClone = JSON.parse(JSON.stringify(state.cells))
 
-      stateClone[newCur.nRow - 1][newCur.nCol - 1] = newCur
-      stateClone[newTarget.nRow - 1][newTarget.nCol - 1] = newTarget
-      stateClone[newDest.nRow - 1][newDest.nCol - 1] = newDest
-
-      state.cells = stateClone
-      state.firstClick = null
-      mutations.mUnhighlight(state, coords)
+      helpers.handleValidMove(state, coords, newCurr, newDest, newTarget)
     }
   },
 
   mReducePiece: (state, whiteTakes) => {
     if (!whiteTakes) {
-      state.nWhiteCount = state.nWhiteCount - 1
+      state.nWhiteCount--
     } else {
-      state.nBlackCount = state.nBlackCount - 1
+      state.nBlackCount--
     }
   },
 
