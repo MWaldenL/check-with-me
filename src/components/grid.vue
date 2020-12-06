@@ -130,8 +130,8 @@ table {
   right: 300px;
   bottom: 50vh;
 }
-
 #box {
-  position: relative
+  position: relative;
+  margin-top: 20px;
 }
 </style>

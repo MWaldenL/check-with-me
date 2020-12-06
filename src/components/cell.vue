@@ -1,6 +1,5 @@
 <template>
   <td :class="highlight" class="square" @click="onSquareClicked()" v-if="isDark">
-    {{ row - 1 }} {{ col - 1 }}
     <div id="checker-black" class="chip black-chip" v-show="hasBlackChip">
       <img class="king" src="../../public/assets/king.png" v-show="hasBlackKing"/>
     </div>
@@ -239,8 +238,8 @@ export default {
 
 <style scoped>
 .square {
-  height: 75px;
-  width: 75px;
+  height: 80px;
+  width: 80px;
   margin: 0;
   padding: 0;
 }
@@ -296,8 +295,8 @@ export default {
 }
 
 .white-chip {
-  background: radial-gradient(50% 50% at 50% 50%, #FFFFFF 28.12%, #dacece 100%, #FFFFFF 100%);
-  border: 10px solid #EDEDED;
+  background: radial-gradient(50% 50% at 50% 50%, rgba(255, 255, 255, 0.74) 0%, #D0D0D0 100%);
+  border: 12px solid #EDEDED;
 }
 
 .king {
