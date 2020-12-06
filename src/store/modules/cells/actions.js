@@ -50,15 +50,6 @@ const actions = {
   },
 
   /**
-   * aReducePiece reduces nBlackCount if param is true, reduces nWhiteCount otherwise
-   * 
-   * @param whiteTakes - if white is the taking piece
-   */
-  aReducePiece({ commit }, whiteTakes) {
-    commit('mReducePiece', whiteTakes)
-  },
-
-  /**
    * Sets the active state of the game. Turns clickability on/off
    * 
    * @param bIsActive

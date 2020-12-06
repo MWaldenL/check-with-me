@@ -103,7 +103,6 @@ export default {
       'aUnhighlight', 
       'aCapturePiece', 
       'aKingCapturePiece', 
-      'aReducePiece', 
       'aSetActiveGame', 
       'aSetWinner'
     ]),
@@ -148,16 +147,12 @@ export default {
               this.aKingMovement(coords)
             } else if (this.isKingCaptureAttempt(source, coords)) {
               this.aKingCapturePiece(coords)
-              //reduce board piece
-              this.aReducePiece(this.hasWhiteKing || this.hasWhiteChip)
             } else {
               this.cancelCurrentMove()
             }
           } else { 
             if (this.isCaptureAttempt(source)) {  
               this.aCapturePiece(coords)
-              //reduce board piece
-              this.aReducePiece(this.hasWhiteKing || this.hasWhiteChip)
             } else if (this.isMoveForwardAttempt(source)) {
               this.aMoveForward(coords)
             } else {

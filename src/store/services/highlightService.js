@@ -116,6 +116,7 @@ export const getPossibleMoveBlackKing = (board, nRow, nCol) => {
         if (!(board[nRowTraverser + 1][nColTraverser + 1].bHasBlackChip || board[nRowTraverser + 1][nColTraverser + 1].bHasWhiteChip)) {
           moves.push([nRowTraverser, nColTraverser, 1])
           moves.push([nRowTraverser + 1, nColTraverser + 1, 0])
+          break
         } else {
           break
         }
@@ -140,6 +141,7 @@ export const getPossibleMoveBlackKing = (board, nRow, nCol) => {
         if (!(board[nRowTraverser - 1][nColTraverser + 1].bHasBlackChip || board[nRowTraverser - 1][nColTraverser + 1].bHasWhiteChip)) {
           moves.push([nRowTraverser, nColTraverser, 1])
           moves.push([nRowTraverser - 1, nColTraverser + 1, 0])
+          break
         } else {
           break
         }
@@ -164,6 +166,7 @@ export const getPossibleMoveBlackKing = (board, nRow, nCol) => {
         if (!(board[nRowTraverser - 1][nColTraverser - 1].bHasBlackChip || board[nRowTraverser - 1][nColTraverser - 1].bHasWhiteChip)) {
           moves.push([nRowTraverser, nColTraverser, 1])
           moves.push([nRowTraverser - 1, nColTraverser - 1, 0])
+          break
         } else {
           break
         }
@@ -190,6 +193,7 @@ export const getPossibleMoveBlackKing = (board, nRow, nCol) => {
           console.log("hereeeee112221")
           moves.push([nRowTraverser, nColTraverser, 1])
           moves.push([nRowTraverser + 1, nColTraverser - 1, 0])
+          break
         } else {
           break
         }
@@ -221,6 +225,7 @@ export const getPossibleMoveWhiteKing = (board, nRow, nCol) => {
         if (!(board[nRowTraverser + 1][nColTraverser + 1].bHasBlackChip || board[nRowTraverser + 1][nColTraverser + 1].bHasWhiteChip)) {
           moves.push([nRowTraverser, nColTraverser, 1])
           moves.push([nRowTraverser + 1, nColTraverser + 1, 0])
+          break
         } else {
           break
         }
@@ -245,6 +250,7 @@ export const getPossibleMoveWhiteKing = (board, nRow, nCol) => {
         if (!(board[nRowTraverser - 1][nColTraverser + 1].bHasBlackChip || board[nRowTraverser - 1][nColTraverser + 1].bHasWhiteChip)) {
           moves.push([nRowTraverser, nColTraverser, 1])
           moves.push([nRowTraverser - 1, nColTraverser + 1, 0])
+          break
         } else {
           break
         }
@@ -269,6 +275,7 @@ export const getPossibleMoveWhiteKing = (board, nRow, nCol) => {
         if (!(board[nRowTraverser - 1][nColTraverser - 1].bHasBlackChip || board[nRowTraverser - 1][nColTraverser - 1].bHasWhiteChip)) {
           moves.push([nRowTraverser, nColTraverser, 1])
           moves.push([nRowTraverser - 1, nColTraverser - 1, 0])
+          break
         } else {
           break
         }
@@ -293,6 +300,7 @@ export const getPossibleMoveWhiteKing = (board, nRow, nCol) => {
         if (!(board[nRowTraverser + 1][nColTraverser - 1].bHasBlackChip || board[nRowTraverser + 1][nColTraverser - 1].bHasWhiteChip)) {
           moves.push([nRowTraverser, nColTraverser, 1])
           moves.push([nRowTraverser + 1, nColTraverser - 1, 0])
+          break
         } else {
           break
         }
