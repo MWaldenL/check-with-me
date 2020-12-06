@@ -1,9 +1,9 @@
 <template>
-  <td class="square dark" @click="onSquareClicked()" v-if="isDark">
-    <div id="checker-black" class="chip black-chip" :style="blackOpacity" v-show="hasBlackChip">
+  <td :class="highlight" class="square" @click="onSquareClicked()" v-if="isDark">
+    <div id="checker-black" class="chip black-chip" v-show="hasBlackChip">
       <img class="king" src="../../public/assets/king.png" v-show="hasBlackKing"/>
     </div>
-    <div id="checker-white" class="chip white-chip" :style="whiteOpacity" v-show="hasWhiteChip">
+    <div id="checker-white" class="chip white-chip" v-show="hasWhiteChip">
       <img class="king" src="../../public/assets/king.png" v-show="hasWhiteKing"/>
     </div>
   </td>
@@ -24,9 +24,9 @@ export default {
   props: ['row', 'col'],
   data () {
     return {
-      blackOpacity: { opacity: '100%' },
-      whiteOpacity: { opacity: '100%' },
-      isSelected: false
+      dIsSelected: false,
+      dIsPossibleMove: false,
+      dIsPossibleCapture: false
     }
   },
   computed: {
@@ -37,6 +37,42 @@ export default {
       blackCount: 'getBlackCount',
       bActiveGame: 'getActiveGame'
     }),
+
+    isSelected: {
+      get () {
+        return this.board[this.row-1][this.col-1].isHighlighted
+      },
+      set (val) {
+        this.dIsSelected = val
+      }
+    },  
+
+    isPossibleMove: {
+      get () {
+        return this.board[this.row-1][this.col-1].isPossibleMove
+      },
+      set (val) {
+        this.dIsPossibleMove = val
+      }
+    },
+
+    isPossibleCapture: {
+      get () {
+        return this.board[this.row-1][this.col-1].isPossibleCapture
+      },
+      set (val) {
+        this.dIsPossibleCapture = val
+      }
+    },
+
+    highlight () {
+      return {
+        'highlight-selected': this.isSelected,
+        'highlight-possible-move': this.isPossibleMove,
+        'highlight-possible-capture': this.isPossibleCapture,
+        'dark': !this.isSelected && !this.isPossibleMove && !this.isPossibleCapture
+      }
+    },
 
     isDark () {
       return (this.row % 2 === 1) ? this.col % 2 === 1 : this.col % 2 === 0
@@ -59,11 +95,16 @@ export default {
     }
   },
   methods: {
-    ...mapActions(['aKingMovement', 'aMoveForward', 'aHighlight', 'aCapturePiece', 'aKingCapturePiece', 'aReducePiece', 'aSetActiveGame', 'aSetWinner']),
-    focus () {
-      this.blackOpacity.opacity = this.blackOpacity.opacity === '100%' ? '50%' : '100%'
-      this.whiteOpacity.opacity = this.whiteOpacity.opacity === '100%' ? '50%' : '100%'
-    },
+    ...mapActions([
+      'aKingMovement', 
+      'aMoveForward', 
+      'aHighlight', 
+      'aUnhighlight', 
+      'aCapturePiece', 
+      'aKingCapturePiece', 
+      'aSetActiveGame', 
+      'aSetWinner'
+    ]),
 
     cancelCurrentMove () {
       const bContainsPiece = this.hasBlackChip || this.hasWhiteChip || this.hasWhiteKing || this.hasBlackKing
@@ -76,11 +117,13 @@ export default {
           bHasWhiteKing: this.hasWhiteKing 
         })
       } else { // Illegal move
-        this.aHighlight(null)
+        console.log('does not contain piece')
+        this.aUnhighlight(null)
       }
     },
 
     onSquareClicked () {
+      console.log('Highlighting square')
       if(this.bActiveGame) {
         const source = this.firstClick
         const bContainsPiece = this.hasBlackChip || this.hasWhiteChip || this.hasWhiteKing || this.hasBlackKing
@@ -97,22 +140,21 @@ export default {
           const bIsKingMovement = source.bHasBlackKing || source.bHasWhiteKing
     
           // Check for move or capture attempts. No legality checking
-          if (bIsKingMovement) {
+          if (coords.nRow === coords.nDestRow && coords.nCol === coords.nDestCol) {
+            console.log("welcome")
+            this.aUnhighlight(null)
+          } else if (bIsKingMovement) {
             if (this.isKingMoveAttempt(source, coords)) {
               console.log('king move attempt')
               this.aKingMovement(coords)
             } else if (this.isKingCaptureAttempt(source, coords)) {
               this.aKingCapturePiece(coords)
-              //reduce board piece
-              this.aReducePiece(this.hasWhiteKing || this.hasWhiteChip)
             } else {
               this.cancelCurrentMove()
             }
           } else { 
             if (this.isCaptureAttempt(source)) {  
               this.aCapturePiece(coords)
-              //reduce board piece
-              this.aReducePiece(this.hasWhiteKing || this.hasWhiteChip)
             } else if (this.isMoveForwardAttempt(source)) {
               this.aMoveForward(coords)
             } else {
@@ -121,7 +163,7 @@ export default {
           }
         } else {
           if (bContainsPiece) {
-            this.isSelected = true
+            console.log('is Selected')
             this.aHighlight({ 
               nRow: this.row, 
               nCol: this.col, 
@@ -130,6 +172,7 @@ export default {
               bHasBlackChip: this.hasBlackChip,
               bHasBlackKing: this.hasBlackKing
             })
+            console.log(this.isSelected)
           }
         }
 
@@ -198,10 +241,31 @@ export default {
 
 <style scoped>
 .square {
-  height: 100px;
-  width: 100px;
+  height: 80px;
+  width: 80px;
   margin: 0;
   padding: 0;
+}
+
+.highlight-selected {
+  background-color: #b3c79e;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.highlight-possible-move {
+  background-color: #569585;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.highlight-possible-capture {
+  background-color: #955656;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .dark {
@@ -219,8 +283,8 @@ export default {
   position: absolute;
   z-index: 2;
   border-radius: 50%;
-  width: 75px;
-  height: 75px;
+  width: 60px;
+  height: 60px;
   box-sizing: border-box;
   opacity: 100%;
   display: flex;
@@ -230,11 +294,11 @@ export default {
 
 .black-chip {
   background: radial-gradient(50% 50% at 50% 50%, rgba(48, 48, 48, 0.74) 0%, #424242 100%);
-  border: 12px solid #3A3A3A;
+  border: 10px solid #3A3A3A;
 }
 
 .white-chip {
-  background: radial-gradient(50% 50% at 50% 50%, #FFFFFF 28.12%, #dacece 100%, #FFFFFF 100%);
+  background: radial-gradient(50% 50% at 50% 50%, rgba(255, 255, 255, 0.74) 0%, #D0D0D0 100%);
   border: 12px solid #EDEDED;
 }
 

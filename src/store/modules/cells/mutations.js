@@ -8,13 +8,69 @@ import {
   bNoWhiteJumps
 } from '../../services/moveCaptureService'
 
+import {
+  getPossibleMoveBlack,
+  getPossibleMoveWhite,
+  getPossibleMoveBlackKing,
+  getPossibleMoveWhiteKing
+} from '../../services/highlightService'
+
 import { bIsValidCapture } from '../../services/kingCaptureService'
 import { getBoard } from '../board'
 
 const mutations = {
+  mUnhighlight: (state, coords) => {
+    console.log('Hello')
+    console.log(coords)
+    const boardClone = JSON.parse(JSON.stringify(state.cells))
+
+    for (let i in boardClone) {
+      for (let j in boardClone[i]) {
+        boardClone[i][j].isPossibleMove = false
+        boardClone[i][j].isPossibleCapture = false
+        boardClone[i][j].isHighlighted = false
+      }
+    }
+
+    state.cells = boardClone
+    state.firstClick = null
+  },
+
   mHighlight: (state, coords) => {
-    // TODO: Highlight legal moves
+    // If there is already a previously highlighted square, cancel it 
+    if (state.firstClick !== null) {
+      // console.log("calling munhighlight")
+      mutations.mUnhighlight(state, coords)
+      state.firstClick = null
+    }
+
     state.firstClick = coords
+
+    const boardClone = JSON.parse(JSON.stringify(state.cells))
+    const srcCell = boardClone[coords.nRow - 1][coords.nCol - 1]
+
+    srcCell.isHighlighted = true
+
+    let aPossibleCells = []
+    
+    if (srcCell.bHasBlackKing) {
+      aPossibleCells = getPossibleMoveBlackKing(boardClone, coords.nRow, coords.nCol)
+    } else if (srcCell.bHasWhiteKing) {
+      aPossibleCells = getPossibleMoveWhiteKing(boardClone, coords.nRow, coords.nCol)
+    } else if (srcCell.bHasBlackChip) {
+      aPossibleCells = getPossibleMoveBlack(boardClone, coords.nRow, coords.nCol)
+    } else if (srcCell.bHasWhiteChip) {
+      aPossibleCells = getPossibleMoveWhite(boardClone, coords.nRow, coords.nCol)
+    } 
+
+    for (const array of aPossibleCells) {
+      if (array[2] === 0)
+        boardClone[array[0]][array[1]].isPossibleMove = true
+      else 
+        boardClone[array[0]][array[1]].isPossibleCapture = true
+    }
+
+    state.cells = boardClone
   },
 
   mMoveForward: (state, coords) => {
@@ -79,6 +135,7 @@ const mutations = {
 
         state.cells = stateClone
         state.firstClick = null
+        mutations.mUnhighlight(state, coords)
       } else {
         const bDestHasWhite = state.cells[coords.nDestRow - 1][coords.nDestCol - 1].bHasWhiteChip
         const bDestHasBlack = state.cells[coords.nDestRow - 1][coords.nDestCol - 1].bHasBlackChip
@@ -104,12 +161,12 @@ const mutations = {
             bHasWhiteKing: bDestHasWhiteKing,
             bHasBlackKing: bDestHasBlackKing
           }
-        } else { // Otherwise, simply set it to the current coordinates
-          newCoords = { nRow: coords.nRow, nCol: coords.nCol, bHasBlackKing: bSrcHasBlackKing, bHasWhiteKing: bSrcHasWhiteKing }
+          mutations.mUnhighlight(state, coords)
+          state.firstClick = newCoords
+          mutations.mHighlight(state, newCoords)
+        } else { // Otherwise, unhighlight
+          mutations.mUnhighlight(state, coords)
         }
-
-        mutations.mHighlight(state.cells, newCoords)
-        state.firstClick = newCoords
       }
     }
   },
@@ -177,6 +234,7 @@ const mutations = {
 
         state.cells = stateClone
         state.firstClick = null
+        mutations.mUnhighlight(state, coords)
       } else {
         const bDestHasWhite = state.cells[coords.nDestRow - 1][coords.nDestCol - 1].bHasWhiteChip
         const bDestHasBlack = state.cells[coords.nDestRow - 1][coords.nDestCol - 1].bHasBlackChip
@@ -194,13 +252,20 @@ const mutations = {
         // this happens when clicking on a piece followed by clicking another
         // same-colored piece adjacent to it
         if (bSrcDestBlack || bSrcDestWhite) {
-          newCoords = { nRow: coords.nDestRow, nCol: coords.nDestCol, bHasBlackKing: bDestHasBlackKing, bHasWhiteKing: bDestHasWhiteKing }
-        } else { // Otherwise, simply set it to the current coordinates
-          newCoords = { nRow: coords.nRow, nCol: coords.nCol, bHasBlackKing: bSrcHasBlackKing, bHasWhiteKing: bSrcHasWhiteKing }
+          newCoords = { 
+            nRow: coords.nDestRow, 
+            nCol: coords.nDestCol, 
+            bHasBlackKing: bDestHasBlackKing, 
+            bHasWhiteKing: bDestHasWhiteKing 
+          }
+          mutations.mUnhighlight(state, coords)
+          state.firstClick = newCoords
+          mutations.mHighlight(state, newCoords)
+        } else { // Otherwise, unhighlight
+          mutations.mUnhighlight(state, coords)
         }
 
-        mutations.mHighlight(state.cells, newCoords)
-        state.firstClick = newCoords
+        
       }
     }
   },
@@ -248,6 +313,7 @@ const mutations = {
         if (bLastRowAbove) {
           newDest.bHasWhiteKing = true
         }
+        mutations.mReducePiece(state, true)
       }
     } else if (bBlackCanCapture) {
       if (!bPieceExistsAfterAdj(state.cells, coords)) {
@@ -256,6 +322,7 @@ const mutations = {
         if (bLastRowBelow) {
           newDest.bHasBlackKing = true
         }
+        mutations.mReducePiece(state, false)
       }
     }
 
@@ -268,6 +335,7 @@ const mutations = {
 
       state.cells = stateClone
       state.firstClick = null
+      mutations.mUnhighlight(state, coords)
     } else {
       const bDestHasWhite = state.cells[coords.nDestRow - 1][coords.nDestCol - 1].bHasWhiteChip
       const bDestHasBlack = state.cells[coords.nDestRow - 1][coords.nDestCol - 1].bHasBlackChip
@@ -285,13 +353,20 @@ const mutations = {
       // this happens when clicking on a piece followed by clicking another
       // same-colored piece adjacent to it
       if (bSrcDestBlack || bSrcDestWhite) {
-        newCoords = { nRow: coords.nDestRow, nCol: coords.nDestCol, bHasBlackKing: bDestHasBlackKing, bHasWhiteKing: bDestHasWhiteKing }
-      } else { // Otherwise, simply set it to the current coordinates
-        newCoords = { nRow: coords.nRow, nCol: coords.nCol, bHasBlackKing: bSrcHasBlackKing, bHasWhiteKing: bSrcHasWhiteKing }
+        newCoords = { 
+          nRow: coords.nDestRow, 
+          nCol: coords.nDestCol, 
+          bHasBlackKing: bDestHasBlackKing, 
+          bHasWhiteKing: bDestHasWhiteKing 
+        }
+        mutations.mUnhighlight(state, coords)
+        state.firstClick = newCoords
+        mutations.mHighlight(state, newCoords)
+      } else { // Otherwise, unhighlight
+        mutations.mUnhighlight(state, coords)
       }
 
-      mutations.mHighlight(state.cells, newCoords)
-      state.firstClick = newCoords
+      
     }
   },
 
@@ -326,9 +401,11 @@ const mutations = {
       if (bSourceHasWhite(state.cells, coords)) {
         newDest.bHasWhiteChip = true
         newDest.bHasWhiteKing = true
+        mutations.mReducePiece(state, true)
       } else if (bSourceHasBlack(state.cells, coords)) {
         newDest.bHasBlackChip = true
         newDest.bHasBlackKing = true
+        mutations.mReducePiece(state, false)
       }
 
       const newTarget = {
@@ -346,6 +423,7 @@ const mutations = {
 
       state.cells = stateClone
       state.firstClick = null
+      mutations.mUnhighlight(state, coords)
     }
   },
 

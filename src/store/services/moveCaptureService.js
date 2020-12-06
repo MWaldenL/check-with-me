@@ -1,5 +1,7 @@
 export const bSourceHasBlack = (board, coords) => board[coords.nRow - 1][coords.nCol - 1].bHasBlackChip
 export const bSourceHasWhite = (board, coords) => board[coords.nRow - 1][coords.nCol - 1].bHasWhiteChip
+export const bSourceHasBlackKing = (board, coords) => board[coords.nRow - 1][coords.nCol - 1].bHasBlackKing
+export const bSourceHasWhiteKing = (board, coords) => board[coords.nRow - 1][coords.nCol - 1].bHasWhiteKing
 
 export const bBlackExistsAdj = (board, coords) => {
   if (coords.nDestRow && coords.nDestCol) {
