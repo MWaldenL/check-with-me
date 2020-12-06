@@ -140,7 +140,10 @@ export default {
           const bIsKingMovement = source.bHasBlackKing || source.bHasWhiteKing
     
           // Check for move or capture attempts. No legality checking
-          if (bIsKingMovement) {
+          if (coords.nRow === coords.nDestRow && coords.nCol === coords.nDestCol) {
+            console.log("welcome")
+            this.aUnhighlight(null)
+          } else if (bIsKingMovement) {
             if (this.isKingMoveAttempt(source, coords)) {
               console.log('king move attempt')
               this.aKingMovement(coords)
