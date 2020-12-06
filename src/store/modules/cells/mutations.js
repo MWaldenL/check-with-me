@@ -166,8 +166,8 @@ const mutations = {
         }
 
         mutations.mUnhighlight(state, coords)
-        state.firstClick = newCoords
-        mutations.mHighlight(state, newCoords)
+        // state.firstClick = newCoords
+        // mutations.mHighlight(state, newCoords)
       }
     }
   },
