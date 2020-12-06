@@ -239,13 +239,8 @@ export default {
 
 <style scoped>
 .square {
-<<<<<<< HEAD
   height: 75px;
   width: 75px;
-=======
-  height: 100px;
-  width: 100px;
->>>>>>> 1959d0c62d27ff0d127568380ffc6ed5dce37dfa
   margin: 0;
   padding: 0;
 }
