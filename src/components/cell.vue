@@ -203,24 +203,11 @@ export default {
       return Math.abs(coords.nRow - coords.nDestRow) === Math.abs(coords.nCol - coords.nDestCol)
     },
 
-    isCancelAttempt () {
-      return !(this.hasBlackChip || this.hasWhiteChip || this.hasBlackKing || this.hasWhiteKing)
-    },
-
     isCaptureAttempt (source) {
-      if (this.row === source.nRow + 2 && this.col === source.nCol + 2) {
-        return this.board[source.nRow][source.nCol].bHasBlackChip || this.board[source.nRow][source.nCol].bHasWhiteChip
-      } else if (this.row === source.nRow + 2 && this.col === source.nCol - 2) { 
-        return this.board[source.nRow + 1][source.nCol - 1].bHasBlackChip || this.board[source.nRow + 1][source.nCol - 1].bHasWhiteChip
-      } else if (this.row === source.nRow - 2 && this.col === source.nCol + 2) {
-        return this.board[source.nRow - 2][source.nCol].bHasBlackChip || this.board[source.nRow - 2][source.nCol].bHasWhiteChip
-      } else if (this.row === source.nRow - 2 && this.col === source.nCol - 2) {
-        return this.board[source.nRow - 1][source.nCol - 1].bHasBlackChip || this.board[source.nRow - 1][source.nCol - 1].bHasWhiteChip
-      }
-      // return (this.row === source.nRow + 2 && this.col === source.nCol + 2) ||
-      //   (this.row === source.nRow + 2 && this.col === source.nCol - 2) ||
-      //   (this.row === source.nRow - 2 && this.col === source.nCol + 2) ||
-      //   (this.row === source.nRow - 2 && this.col === source.nCol - 2)
+      return (this.row === source.nRow + 2 && this.col === source.nCol + 2) ||
+        (this.row === source.nRow + 2 && this.col === source.nCol - 2) ||
+        (this.row === source.nRow - 2 && this.col === source.nCol + 2) ||
+        (this.row === source.nRow - 2 && this.col === source.nCol - 2)
     },
 
     isMoveForwardAttempt (source) {
