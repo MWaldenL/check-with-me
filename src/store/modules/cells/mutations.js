@@ -161,13 +161,12 @@ const mutations = {
             bHasWhiteKing: bDestHasWhiteKing,
             bHasBlackKing: bDestHasBlackKing
           }
-        } else { // Otherwise, simply set it to the current coordinates
-          newCoords = { nRow: coords.nRow, nCol: coords.nCol, bHasBlackKing: bSrcHasBlackKing, bHasWhiteKing: bSrcHasWhiteKing }
+          mutations.mUnhighlight(state, coords)
+          state.firstClick = newCoords
+          mutations.mHighlight(state, newCoords)
+        } else { // Otherwise, unhighlight
+          mutations.mUnhighlight(state, coords)
         }
-
-        mutations.mUnhighlight(state, coords)
-        // state.firstClick = newCoords
-        // mutations.mHighlight(state, newCoords)
       }
     }
   },
@@ -253,14 +252,20 @@ const mutations = {
         // this happens when clicking on a piece followed by clicking another
         // same-colored piece adjacent to it
         if (bSrcDestBlack || bSrcDestWhite) {
-          newCoords = { nRow: coords.nDestRow, nCol: coords.nDestCol, bHasBlackKing: bDestHasBlackKing, bHasWhiteKing: bDestHasWhiteKing }
-        } else { // Otherwise, simply set it to the current coordinates
-          newCoords = { nRow: coords.nRow, nCol: coords.nCol, bHasBlackKing: bSrcHasBlackKing, bHasWhiteKing: bSrcHasWhiteKing }
+          newCoords = { 
+            nRow: coords.nDestRow, 
+            nCol: coords.nDestCol, 
+            bHasBlackKing: bDestHasBlackKing, 
+            bHasWhiteKing: bDestHasWhiteKing 
+          }
+          mutations.mUnhighlight(state, coords)
+          state.firstClick = newCoords
+          mutations.mHighlight(state, newCoords)
+        } else { // Otherwise, unhighlight
+          mutations.mUnhighlight(state, coords)
         }
 
-        mutations.mUnhighlight(state, coords)
-        // state.firstClick = newCoords
-        // mutations.mHighlight(state, newCoords)
+        
       }
     }
   },
@@ -348,14 +353,20 @@ const mutations = {
       // this happens when clicking on a piece followed by clicking another
       // same-colored piece adjacent to it
       if (bSrcDestBlack || bSrcDestWhite) {
-        newCoords = { nRow: coords.nDestRow, nCol: coords.nDestCol, bHasBlackKing: bDestHasBlackKing, bHasWhiteKing: bDestHasWhiteKing }
-      } else { // Otherwise, simply set it to the current coordinates
-        newCoords = { nRow: coords.nRow, nCol: coords.nCol, bHasBlackKing: bSrcHasBlackKing, bHasWhiteKing: bSrcHasWhiteKing }
+        newCoords = { 
+          nRow: coords.nDestRow, 
+          nCol: coords.nDestCol, 
+          bHasBlackKing: bDestHasBlackKing, 
+          bHasWhiteKing: bDestHasWhiteKing 
+        }
+        mutations.mUnhighlight(state, coords)
+        state.firstClick = newCoords
+        mutations.mHighlight(state, newCoords)
+      } else { // Otherwise, unhighlight
+        mutations.mUnhighlight(state, coords)
       }
 
-      mutations.mUnhighlight(state, coords)
-      // state.firstClick = newCoords
-      // mutations.mHighlight(state, newCoords)
+      
     }
   },
 
