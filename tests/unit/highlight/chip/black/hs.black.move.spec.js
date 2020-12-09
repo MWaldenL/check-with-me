@@ -10,12 +10,7 @@ const getBoard = () => {
         nRow: r + 1, // nRow number 1-8, 1 is bottom
         nCol: c + 1, // column number 1-8, 1 is leftmost
         bHasBlackChip: false, // boolean
-        bHasWhiteChip: false, // boolean
-        bHasBlackKing: false, // boolean
-        bHasWhiteKing: false, // boolean,
-        isHighlighted: false,
-        isPossibleMove: false,
-        isPossibleCapture: false
+        bHasWhiteChip: false
       }
 
       board[r][c] = cell
@@ -43,12 +38,7 @@ describe('movement for black', () => {
       nRow: 4, 
       nCol: 3, 
       bHasBlackChip: true,
-      bHasWhiteChip: false,
-      bHasBlackKing: false,
-      bHasWhiteKing: false,
-      isHighlighted: false,
-      isPossibleMove: false,
-      isPossibleCapture: false
+      bHasWhiteChip: false
     }
 
     const expected = [
@@ -81,12 +71,7 @@ describe('movement for black', () => {
       nRow: 4, 
       nCol: 8, 
       bHasBlackChip: true,
-      bHasWhiteChip: false,
-      bHasBlackKing: false,
-      bHasWhiteKing: false,
-      isHighlighted: false,
-      isPossibleMove: false,
-      isPossibleCapture: false
+      bHasWhiteChip: false
     }
 
     const expected = [[2, 6, 0]]
@@ -116,12 +101,7 @@ describe('movement for black', () => {
       nRow: 4, 
       nCol: 1, 
       bHasBlackChip: true,
-      bHasWhiteChip: false,
-      bHasBlackKing: false,
-      bHasWhiteKing: false,
-      isHighlighted: false,
-      isPossibleMove: false,
-      isPossibleCapture: false
+      bHasWhiteChip: false
     }
 
     const expected = [[2, 1, 0]]
@@ -151,24 +131,14 @@ describe('movement for black', () => {
       nRow: 4, 
       nCol: 3, 
       bHasBlackChip: true,
-      bHasWhiteChip: false,
-      bHasBlackKing: false,
-      bHasWhiteKing: false,
-      isHighlighted: false,
-      isPossibleMove: false,
-      isPossibleCapture: false
+      bHasWhiteChip: false
     }
 
     board[2][3] = {
       nRow: 3, 
       nCol: 4, 
       bHasBlackChip: true,
-      bHasWhiteChip: false,
-      bHasBlackKing: false,
-      bHasWhiteKing: false,
-      isHighlighted: false,
-      isPossibleMove: false,
-      isPossibleCapture: false
+      bHasWhiteChip: false
     }
 
     const expected = [[2, 1, 0]]
@@ -198,24 +168,14 @@ describe('movement for black', () => {
       nRow: 4, 
       nCol: 3, 
       bHasBlackChip: true,
-      bHasWhiteChip: false,
-      bHasBlackKing: false,
-      bHasWhiteKing: false,
-      isHighlighted: false,
-      isPossibleMove: false,
-      isPossibleCapture: false
+      bHasWhiteChip: false
     }
 
     board[2][1] = {
       nRow: 3, 
       nCol: 2, 
       bHasBlackChip: true,
-      bHasWhiteChip: false,
-      bHasBlackKing: false,
-      bHasWhiteKing: false,
-      isHighlighted: false,
-      isPossibleMove: false,
-      isPossibleCapture: false
+      bHasWhiteChip: false
     }
 
     const expected = [[2, 3, 0]]
@@ -245,36 +205,21 @@ describe('movement for black', () => {
       nRow: 4, 
       nCol: 3, 
       bHasBlackChip: true,
-      bHasWhiteChip: false,
-      bHasBlackKing: false,
-      bHasWhiteKing: false,
-      isHighlighted: false,
-      isPossibleMove: false,
-      isPossibleCapture: false
+      bHasWhiteChip: false
     }
 
     board[2][3] = {
       nRow: 3, 
       nCol: 4, 
       bHasBlackChip: true,
-      bHasWhiteChip: false,
-      bHasBlackKing: false,
-      bHasWhiteKing: false,
-      isHighlighted: false,
-      isPossibleMove: false,
-      isPossibleCapture: false
+      bHasWhiteChip: false
     }
 
     board[2][1] = {
       nRow: 3, 
       nCol: 2, 
       bHasBlackChip: true,
-      bHasWhiteChip: false,
-      bHasBlackKing: false,
-      bHasWhiteKing: false,
-      isHighlighted: false,
-      isPossibleMove: false,
-      isPossibleCapture: false
+      bHasWhiteChip: false
     }
 
     const expected = []

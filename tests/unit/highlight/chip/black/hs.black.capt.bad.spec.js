@@ -10,12 +10,7 @@ const getBoard = () => {
         nRow: r + 1, // nRow number 1-8, 1 is bottom
         nCol: c + 1, // column number 1-8, 1 is leftmost
         bHasBlackChip: false, // boolean
-        bHasWhiteChip: false, // boolean
-        bHasBlackKing: false, // boolean
-        bHasWhiteKing: false, // boolean,
-        isHighlighted: false,
-        isPossibleMove: false,
-        isPossibleCapture: false
+        bHasWhiteChip: false
       }
 
       board[r][c] = cell
@@ -44,36 +39,21 @@ describe('blocked capture attempt for black', () => {
       nRow: 4, 
       nCol: 3, 
       bHasBlackChip: true,
-      bHasWhiteChip: false,
-      bHasBlackKing: false,
-      bHasWhiteKing: false,
-      isHighlighted: false,
-      isPossibleMove: false,
-      isPossibleCapture: false
+      bHasWhiteChip: false
     }
 
     board[2][1] = {
       nRow: 3, 
       nCol: 2, 
       bHasBlackChip: false,
-      bHasWhiteChip: true,
-      bHasBlackKing: false,
-      bHasWhiteKing: false,
-      isHighlighted: false,
-      isPossibleMove: false,
-      isPossibleCapture: false
+      bHasWhiteChip: true
     }
 
     board[1][0] = {
       nRow: 2, 
       nCol: 1, 
       bHasBlackChip: false,
-      bHasWhiteChip: true,
-      bHasBlackKing: false,
-      bHasWhiteKing: false,
-      isHighlighted: false,
-      isPossibleMove: false,
-      isPossibleCapture: false
+      bHasWhiteChip: true
     }
 
     const expected = [
@@ -106,36 +86,21 @@ describe('blocked capture attempt for black', () => {
       nRow: 4, 
       nCol: 3, 
       bHasBlackChip: true,
-      bHasWhiteChip: false,
-      bHasBlackKing: false,
-      bHasWhiteKing: false,
-      isHighlighted: false,
-      isPossibleMove: false,
-      isPossibleCapture: false
+      bHasWhiteChip: false
     }
 
     board[2][1] = {
       nRow: 3, 
       nCol: 2, 
       bHasBlackChip: false,
-      bHasWhiteChip: true,
-      bHasBlackKing: false,
-      bHasWhiteKing: false,
-      isHighlighted: false,
-      isPossibleMove: false,
-      isPossibleCapture: false
+      bHasWhiteChip: true
     }
 
     board[1][0] = {
       nRow: 2, 
       nCol: 1, 
       bHasBlackChip: true,
-      bHasWhiteChip: false,
-      bHasBlackKing: false,
-      bHasWhiteKing: false,
-      isHighlighted: false,
-      isPossibleMove: false,
-      isPossibleCapture: false
+      bHasWhiteChip: false
     }
 
     const expected = [
@@ -168,36 +133,21 @@ describe('blocked capture attempt for black', () => {
       nRow: 4, 
       nCol: 3, 
       bHasBlackChip: true,
-      bHasWhiteChip: false,
-      bHasBlackKing: false,
-      bHasWhiteKing: false,
-      isHighlighted: false,
-      isPossibleMove: false,
-      isPossibleCapture: false
+      bHasWhiteChip: false
     }
 
     board[2][3] = {
       nRow: 3, 
       nCol: 4, 
       bHasBlackChip: false,
-      bHasWhiteChip: true,
-      bHasBlackKing: false,
-      bHasWhiteKing: false,
-      isHighlighted: false,
-      isPossibleMove: false,
-      isPossibleCapture: false
+      bHasWhiteChip: true
     }
 
     board[1][4] = {
       nRow: 2, 
       nCol: 5, 
       bHasBlackChip: false,
-      bHasWhiteChip: true,
-      bHasBlackKing: false,
-      bHasWhiteKing: false,
-      isHighlighted: false,
-      isPossibleMove: false,
-      isPossibleCapture: false
+      bHasWhiteChip: true
     }
 
     const expected = [
@@ -230,36 +180,21 @@ describe('blocked capture attempt for black', () => {
       nRow: 4, 
       nCol: 3, 
       bHasBlackChip: true,
-      bHasWhiteChip: false,
-      bHasBlackKing: false,
-      bHasWhiteKing: false,
-      isHighlighted: false,
-      isPossibleMove: false,
-      isPossibleCapture: false
+      bHasWhiteChip: false
     }
 
     board[2][3] = {
       nRow: 3, 
       nCol: 4, 
       bHasBlackChip: false,
-      bHasWhiteChip: true,
-      bHasBlackKing: false,
-      bHasWhiteKing: false,
-      isHighlighted: false,
-      isPossibleMove: false,
-      isPossibleCapture: false
+      bHasWhiteChip: true
     }
 
     board[1][4] = {
       nRow: 2, 
       nCol: 5, 
       bHasBlackChip: true,
-      bHasWhiteChip: false,
-      bHasBlackKing: false,
-      bHasWhiteKing: false,
-      isHighlighted: false,
-      isPossibleMove: false,
-      isPossibleCapture: false
+      bHasWhiteChip: false
     }
 
     const expected = [
@@ -292,24 +227,14 @@ describe('blocked capture attempt for black', () => {
       nRow: 4, 
       nCol: 2, 
       bHasBlackChip: true,
-      bHasWhiteChip: false,
-      bHasBlackKing: false,
-      bHasWhiteKing: false,
-      isHighlighted: false,
-      isPossibleMove: false,
-      isPossibleCapture: false
+      bHasWhiteChip: false
     }
 
     board[2][0] = {
       nRow: 3, 
       nCol: 1, 
       bHasBlackChip: false,
-      bHasWhiteChip: true,
-      bHasBlackKing: false,
-      bHasWhiteKing: false,
-      isHighlighted: false,
-      isPossibleMove: false,
-      isPossibleCapture: false
+      bHasWhiteChip: true
     }
 
     const expected = [
@@ -342,24 +267,14 @@ describe('blocked capture attempt for black', () => {
       nRow: 4, 
       nCol: 7, 
       bHasBlackChip: true,
-      bHasWhiteChip: false,
-      bHasBlackKing: false,
-      bHasWhiteKing: false,
-      isHighlighted: false,
-      isPossibleMove: false,
-      isPossibleCapture: false
+      bHasWhiteChip: false
     }
 
     board[2][7] = {
       nRow: 3, 
       nCol: 8, 
       bHasBlackChip: false,
-      bHasWhiteChip: true,
-      bHasBlackKing: false,
-      bHasWhiteKing: false,
-      isHighlighted: false,
-      isPossibleMove: false,
-      isPossibleCapture: false
+      bHasWhiteChip: true
     }
 
     const expected = [
