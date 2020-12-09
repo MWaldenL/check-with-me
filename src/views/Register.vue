@@ -67,32 +67,36 @@ export default {
   },
   
   computed: {
-    isValidFirstName () {
-      return /^[a-z]+$/i.test(this.firstName)
-    },
-
-    isValidLastName () {
-      return /^[a-z]+$/i.test(this.lastName)
+    isValidUsername () {
+      return /^[a-z0-9]+$/i.test(this.username)
     },
 
     isValidEmail () {
       const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-      return re.test(String(this.email).toLowerCase());
+      return this.email.length > 0 && re.test(String(this.email).toLowerCase());
     },
 
     isValidPassword () {
-      const regex = new RegExp("^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})");
-      return regex.test(this.password) 
+      const re = new RegExp("^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})");
+      return re.test(this.password) 
+    },
+
+    arePasswordsEqual () {
+      return this.password === this.confirmPassword
     }
   },
 
   methods: {
+    isValidName (name) {
+      return /^[a-z]+$/i.test(name)
+    },
+    
     register() {
-      return this.isValidFirstName  && 
-            this.isValidLastName    && 
-            this.isValidEmail       &&
-            this.isValidPassword    && 
-            this.password === this.confirmPassword
+      return this.isValidName(this.firstName) && 
+            this.isValidName(this.lastName) &&
+            this.isValidEmail &&
+            this.isValidPassword  && 
+            this.arePasswordsEqual
     }
   }
 }

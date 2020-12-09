@@ -1,0 +1,203 @@
+import { shallowMount } from '@vue/test-utils'
+import { BForm, BFormInput, BInputGroup, BButton } from 'bootstrap-vue'
+import Register from '@/views/Register'
+
+describe('Bad input tests on registration fields', () => {
+  let cmp
+  beforeEach(() => {
+    cmp = shallowMount(Register, {
+      stubs: {
+        'b-form': BForm,
+        'b-form-input': BFormInput,
+        'b-input-group': BInputGroup,
+        'b-button': BButton,
+      }})
+  })
+
+  describe('Name testing', ()  => {
+    it ('returns false if the user-inputted name contains numbers', () => {
+      // Arrange
+      const name = 'Matthew1'
+      
+      // Act
+      const result = cmp.vm.isValidName(name)
+      
+      // Assert
+      expect(result).toBe(false)
+    }),
+
+    it ('checks if the user-inputted name contains special characters', () => {
+      // Arrange
+      const name = 'Lua*'
+      
+      // Act
+      const result = cmp.vm.isValidName(name)
+      
+      // Assert
+      expect(result).toBe(false)
+    }),
+
+    it ('checks if the user-inputted name contains numbers and special characters', () => {
+      // Arrange
+      const name = 'Lua2*'
+      
+      // Act
+      const result = cmp.vm.isValidName(name)
+      
+      // Assert
+      expect(result).toBe(false)
+    }),
+
+    it ('checks if the user-inputted name is empty', () => {
+      // Arrange
+      const name = ''
+      
+      // Act
+      const result = cmp.vm.isValidName(name)
+      
+      // Assert
+      expect(result).toBe(false)
+    })
+  }),
+
+
+  describe('Email testing', () => {
+    it ('returns false if an email is empty', () => {
+      // Arrange
+      const email = ""
+
+      // Act
+      cmp.setData({ email })
+
+      // Assert
+      expect(cmp.vm.isValidEmail).toBe(false)
+    }),
+
+    it ('returns false if an email does not have an @ sign', () => {
+      // Arrange
+      const email = "useremail.com"
+
+      // Act
+      cmp.setData({ email })
+
+      // Assert
+      expect(cmp.vm.isValidEmail).toBe(false)
+    }),
+
+    it ('returns false if an email does not have an . sign', () => {
+      // Arrange
+      const email = "useremailcom"
+
+      // Act
+      cmp.setData({ email })
+
+      // Assert
+      expect(cmp.vm.isValidEmail).toBe(false)
+    }),
+
+    it ('returns false if an email has the . and @ signs reversed', () => {
+      // Arrange
+      const email = "user.email@com"
+
+      // Act
+      cmp.setData({ email })
+
+      // Assert
+      expect(cmp.vm.isValidEmail).toBe(false)
+    }),
+
+    it ('returns false if an email starts with the @ sign', () => {
+      // Arrange
+      const email = "@useremail.com"
+
+      // Act
+      cmp.setData({ email })
+
+      // Assert
+      expect(cmp.vm.isValidEmail).toBe(false)
+    }),
+
+    
+    it ('returns false if an email starts with the . sign', () => {
+      // Arrange
+      const email = ".comemailuser"
+
+      // Act
+      cmp.setData({ email })
+
+      // Assert
+      expect(cmp.vm.isValidEmail).toBe(false)
+    })
+  }),
+
+  describe('Password testing', () => {
+    it ('returns false if a given password is empty', () => {
+      // Arrange
+      const password = ""
+
+      // Act
+      cmp.setData({ password })
+
+      // Assert
+      expect(cmp.vm.isValidPassword).toBe(false)
+    }),
+
+    it ('returns false if a given password is less than 8 characters long', () => {
+      // Arrange
+      const password = "abcdefg"
+
+      // Act
+      cmp.setData({ password })
+
+      // Assert
+      expect(cmp.vm.isValidPassword).toBe(false)
+    }),
+
+    it ('returns false if a given password has no special characters', () => {
+      // Arrange
+      const password = "ABCcdefg"
+
+      // Act
+      cmp.setData({ password })
+
+      // Assert
+      expect(cmp.vm.isValidPassword).toBe(false)
+    }),
+
+    it ('returns false if a given password has no uppercase letter', () => {
+      // Arrange
+      const password = "abcdefg@"
+
+      // Act
+      cmp.setData({ password })
+
+      // Assert 
+      expect(cmp.vm.isValidPassword).toBe(false)
+    }),
+
+    it ('returns false if a given password has no lowercase letter', () => {
+      // Arrange
+      const password = "ABCDEFG&"
+
+      // Act
+      cmp.setData({ password })
+
+      // Assert
+      expect(cmp.vm.isValidPassword).toBe(false)
+    })
+  })
+
+  describe('Password matching', () => {
+    it (`returns false when the password and its confirmation don't match`, () => {
+      // Arrange
+      const password = "p@ssworD1"
+      const confirmPassword = "p@ssworD2"
+
+      // Act
+      cmp.setData({ password, confirmPassword })
+
+      // Assert
+      expect(cmp.vm.arePasswordsEqual).toBe(false)
+    })
+  })
+})

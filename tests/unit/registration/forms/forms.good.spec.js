@@ -1,40 +1,42 @@
 import { shallowMount } from '@vue/test-utils'
-import { BForm, BFormInline, BFormGroup, BButton } from 'bootstrap-vue'
+import { BForm, BFormInput, BInputGroup, BButton } from 'bootstrap-vue'
 import Register from '@/views/Register'
 
 describe('Good input tests on registration fields', () => {
   let cmp
   beforeEach(() => {
-    cmp = shallowMount(Register)
-      // stubs: {
-      //   'b-form': BForm,
-      //   'b-form-inline': BFormInline,
-      //   'b-form-group': BFormGroup,
-      //   'b-button': BButton,
-      // }})
+    cmp = shallowMount(Register, {
+      stubs: {
+        'b-form': BForm,
+        'b-form-input': BFormInput,
+        'b-input-group': BInputGroup,
+        'b-button': BButton,
+      }})
   })
 
   describe('Name testing', ()  => {
     it ('returns true if the user-inputted first name contains only letters', () => {
       // Arrange
-      const name = 'Matthew'
+      const firstName = 'Matthew'
       
       // Act
-      cmp.setData({ firstName: name })
-      
-      // Assert
-      expect(cmp.vm.isValidFirstName).toBe(true)
-    }),
+      const result = cmp.vm.isValidName(firstName)
 
-    it ('checks if the user-inputted last name contains only letters', () => {
-      // Arrange
-      const name = 'Lua'
-      
-      // Act
-      cmp.setData({ lastName: name })
-      
       // Assert
-      expect(cmp.vm.isValidLastName).toBe(true)
+      expect(result).toBe(true)
+    })
+  }),
+
+  describe('Username testing', ()  => {
+    it ('returns true if the user-inputted first name contains only letters', () => {
+      // Arrange
+      const username = "usernAMe"
+
+      // Act
+      cmp.setData({ username })
+
+      // Assert
+      expect(cmp.vm.isValidUsername).toBe(true)
     })
   }),
 
@@ -61,6 +63,20 @@ describe('Good input tests on registration fields', () => {
 
       // Assert
       expect(cmp.vm.isValidPassword).toBe(true)
+    })
+  }),
+
+  describe('Password matching', () => {
+    it (`returns true when a password and its confirmation match`, () => {
+      // Arrange
+      const password = "p@ssworD1"
+      const confirmPassword = "p@ssworD1"
+
+      // Act
+      cmp.setData({ password, confirmPassword })
+
+      // Assert
+      expect(cmp.vm.arePasswordsEqual).toBe(true)
     })
   })
 })
