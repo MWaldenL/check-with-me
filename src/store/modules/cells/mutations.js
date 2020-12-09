@@ -19,7 +19,7 @@ import { bIsValidCapture } from '../../services/kingCaptureService'
 import { getBoard } from '../board'
 
 const helpers = {
-  handleValidMove: (state, coords, newCurr, newDest, adjacent) => {
+  handleValidMove: (state, newCurr, newDest, adjacent) => {
     // Perform a deep copy for board updating
     const boardClone = JSON.parse(JSON.stringify(state.cells))
 
@@ -250,7 +250,7 @@ const mutations = {
 
       // Check if the move is valid
       if (bIsValidKingMove) {
-        helpers.handleValidMove(state, coords, newCurr, newDest)
+        helpers.handleValidMove(state, newCurr, newDest)
       } else {
         helpers.handleIllegalMove(state, coords)
       }
@@ -321,7 +321,7 @@ const mutations = {
     }
 
     if (bIsValidCapture) {
-      helpers.handleValidMove(state, coords, newCurr, newDest, adjacent)
+      helpers.handleValidMove(state, newCurr, newDest, adjacent)
     } else {
       helpers.handleIllegalMove(state, coords)
     }
@@ -375,7 +375,7 @@ const mutations = {
         bHasBlackKing: false
       }
 
-      helpers.handleValidMove(state, coords, newCurr, newDest, newTarget)
+      helpers.handleValidMove(state, newCurr, newDest, newTarget)
     }
   },
 
