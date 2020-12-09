@@ -32,7 +32,7 @@ const helpers = {
     // Update the state
     state.cells = boardClone
     state.firstClick = null
-    mutations.mUnhighlight(state, coords)
+    mutations.mUnhighlight(state)
   },
 
   handleIllegalMove: (state, coords) => {
@@ -56,11 +56,11 @@ const helpers = {
         bHasWhiteKing: bDestHasWhiteKing,
         bHasBlackKing: bDestHasBlackKing
       }
-      mutations.mUnhighlight(state, coords)
+      mutations.mUnhighlight(state)
       state.firstClick = newCoords
       mutations.mHighlight(state, newCoords)
     } else { // Otherwise, simply unhighlight the square
-      mutations.mUnhighlight(state, coords)
+      mutations.mUnhighlight(state)
     }
   }
 }
@@ -87,7 +87,7 @@ const mutations = {
   mHighlight: (state, coords) => {
     // If there is already a previously highlighted square, cancel it 
     if (state.firstClick !== null) {
-      mutations.mUnhighlight(state, coords)
+      mutations.mUnhighlight(state)
       state.firstClick = null
     }
 
