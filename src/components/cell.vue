@@ -286,7 +286,7 @@ export default {
   width: 60px;
   height: 60px;
   box-sizing: border-box;
-  opacity: 100%;
+  opacity: 100;
   display: flex;
   align-items: center;
   justify-content: center;
