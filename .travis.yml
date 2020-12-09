@@ -3,18 +3,19 @@ node_js:
 - lts/*
 jobs:
   include:
-  - stage: develop
-    script:
-    - npm run test:unit
-  - stage: release
-   # if: branch = Release
-    script:
-      - npm run build
-    deploy:
-      provider: firebase
-      token:
-        secure: "phzm6v1GKk+HgYsS2GWT6IMQjh5cjUMjJBRaB+S4yTX9k15A5frnWP6K4IOvI6aKOIN7/9btZBz5lUBBpHPxzIe0UKmSvwwYEsmh6ELgcQSapxHonDaF5xrqj9wZBHjRWYzyH4XX/Pz+hrRp2g4YEBiJsWGwMwpdXjERZ3b8myOLUQpFuhrVJbCtX1Nllgg+YUnNPW/6rUJteVxfkpdENcMieUcLUM9pRHZ6/wOasHBY3IXZ+TL4wBwXP+YF39KBDkRc04SvW0rqxFcDDOSLPRuzrFXJyaWPo4b21vP36Wk/mnrlsVMg5vdMjPwhr+h9rpeUSlEqzf2yTideKLUnX7K3qxJNq44SPR6XEktIykRyIywmnXV3qMzjopj6Zk/IY/wu/2fXkznw/joFHe3LkEzoSyO4IatH9oLFtZG9vhR5S/A2YlZ0P62WNgr6XbjPvRLQd3oL+gIEvb9/SzefDFRCAijWj+rRLcWltKK2OgocRXX7ZlPjdZdUwpU5BqtRWstqBpqF3zVvvEFhziGQ0NHmrghuY9VO1cIZYi4SpumGSuSAuudLJABzWX0KpwP5t/iwjgtTZXyKkEB4SX66HrrPzQb+8Kf1/nvcOG0sWD+IwH599LVYnkcf4+mgkOdyn+ffSdm+NftVRKHgpMgTwdy5ok9DGdlZqMcTYxgwzrU="
-
-# env:
-#   global:
-#     secure: phzm6v1GKk+HgYsS2GWT6IMQjh5cjUMjJBRaB+S4yTX9k15A5frnWP6K4IOvI6aKOIN7/9btZBz5lUBBpHPxzIe0UKmSvwwYEsmh6ELgcQSapxHonDaF5xrqj9wZBHjRWYzyH4XX/Pz+hrRp2g4YEBiJsWGwMwpdXjERZ3b8myOLUQpFuhrVJbCtX1Nllgg+YUnNPW/6rUJteVxfkpdENcMieUcLUM9pRHZ6/wOasHBY3IXZ+TL4wBwXP+YF39KBDkRc04SvW0rqxFcDDOSLPRuzrFXJyaWPo4b21vP36Wk/mnrlsVMg5vdMjPwhr+h9rpeUSlEqzf2yTideKLUnX7K3qxJNq44SPR6XEktIykRyIywmnXV3qMzjopj6Zk/IY/wu/2fXkznw/joFHe3LkEzoSyO4IatH9oLFtZG9vhR5S/A2YlZ0P62WNgr6XbjPvRLQd3oL+gIEvb9/SzefDFRCAijWj+rRLcWltKK2OgocRXX7ZlPjdZdUwpU5BqtRWstqBpqF3zVvvEFhziGQ0NHmrghuY9VO1cIZYi4SpumGSuSAuudLJABzWX0KpwP5t/iwjgtTZXyKkEB4SX66HrrPzQb+8Kf1/nvcOG0sWD+IwH599LVYnkcf4+mgkOdyn+ffSdm+NftVRKHgpMgTwdy5ok9DGdlZqMcTYxgwzrU=
+    - stage: develop
+      script:
+        - npm run test:unit
+        
+    - stage: release
+      if: branch = Release
+      script: 
+        - npm run build
+      deploy:
+        skip_cleanup: true
+        provider: firebase
+        token:
+          secure: "phzm6v1GKk+HgYsS2GWT6IMQjh5cjUMjJBRaB+S4yTX9k15A5frnWP6K4IOvI6aKOIN7/9btZBz5lUBBpHPxzIe0UKmSvwwYEsmh6ELgcQSapxHonDaF5xrqj9wZBHjRWYzyH4XX/Pz+hrRp2g4YEBiJsWGwMwpdXjERZ3b8myOLUQpFuhrVJbCtX1Nllgg+YUnNPW/6rUJteVxfkpdENcMieUcLUM9pRHZ6/wOasHBY3IXZ+TL4wBwXP+YF39KBDkRc04SvW0rqxFcDDOSLPRuzrFXJyaWPo4b21vP36Wk/mnrlsVMg5vdMjPwhr+h9rpeUSlEqzf2yTideKLUnX7K3qxJNq44SPR6XEktIykRyIywmnXV3qMzjopj6Zk/IY/wu/2fXkznw/joFHe3LkEzoSyO4IatH9oLFtZG9vhR5S/A2YlZ0P62WNgr6XbjPvRLQd3oL+gIEvb9/SzefDFRCAijWj+rRLcWltKK2OgocRXX7ZlPjdZdUwpU5BqtRWstqBpqF3zVvvEFhziGQ0NHmrghuY9VO1cIZYi4SpumGSuSAuudLJABzWX0KpwP5t/iwjgtTZXyKkEB4SX66HrrPzQb+8Kf1/nvcOG0sWD+IwH599LVYnkcf4+mgkOdyn+ffSdm+NftVRKHgpMgTwdy5ok9DGdlZqMcTYxgwzrU="
+        on:
+          branch: Release
+    
