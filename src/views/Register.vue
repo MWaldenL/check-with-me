@@ -97,12 +97,6 @@ export default {
 
     arePasswordsEqual () {
       return this.password === this.confirmPassword
-    }
-  },
-
-  methods: {
-    isValidName (name) {
-      return /^[a-z]+$/i.test(name)
     },
 
     isValidRegistration () {
@@ -111,15 +105,21 @@ export default {
             this.isValidEmail &&
             this.isValidPassword && 
             this.arePasswordsEqual
+    }
+  },
+
+  methods: {
+    isValidName (name) {
+      return /^[a-z]+$/i.test(name)
     },
 
     async register () {
-      if (this.isValidRegistration()) {
+      if (this.isValidRegistration) {
         console.log('Registering')
         firebase.auth().createUserWithEmailAndPassword(this.email, this.password)
-          .then((user) => {
+          .then(res => {
             // Fetch the users doc
-            const userRef = db.collection('users').doc(user.user.uid)
+            const userRef = db.collection('users').doc(res.user.uid)
             userRef.set({
               first_name: this.firstName,
               last_name: this.lastName,
