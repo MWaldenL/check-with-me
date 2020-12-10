@@ -1,6 +1,8 @@
 <template>
 <div id="registration" class="container">
-  <b-form @submit="register">
+<div class="col-8">
+  <h1 id="titleRegister" class="text-white">Register</h1>
+  <b-form @submit.prevent="register">
     <!-- First and Last Name -->
     <b-form inline>
       <label class="sr-only" for="firstName">First Name</label>
@@ -21,13 +23,19 @@
     <!-- Username -->
     <label class="sr-only" for="username">Username</label>
     <b-input-group prepend="@" class="mb-2 mr-sm-2 mb-sm-0">
-      <b-form-input id="inline-form-input-username" placeholder="Username" />
+      <b-form-input 
+        id="inline-form-input-username" 
+        placeholder="Username" 
+        v-model="username" />
     </b-input-group>
 
     <!-- Email -->
     <label class="sr-only" for="email">Email</label>
     <b-input-group class="mb-2 mr-sm-2 mb-sm-0">
-      <b-form-input id="inline-form-input-username" placeholder="Email" />
+      <b-form-input 
+        id="inline-form-input-username" 
+        placeholder="Email" 
+        v-model="email" />
     </b-input-group>
 
     <!-- Passwords -->
@@ -36,6 +44,7 @@
       <b-form-input
         id="password"
         class="mb-2 mr-sm-2 mb-sm-0"
+        type="password"
         placeholder="Password" 
         v-model="password" />
 
@@ -43,6 +52,7 @@
       <b-form-input
         id="lastName"
         class="mb-2 mr-sm-2 mb-sm-0"
+        type="password"
         placeholder="Confirm Password" 
         v-model="confirmPassword" />
     </b-form>
@@ -50,19 +60,21 @@
     <b-button variant="primary" type="submit">Register</b-button>
   </b-form>
 </div>
+</div>
 </template>
 
 <script>
+import firebase from 'firebase'
 export default {
   name: 'Register',
   data() {
     return {
-      firstName: '',
-      lastName: '',
-      username: '',
-      email: '',
-      password: '',
-      confirmPassword: ''
+      firstName: 'Prinz',
+      lastName: 'Eugen',
+      username: 'prnz_eugn',
+      email: 'prnz_eugen@gmail.com',
+      password: 'p@ssworD1',
+      confirmPassword: 'p@ssworD1'
     }
   },
   
@@ -90,13 +102,28 @@ export default {
     isValidName (name) {
       return /^[a-z]+$/i.test(name)
     },
-    
-    register() {
+
+    isValidRegistration () {
       return this.isValidName(this.firstName) && 
             this.isValidName(this.lastName) &&
             this.isValidEmail &&
-            this.isValidPassword  && 
+            this.isValidPassword && 
             this.arePasswordsEqual
+    },
+
+    register () {
+      if (this.isValidRegistration()) {
+        console.log('Registering')
+        firebase.auth().createUserWithEmailAndPassword(this.email, this.password)
+          .then((user) => {
+            console.log(user)
+          })
+          .catch((error) => {
+            var errorCode = error.code;
+            var errorMessage = error.message;
+            console.log(error)
+          });
+      }
     }
   }
 }
