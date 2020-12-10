@@ -19,8 +19,8 @@ firebase.initializeApp(firebaseConfig)
 const db = firebase.firestore()
 const auth = firebase.auth()
 
-firebase.auth().onAuthStateChanged(user => {
-  store.dispatch("fetchUser", user);
+auth.onAuthStateChanged(user => {
+  store.dispatch("setUser", user);
 });
 
 // Collections

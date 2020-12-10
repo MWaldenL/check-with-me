@@ -65,6 +65,8 @@
 
 <script>
 import firebase from 'firebase'
+import { db } from '@/firebase'
+
 export default {
   name: 'Register',
   data() {
@@ -111,14 +113,28 @@ export default {
             this.arePasswordsEqual
     },
 
-    register () {
+    async register () {
       if (this.isValidRegistration()) {
         console.log('Registering')
         firebase.auth().createUserWithEmailAndPassword(this.email, this.password)
           .then((user) => {
-            console.log(user)
+            // Fetch the users doc
+            const userRef = db.collection('users').doc(user.user.uid)
+            userRef.set({
+              first_name: this.firstName,
+              last_name: this.lastName,
+              username: this.username,
+              points: 0,
+              loss_white: 0,
+              loss_black: 0,
+              wins_white: 0,
+              wins_black: 0,
+              draw_white: 0,
+              draw_black: 0
+            })
           })
           .catch((error) => {
+            console.log('Error')
             var errorCode = error.code;
             var errorMessage = error.message;
             console.log(error)
