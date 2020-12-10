@@ -13,15 +13,12 @@ export const getPossibleMoveBlack = (board, nRow, nCol) => {
     const bBottLeft = board[nRow - 2][nCol - 2]
 
     if (!bBottLeft.bHasBlackChip && !bBottLeft.bHasWhiteChip) {
-      console.log("here3")
       moves.push([nRow - 2, nCol - 2, 0])
     } else if (bBottLeft.bHasBlackChip) {
       // skip
     } else if (bBottLeft.bHasWhiteChip && bBottLeftCaptValid && !bBottLeftCaptUnblocked) {
-      console.log("here1")
       // skip
     } else if (bBottLeft.bHasWhiteChip && bBottLeftCaptValid && bBottLeftCaptUnblocked) {
-      console.log("here2")
       moves.push([nRow - 2, nCol - 2, 1])
       moves.push([nRow - 3, nCol - 3, 0])
     }
@@ -32,21 +29,17 @@ export const getPossibleMoveBlack = (board, nRow, nCol) => {
     const bBottRight = board[nRow - 2][nCol]
 
     if (!bBottRight.bHasBlackChip && !bBottRight.bHasWhiteChip) {
-      console.log("here3")
       moves.push([nRow - 2, nCol, 0])
     } else if (bBottRight.bHasBlackChip) {
       // skip
     } else if (bBottRight.bHasWhiteChip && bBottRightCaptValid && !bBottRightCaptUnblocked) {
-      console.log("here1")
       // skip
     } else if (bBottRight.bHasWhiteChip && bBottRightCaptValid && bBottRightCaptUnblocked) {
-      console.log("here2")
       moves.push([nRow - 2, nCol, 1])
       moves.push([nRow - 3, nCol + 1, 0])
     } 
     
   }
-
   return moves
 }
 
@@ -65,15 +58,12 @@ export const getPossibleMoveWhite = (board, nRow, nCol) => {
     const bTopLeft = board[nRow][nCol - 2]
 
     if (!bTopLeft.bHasBlackChip && !bTopLeft.bHasWhiteChip) {
-      console.log("here3")
       moves.push([nRow, nCol - 2, 0])
     } else if (bTopLeft.bHasWhiteChip) {
       // skip
     } else if (bTopLeft.bHasBlackChip && bTopLeftCaptValid && !bTopLeftCaptUnblocked) {
-      console.log("here1")
       // skip
     } else if (bTopLeft.bHasBlackChip && bTopLeftCaptValid && bTopLeftCaptUnblocked) {
-      console.log("here2")
       moves.push([nRow, nCol - 2, 1])
       moves.push([nRow + 1, nCol - 3, 0])
     }
@@ -84,15 +74,12 @@ export const getPossibleMoveWhite = (board, nRow, nCol) => {
     const bTopRight = board[nRow][nCol]
 
     if (!bTopRight.bHasBlackChip && !bTopRight.bHasWhiteChip) {
-      console.log("here3")
       moves.push([nRow, nCol, 0])
     } else if (bTopRight.bHasWhiteChip) {
       // skip
     } else if (bTopRight.bHasBlackChip && bTopRightCaptValid && !bTopRightCaptUnblocked) {
-      console.log("here1")
       // skip
     } else if (bTopRight.bHasBlackChip && bTopRightCaptValid && bTopRightCaptUnblocked) {
-      console.log("here2")
       moves.push([nRow, nCol, 1])
       moves.push([nRow + 1, nCol + 1, 0])
     } 
