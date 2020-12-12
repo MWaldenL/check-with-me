@@ -1,6 +1,9 @@
 <template>
 <b-container id="pageRegistration">
+  <!-- Logo -->
   <img id="imgLogo" class="logo" src="../../public/assets/logo.png">
+
+  <!-- Form section -->
   <b-row id="sectionForm" align-h="center">
     <div class="col-7 d-flex flex-column justify-content-center">
       <b-form @submit.prevent="register">
@@ -35,7 +38,7 @@
         <label id="labelEmail" class="sr-only" for="email">Email</label>
         <b-input-group>
           <b-form-input 
-            id="username" 
+            id="email" 
             class="form-input" style="margin: 8px"
             placeholder="Email" 
             v-model="email" />
@@ -53,17 +56,21 @@
 
           <label class="sr-only" for="confirmPass">Confirm Password</label>
           <b-form-input
-            id="lastName"
+            id="confirmPassword"
             class="form-input flex-grow-1"
             type="password"
             placeholder="Confirm Password" 
             v-model="confirmPassword" />
         </b-form>
 
-        <b-button id="btnSubmit" type="submit">Register</b-button>
+        <b-button id="btnSubmit" :disabled="!isValidRegistration" type="submit">
+          Register
+        </b-button>
       </b-form>
     </div>
   </b-row>
+
+  <!-- Already logged in? -->
   <b-row id="sectionRouteLogin" align-h="center">
     <h4 id="textAccountExists" class="text-white">Already have an account?</h4>
     <router-link to="/login" class="routerLink">
@@ -83,8 +90,8 @@ export default {
     return {
       firstName: 'Prinz',
       lastName: 'Eugen',
-      username: 'prnz_eugn',
-      email: 'prnz_eugen@gmail.com',
+      username: 'prnzeugn',
+      email: 'luamatthew@gmail.com',
       password: 'p@ssworD1',
       confirmPassword: 'p@ssworD1',
     }
@@ -97,7 +104,8 @@ export default {
 
     isValidEmail () {
       const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-      return this.email.length > 0 && re.test(String(this.email).toLowerCase());
+      return this.email.length > 0 && 
+             re.test(String(this.email).toLowerCase());
     },
 
     isValidPassword () {
@@ -112,6 +120,7 @@ export default {
     isValidRegistration () {
       return this.isValidName(this.firstName) && 
             this.isValidName(this.lastName) &&
+            this.isValidUsername && 
             this.isValidEmail &&
             this.isValidPassword && 
             this.arePasswordsEqual
@@ -127,26 +136,46 @@ export default {
       if (this.isValidRegistration) {
         console.log('Registering')
         firebase.auth().createUserWithEmailAndPassword(this.email, this.password)
-          .then(res => {
-            // Fetch the users doc
-            const userRef = db.collection('users').doc(res.user.uid)
-            userRef.set({
-              first_name: this.firstName,
-              last_name: this.lastName,
-              username: this.username,
-              points: 0,
-              loss_white: 0,
-              loss_black: 0,
-              wins_white: 0,
-              wins_black: 0,
-              draw_white: 0,
-              draw_black: 0
-            })
+          .then(async res => {
+            // Search for the username in the database
+            db.collection('users')
+              .where('username', '==', this.username)
+              .get()
+              .then(qs => {
+                if (qs.empty) { // The username does not exist
+                  // Create a new user
+                  const newUserRef = db.collection('users').doc(res.user.uid)
+                  
+                  // Add the user to the database
+                  userRef.set({
+                    first_name: this.firstName,
+                    last_name: this.lastName,
+                    username: this.username,
+                    points: 0,
+                    loss_white: 0,
+                    loss_black: 0,
+                    wins_white: 0,
+                    wins_black: 0,
+                    draw_white: 0,
+                    draw_black: 0
+                  })
+                } else {
+                  console.log('Username exists in db!')
+                }
+              })  
+              .catch(e => console.log(e))
           })
+
           .catch((error) => {
             console.log('Error')
-            var errorCode = error.code;
-            var errorMessage = error.message;
+            var errorCode = error.code
+            var errorMessage = error.message
+
+            // Handle duplicate emails
+            if (errorCode === 'auth/email-already-in-use') {
+              console.log('Email already in use')
+              // Show an error message
+            } 
             console.log(error)
           });
       }

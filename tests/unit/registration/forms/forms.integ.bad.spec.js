@@ -95,7 +95,7 @@ describe ('Integration test on bad form field inputs', () => {
       const firstName = 'Prinz1'
       const lastName = 'Eugen'
       const username = 'prnz_eugn'
-      const email = 'prnz_eugengmail.com'
+      const email = ''
       const password = 'p@ssworD1'
       const confirmPassword = 'p@ssworD1'
 
