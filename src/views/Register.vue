@@ -4,7 +4,7 @@
   <img id="imgLogo" class="logo" src="../../public/assets/logo.png">
 
   <!-- Form section -->
-  <b-row id="sectionForm" align-h="center">
+  <b-row id="sectionRegForm" align-h="center">
     <div class="col-7 d-flex flex-column justify-content-center">
       <b-form @submit.prevent="register">
 
@@ -42,10 +42,10 @@
         </b-form>
         
         <!-- Username -->
-        <label id="labelUsername" class="sr-only" for="username">Username</label>
+        <label id="labelRegUsername" class="sr-only" for="regUsername">Username</label>
         <b-input-group>
           <b-form-input 
-            id="username"
+            id="regUsername"
             class="form-input" style="margin: 8px"
             placeholder="Username" 
             v-model="username" />
@@ -63,7 +63,7 @@
 
         <!-- Passwords -->
         <b-form inline>
-          <label class="sr-only" for="password">Password</label>
+          <label id="labelRegPassword" class="sr-only" for="password">Password</label>
           <b-form-input
             id="password"
             class="form-input flex-grow-1"
@@ -71,7 +71,7 @@
             placeholder="Password" 
             v-model="password" />
 
-          <label class="sr-only" for="confirmPass">Confirm Password</label>
+          <label id="labelConfirmPassword" class="sr-only" for="confirmPass">Confirm Password</label>
           <b-form-input
             id="confirmPassword"
             class="form-input flex-grow-1"
@@ -89,9 +89,9 @@
 
   <!-- Already logged in? -->
   <b-row id="sectionRouteLogin" align-h="center">
-    <h4 id="textAccountExists" class="text-white">Already have an account?</h4>
+    <h5 id="textAccountExists" class="text-white">Already have an account?</h5>
     <router-link to="/login" class="routerLink">
-      <h4 id="linkLogin" class="text-white">Login here</h4>
+      <h5 id="linkLogin" class="text-white">Login here</h5>
     </router-link>
   </b-row>
 </b-container>
@@ -174,34 +174,7 @@ export default {
         this.handleDBUserRegistration()
       } else {
         console.log('Invalid fields')
-        if (!this.isValidName(this.firstName)) {
-          this.errorMessages.firstName = 'First name must contain letters only.'
-        } 
-
-        if (!this.isValidName(this.lastName)) {
-          this.errorMessages.lastName = 'Last name must contain letters only.'
-        } 
-        
-        if (!this.isValidUsername) {
-          this.errorMessages.username = 'Username must contain letters and/or numbers only.'
-        } 
-
-        if (!this.isValidEmail) {
-          this.errorMessages.email = 'Please enter a valid email.'
-        } 
-
-        if (!this.isValidPassword) {
-          this.errorMessages.password = 
-            `Password must contain at least 8 characters, 
-              1 uppercase letter, 
-              1 lowercase letter, 
-              1 number, and
-              1 special character.`
-        } 
-
-        if (!this.arePasswordsEqual) {
-          this.errorMessages.confirmPassword = `Passwords don't match.`
-        }
+        this.handleInvalidFields()
       }
     },
 
@@ -241,11 +214,42 @@ export default {
                 console.log(error)
               })
           } else { // That username is in use
-            // Set an error message
+            console.log('Username already in use')
             this.errorMessages.usernameExists = `That username already exists.`
           }
         })
         .catch(e => console.log(e))
+    },
+
+    handleInvalidFields () {
+      if (!this.isValidName(this.firstName)) {
+        this.errorMessages.firstName = 'First name must contain letters only.'
+      } 
+
+      if (!this.isValidName(this.lastName)) {
+        this.errorMessages.lastName = 'Last name must contain letters only.'
+      } 
+      
+      if (!this.isValidUsername) {
+        this.errorMessages.username = 'Username must contain letters and/or numbers only.'
+      } 
+
+      if (!this.isValidEmail) {
+        this.errorMessages.email = 'Please enter a valid email.'
+      } 
+
+      if (!this.isValidPassword) {
+        this.errorMessages.password = 
+          `Password must contain at least 8 characters, 
+            1 uppercase letter, 
+            1 lowercase letter, 
+            1 number, and
+            1 special character.`
+      } 
+
+      if (!this.arePasswordsEqual) {
+        this.errorMessages.confirmPassword = `Passwords don't match.`
+      }
     }
   }
 }
@@ -255,6 +259,7 @@ export default {
 * {
   font-family: 'Raleway';
 }
+
 
 .error-message {
   margin: 0.5rem 0.5rem;

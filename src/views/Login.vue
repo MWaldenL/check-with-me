@@ -1,35 +1,165 @@
 <template>
-  <div>
-    <form @submit="login" action="">
-      <label for="email" style="color: #FFF">Email</label>
-      <input id="email" type="email" v-model="email" />
-      <label for="password" style="color: #FFF">Password</label>
-      <input id="password" type="password" v-model="password" />
-      <input type="submit" />
-    </form>
-  </div>
+<b-container id="pageLogin">
+  <!-- Logo -->
+  <img id="imgLogo" class="logo" src="../../public/assets/logo.png">
+
+  <!-- Form section -->
+  <b-row id="sectionLoginForm" align-h="center">
+    <div class="col-4 d-flex flex-column justify-content-center">
+      <b-form @submit.prevent="login">
+        <!-- Username -->
+        <label id="labelLoginUsername" class="sr-only" for="username">Username</label>
+        <b-input-group>
+          <b-form-input 
+            id="loginUsername"
+            class="form-input" style="margin: 8px"
+            placeholder="username" 
+            v-model="username" />
+        </b-input-group>
+
+        <!-- Email -->
+        <label id="labelLoginPassword" class="sr-only" for="loginPassword">Password</label>
+        <b-input-group>
+          <b-form-input 
+            id="loginPassword" 
+            class="form-input" style="margin: 8px"
+            placeholder="password" 
+            v-model="password" />
+        </b-input-group>
+
+        <b-button id="btnSubmit" :disabled="!areFieldsComplete" type="submit">
+          Log In
+        </b-button>
+      </b-form>
+    </div>
+  </b-row>
+
+  <!-- Already logged in? -->
+  <b-row id="sectionRouteLogin" align-h="center">
+    <h5 id="textNoAccount" class="text-grey">Don't have an account?</h5>
+    <router-link to="/register" class="routerLink">
+      <h5 id="linkRegister" class="text-white">Register now</h5>
+    </router-link>
+  </b-row>
+  <b-row id="sectionMakeAnAcct" align-h="center">
+    <h5 id="textMakeAnAccount" class="text-grey">
+      Make an account to access <br> our website’s exclusive features!
+    </h5>
+  </b-row>
+</b-container>
 </template>
+
 <script>
 import firebase from 'firebase'
 import { db } from '@/firebase'
+
 export default {
   data () {
     return {
       email: '',
       password: '',
+      errorMessages: {
+        usernameDoesNotExist: null,
+        invalidPassword: null
+      }
     }
   },
+
+  computed: {
+    areFieldsComplete () {
+      return this.email !== '' && this.password !== ''
+    }
+  },
+
   methods: {
-    login() {
-      firebase.auth().signInWithEmailAndPassword(this.email, this.password)
-        .then((user) => {
-          this.$router.push('/')
+    async login() {
+      // Check if the username does not exist in db
+      db.collection('users')
+        .where('username', '==', this.username)
+        .get()
+        .then(querySnapshot => {
+          if (querySnapshot.empty) { // The username doesn't exist
+            this.errorMessages.usernameDoesNotExist = ``
+          } else {
+            // Retrieve user email from uid from username
+            console.log(querySnapshot[0])
+  
+            // firebase
+            //   .auth()
+            //   .signInWithEmailAndPassword(this.email, this.password)
+            //   .then(user => {
+            //     // Proceed to the main page
+            //     this.$router.push('/')
+            //   })
+            //   .catch(error => {
+            //     var errorCode = error.code;
+            //     var errorMessage = error.message; 
+            //   })
+          }
         })
-        .catch((error) => {
-          var errorCode = error.code;
-          var errorMessage = error.message;
-        });
+
     }
   }
 }
 </script>
+
+<style scoped>
+* {
+  font-family: 'Raleway';
+}
+
+.error-message {
+  margin: 0.5rem 0.5rem;
+}
+
+.form-input {
+  height: 50px;
+  margin: 0.5rem 0.5rem;
+  border: none;
+  border-radius: 0;
+  background-color: #c4c4c4
+}
+
+.form-input:focus {
+  background-color: #C4C4C4
+}
+
+.logo {
+  width: 50%; 
+  margin: 3rem
+}
+
+.margin-8 {
+  margin: 8px
+}
+
+.text-white {
+  color: #FFFFFF
+}
+
+.text-grey {
+  color: #969696
+}
+
+#btnSubmit { 
+  margin: 2.5rem;
+  background-color: transparent;
+  border: none;
+  outline: none;
+  font-size: 2.125rem;
+  font-weight: 700;
+}
+
+#textNoAccount {
+  color: #969696
+}
+
+#linkRegister {
+  margin-left: 10px;
+}
+
+.routerLink {
+  text-decoration: none;
+  border-bottom: 0
+}
+</style>
