@@ -7,7 +7,23 @@
   <b-row id="sectionForm" align-h="center">
     <div class="col-7 d-flex flex-column justify-content-center">
       <b-form @submit.prevent="register">
+
         <!-- First and Last Name -->
+        <b-form class="d-flex justify-content-between" inline>
+          <span 
+            id="errFirstName" 
+            class="d-flex flex-grow-1 error-message text-white"
+            v-if="errorMessages.firstName">
+            {{ errorMessages.firstName }}
+          </span>
+          <span 
+            id="errFirstName" 
+            class="d-flex flex-grow-1 error-message text-white" 
+            v-if="errorMessages.lastName">
+             {{ errorMessages.lastName }}
+          </span>
+        </b-form>
+
         <b-form id="firstLastName" class="d-flex justify-content-between" inline>
           <label id="labelFirstName" class="sr-only" for="firstName">First Name</label>
           <b-form-input
@@ -15,6 +31,7 @@
             class="form-input flex-grow-1"
             placeholder="First Name" 
             v-model="firstName" />
+
 
           <label id="labelLastName" class="sr-only" for="lastName">Last Name</label>
           <b-form-input
@@ -63,7 +80,7 @@
             v-model="confirmPassword" />
         </b-form>
 
-        <b-button id="btnSubmit" :disabled="!isValidRegistration" type="submit">
+        <b-button id="btnSubmit" :disabled="!areFieldsComplete" type="submit">
           Register
         </b-button>
       </b-form>
@@ -94,6 +111,16 @@ export default {
       email: 'luamatthew@gmail.com',
       password: 'p@ssworD1',
       confirmPassword: 'p@ssworD1',
+
+      errorMessages: {
+        firstName: null,
+        lastName: null,
+        username: null,
+        password: null,
+        confirmPassword: null,
+        usernameExists: null,
+        emailExists: null
+      }
     }
   },
   
@@ -117,6 +144,15 @@ export default {
       return this.password === this.confirmPassword
     },
 
+    areFieldsComplete () {
+      return this.firstName !== '' &&
+            this.lastName !== '' &&
+            this.username !== '' &&
+            this.email !== '' &&
+            this.password !== '' &&
+            this.confirmPassword !== ''
+    },
+
     isValidRegistration () {
       return this.isValidName(this.firstName) && 
             this.isValidName(this.lastName) &&
@@ -135,50 +171,81 @@ export default {
     async register () {
       if (this.isValidRegistration) {
         console.log('Registering')
-        firebase.auth().createUserWithEmailAndPassword(this.email, this.password)
-          .then(async res => {
-            // Search for the username in the database
-            db.collection('users')
-              .where('username', '==', this.username)
-              .get()
-              .then(qs => {
-                if (qs.empty) { // The username does not exist
-                  // Create a new user
-                  const newUserRef = db.collection('users').doc(res.user.uid)
-                  
-                  // Add the user to the database
-                  userRef.set({
-                    first_name: this.firstName,
-                    last_name: this.lastName,
-                    username: this.username,
-                    points: 0,
-                    loss_white: 0,
-                    loss_black: 0,
-                    wins_white: 0,
-                    wins_black: 0,
-                    draw_white: 0,
-                    draw_black: 0
-                  })
-                } else {
-                  console.log('Username exists in db!')
-                }
-              })  
-              .catch(e => console.log(e))
-          })
+        this.handleDBUserRegistration()
+      } else {
+        console.log('Invalid fields')
+        if (!this.isValidName(this.firstName)) {
+          this.errorMessages.firstName = 'First name must contain letters only.'
+        } 
 
-          .catch((error) => {
-            console.log('Error')
-            var errorCode = error.code
-            var errorMessage = error.message
+        if (!this.isValidName(this.lastName)) {
+          this.errorMessages.lastName = 'Last name must contain letters only.'
+        } 
+        
+        if (!this.isValidUsername) {
+          this.errorMessages.username = 'Username must contain letters and/or numbers only.'
+        } 
 
-            // Handle duplicate emails
-            if (errorCode === 'auth/email-already-in-use') {
-              console.log('Email already in use')
-              // Show an error message
-            } 
-            console.log(error)
-          });
+        if (!this.isValidEmail) {
+          this.errorMessages.email = 'Please enter a valid email.'
+        } 
+
+        if (!this.isValidPassword) {
+          this.errorMessages.password = 
+            `Password must contain at least 8 characters, 
+              1 uppercase letter, 
+              1 lowercase letter, 
+              1 number, and
+              1 special character.`
+        } 
+
+        if (!this.arePasswordsEqual) {
+          this.errorMessages.confirmPassword = `Passwords don't match.`
+        }
       }
+    },
+
+    handleDBUserRegistration () {
+      // Search for the username in the db
+      db.collection('users')
+        .where('username', '==', this.username)
+        .get()
+        .then(querySnapshot => {
+          if (querySnapshot.empty) {  // If no records have been found with that username
+            firebase  
+              .auth()
+              .createUserWithEmailAndPassword(this.email, this.password)
+              .then(res => {
+                const newUserRef = db.collection('users').doc(res.user.uid)
+                
+                // Add the user to the database
+                userRef.set({
+                  first_name: this.firstName,
+                  last_name: this.lastName,
+                  username: this.username,
+                  points: 0,
+                  loss_white: 0,
+                  loss_black: 0,
+                  wins_white: 0,
+                  wins_black: 0,
+                  draw_white: 0,
+                  draw_black: 0
+                })
+              })
+              .catch(error => {
+                // Handle duplicate emails
+                if (error.code === 'auth/email-already-in-use') {
+                  console.log('Email already in use')
+                  this.errorMessages.emailExists = `That email already exists.`
+                } 
+                console.log(error)
+              })
+          } else { // That username is in use
+            // Set an error message
+            this.errorMessages.usernameExists = `That username already exists.`
+          }
+        })
+        .catch(e => console.log(e))
     }
   }
 }
@@ -187,6 +254,10 @@ export default {
 <style scoped>
 * {
   font-family: 'Raleway';
+}
+
+.error-message {
+  margin: 0.5rem 0.5rem;
 }
 
 .form-input {
