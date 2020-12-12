@@ -15,11 +15,22 @@ const firebaseConfig = {
 
 firebase.initializeApp(firebaseConfig)
 
+
+
 // Utilities
 const db = firebase.firestore()
 const auth = firebase.auth()
 
-auth.onAuthStateChanged(user => {
+firebase.getCurrentUser = () => {
+  return new Promise((resolve, reject) => {
+    const unsubscribe = firebase.auth().onAuthStateChanged(user => {
+      unsubscribe();
+      resolve(user);
+    }, reject)
+  })
+}
+
+firebase.auth().onAuthStateChanged(user => {
   store.dispatch("setUser", user);
 });
 

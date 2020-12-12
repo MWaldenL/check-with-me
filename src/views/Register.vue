@@ -295,10 +295,6 @@ export default {
   margin: 3rem
 }
 
-.margin-8 {
-  margin: 8px
-}
-
 .text-error {
   color: #F5545F
 }
