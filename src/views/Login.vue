@@ -6,6 +6,14 @@
   <!-- Form section -->
   <b-row id="sectionLoginForm" align-h="center">
     <div class="col-4 d-flex flex-column justify-content-center">
+      <b-col id="loginErrorMessages">
+        <span v-for="err in errors" :key="err">
+          <p id="errFirstName" class="d-flex flex-grow-1 error-message text-error" v-if="err">
+            {{ err }}
+          </p>
+        </span>
+      </b-col>
+
       <b-form @submit.prevent="login">
         <!-- Username -->
         <label id="labelLoginUsername" class="sr-only" for="username">Username</label>
@@ -22,6 +30,7 @@
         <b-input-group>
           <b-form-input 
             id="loginPassword" 
+            type="password"
             class="form-input" style="margin: 8px"
             placeholder="password" 
             v-model="password" />
@@ -52,13 +61,14 @@
 <script>
 import firebase from 'firebase'
 import { db } from '@/firebase'
+import errorMessages from  '@/resources/errorMessages'
 
 export default {
   data () {
     return {
-      email: '',
-      password: '',
-      errorMessages: {
+      username: 'prnzeugn',
+      password: 'p@ssworD1',
+      errors: {
         usernameDoesNotExist: null,
         invalidPassword: null
       }
@@ -72,6 +82,13 @@ export default {
   },
 
   methods: {
+    clearErrors () {
+      this.errors = {
+        usernameDoesNotExist: null,
+        invalidPassword: null
+      }
+    },
+
     async login() {
       // Check if the username does not exist in db
       db.collection('users')
@@ -79,22 +96,24 @@ export default {
         .get()
         .then(querySnapshot => {
           if (querySnapshot.empty) { // The username doesn't exist
-            this.errorMessages.usernameDoesNotExist = ``
+            this.clearErrors()
+            this.errors.usernameDoesNotExist = errorMessages.login.USERNAME
           } else {
             // Retrieve user email from uid from username
-            console.log(querySnapshot[0])
-  
-            // firebase
-            //   .auth()
-            //   .signInWithEmailAndPassword(this.email, this.password)
-            //   .then(user => {
-            //     // Proceed to the main page
-            //     this.$router.push('/')
-            //   })
-            //   .catch(error => {
-            //     var errorCode = error.code;
-            //     var errorMessage = error.message; 
-            //   })
+            const email = querySnapshot.docs[0].data().email
+            firebase
+              .auth()
+              .signInWithEmailAndPassword(email, this.password)
+              .then(user => {
+                // Proceed to the main page
+                this.$router.push('/')
+              })
+              .catch(error => {
+                if (error.code === 'auth/wrong-password') {
+                  this.clearErrors()
+                  this.errors.invalidPassword = errorMessages.login.PASSWORD
+                }
+              })
           }
         })
 
@@ -124,6 +143,10 @@ export default {
   background-color: #C4C4C4
 }
 
+.error-message {
+  margin: 0.5rem 0.5rem;
+}
+
 .logo {
   width: 50%; 
   margin: 3rem
@@ -131,6 +154,10 @@ export default {
 
 .margin-8 {
   margin: 8px
+}
+
+.text-error {
+  color: #F5545F
 }
 
 .text-white {

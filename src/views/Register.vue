@@ -6,24 +6,20 @@
   <!-- Form section -->
   <b-row id="sectionRegForm" align-h="center">
     <div class="col-7 d-flex flex-column justify-content-center">
+      <!-- Error Messages -->
+      <b-col id="registerErrorM"> 
+        <p class="text-white d-flex align-self-start">
+          <b>{{ errorTitle }}</b>
+        </p>
+        <span v-for="err in errors" :key="err">
+          <p id="errFirstName" class="d-flex flex-grow-1 error-message text-error" v-if="err">
+            {{ err }}
+          </p>
+        </span>
+      </b-col>
+
       <b-form @submit.prevent="register">
-
         <!-- First and Last Name -->
-        <b-form class="d-flex justify-content-between" inline>
-          <span 
-            id="errFirstName" 
-            class="d-flex flex-grow-1 error-message text-white"
-            v-if="errorMessages.firstName">
-            {{ errorMessages.firstName }}
-          </span>
-          <span 
-            id="errFirstName" 
-            class="d-flex flex-grow-1 error-message text-white" 
-            v-if="errorMessages.lastName">
-             {{ errorMessages.lastName }}
-          </span>
-        </b-form>
-
         <b-form id="firstLastName" class="d-flex justify-content-between" inline>
           <label id="labelFirstName" class="sr-only" for="firstName">First Name</label>
           <b-form-input
@@ -89,7 +85,7 @@
 
   <!-- Already logged in? -->
   <b-row id="sectionRouteLogin" align-h="center">
-    <h5 id="textAccountExists" class="text-white">Already have an account?</h5>
+    <h5 id="textAccountExists" class="text-grey">Already have an account?</h5>
     <router-link to="/login" class="routerLink">
       <h5 id="linkLogin" class="text-white">Login here</h5>
     </router-link>
@@ -100,6 +96,7 @@
 <script>
 import firebase from 'firebase'
 import { db } from '@/firebase'
+import errorMessages from  '@/resources/errorMessages'
 
 export default {
   name: 'Register',
@@ -112,7 +109,8 @@ export default {
       password: 'p@ssworD1',
       confirmPassword: 'p@ssworD1',
 
-      errorMessages: {
+      errorTitle: null,
+      errors: {
         firstName: null,
         lastName: null,
         username: null,
@@ -168,12 +166,25 @@ export default {
       return /^[a-z]+$/i.test(name)
     },
 
+    clearErrors () {
+      this.errors = {
+        firstName: null,
+        lastName: null,
+        username: null,
+        password: null,
+        confirmPassword: null,
+        usernameExists: null,
+        emailExists: null
+      }
+    },
+
     async register () {
       if (this.isValidRegistration) {
         console.log('Registering')
         this.handleDBUserRegistration()
       } else {
         console.log('Invalid fields')
+        this.clearErrors()
         this.handleInvalidFields()
       }
     },
@@ -192,10 +203,11 @@ export default {
                 const newUserRef = db.collection('users').doc(res.user.uid)
                 
                 // Add the user to the database
-                userRef.set({
+                newUserRef.set({
                   first_name: this.firstName,
                   last_name: this.lastName,
                   username: this.username,
+                  email: this.email,
                   points: 0,
                   loss_white: 0,
                   loss_black: 0,
@@ -204,51 +216,52 @@ export default {
                   draw_white: 0,
                   draw_black: 0
                 })
+
+                this.$router.push('/')
               })
               .catch(error => {
                 // Handle duplicate emails
                 if (error.code === 'auth/email-already-in-use') {
                   console.log('Email already in use')
-                  this.errorMessages.emailExists = `That email already exists.`
+                  this.clearErrors()
+                  this.errors.emailExists = errorMessages.register.EMAIL_EXISTS
                 } 
                 console.log(error)
               })
           } else { // That username is in use
             console.log('Username already in use')
-            this.errorMessages.usernameExists = `That username already exists.`
+            this.clearErrors()
+            this.errors.usernameExists = errorMessages.register.USERNAME_EXISTS
           }
         })
         .catch(e => console.log(e))
     },
 
     handleInvalidFields () {
+      this.errorTitle = 'The following errors have been found:'
+
       if (!this.isValidName(this.firstName)) {
-        this.errorMessages.firstName = 'First name must contain letters only.'
+        this.errors.firstName = errorMessages.register.FIRST_NAME
       } 
 
       if (!this.isValidName(this.lastName)) {
-        this.errorMessages.lastName = 'Last name must contain letters only.'
+        this.errors.lastName = errorMessages.register.LAST_NAME
       } 
       
       if (!this.isValidUsername) {
-        this.errorMessages.username = 'Username must contain letters and/or numbers only.'
+        this.errors.username = errorMessages.register.USERNAME
       } 
 
       if (!this.isValidEmail) {
-        this.errorMessages.email = 'Please enter a valid email.'
+        this.errors.email = errorMessages.register.EMAIL
       } 
 
       if (!this.isValidPassword) {
-        this.errorMessages.password = 
-          `Password must contain at least 8 characters, 
-            1 uppercase letter, 
-            1 lowercase letter, 
-            1 number, and
-            1 special character.`
+        this.errors.password = errorMessages.register.PASSWORD
       } 
 
       if (!this.arePasswordsEqual) {
-        this.errorMessages.confirmPassword = `Passwords don't match.`
+        this.errors.confirmPassword = errorMessages.register.CONFIRM_PASSWORD
       }
     }
   }
@@ -286,8 +299,16 @@ export default {
   margin: 8px
 }
 
+.text-error {
+  color: #F5545F
+}
+
 .text-white {
   color: #FFFFFF
+}
+
+.text-grey {
+  color: #969696
 }
 
 #btnSubmit { 
