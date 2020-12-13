@@ -1,5 +1,13 @@
-import { shallowMount } from '@vue/test-utils'
-import { BForm, BFormInput, BInputGroup, BButton } from 'bootstrap-vue'
+import { shallowMount, RouterLinkStub } from '@vue/test-utils'
+import { 
+  BForm, 
+  BFormInput, 
+  BInputGroup, 
+  BButton, 
+  BRow, 
+  BCol, 
+  BContainer 
+} from 'bootstrap-vue'
 import Register from '@/views/Register'
 
 describe ('Integration test on bad form field inputs', () => {
@@ -11,6 +19,10 @@ describe ('Integration test on bad form field inputs', () => {
         'b-form-input': BFormInput,
         'b-input-group': BInputGroup,
         'b-button': BButton,
+        'b-container': BContainer,
+        'b-row': BRow,
+        'b-col': BCol,
+        RouterLink: RouterLinkStub
       }})
   })
 
