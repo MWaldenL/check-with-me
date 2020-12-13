@@ -69,6 +69,28 @@ describe('Bad input tests on registration fields', () => {
       
       // Assert
       expect(result).toBe(false)
+    }),
+    
+    it ('checks if the user-inputted name contains only spaces', () => {
+      // Arrange
+      const name = '   '
+      
+      // Act
+      const result = cmp.vm.isValidName(name)
+      
+      // Assert
+      expect(result).toBe(false)
+    }),
+
+    it ('checks if the user-inputted name contains multiple spaces', () => {
+      // Arrange
+      const name = 'Abc   Def'
+      
+      // Act
+      const result = cmp.vm.isValidName(name)
+      
+      // Assert
+      expect(result).toBe(false)
     })
   }),
 

@@ -9,7 +9,7 @@
       <!-- Error Messages -->
       <b-col id="registerError"> 
         <span v-for="err in errors" :key="err">
-          <p id="errFirstName" class="d-flex flex-grow-1 error-message text-error" v-if="err">
+          <p class="d-flex flex-grow-1 error-message text-error" v-if="err">
             {{ err }}
           </p>
         </span>
@@ -162,7 +162,7 @@ export default {
 
   methods: {
     isValidName (name) {
-      return /^[a-z]+$/i.test(name)
+      return /^[a-zA-Z_]+( [a-zA-Z_]+)*$/i.test(name)
     },
 
     clearErrors () {
@@ -238,11 +238,11 @@ export default {
 
     handleInvalidFields () {
       if (!this.isValidName(this.firstName)) {
-        this.errors.firstName = errorMessages.register.FIRST_NAME
+        this.errors.firstName = errorMessages.register.NAME
       } 
 
       if (!this.isValidName(this.lastName)) {
-        this.errors.lastName = errorMessages.register.LAST_NAME
+        this.errors.lastName = errorMessages.register.NAME
       } 
       
       if (!this.isValidUsername) {
@@ -272,7 +272,7 @@ export default {
 
 
 .error-message {
-  margin: 0.5rem 0.5rem;
+  text-align: left;
 }
 
 .form-input {

@@ -36,6 +36,17 @@ describe('Good input tests on registration fields', () => {
 
       // Assert
       expect(result).toBe(true)
+    }),
+
+    it ('returns true if the user-inputted first name contains only letters 2', () => {
+      // Arrange
+      const firstName = 'Matthew Walden'
+      
+      // Act
+      const result = cmp.vm.isValidName(firstName)
+
+      // Assert
+      expect(result).toBe(true)
     })
   }),
 
