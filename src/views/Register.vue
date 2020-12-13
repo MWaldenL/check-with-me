@@ -121,7 +121,9 @@ export default {
   
   computed: {
     isValidUsername () {
-      return /^[a-z0-9]+$/i.test(this.username)
+      return this.username.length >= 8 && 
+            this.username.length <= 20 &&
+            /^[a-z0-9]+$/i.test(this.username)
     },
 
     isValidEmail () {
