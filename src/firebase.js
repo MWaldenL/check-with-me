@@ -15,11 +15,10 @@ const firebaseConfig = {
 
 firebase.initializeApp(firebaseConfig)
 
-
-
 // Utilities
 const db = firebase.firestore()
 const auth = firebase.auth()
+
 
 firebase.getCurrentUser = () => {
   return new Promise((resolve, reject) => {
@@ -32,7 +31,7 @@ firebase.getCurrentUser = () => {
 
 firebase.auth().onAuthStateChanged(user => {
   store.dispatch("setUser", user);
-});
+
 
 // Collections
 const usersCollection = db.collection('users')
