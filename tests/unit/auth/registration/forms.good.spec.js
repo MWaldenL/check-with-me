@@ -49,6 +49,28 @@ describe('Good input tests on registration fields', () => {
 
       // Assert
       expect(cmp.vm.isValidUsername).toBe(true)
+    }),
+
+    it ('returns true if the user-inputted first name contains only numbers', () => {
+      // Arrange
+      const username = "0123456789"
+
+      // Act
+      cmp.setData({ username })
+
+      // Assert
+      expect(cmp.vm.isValidUsername).toBe(true)
+    }),
+
+    it ('returns true if the user-inputted first name contains letters and numbers', () => {
+      // Arrange
+      const username = "a1b2c3d4"
+
+      // Act
+      cmp.setData({ username })
+
+      // Assert
+      expect(cmp.vm.isValidUsername).toBe(true)
     })
   }),
 

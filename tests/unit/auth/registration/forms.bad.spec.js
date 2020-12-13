@@ -72,7 +72,56 @@ describe('Bad input tests on registration fields', () => {
     })
   }),
 
+  describe('Username testing', () => {
+    it('returns false if the username is empty', () => {
+      // Arrange
+      const username = ''
 
+      // Act
+      cmp.setData({ username })
+      const result = cmp.vm.isValidUsername
+
+      // Assert
+      expect(result).toBe(false)
+    }),
+
+    it('returns false if the username is less than 8 characters long', () => {
+      // Arrange
+      const username = 'usernam'
+
+      // Act
+      cmp.setData({ username })
+      const result = cmp.vm.isValidUsername
+
+      // Assert
+      expect(result).toBe(false)
+    }),
+
+    it('returns false if the username is greater than 20 characters long', () => {
+      // Arrange
+      const username = '012345678901234567890'
+
+      // Act
+      cmp.setData({ username })
+      const result = cmp.vm.isValidUsername
+
+      // Assert
+      expect(result).toBe(false)
+    }),
+
+    it('returns false if the username contains special characters', () => {
+      // Arrange
+      const username = 'username_'
+
+      // Act
+      cmp.setData({ username })
+      const result = cmp.vm.isValidUsername
+
+      // Assert
+      expect(result).toBe(false)
+    })
+  })
+  
   describe('Email testing', () => {
     it ('returns false if an email is empty', () => {
       // Arrange
