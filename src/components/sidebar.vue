@@ -24,7 +24,10 @@ export default {
     ...mapActions(['logoutUser']),
     logout () {
       firebase.auth().signOut()
-        .then(() => this.logoutUser())
+        .then(() => {
+          this.logoutUser()
+          this.$router.push('/login')
+        })
     }
   }
 }
