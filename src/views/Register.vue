@@ -103,8 +103,8 @@ export default {
       lastName: 'Eugen',
       username: 'prnzeugn',
       email: 'luamatthew@gmail.com',
-      password: 'p@ssworD1',
-      confirmPassword: 'p@ssworD1',
+      password: 'Ab1,./;?',
+      confirmPassword: 'Ab1,./;?',
 
       errorTitle: null,
       errors: {
@@ -133,7 +133,8 @@ export default {
     },
 
     isValidPassword () {
-      const re = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})/
+      // const re = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})/
+      const re = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[/\W|_/g])(?=.{8,})/
       return re.test(this.password) 
     },
 
@@ -253,13 +254,12 @@ export default {
         this.errors.email = errorMessages.register.EMAIL
       } 
 
-      if (!this.isValidPassword) {
-        this.errors.password = errorMessages.register.PASSWORD
-      } 
-
       if (!this.arePasswordsEqual) {
         this.errors.confirmPassword = errorMessages.register.CONFIRM_PASSWORD
-      }
+        return
+      } else if (!this.isValidPassword) {
+        this.errors.password = errorMessages.register.PASSWORD
+      } 
     }
   }
 }
