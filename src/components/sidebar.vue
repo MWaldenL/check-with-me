@@ -6,20 +6,40 @@
         <h3>Play</h3>
         <h3>Profile</h3>
         <h3>Leaderboard</h3>
-        <h3>Logout</h3>
+        <router-link to="/login" class="router-link" @click.native="logout">
+          <h3 class="cursor-pointer text-white">Logout</h3>
+        </router-link>
       </div>
     </b-sidebar>
   </div>  
 </template>
 
 <script>
+import firebase from 'firebase'
+import { mapGetters, mapActions } from 'vuex'
+
 export default {
-  name: 'Sidebar'
+  name: 'Sidebar',
+  methods: {
+    ...mapActions(['logoutUser']),
+    logout () {
+      firebase.auth().signOut()
+        .then(() => {
+          this.logoutUser()
+          this.$router.push('/login')
+        })
+    }
+  }
 }
 </script>
 
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Jura&family=Raleway?display=swap');
+
+.router-link {
+  text-decoration: none;
+  border-bottom: 0
+}
 
 #menu {
   position: absolute;

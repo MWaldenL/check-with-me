@@ -1,4 +1,3 @@
-// import * as firebase from 'firebase/app'
 import firebase from 'firebase'
 import 'firebase/auth'
 import 'firebase/firestore'
@@ -12,16 +11,27 @@ const firebaseConfig = {
   storageBucket: "check-with-me.appspot.com",
   messagingSenderId: "910644162284",
   appId: "1:910644162284:web:ac3990fc338d8863593fc9"
-};
+}
+
 firebase.initializeApp(firebaseConfig)
 
 // Utilities
 const db = firebase.firestore()
 const auth = firebase.auth()
 
+
+firebase.getCurrentUser = () => {
+  return new Promise((resolve, reject) => {
+    const unsubscribe = firebase.auth().onAuthStateChanged(user => {
+      unsubscribe();
+      resolve(user);
+    }, reject)
+  })
+}
+
 firebase.auth().onAuthStateChanged(user => {
-  store.dispatch("fetchUser", user);
-});
+  store.dispatch("setUser", user);
+})
 
 // Collections
 const usersCollection = db.collection('users')
@@ -31,9 +41,9 @@ const movesCollection = db.collection('moves')
 
 gamesCollection.doc("2gSaU2SjJeUpHEEbXPyX")
   .onSnapshot(doc => {
-      const boardState = doc.data().boardState
-      console.log(boardState)
-      store.dispatch('aUpdateBoard', boardState);
+      // const boardState = doc.data().boardState
+      // console.log(boardState)
+      // store.dispatch('aUpdateBoard', boardState);
   });
 
 export {
