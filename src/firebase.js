@@ -31,7 +31,7 @@ firebase.getCurrentUser = () => {
 
 firebase.auth().onAuthStateChanged(user => {
   store.dispatch("setUser", user);
-
+})
 
 // Collections
 const usersCollection = db.collection('users')
