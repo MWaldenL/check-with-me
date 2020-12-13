@@ -77,7 +77,7 @@ export default {
 
   computed: {
     areFieldsComplete () {
-      return this.email !== '' && this.password !== ''
+      return this.username !== '' && this.password !== ''
     }
   },
 
