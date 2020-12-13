@@ -1,0 +1,159 @@
+<template>
+  <div id="box">
+    <Sidebar />
+    <h1 id="title">Profile</h1>
+    <div id="user-details">
+      <h1 id="hello">hello, <span id="username">{{ user.data.username }}</span></h1>
+      <b-row style="margin-bottom: 30px">
+        <b-col>
+          <h2 class="col-header">your information</h2>
+          <h2 class="col-content">first name: <span class="col-details">{{ user.data.first_name }}</span></h2>
+          <h2 class="col-content">last name: <span class="col-details">{{ user.data.last_name }}</span></h2>
+          <h2 class="col-content">email: <span class="col-details">{{ getEmail }}</span></h2>
+        </b-col>
+        <b-col></b-col>
+        <b-col>
+          <h2 class="col-header">your options</h2>
+          <router-link to="/changepw" class="router-link">
+            <h2 class="col-content col-details cursor-pointer" id="change-pw">change password</h2>
+          </router-link>
+        </b-col>
+      </b-row>
+      <h2 class="col-header" style="margin-bottom: 30px">your statistics</h2>
+      <b-row>
+        <b-col><Statistic title="Total Wins" :value="getTotalWins" /></b-col>
+        <b-col><Statistic title="Wins on White" :value="user.data.wins_white" /></b-col>
+        <b-col><Statistic title="Wins on Black" :value="user.data.wins_black" /></b-col>
+      </b-row>
+      <b-row>
+        <b-col><Statistic title="Win Rate" :value="getWinRate" /></b-col>
+        <b-col><Statistic title="Points" :value="getPoints" /></b-col>
+        <b-col><Statistic title="Total Games" :value="getTotalGames" /></b-col>
+      </b-row>
+    </div>
+  </div>
+</template>
+
+<script>
+import { mapGetters } from 'vuex'
+import Sidebar from '@/components/sidebar.vue'
+import Statistic from '@/components/statistic.vue'
+
+export default {
+  name: 'Profile',
+  components: {
+    Sidebar,
+    Statistic
+  },
+  computed: {
+    ...mapGetters({
+      user: 'getCurrentUser'
+    }),
+
+    getEmail () {
+      const email = this.user.data.email
+      const length = email.length - 5
+
+      let string = email.substring(0, 2);
+      for (let i = 0; i < length; i++)
+        string = string.concat("*")
+      string = string.concat(email.substring(length + 2, length + 5))
+
+      return string
+    },
+
+    getTotalWins () {
+      return this.user.data.wins_white + this.user.data.wins_black
+    },
+
+    getTotalGames () {
+      return this.user.data.wins_white + this.user.data.wins_black +
+        this.user.data.draw_white + this.user.data.draw_black +
+        this.user.data.loss_white + this.user.data.loss_black
+    },
+
+    getWinRate () {
+      const nWins = this.user.data.wins_white + this.user.data.wins_black
+      const nDiv = nWins + this.user.data.loss_white + this.user.data.loss_black
+
+      const rate = nWins / nDiv * 100
+
+      return rate.toFixed(2) + "%"
+    },
+
+    getPoints () {
+      const nWins = (this.user.data.wins_white + this.user.data.wins_black) * 1
+      const nDraw = (this.user.data.draw_white + this.user.data.draw_black) * 0.5
+      const nLoss = (this.user.data.loss_white + this.user.data.loss_black) * -0.5
+
+      return nWins + nDraw + nLoss
+    }
+  }
+}
+</script>
+
+<style scoped>
+@import url('https://fonts.googleapis.com/css2?family=Raleway:wght@700&family=Jura&display=swap');
+
+#box {
+  position: relative;
+  margin-top: 20px;
+}
+
+#user-details {
+  margin-left: 50px;
+  margin-right: 50px;
+}
+
+#title {
+  padding: 20px;
+  font-family: 'Jura', monospace;
+  font-size: 72px;
+  font-weight: bold;
+  color: #BCFC8A;
+}
+
+#hello {
+  text-align: left;
+  font-family: 'Raleway', Arial, Helvetica, sans-serif;
+  font-size: 72px;
+  color: #585858;
+  margin-bottom: 40px;
+}
+
+#username {
+  font-weight: 700;
+  color: #FFFFFF;
+}
+
+.col-header {
+  text-align: left;
+  font-family: 'Raleway', Arial, Helvetica, sans-serif;
+  font-size: 36px;
+  color: #585858;
+  margin-bottom: 30px;
+}
+
+.col-content {
+  text-align: left;
+  font-family: 'Raleway', Arial, Helvetica, sans-serif;
+  font-size: 36px;
+  color: #585858;
+}
+
+.col-details {
+  color: #FFFFFF;
+}
+
+#change-pw {
+  transition: all 0.2s;
+}
+
+#change-pw:hover {
+  color: #BCFC8A;
+}
+
+.router-link {
+  text-decoration: none;
+}
+</style>
