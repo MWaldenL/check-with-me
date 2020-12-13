@@ -108,8 +108,7 @@ export default {
 
       errorTitle: null,
       errors: {
-        firstName: null,
-        lastName: null,
+        name: null,
         username: null,
         password: null,
         confirmPassword: null,
@@ -238,12 +237,8 @@ export default {
     },
 
     handleInvalidFields () {
-      if (!this.isValidName(this.firstName)) {
-        this.errors.firstName = errorMessages.register.NAME
-      } 
-
-      if (!this.isValidName(this.lastName)) {
-        this.errors.lastName = errorMessages.register.NAME
+      if (!this.isValidName(this.firstName) || !this.isValidName(this.lastName)) {
+        this.errors.name = errorMessages.register.NAME
       } 
       
       if (!this.isValidUsername) {
