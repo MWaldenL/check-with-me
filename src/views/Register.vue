@@ -7,10 +7,7 @@
   <b-row id="sectionRegForm" align-h="center">
     <div class="col-7 d-flex flex-column justify-content-center">
       <!-- Error Messages -->
-      <b-col id="registerErrorM"> 
-        <p class="text-white d-flex align-self-start">
-          <b>{{ errorTitle }}</b>
-        </p>
+      <b-col id="registerError"> 
         <span v-for="err in errors" :key="err">
           <p id="errFirstName" class="d-flex flex-grow-1 error-message text-error" v-if="err">
             {{ err }}
@@ -238,8 +235,6 @@ export default {
     },
 
     handleInvalidFields () {
-      this.errorTitle = 'The following errors have been found:'
-
       if (!this.isValidName(this.firstName)) {
         this.errors.firstName = errorMessages.register.FIRST_NAME
       } 
