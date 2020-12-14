@@ -19,12 +19,13 @@
           </router-link>
         </b-col>
       </b-row>
-      <h2 class="col-header" style="margin-bottom: 30px">your statistics</h2>
+      <h2 class="col-header">your statistics</h2>
       <b-row>
         <b-col><Statistic title="Total Wins" :value="getTotalWins" /></b-col>
         <b-col><Statistic title="Wins on White" :value="user.data.wins_white" /></b-col>
         <b-col><Statistic title="Wins on Black" :value="user.data.wins_black" /></b-col>
       </b-row>
+      <h2 class="col-header"></h2>
       <b-row>
         <b-col><Statistic title="Win Rate" :value="getWinRate" /></b-col>
         <b-col><Statistic title="Points" :value="getPoints" /></b-col>
@@ -109,14 +110,14 @@ export default {
 }
 
 #user-details {
-  margin-left: 50px;
-  margin-right: 50px;
+  margin-left: 2.5vw;
+  margin-right: 2.5vw;
 }
 
 #title {
-  padding: 20px;
+  padding: 2vh;
   font-family: 'Jura', monospace;
-  font-size: 64px;
+  font-size: 6vh;
   font-weight: bold;
   color: #BCFC8A;
 }
@@ -124,9 +125,9 @@ export default {
 #hello {
   text-align: left;
   font-family: 'Raleway', Arial, Helvetica, sans-serif;
-  font-size: 64px;
+  font-size: 6vh;
   color: #585858;
-  margin-bottom: 40px;
+  margin-bottom: 3.5vh;
 }
 
 #username {
@@ -137,15 +138,15 @@ export default {
 .col-header {
   text-align: left;
   font-family: 'Raleway', Arial, Helvetica, sans-serif;
-  font-size: 32px;
+  font-size: 3vh;
   color: #585858;
-  margin-bottom: 30px;
+  margin-bottom: 2.5vh;
 }
 
 .col-content {
   text-align: left;
   font-family: 'Raleway', Arial, Helvetica, sans-serif;
-  font-size: 32px;
+  font-size: 3vh;
   color: #585858;
 }
 

@@ -17,12 +17,12 @@ export default {
 
 #box {
   background-color: #C4C4C4;
-  padding: 15px;
+  padding: 1.25vh;
 }
 
 .statistic-text {
   font-family: 'Raleway', Arial, Helvetica, sans-serif;
-  font-size: 32px;
+  font-size: 3vh;
   font-weight: 700;
   color: #181818;
 }
