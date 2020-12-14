@@ -74,11 +74,19 @@ export default {
 
     getWinRate () {
       const nWins = this.user.data.wins_white + this.user.data.wins_black
-      const nDiv = nWins + this.user.data.loss_white + this.user.data.loss_black
+      const nDraw = this.user.data.draw_white + this.user.data.draw_black
+      const nLoss = this.user.data.loss_white + this.user.data.loss_black
 
-      const rate = nWins / nDiv * 100
+      const nCounted = nWins + nLoss
 
-      return rate.toFixed(2) + "%"
+      if (nCounted === 0 && nDraw !== 0) {
+        return "0.00%"
+      } else if (nCounted === 0 && nDraw === 0) {
+        return "N/A"
+      } else {
+        const nRate = nWins / nCounted * 100
+        return nRate.toFixed(2) + "%"
+      }
     },
 
     getPoints () {
