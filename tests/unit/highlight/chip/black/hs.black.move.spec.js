@@ -74,7 +74,9 @@ describe('movement for black', () => {
       bHasWhiteChip: false
     }
 
-    const expected = [[2, 6, 0]]
+    const expected = [
+      [2, 6, 0]
+    ]
 
     // act
     const result = getPossibleMoveBlack(board, board[3][7].nRow, board[3][7].nCol)
@@ -104,7 +106,9 @@ describe('movement for black', () => {
       bHasWhiteChip: false
     }
 
-    const expected = [[2, 1, 0]]
+    const expected = [
+      [2, 1, 0]
+    ]
 
     // act
     const result = getPossibleMoveBlack(board, board[3][0].nRow, board[3][0].nCol)
@@ -141,7 +145,9 @@ describe('movement for black', () => {
       bHasWhiteChip: false
     }
 
-    const expected = [[2, 1, 0]]
+    const expected = [
+      [2, 1, 0]
+    ]
 
     // act
     const result = getPossibleMoveBlack(board, board[3][2].nRow, board[3][2].nCol)
@@ -178,7 +184,9 @@ describe('movement for black', () => {
       bHasWhiteChip: false
     }
 
-    const expected = [[2, 3, 0]]
+    const expected = [
+      [2, 3, 0]
+    ]
 
     // act
     const result = getPossibleMoveBlack(board, board[3][2].nRow, board[3][2].nCol)
