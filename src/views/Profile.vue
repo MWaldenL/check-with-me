@@ -3,23 +3,23 @@
     <Sidebar />
     <h1 id="title">Profile</h1>
     <div id="user-details">
-      <h1 id="hello">hello, <span id="username">{{ user.data.username }}</span></h1>
+      <h1 id="hello">Hello, <span id="username">{{ user.data.username }}</span></h1>
       <b-row style="margin-bottom: 30px">
         <b-col>
-          <h2 class="col-header">your information</h2>
-          <h2 class="col-content">first name: <span class="col-details">{{ user.data.first_name }}</span></h2>
-          <h2 class="col-content">last name: <span class="col-details">{{ user.data.last_name }}</span></h2>
-          <h2 class="col-content">email: <span class="col-details">{{ getEmail }}</span></h2>
+          <h2 class="col-header">Your information</h2>
+          <h2 class="col-content">First name: <span class="col-details">{{ firstName }}</span></h2>
+          <h2 class="col-content">Last name: <span class="col-details">{{ user.data.last_name }}</span></h2>
+          <h2 class="col-content">Email: <span class="col-details">{{ getEmail }}</span></h2>
         </b-col>
         <b-col></b-col>
         <b-col>
-          <h2 class="col-header">your options</h2>
+          <h2 class="col-header">Your options</h2>
           <router-link to="/change-password" class="router-link">
-            <h2 class="col-content col-details cursor-pointer" id="change-pw">change password</h2>
+            <h2 class="col-content col-details cursor-pointer" id="change-pw">Change password</h2>
           </router-link>
         </b-col>
       </b-row>
-      <h2 class="col-header">your statistics</h2>
+      <h2 class="col-header">Your statistics</h2>
       <b-row>
         <b-col><Statistic title="Total Wins" :value="getTotalWins" /></b-col>
         <b-col><Statistic title="Wins on White" :value="user.data.wins_white" /></b-col>
