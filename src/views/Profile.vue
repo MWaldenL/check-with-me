@@ -14,7 +14,7 @@
         <b-col></b-col>
         <b-col>
           <h2 class="col-header">your options</h2>
-          <router-link to="/changepw" class="router-link">
+          <router-link to="/change-password" class="router-link">
             <h2 class="col-content col-details cursor-pointer" id="change-pw">change password</h2>
           </router-link>
         </b-col>
@@ -105,7 +105,7 @@ export default {
 
 #box {
   position: relative;
-  margin-top: 20px;
+  margin-top: 10px;
 }
 
 #user-details {
@@ -116,7 +116,7 @@ export default {
 #title {
   padding: 20px;
   font-family: 'Jura', monospace;
-  font-size: 72px;
+  font-size: 64px;
   font-weight: bold;
   color: #BCFC8A;
 }
@@ -124,7 +124,7 @@ export default {
 #hello {
   text-align: left;
   font-family: 'Raleway', Arial, Helvetica, sans-serif;
-  font-size: 72px;
+  font-size: 64px;
   color: #585858;
   margin-bottom: 40px;
 }
@@ -137,7 +137,7 @@ export default {
 .col-header {
   text-align: left;
   font-family: 'Raleway', Arial, Helvetica, sans-serif;
-  font-size: 36px;
+  font-size: 32px;
   color: #585858;
   margin-bottom: 30px;
 }
@@ -145,7 +145,7 @@ export default {
 .col-content {
   text-align: left;
   font-family: 'Raleway', Arial, Helvetica, sans-serif;
-  font-size: 36px;
+  font-size: 32px;
   color: #585858;
 }
 

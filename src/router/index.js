@@ -4,6 +4,7 @@ import Home from '../views/Home.vue'
 import Profile from '../views/Profile.vue'
 import Register from '../views/Register.vue'
 import Login from '../views/Login.vue'
+import ChangePassword from '../views/ChangePassword.vue'
 import firebase from  'firebase'
 import authStore from '@/store/modules/auth'
 
@@ -20,6 +21,12 @@ const routes = [
     path: '/profile',
     name: 'Profile',
     component: Profile,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/change-password',
+    name: 'ChangePassword',
+    component: ChangePassword,
     meta: { requiresAuth: true },
   },
   {
