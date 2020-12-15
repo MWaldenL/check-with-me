@@ -259,6 +259,28 @@ describe('Bad input tests on registration fields', () => {
       expect(cmp.vm.isValidPassword).toBe(false)
     }),
 
+    it ('returns false if a given password has no special characters 2', () => {
+      // Arrange
+      const password = "Abcdefg1"
+
+      // Act
+      cmp.setData({ password })
+
+      // Assert
+      expect(cmp.vm.isValidPassword).toBe(false)
+    }),
+
+    it ('returns false if a given password has only special characters', () => {
+      // Arrange
+      const password = `~\`!@#$%^&*()_+-=[]\\;',./{}|:"<>?`
+
+      // Act
+      cmp.setData({ password })
+
+      // Assert
+      expect(cmp.vm.isValidPassword).toBe(false)
+    }),
+
     it ('returns false if a given password has no uppercase letter', () => {
       // Arrange
       const password = "abcdefg@"
