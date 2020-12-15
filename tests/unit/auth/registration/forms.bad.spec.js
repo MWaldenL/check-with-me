@@ -168,6 +168,17 @@ describe('Bad input tests on registration fields', () => {
       expect(cmp.vm.isValidEmail).toBe(false)
     }),
 
+    it ('returns false if an email contains leading or trailing spaces', () => {
+      // Arrange
+      const email = "   user@gmail.com   "
+
+      // Act
+      cmp.setData({ email })
+
+      // Assert
+      expect(cmp.vm.isValidEmail).toBe(false)
+    }),
+
     it ('returns false if an email does not have an @ sign', () => {
       // Arrange
       const email = "useremail.com"

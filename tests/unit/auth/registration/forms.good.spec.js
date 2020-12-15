@@ -38,9 +38,9 @@ describe('Good input tests on registration fields', () => {
       expect(result).toBe(true)
     }),
 
-    it ('returns true if the user-inputted first name contains only letters 2', () => {
+    it ('returns true if the valid user-inputted first name contains a space', () => {
       // Arrange
-      const firstName = 'Matthew Walden'
+      const firstName = 'Matthew Walden Barcelona Chen'
       
       // Act
       const result = cmp.vm.isValidName(firstName)
