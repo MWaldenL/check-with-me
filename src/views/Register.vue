@@ -205,7 +205,7 @@ export default {
                   first_name: this.firstName,
                   last_name: this.lastName,
                   username: this.username,
-                  email: this.email,
+                  email: this.email.toLowerCase(),
                   points: 0,
                   loss_white: 0,
                   loss_black: 0,
