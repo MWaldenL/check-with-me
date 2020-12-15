@@ -4,8 +4,6 @@
 
   <!-- Logo -->
   <h1 id="title">Change Password</h1>
-  <p class="text-white">Before changing your password, please confirm your identity by entering your 
-    email address and current password.</p>
 
   <!-- Form section -->
   <b-row id="sectionLoginForm" align-h="center">
@@ -20,24 +18,25 @@
 
       <b-form @submit.prevent="continueChange">
         <!-- Username -->
-        <label id="labelEmail" class="sr-only" for="email">Email Address</label>
-        <b-input-group>
-          <b-form-input 
-            id="email"
-            class="form-input" style="margin: 8px"
-            placeholder="email address" 
-            v-model="email" />
-        </b-input-group>
-
-        <!-- Email -->
         <label id="labelPassword" class="sr-only" for="password">Password</label>
         <b-input-group>
           <b-form-input 
-            id="password" 
+            id="password"
             type="password"
             class="form-input" style="margin: 8px"
             placeholder="password" 
             v-model="password" />
+        </b-input-group>
+
+        <!-- Email -->
+        <label id="labelConf" class="sr-only" for="confirm-password">Password</label>
+        <b-input-group>
+          <b-form-input 
+            id="confirm-password" 
+            type="password"
+            class="form-input" style="margin: 8px"
+            placeholder="confirm password" 
+            v-model="confirmPassword" />
         </b-input-group>
 
         <b-button id="btnSubmit" :disabled="!areFieldsComplete" type="submit">
@@ -54,7 +53,7 @@
 
 <script>
 import firebase from 'firebase'
-import { mapGetters } from 'vuex'
+import { mapActions } from 'vuex'
 import errorMessages from  '@/resources/errorMessages'
 import Sidebar from '@/components/sidebar.vue'
 
@@ -65,54 +64,58 @@ export default {
 
   data () {
     return {
-      email: 'prnzeugn@gmail.com',
       password: 'p@ssworD1',
+      confirmPassword: 'p@ssworD1',
       errors: {
-        incorrectEmail: null,
-        incorrectPassword: null
+        invalidPassword: null,
+        confirmPassword: null
       }
     }
   },
 
   computed: {
-    ...mapGetters({
-      user: 'getCurrentUser'
-    }),
-
     areFieldsComplete () {
       return this.email !== '' && this.password !== ''
+    },
+
+    isValidPassword () {
+      // const re = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})/
+      const re = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[/\W|_/g])(?=.{8,})/
+      return re.test(this.password) 
+    },
+
+    arePasswordsEqual () {
+      return this.password === this.confirmPassword
     },
   },
 
   methods: {
+    ...mapActions(['logoutUser']),
+
     clearErrors () {
       this.errors = {
-        incorrectEmail: null,
-        incorrectPassword: null
+        incorrectPassword: null,
+        confirmPassword: null
       }
     },
 
     continueChange () {
-      //check if email is correct
-      const credential = firebase.auth.EmailAuthProvider.credential(
-        this.email, 
-        this.password
-      );
-
-      if (this.user.data.email !== this.email) {
+      if (!this.arePasswordsEqual) {
         this.clearErrors()
-        this.errors.incorrectEmail = errorMessages.changePassword.EMAIL
+        this.errors.confirmPassword = errorMessages.changePasswordConfirm.CONFIRM_PASSWORD
+      } else if (!this.isValidPassword) {
+        this.clearErrors()
+        this.errors.invalidPassword = errorMessages.changePasswordConfirm.PASSWORD
       } else {
+        this.clearErrors()
         const currentUser = firebase.auth().currentUser
-        currentUser.reauthenticateWithCredential(credential)
+        currentUser.updatePassword(this.password)
           .then(() => {
-            this.$router.push('/change-password/confirm')
-          })
-          .catch(error => {
-            if (error.code === 'auth/wrong-password') {
-              this.clearErrors()
-              this.errors.incorrectPassword = errorMessages.changePassword.PASSWORD
-            }
+            firebase.auth().signOut()
+              .then(() => {
+                this.logoutUser()
+                this.$router.push('/login')
+              })
           })
       }
     }

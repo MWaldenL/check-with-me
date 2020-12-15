@@ -18,5 +18,19 @@ export default {
   login: {
     USERNAME: 'This username does not exist.',
     PASSWORD: 'Invalid password.'
+  },
+
+  changePassword: {
+    EMAIL: 'The email you entered is incorrect.',
+    PASSWORD: 'The password you entered is incorrect'
+  },
+
+  changePasswordConfirm: {
+    PASSWORD: `Password must contain at least 8 characters, 
+              1 uppercase letter, 
+              1 lowercase letter, 
+              1 number, and
+              1 special character.`,
+    CONFIRM_PASSWORD: `Passwords don't match.`,
   }
 }
