@@ -77,7 +77,8 @@ export default {
 
   computed: {
     ...mapGetters({
-      user: 'getCurrentUser'
+      user: 'getCurrentUser',
+      pass: 'getPass'
     }),
 
     areFieldsComplete () {
@@ -111,10 +112,6 @@ export default {
         const currentUser = firebase.auth().currentUser
         currentUser.reauthenticateWithCredential(credential)
           .then(() => {
-            // const saltRounds = 10
-            // bcrypt.hash(this.password, saltRounds, (err, hash) => {
-            //   this.setPass(hash)
-            // })
             const hashedPass = bcrypt.hashSync(this.password, 10)
             this.setPass(hashedPass)
             this.$router.push('/change-password/confirm')

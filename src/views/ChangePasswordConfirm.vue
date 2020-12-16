@@ -107,13 +107,14 @@ export default {
     },
 
     continueChange () {
+      let bRepeated = bcrypt.compareSync(this.password, this.currentPassword)
       if (!this.arePasswordsEqual) {
         this.clearErrors()
         this.errors.confirmPassword = errorMessages.changePasswordConfirm.CONFIRM_PASSWORD
       } else if (!this.isValidPassword) {
         this.clearErrors()
         this.errors.invalidPassword = errorMessages.changePasswordConfirm.PASSWORD
-      } else if (bcrypt.compareSync(this.password, this.currentPassword)) {
+      } else if (bRepeated) {
         this.clearErrors()
         this.errors.invalidPassword = errorMessages.changePasswordConfirm.SAME_PASSWORD
       } else {

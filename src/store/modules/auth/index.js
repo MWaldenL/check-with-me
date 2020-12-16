@@ -6,9 +6,9 @@ import mutations from './mutations'
 const state = {
   user: {
     isLoggedIn: false,
-    data: null,
-    pass: ''
-  }
+    data: null
+  },
+  pass: ''
 }
 
 export default {
