@@ -15,6 +15,10 @@ const actions = {
   async logoutUser({ commit }) {
     commit('setUserLoggedIn', false)
     commit('setUserData', null)
+  },
+
+  async setPass({ commit }, pass) {
+    commit('setPassword', pass)
   }
 }
 

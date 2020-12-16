@@ -6,7 +6,8 @@ import mutations from './mutations'
 const state = {
   user: {
     isLoggedIn: false,
-    data: null
+    data: null,
+    pass: ''
   }
 }
 

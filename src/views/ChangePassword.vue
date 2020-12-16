@@ -54,7 +54,7 @@
 
 <script>
 import firebase from 'firebase'
-import { mapGetters } from 'vuex'
+import { mapActions, mapGetters } from 'vuex'
 import errorMessages from  '@/resources/errorMessages'
 import Sidebar from '@/components/sidebar.vue'
 
@@ -65,8 +65,8 @@ export default {
 
   data () {
     return {
-      email: 'prnzeugn@gmail.com',
-      password: 'p@ssworD1',
+      email: '',
+      password: '',
       errors: {
         incorrectEmail: null,
         incorrectPassword: null
@@ -85,6 +85,8 @@ export default {
   },
 
   methods: {
+    ...mapActions(['setPass']),
+
     clearErrors () {
       this.errors = {
         incorrectEmail: null,
@@ -94,6 +96,8 @@ export default {
 
     continueChange () {
       //check if email is correct
+      this.email = this.email.toLowerCase()
+
       const credential = firebase.auth.EmailAuthProvider.credential(
         this.email, 
         this.password
@@ -106,6 +110,7 @@ export default {
         const currentUser = firebase.auth().currentUser
         currentUser.reauthenticateWithCredential(credential)
           .then(() => {
+            this.setPass(this.password)
             this.$router.push('/change-password/confirm')
           })
           .catch(error => {

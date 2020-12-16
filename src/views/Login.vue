@@ -66,8 +66,8 @@ import errorMessages from  '@/resources/errorMessages'
 export default {
   data () {
     return {
-      username: 'prnzeugn',
-      password: 'p@ssworD1',
+      username: '',
+      password: '',
       errors: {
         usernameDoesNotExist: null,
         invalidPassword: null

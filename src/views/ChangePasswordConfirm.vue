@@ -53,7 +53,7 @@
 
 <script>
 import firebase from 'firebase'
-import { mapActions } from 'vuex'
+import { mapGetters, mapActions } from 'vuex'
 import errorMessages from  '@/resources/errorMessages'
 import Sidebar from '@/components/sidebar.vue'
 
@@ -64,8 +64,8 @@ export default {
 
   data () {
     return {
-      password: 'p@ssworD1',
-      confirmPassword: 'p@ssworD1',
+      password: '',
+      confirmPassword: '',
       errors: {
         invalidPassword: null,
         confirmPassword: null
@@ -74,13 +74,16 @@ export default {
   },
 
   computed: {
+    ...mapGetters ({
+      currentPassword: 'getPass'
+    }),
+
     areFieldsComplete () {
-      return this.email !== '' && this.password !== ''
+      return this.confirmPassword !== '' && this.password !== ''
     },
 
     isValidPassword () {
-      // const re = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})/
-      const re = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[/\W|_/g])(?=.{8,})/
+      const re = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[\*\.\!\@\$\%\^\&\(\)\{\}\[\]\:\;\<\>\,\.\?\/\~\_\+\-\=\|])(?=.{8,})/
       return re.test(this.password) 
     },
 
@@ -90,7 +93,10 @@ export default {
   },
 
   methods: {
-    ...mapActions(['logoutUser']),
+    ...mapActions([
+      'logoutUser',
+      'setPass'
+    ]),
 
     clearErrors () {
       this.errors = {
@@ -106,8 +112,12 @@ export default {
       } else if (!this.isValidPassword) {
         this.clearErrors()
         this.errors.invalidPassword = errorMessages.changePasswordConfirm.PASSWORD
+      } else if (this.currentPassword === this.password) {
+        this.clearErrors()
+        this.errors.invalidPassword = errorMessages.changePasswordConfirm.SAME_PASSWORD
       } else {
         this.clearErrors()
+        this.setPass('')
         const currentUser = firebase.auth().currentUser
         currentUser.updatePassword(this.password)
           .then(() => {

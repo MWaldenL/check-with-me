@@ -5,6 +5,10 @@ const mutations = {
 
   setUserData(state, data) {
     state.user.data = data
+  },
+
+  setPassword(state, newPass) {
+    state.pass = newPass
   }
 }
 

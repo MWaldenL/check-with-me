@@ -99,12 +99,12 @@ export default {
   name: 'Register',
   data() {
     return {
-      firstName: 'Prinz',
-      lastName: 'Eugen',
-      username: 'prnzeugn',
-      email: 'luamatthew@gmail.com',
-      password: 'Ab1,./;?',
-      confirmPassword: 'Ab1,./;?',
+      firstName: '',
+      lastName: '',
+      username: '',
+      email: '',
+      password: '',
+      confirmPassword: '',
 
       errorTitle: null,
       errors: {
