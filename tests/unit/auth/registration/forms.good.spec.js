@@ -141,6 +141,28 @@ describe('Good input tests on registration fields', () => {
 
       // Assert
       expect(cmp.vm.isValidPassword).toBe(true)
+    }),
+    
+    it ('returns true if a given password has spaces', () => {
+      // Arrange
+      const password = `Ab1~\`!@#$%^&*()_+-=[]\\;',./{}|:" < > ?`
+
+      // Act
+      cmp.setData({ password })
+
+      // Assert
+      expect(cmp.vm.isValidPassword).toBe(true)
+    }),
+
+    it ('returns true if a given password has spaces 2', () => {
+      // Arrange
+      const password = `Ab1~\`!@#$     `
+
+      // Act
+      cmp.setData({ password })
+
+      // Assert
+      expect(cmp.vm.isValidPassword).toBe(true)
     })
   }),
 
