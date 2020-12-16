@@ -54,6 +54,7 @@
 
 <script>
 import firebase from 'firebase'
+import bcrypt from 'bcryptjs'
 import { mapActions, mapGetters } from 'vuex'
 import errorMessages from  '@/resources/errorMessages'
 import Sidebar from '@/components/sidebar.vue'
@@ -110,7 +111,12 @@ export default {
         const currentUser = firebase.auth().currentUser
         currentUser.reauthenticateWithCredential(credential)
           .then(() => {
-            this.setPass(this.password)
+            // const saltRounds = 10
+            // bcrypt.hash(this.password, saltRounds, (err, hash) => {
+            //   this.setPass(hash)
+            // })
+            const hashedPass = bcrypt.hashSync(this.password, 10)
+            this.setPass(hashedPass)
             this.$router.push('/change-password/confirm')
           })
           .catch(error => {

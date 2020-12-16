@@ -53,6 +53,7 @@
 
 <script>
 import firebase from 'firebase'
+import bcrypt from 'bcryptjs'
 import { mapGetters, mapActions } from 'vuex'
 import errorMessages from  '@/resources/errorMessages'
 import Sidebar from '@/components/sidebar.vue'
@@ -112,7 +113,7 @@ export default {
       } else if (!this.isValidPassword) {
         this.clearErrors()
         this.errors.invalidPassword = errorMessages.changePasswordConfirm.PASSWORD
-      } else if (this.currentPassword === this.password) {
+      } else if (bcrypt.compareSync(this.password, this.currentPassword)) {
         this.clearErrors()
         this.errors.invalidPassword = errorMessages.changePasswordConfirm.SAME_PASSWORD
       } else {
