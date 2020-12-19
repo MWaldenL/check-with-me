@@ -77,8 +77,7 @@ export default {
 
   computed: {
     ...mapGetters ({
-      user: 'getCurrentUser',
-      currentPassword: 'getPass'
+      user: 'getCurrentUser'
     }),
 
     areFieldsComplete () {
@@ -97,8 +96,7 @@ export default {
 
   methods: {
     ...mapActions([
-      'logoutUser',
-      'setPass'
+      'logoutUser'
     ]),
 
     clearErrors () {

@@ -1,6 +1,5 @@
 const getters = {
-  getCurrentUser: state => state.user,
-  getPass: state => state.pass
+  getCurrentUser: state => state.user
 }
 
 export default getters

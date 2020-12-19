@@ -7,8 +7,7 @@ const state = {
   user: {
     isLoggedIn: false,
     data: null
-  },
-  pass: ''
+  }
 }
 
 export default {

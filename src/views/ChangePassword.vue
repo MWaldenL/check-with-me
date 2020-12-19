@@ -78,8 +78,7 @@ export default {
 
   computed: {
     ...mapGetters({
-      user: 'getCurrentUser',
-      pass: 'getPass'
+      user: 'getCurrentUser'
     }),
 
     areFieldsComplete () {
@@ -88,7 +87,6 @@ export default {
   },
 
   methods: {
-    ...mapActions(['setPass']),
 
     clearErrors () {
       this.errors = {
