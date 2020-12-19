@@ -56,7 +56,7 @@
 import firebase from 'firebase'
 import { db } from '@/firebase'
 import bcrypt from 'bcryptjs'
-import { mapActions, mapGetters } from 'vuex'
+import { mapGetters } from 'vuex'
 import errorMessages from  '@/resources/errorMessages'
 import Sidebar from '@/components/sidebar.vue'
 
@@ -87,7 +87,6 @@ export default {
   },
 
   methods: {
-
     clearErrors () {
       this.errors = {
         incorrectEmail: null,
