@@ -53,7 +53,9 @@
 
 <script>
 import firebase from 'firebase'
-import { mapActions } from 'vuex'
+import { db } from '@/firebase'
+import bcrypt from 'bcryptjs'
+import { mapGetters, mapActions } from 'vuex'
 import errorMessages from  '@/resources/errorMessages'
 import Sidebar from '@/components/sidebar.vue'
 
@@ -64,8 +66,8 @@ export default {
 
   data () {
     return {
-      password: 'p@ssworD1',
-      confirmPassword: 'p@ssworD1',
+      password: '',
+      confirmPassword: '',
       errors: {
         invalidPassword: null,
         confirmPassword: null
@@ -74,13 +76,16 @@ export default {
   },
 
   computed: {
+    ...mapGetters ({
+      user: 'getCurrentUser'
+    }),
+
     areFieldsComplete () {
-      return this.email !== '' && this.password !== ''
+      return this.confirmPassword !== '' && this.password !== ''
     },
 
     isValidPassword () {
-      // const re = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})/
-      const re = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[/\W|_/g])(?=.{8,})/
+      const re = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[\*\.\!\@\$\%\^\&\(\)\{\}\[\]\:\;\<\>\,\.\?\/\~\_\+\-\=\|])(?=.{8,})/
       return re.test(this.password) 
     },
 
@@ -90,7 +95,9 @@ export default {
   },
 
   methods: {
-    ...mapActions(['logoutUser']),
+    ...mapActions([
+      'logoutUser'
+    ]),
 
     clearErrors () {
       this.errors = {
@@ -99,7 +106,7 @@ export default {
       }
     },
 
-    continueChange () {
+    async continueChange () {
       if (!this.arePasswordsEqual) {
         this.clearErrors()
         this.errors.confirmPassword = errorMessages.changePasswordConfirm.CONFIRM_PASSWORD
@@ -107,16 +114,32 @@ export default {
         this.clearErrors()
         this.errors.invalidPassword = errorMessages.changePasswordConfirm.PASSWORD
       } else {
-        this.clearErrors()
-        const currentUser = firebase.auth().currentUser
-        currentUser.updatePassword(this.password)
-          .then(() => {
-            firebase.auth().signOut()
+        db.collection('users')
+        .where("username", "==", this.user.data.username)
+        .get()
+        .then(querySnapshot => {
+          const currentPassword = querySnapshot.docs[0].data().currentPassword
+          if (bcrypt.compareSync(this.password, currentPassword)) {
+            this.clearErrors()
+            this.errors.invalidPassword = errorMessages.changePasswordConfirm.SAME_PASSWORD
+          } else {
+            this.clearErrors()
+            const currentUser = firebase.auth().currentUser
+
+            db.collection('users')
+              .doc(currentUser.uid)
+              .update({ currentPassword : firebase.firestore.FieldValue.delete() })
+
+            currentUser.updatePassword(this.password)
               .then(() => {
-                this.logoutUser()
-                this.$router.push('/login')
+                firebase.auth().signOut()
+                  .then(() => {
+                    this.logoutUser()
+                    this.$router.push('/login')
+                  })
               })
-          })
+          }
+        })
       }
     }
   }
