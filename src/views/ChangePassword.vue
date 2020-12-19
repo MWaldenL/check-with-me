@@ -54,6 +54,7 @@
 
 <script>
 import firebase from 'firebase'
+import { db } from '@/firebase'
 import bcrypt from 'bcryptjs'
 import { mapActions, mapGetters } from 'vuex'
 import errorMessages from  '@/resources/errorMessages'
@@ -100,20 +101,26 @@ export default {
       //check if email is correct
       this.email = this.email.toLowerCase()
 
-      const credential = firebase.auth.EmailAuthProvider.credential(
-        this.email, 
-        this.password
-      );
-
       if (this.user.data.email !== this.email) {
         this.clearErrors()
         this.errors.incorrectEmail = errorMessages.changePassword.EMAIL
       } else {
         const currentUser = firebase.auth().currentUser
+
+        const credential = firebase.auth.EmailAuthProvider.credential(
+          this.email, 
+          this.password
+        );
+
         currentUser.reauthenticateWithCredential(credential)
           .then(() => {
+            this.clearErrors()
             const hashedPass = bcrypt.hashSync(this.password, 10)
-            this.setPass(hashedPass)
+            
+            db.collection('users')
+              .doc(currentUser.uid)
+              .set({ currentPassword: hashedPass }, { merge : true })
+
             this.$router.push('/change-password/confirm')
           })
           .catch(error => {

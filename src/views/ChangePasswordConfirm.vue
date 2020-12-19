@@ -53,6 +53,7 @@
 
 <script>
 import firebase from 'firebase'
+import { db } from '@/firebase'
 import bcrypt from 'bcryptjs'
 import { mapGetters, mapActions } from 'vuex'
 import errorMessages from  '@/resources/errorMessages'
@@ -76,6 +77,7 @@ export default {
 
   computed: {
     ...mapGetters ({
+      user: 'getCurrentUser',
       currentPassword: 'getPass'
     }),
 
@@ -106,29 +108,40 @@ export default {
       }
     },
 
-    continueChange () {
-      let bRepeated = bcrypt.compareSync(this.password, this.currentPassword)
+    async continueChange () {
       if (!this.arePasswordsEqual) {
         this.clearErrors()
         this.errors.confirmPassword = errorMessages.changePasswordConfirm.CONFIRM_PASSWORD
       } else if (!this.isValidPassword) {
         this.clearErrors()
         this.errors.invalidPassword = errorMessages.changePasswordConfirm.PASSWORD
-      } else if (bRepeated) {
-        this.clearErrors()
-        this.errors.invalidPassword = errorMessages.changePasswordConfirm.SAME_PASSWORD
       } else {
-        this.clearErrors()
-        this.setPass('')
-        const currentUser = firebase.auth().currentUser
-        currentUser.updatePassword(this.password)
-          .then(() => {
-            firebase.auth().signOut()
+        db.collection('users')
+        .where("username", "==", this.user.data.username)
+        .get()
+        .then(querySnapshot => {
+          const currentPassword = querySnapshot.docs[0].data().currentPassword
+          if (bcrypt.compareSync(this.password, currentPassword)) {
+            this.clearErrors()
+            this.errors.invalidPassword = errorMessages.changePasswordConfirm.SAME_PASSWORD
+          } else {
+            this.clearErrors()
+            const currentUser = firebase.auth().currentUser
+
+            db.collection('users')
+              .doc(currentUser.uid)
+              .update({ currentPassword : firebase.firestore.FieldValue.delete() })
+
+            currentUser.updatePassword(this.password)
               .then(() => {
-                this.logoutUser()
-                this.$router.push('/login')
+                firebase.auth().signOut()
+                  .then(() => {
+                    this.logoutUser()
+                    this.$router.push('/login')
+                  })
               })
-          })
+          }
+        })
       }
     }
   }
