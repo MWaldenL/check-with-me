@@ -1,23 +1,27 @@
 <template>
-  <b-row v-if="img">
-    <b-col cols="8" class="help-content help-text">
-      <p>
-        <span class="help-bold" v-if="head">King Movement. </span>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt 
-        ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco 
-        laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in 
-        voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat 
-        non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-      </p>
-    </b-col>
+  <b-row v-if="!text">
     <b-col class="help-image-wrapper">
-      <img class="help-image" src="../../public/assets/gif1.gif">
+      <img  v-for="(_img, index) in img" class="help-image-lrg" :key="index" :src="_img">
     </b-col>
   </b-row>
-  <b-row v-else>
-    <b-col class="help-content help-text">
+
+  <b-row v-else-if="!img">
+    <b-col cols="8" class="help-content help-text">
       <p>
         <span class="help-bold" v-if="head">{{ head }}</span>{{ text }}
       </p>
+    </b-col>
+    <b-col></b-col>
+  </b-row>
+
+  <b-row v-else>
+    <b-col cols="8" class="help-content help-text">
+      <p>
+        <span class="help-bold" v-if="head">{{ head }}</span>{{ text }}
+      </p>
+    </b-col>
+    <b-col class="help-image-wrapper">
+      <img  v-for="(_img, index) in img" class="help-image" :key="index" :src="_img">
     </b-col>
   </b-row>
 </template>
@@ -57,7 +61,12 @@ export default {
 }
 
 .help-image {
-  max-width: 300px;
-  margin: 20px;
+  max-width: 250px;
+  margin: 40px;
+}
+
+.help-image-lrg {
+  max-width: 500px;
+  margin: 40px;
 }
 </style>

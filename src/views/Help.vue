@@ -9,13 +9,18 @@
     <b-nav-item class="nav-item" href="#how-to-win" @click="scrollIntoView">How to Win</b-nav-item>
   </b-nav>
   <div id="instructions-box" class="instructions" ref="content">
-    <h1 id="what-is-checkers" class="help-content help-bold help-header">What is Checkers</h1>
-    <HelpItem :text="this.helpMessages.intro.CHECKERS_DESC" :head="'King Movement. '" />
-    <h1 id="prep-objective" class="help-content help-bold help-header">Preparation and Objectives</h1>
-    <HelpItem :text="this.helpMessages" />
-    <h1 id="mechanics" class="help-content help-bold help-header">Game Mechanics</h1>
-    <HelpItem :text="this.helpMessages" />
-    <h1 id="how-to-win" class="help-content help-bold help-header">How to Win</h1>
+    <h1 id="what-is-checkers" class="help-header">What is Checkers?</h1>
+    <HelpItem :text="this.helpMessages.intro.CHECKERS_DESC" />
+
+    <h1 id="prep-objective" class="help-header">Preparation and Objectives</h1>
+    <HelpItem :head="'Preparation. '" :text="this.helpMessages.prepObj.PREPARATION" :img="[require('../../public/assets/preparation.png')]" />
+    <HelpItem :head="'Objective. '" :text="this.helpMessages.prepObj.OBJECTIVE" />
+    <HelpItem :img="[require('../../public/assets/objective1.png'), require('../../public/assets/objective2.png')]" />
+
+    <h1 id="mechanics" class="help-header">Game Mechanics</h1>
+    <HelpItem :text="this.helpMessages" :img="true" />
+
+    <h1 id="how-to-win" class="help-header">How to Win</h1>
     <HelpItem :text="this.helpMessages" />
   </div>
 </div>
@@ -99,17 +104,11 @@ a.nav-link:hover {
   padding: 0 30px 30px 30px;
 }
 
-.help-content {
+.help-header {
   font-family: 'Raleway', sans-serif;
   color: #000000;
   text-align: left;
-}
-
-.help-bold {
   font-weight: 700;
-}
-
-.help-header {
-  padding: 50px 0
+  padding: 50px 0;
 }
 </style>
