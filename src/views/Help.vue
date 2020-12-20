@@ -10,70 +10,32 @@
   </b-nav>
   <div id="instructions-box" class="instructions" ref="content">
     <h1 id="what-is-checkers" class="help-content help-bold help-header">What is Checkers</h1>
-    <b-row>
-      <b-col cols="8" class="help-content help-text">
-        <p>
-          <span class="help-bold">King Movement. </span>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt 
-          ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco 
-          laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in 
-          voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat 
-          non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-        </p>
-      </b-col>
-      <b-col class="help-image-wrapper">
-        <img class="help-image" src="../../public/assets/gif1.gif">
-      </b-col>
-    </b-row>
+    <HelpItem :text="this.helpMessages.intro.CHECKERS_DESC" :head="'King Movement. '" />
     <h1 id="prep-objective" class="help-content help-bold help-header">Preparation and Objectives</h1>
-    <b-row>
-      <b-col cols="8" class="help-content help-text">
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt 
-        ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco 
-        laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in 
-        voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat 
-        non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-      </b-col>
-      <b-col class="help-image-wrapper">
-        <img class="help-image" src="../../public/assets/gif1.gif">
-      </b-col>
-    </b-row>
+    <HelpItem :text="this.helpMessages" />
     <h1 id="mechanics" class="help-content help-bold help-header">Game Mechanics</h1>
-    <b-row>
-      <b-col cols="8" class="help-content help-text">
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt 
-        ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco 
-        laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in 
-        voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat 
-        non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-      </b-col>
-      <b-col class="help-image-wrapper">
-        <img class="help-image" src="../../public/assets/gif1.gif">
-      </b-col>
-    </b-row>
+    <HelpItem :text="this.helpMessages" />
     <h1 id="how-to-win" class="help-content help-bold help-header">How to Win</h1>
-    <b-row>
-      <b-col cols="8" class="help-content help-text">
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt 
-        ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco 
-        laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in 
-        voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat 
-        non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-      </b-col>
-      <b-col class="help-image-wrapper">
-        <img class="help-image" src="../../public/assets/gif1.gif">
-      </b-col>
-    </b-row>
+    <HelpItem :text="this.helpMessages" />
   </div>
 </div>
 </template>
 
 <script>
 import Sidebar from '@/components/sidebar.vue'
+import HelpItem from '@/components/helpItem.vue'
+import helpMessages from '@/resources/helpContent.js'
 
 export default {
-  name: 'Profile',
+  name: 'Help',
   components: {
     Sidebar,
+    HelpItem
+  },
+  data() {
+    return {
+      helpMessages
+    }
   },
   methods: {
     scrollIntoView(event) {
@@ -133,7 +95,7 @@ a.nav-link:hover {
   position: relative; 
   background-color: #C4C4C4; 
   overflow-y: scroll; 
-  height: 78vh;
+  height: 75vh;
   padding: 0 30px 30px 30px;
 }
 
@@ -149,22 +111,5 @@ a.nav-link:hover {
 
 .help-header {
   padding: 50px 0
-}
-
-.help-text {
-  font-size: 25px;
-  display: flex;
-  align-items: center;
-}
-
-.help-image-wrapper {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.help-image {
-  max-width: 300px;
-  margin: 20px;
 }
 </style>
