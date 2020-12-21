@@ -9,7 +9,7 @@
           <tr>
             <th id = "headerRank">Rank</th>
             <th id = "headerName">Name</th>
-            <th id = "headerScore">Points</th>
+            <th id = "headerScore">{{ criteria }}</th>
           </tr>
         </thead>
         <tbody>
@@ -41,7 +41,9 @@ export default {
   },
   data () {
     return{
-      criteria: "Win Ratio",
+      criteria: "Points",
+      leaders: []
+      /*
       leaders: [
         {
           key: 1,
@@ -104,7 +106,27 @@ export default {
           points: 20
         }
       ]
+      */
     }
+  },
+  created() {
+    db.collection("users").orderBy("points", "desc").limit(10)
+      .get()
+      .then(querySnapshot => {
+        let docs = querySnapshot.docs
+        docs.forEach((doc, index) => {
+          console.log(doc.id, " => ", doc.data());
+          let leader = {
+            rank: index + 1,
+            username: doc.data().username,
+            points: doc.data().points
+          }
+          this.leaders.push(leader)
+        })
+      })
+      .catch(function(error) {
+        console.log("Error getting documents: ", error);
+      })
   }
 }
 </script>
@@ -184,7 +206,6 @@ export default {
   #CriteriaSelect {
     padding: 20px;
     margin: 10px;
-    display: 
   }
 
   .triangle-left {
