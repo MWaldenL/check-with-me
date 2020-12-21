@@ -15,25 +15,17 @@ export const getBoard = () => {
         isPossibleCapture: false
       }
 
-      // if (cell.nRow >= 6 && ((cell.nCol % 2 === 1 && cell.nRow % 2 === 1) || (cell.nCol % 2 === 0 && cell.nRow % 2 === 0))) {
-      //   // put black chip
-      //   cell.bHasBlackChip = true
-      // } else if (cell.nRow <= 3 && ((cell.nCol % 2 === 1 && cell.nRow % 2 === 1) || (cell.nCol % 2 === 0 && cell.nRow % 2 === 0))) {
-      //   // put white chip
-      //   cell.bHasWhiteChip = true
-      // }
+      if (cell.nRow >= 6 && ((cell.nCol % 2 === 1 && cell.nRow % 2 === 1) || (cell.nCol % 2 === 0 && cell.nRow % 2 === 0))) {
+        // put black chip
+        cell.bHasBlackChip = true
+      } else if (cell.nRow <= 3 && ((cell.nCol % 2 === 1 && cell.nRow % 2 === 1) || (cell.nCol % 2 === 0 && cell.nRow % 2 === 0))) {
+        // put white chip
+        cell.bHasWhiteChip = true
+      }
 
       board[r][c] = cell
     }
   }
-
-  board[0][2].bHasWhiteChip = true
-  board[1][1].bHasBlackChip = true
-  board[2][0].bHasWhiteChip = true
-  board[3][1].bHasBlackChip = true
-  board[4][2].bHasBlackChip = true
-  board[1][3].bHasBlackChip = true
-  board[2][4].bHasBlackChip = true
 
   return board
 }

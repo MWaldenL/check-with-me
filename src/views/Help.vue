@@ -9,19 +9,46 @@
     <b-nav-item class="nav-item" href="#how-to-win" @click="scrollIntoView">How to Win</b-nav-item>
   </b-nav>
   <div id="instructions-box" class="instructions" ref="content">
+
     <h1 id="what-is-checkers" class="help-header">What is Checkers?</h1>
     <HelpItem :text="this.helpMessages.intro.CHECKERS_DESC" />
 
     <h1 id="prep-objective" class="help-header">Preparation and Objectives</h1>
-    <HelpItem :head="'Preparation. '" :text="this.helpMessages.prepObj.PREPARATION" :img="[require('../../public/assets/preparation.png')]" />
-    <HelpItem :head="'Objective. '" :text="this.helpMessages.prepObj.OBJECTIVE" />
-    <HelpItem :img="[require('../../public/assets/objective1.png'), require('../../public/assets/objective2.png')]" />
+    <HelpItem :head="'Preparation'" :text="this.helpMessages.prepObj.PREPARATION" />
+    <HelpItem :img="[require('../../public/assets/preparation.png')]" />
+
+    <HelpItem :head="'Objective'" :text="this.helpMessages.prepObj.OBJECTIVE" />
+    <HelpItem :img="[require('../../public/assets/objective-zero.png'), require('../../public/assets/objective-stuck.png')]" />
 
     <h1 id="mechanics" class="help-header">Game Mechanics</h1>
-    <HelpItem :text="this.helpMessages" :img="true" />
+    <HelpItem :text="this.helpMessages.mechanics.INTRO" />
+
+    <HelpItem :head="'Moving a Regular Checker'" :text="this.helpMessages.mechanics.REG_MOVEMENT" :img="require('../../public/assets/move-forward.gif')" />
+    
+    <HelpItem :head="'Capturing Using a Regular Checker'" :text="this.helpMessages.mechanics.REG_CAPTURE_1" />
+    <HelpItem :text="this.helpMessages.mechanics.REG_CAPTURE_2" :img="require('../../public/assets/capture-single.gif')" />
+    <HelpItem :text="this.helpMessages.mechanics.REG_CAPTURE_3" :img="require('../../public/assets/capture-multiple.gif')" />
+    <HelpItem :text="this.helpMessages.mechanics.REG_CAPTURE_4" />
+
+    <HelpItem :head="'Upgrading a Regular Checker'" :text="this.helpMessages.mechanics.KING_UPGRADE" :img="require('../../public/assets/king-upgrade.gif')" />
+
+    <HelpItem :head="'Moving a Kinged Checker'" :text="this.helpMessages.mechanics.KING_MOVEMENT" :img="require('../../public/assets/king-movement.gif')" />
+
+    <HelpItem :head="'Capturing Using a Kinged Checker'" :text="this.helpMessages.mechanics.KING_CAPTURE_1" :img="require('../../public/assets/king-capture-single.gif')" />
+    <HelpItem :list="[this.helpMessages.mechanics.KING_CAPTURE_2, this.helpMessages.mechanics.KING_CAPTURE_3, this.helpMessages.mechanics.KING_CAPTURE_4]" />
+    <HelpItem :text="this.helpMessages.mechanics.KING_CAPTURE_5" :img="require('../../public/assets/king-capture-multiple.gif')" />
 
     <h1 id="how-to-win" class="help-header">How to Win</h1>
-    <HelpItem :text="this.helpMessages" />
+    <HelpItem :img="[require('../../public/assets/declare-winner.gif')]" />
+
+    <HelpItem :head="'Win Conditions'" :text="this.helpMessages.howToWin.WIN_CONDITIONS" />
+    <HelpItem :list="[this.helpMessages.howToWin.CONDITION_1, this.helpMessages.howToWin.CONDITION_2, this.helpMessages.howToWin.CONDITION_3]" />
+    
+    <HelpItem :head="'Offering a Draw'" :text="this.helpMessages.howToWin.DRAW_OFFER" />
+    <HelpItem :text="this.helpMessages.howToWin.DRAW_SUCCESS" />
+    <HelpItem :text="this.helpMessages.howToWin.DRAW_RESET" />
+
+    <HelpItem :head="'Gathering Points'" :text="this.helpMessages.howToWin.POINT_SYSTEM" />
   </div>
 </div>
 </template>
@@ -109,6 +136,6 @@ a.nav-link:hover {
   color: #000000;
   text-align: left;
   font-weight: 700;
-  padding: 50px 0;
+  margin: 40px 0 0 0;
 }
 </style>
