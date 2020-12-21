@@ -1,9 +1,12 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Home from '../views/Home.vue'
+import Profile from '../views/Profile.vue'
 import Register from '../views/Register.vue'
 import Login from '../views/Login.vue'
 import Leaderboard from '../views/Leaderboard.vue'
+import ChangePassword from '../views/ChangePassword.vue'
+import ChangePasswordConfirm from '../views/ChangePasswordConfirm.vue'
 import firebase from  'firebase'
 import authStore from '@/store/modules/auth'
 
@@ -14,6 +17,24 @@ const routes = [
     path: '/',
     name: 'Home',
     component: Home,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/profile',
+    name: 'Profile',
+    component: Profile,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/change-password',
+    name: 'ChangePassword',
+    component: ChangePassword,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/change-password/confirm',
+    name: 'ChangePasswordConfirm',
+    component: ChangePasswordConfirm,
     meta: { requiresAuth: true },
   },
   {

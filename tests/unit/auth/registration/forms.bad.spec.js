@@ -168,6 +168,17 @@ describe('Bad input tests on registration fields', () => {
       expect(cmp.vm.isValidEmail).toBe(false)
     }),
 
+    it ('returns false if an email contains leading or trailing spaces', () => {
+      // Arrange
+      const email = "   user@gmail.com   "
+
+      // Act
+      cmp.setData({ email })
+
+      // Assert
+      expect(cmp.vm.isValidEmail).toBe(false)
+    }),
+
     it ('returns false if an email does not have an @ sign', () => {
       // Arrange
       const email = "useremail.com"
@@ -251,6 +262,28 @@ describe('Bad input tests on registration fields', () => {
     it ('returns false if a given password has no special characters', () => {
       // Arrange
       const password = "ABCcdefg"
+
+      // Act
+      cmp.setData({ password })
+
+      // Assert
+      expect(cmp.vm.isValidPassword).toBe(false)
+    }),
+
+    it ('returns false if a given password has no special characters 2', () => {
+      // Arrange
+      const password = "Abcdefg1"
+
+      // Act
+      cmp.setData({ password })
+
+      // Assert
+      expect(cmp.vm.isValidPassword).toBe(false)
+    }),
+
+    it ('returns false if a given password has only special characters', () => {
+      // Arrange
+      const password = `~\`!@#$%^&*()_+-=[]\\;',./{}|:"<>?`
 
       // Act
       cmp.setData({ password })

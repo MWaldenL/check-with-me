@@ -99,12 +99,12 @@ export default {
   name: 'Register',
   data() {
     return {
-      firstName: 'Prinz',
-      lastName: 'Eugen',
-      username: 'prnzeugn',
-      email: 'luamatthew@gmail.com',
-      password: 'Ab1,./;?',
-      confirmPassword: 'Ab1,./;?',
+      firstName: '',
+      lastName: '',
+      username: '',
+      email: '',
+      password: '',
+      confirmPassword: '',
 
       errorTitle: null,
       errors: {
@@ -132,8 +132,7 @@ export default {
     },
 
     isValidPassword () {
-      // const re = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})/
-      const re = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[/\W|_/g])(?=.{8,})/
+      const re = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[\*\.\!\@\$\%\^\&\(\)\{\}\[\]\:\;\<\>\,\.\?\/\~\_\+\-\=\|])(?=.{8,})/
       return re.test(this.password) 
     },
 
@@ -206,7 +205,7 @@ export default {
                   first_name: this.firstName,
                   last_name: this.lastName,
                   username: this.username,
-                  email: this.email,
+                  email: this.email.toLowerCase(),
                   points: 0,
                   loss_white: 0,
                   loss_black: 0,

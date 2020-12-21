@@ -38,9 +38,9 @@ describe('Good input tests on registration fields', () => {
       expect(result).toBe(true)
     }),
 
-    it ('returns true if the user-inputted first name contains only letters 2', () => {
+    it ('returns true if the valid user-inputted first name contains a space', () => {
       // Arrange
-      const firstName = 'Matthew Walden'
+      const firstName = 'Matthew Walden Barcelona Chen'
       
       // Act
       const result = cmp.vm.isValidName(firstName)
@@ -95,6 +95,17 @@ describe('Good input tests on registration fields', () => {
 
       // Assert
       expect(cmp.vm.isValidEmail).toBe(true)
+    }),
+
+    it ('returns true even if an email contains mixed-case letters', () => {
+      // Arrange
+      const email = "UsErABc@email.com"
+
+      // Act
+      cmp.setData({ email })
+
+      // Assert
+      expect(cmp.vm.isValidEmail).toBe(true)
     })
   }),
 
@@ -113,6 +124,39 @@ describe('Good input tests on registration fields', () => {
     it ('returns true if a given password conforms to its standards 2', () => {
       // Arrange
       const password = "Ab1,./;?"
+
+      // Act
+      cmp.setData({ password })
+
+      // Assert
+      expect(cmp.vm.isValidPassword).toBe(true)
+    }),
+
+    it ('returns true if a given password conforms to its standards 3', () => {
+      // Arrange
+      const password = `Ab1~\`!@#$%^&*()_+-=[]\\;',./{}|:"<>?`
+
+      // Act
+      cmp.setData({ password })
+
+      // Assert
+      expect(cmp.vm.isValidPassword).toBe(true)
+    }),
+    
+    it ('returns true if a given password has spaces', () => {
+      // Arrange
+      const password = `Ab1~\`!@#$%^&*()_+-=[]\\;',./{}|:" < > ?`
+
+      // Act
+      cmp.setData({ password })
+
+      // Assert
+      expect(cmp.vm.isValidPassword).toBe(true)
+    }),
+
+    it ('returns true if a given password has spaces 2', () => {
+      // Arrange
+      const password = `Ab1~\`!@#$     `
 
       // Act
       cmp.setData({ password })

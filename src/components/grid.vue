@@ -132,6 +132,6 @@ table {
 }
 #box {
   position: relative;
-  margin-top: 20px;
+  margin-top: 10px;
 }
 </style>
