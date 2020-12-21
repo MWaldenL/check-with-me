@@ -3,6 +3,7 @@ import VueRouter from 'vue-router'
 import Home from '../views/Home.vue'
 import Register from '../views/Register.vue'
 import Login from '../views/Login.vue'
+import Leaderboard from '../views/Leaderboard.vue'
 import firebase from  'firebase'
 import authStore from '@/store/modules/auth'
 
@@ -27,6 +28,12 @@ const routes = [
     component: Login,
     meta: { requiresNotAuth: true }
   },
+  {
+    path: '/leaderboard',
+    name: 'Leaderboard',
+    component: Leaderboard,
+    meta: { requiresNotAuth: false }
+  }
 ]
 
 const router = new VueRouter({

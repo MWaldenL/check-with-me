@@ -5,7 +5,9 @@
       <div id="s-contents" class="px-3 py-2">
         <h3>Play</h3>
         <h3>Profile</h3>
-        <h3>Leaderboard</h3>
+        <router-link to="/leaderboard" class="router-link" @click.native="leaderboard">
+          <h3 class="cursor-pointer text-white">Leaderboard</h3>
+        </router-link>
         <router-link to="/login" class="router-link" @click.native="logout">
           <h3 class="cursor-pointer text-white">Logout</h3>
         </router-link>
