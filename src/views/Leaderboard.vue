@@ -9,7 +9,7 @@
           <tr>
             <th id = "headerRank">Rank</th>
             <th id = "headerName">Name</th>
-            <th id = "headerScore">{{ criteria }}</th>
+            <th id = "headerScore">{{ criteriaList[criteriaIndex] }}</th>
           </tr>
         </thead>
         <tbody>
@@ -21,9 +21,9 @@
         </tbody>
       </table>
       <div id="CriteriaSelect">
-        <div class="triangle-left"></div>
-        <div id="criteriaLabel">{{ criteria }}</div>
-        <div class="triangle-right"></div>
+        <div class="triangle-left" @click="moveCriteriaLeft()"></div>
+        <div id="criteriaLabel">{{ criteriaList[criteriaIndex] }}</div>
+        <div class="triangle-right" @click="moveCriteriaRight()"></div>
       </div>
     </div>
   </div>
@@ -33,6 +33,7 @@
 import firebase from 'firebase'
 import { db } from '@/firebase'
 import Sidebar from '@/components/sidebar.vue'
+import leaderQuery from '@/resources/leaderQuery'
 
 export default {
   name: 'Leaderboard',
@@ -41,72 +42,9 @@ export default {
   },
   data () {
     return{
-      criteria: "Points",
+      criteriaList: ["Elo Rating", "Win Rate", "Total Wins", "Wins on White", "Wins on Black"],
+      criteriaIndex: 0,
       leaders: []
-      /*
-      leaders: [
-        {
-          key: 1,
-          username: "Mika Reyes",
-          rank: 1,
-          points: 20
-        },
-        {
-          key: 2,
-          username: "Michiko Gomi",
-          rank: 2,
-          points: 19
-        },
-        {
-          key: 3,
-          username: "Arnold Shwarzanegger??",
-          rank: 3,
-          points: 18
-        },
-        {
-          key: 1,
-          username: "Mika Reyes",
-          rank: 1,
-          points: 20
-        },
-        {
-          key: 2,
-          username: "Michiko Gomi",
-          rank: 2,
-          points: 19
-        },
-        {
-          key: 3,
-          username: "Arnold Shwarzanegger??",
-          rank: 3,
-          points: 18
-        },
-        {
-          key: 1,
-          username: "Mika Reyes",
-          rank: 1,
-          points: 20
-        },
-        {
-          key: 2,
-          username: "Michiko Gomi",
-          rank: 2,
-          points: 19
-        },
-        {
-          key: 3,
-          username: "Arnold Shwarzanegger??",
-          rank: 3,
-          points: 18
-        },
-        {
-          key: 1,
-          username: "Mika Reyes",
-          rank: 1,
-          points: 20
-        }
-      ]
-      */
     }
   },
   created() {
@@ -127,6 +65,40 @@ export default {
       .catch(function(error) {
         console.log("Error getting documents: ", error);
       })
+  },
+  methods: {
+    queryLeaders() {
+      if(this.criteriaIndex === 0)
+        this.leaders = leaderQuery.queryElo()
+      else if(this.criteriaIndex === 1)
+        this.leaders = leaderQuery.queryWinRate()
+      else if(this.criteriaIndex === 2)
+        this.leaders = leaderQuery.queryTotalWins()
+      else if(this.criteriaIndex === 3)
+        this.leaders = leaderQuery.queryWhiteWins()
+      else if(this.criteriaIndex === 4)
+        this.leaders = leaderQuery.queryBlackWins()
+
+      console.log(this.leaders)
+    },
+
+    moveCriteriaLeft() {
+      if (this.criteriaIndex === 0)
+        this.criteriaIndex = 4
+      else
+        this.criteriaIndex = this.criteriaIndex - 1
+
+      this.queryLeaders()
+    },
+    
+    moveCriteriaRight() {
+      if (this.criteriaIndex === 4)
+        this.criteriaIndex = 0
+      else
+        this.criteriaIndex = this.criteriaIndex + 1
+
+      this.queryLeaders()
+    }
   }
 }
 </script>
@@ -177,6 +149,7 @@ export default {
   .leaderRank {
     text-align: left;
     padding: 15px 8vw 15px 20px;
+    font-size: 1.25em;
   }
 
   #headerName {
@@ -187,6 +160,7 @@ export default {
     text-align: left;
     column-width: 100px;
     padding: 15px 30vw 15px 10px;
+    font-size: 1.25em;
   }
 
   #headerScore {
@@ -195,6 +169,7 @@ export default {
   .leaderScore {
     text-align: right;
     padding: 15px 20px 15px 5vw;
+    font-size: 1.25em;
   }
 
   #CriteriaSelect {
@@ -231,5 +206,13 @@ export default {
     border-top: 15px solid transparent;
     border-left: 30px solid #FFF;
     border-bottom: 15px solid transparent;
+  }
+
+  .triangle-left:hover {
+    border-right: 30px solid #BCFC8A;
+  }
+
+  .triangle-right:hover {
+    border-left: 30px solid #BCFC8A;
   }
 </style>
