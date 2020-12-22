@@ -9,7 +9,9 @@
         <router-link to="/profile" class="router-link">
           <h3 class="cursor-pointer text-white">Profile</h3>
         </router-link>
-        <h3>Leaderboard</h3>
+        <router-link to="/leaderboard" class="router-link">
+          <h3 class="cursor-pointer text-white">Leaderboard</h3>
+        </router-link>
         <router-link to="/help" class="router-link">
           <h3 class="cursor-pointer text-white">How to Play</h3>
         </router-link>
