@@ -1,5 +1,6 @@
 <template>
   <td :class="highlight" class="square" @click="onSquareClicked()" v-if="isDark">
+    <!-- {{row-1}}{{col-1}} -->
     <div id="checker-black" class="chip black-chip" v-show="hasBlackChip">
       <img class="king" src="../../public/assets/king.png" v-show="hasBlackKing"/>
     </div>

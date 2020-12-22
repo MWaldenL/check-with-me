@@ -6,6 +6,7 @@ import Register from '../views/Register.vue'
 import Login from '../views/Login.vue'
 import ChangePassword from '../views/ChangePassword.vue'
 import ChangePasswordConfirm from '../views/ChangePasswordConfirm.vue'
+import Help from '../views/Help.vue'
 import firebase from  'firebase'
 import authStore from '@/store/modules/auth'
 
@@ -34,6 +35,12 @@ const routes = [
     path: '/change-password/confirm',
     name: 'ChangePasswordConfirm',
     component: ChangePasswordConfirm,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/help',
+    name: 'Help',
+    component: Help,
     meta: { requiresAuth: true },
   },
   {

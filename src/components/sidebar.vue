@@ -10,6 +10,9 @@
           <h3 class="cursor-pointer text-white">Profile</h3>
         </router-link>
         <h3>Leaderboard</h3>
+        <router-link to="/help" class="router-link">
+          <h3 class="cursor-pointer text-white">How to Play</h3>
+        </router-link>
         <router-link to="/login" class="router-link" @click.native="logout">
           <h3 class="cursor-pointer text-white">Logout</h3>
         </router-link>
