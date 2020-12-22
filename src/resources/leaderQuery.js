@@ -38,9 +38,21 @@ var totalWinsConverter = {
 }
 
 export default {
+  sortWinRateThenElo (a, b) {
+    if(a.win_rate === b.win_rate)
+      return (a.points <= b.points) ? 1 : -1
+    else
+      return (a.win_rate < b.win_rate) ? 1 : -1
+  },
+  
+  sortTotalWinsThenElo (a, b) {
+    if(a.total_wins === b.total_wins)
+      return (a.points <= b.points) ? 1 : -1
+    else
+      return (a.total_wins < b.total_wins) ? 1 : -1
+  },
   //queryElo
   queryElo() {
-    let queryCriteria = ["points", "win_rate", "total_wins", "wins_white", "wins_black"]
     let leaders = []
 
     db.collection("users").orderBy("points", "desc").limit(10)
@@ -48,7 +60,7 @@ export default {
     .then(querySnapshot => {
       let docs = querySnapshot.docs
       docs.forEach((doc, index) => {
-        console.log(doc.id, " => ", doc.data());
+        //console.log(doc.id, " => ", doc.data());
         let leader = {
           rank: index + 1,
           username: doc.data().username,
@@ -61,7 +73,6 @@ export default {
       console.log("Error getting documents: ", error);
     })
 
-    console.log(leaders)
     return leaders
   },
 
@@ -76,7 +87,7 @@ export default {
       let winRates = []
 
       querySnapshot.forEach(doc => {
-        console.log(doc.id, " => ", doc.data());
+        //console.log(doc.id, " => ", doc.data());
         let winRateLeader = doc.data()
 
         //console.log(!isNaN(winRateLeader.win_rate))
@@ -84,13 +95,7 @@ export default {
           winRates.push(winRateLeader)
       })
 
-      winRates.sort(function(a, b) {
-        if(a.win_rate === b.win_rate)
-          return (a.points < b.points) ? 1 : -1
-        else
-          return (a.win_rate < b.win_rate) ? 1 : -1
-      })
-      console.log(winRates)
+      winRates.sort(this.sortWinRateThenElo)
 
       let limit = 10
       if(winRates.length < 10)
@@ -111,7 +116,6 @@ export default {
       console.log("Error getting documents: ", error);
     })
 
-    console.log(leaders)
     return leaders
   },
 
@@ -126,20 +130,14 @@ export default {
       let totalWins = []
 
       querySnapshot.forEach(doc => {
-        console.log(doc.id, " => ", doc.data());
+        //console.log(doc.id, " => ", doc.data());
         let totalWinsLeader = doc.data()
 
         //console.log(!isNaN(winRateLeader.win_rate))
         totalWins.push(totalWinsLeader)
       })
 
-      totalWins.sort(function(a, b) {
-        if(a.total_wins === b.total_wins)
-          return (a.points < b.points) ? 1 : -1
-        else
-          return (a.total_wins < b.total_wins) ? 1 : -1
-      })
-      console.log(totalWins)
+      totalWins.sort(this.sortTotalWinsThenElo)
 
       let limit = 10
       if(totalWins.length < 10)
@@ -160,13 +158,11 @@ export default {
       console.log("Error getting documents: ", error);
     })
 
-    console.log(leaders)
     return leaders
   },
 
   //queryWhiteWins
   queryWhiteWins() {
-    let queryCriteria = ["points", "win_rate", "total_wins", "wins_white", "wins_black"]
     let leaders = []
 
     db.collection("users").orderBy("wins_white", "desc").orderBy("points", "desc").limit(10)
@@ -174,7 +170,7 @@ export default {
     .then(querySnapshot => {
       let docs = querySnapshot.docs
       docs.forEach((doc, index) => {
-        console.log(doc.id, " => ", doc.data());
+        //console.log(doc.id, " => ", doc.data());
         let leader = {
           rank: index + 1,
           username: doc.data().username,
@@ -187,13 +183,11 @@ export default {
       console.log("Error getting documents: ", error);
     })
 
-    console.log(leaders)
     return leaders
   },
 
   //queryBlackWins
   queryBlackWins() {
-    let queryCriteria = ["points", "win_rate", "total_wins", "wins_white", "wins_black"]
     let leaders = []
 
     db.collection("users").orderBy("wins_black", "desc").orderBy("points", "desc").limit(10)
@@ -201,7 +195,7 @@ export default {
     .then(querySnapshot => {
       let docs = querySnapshot.docs
       docs.forEach((doc, index) => {
-        console.log(doc.id, " => ", doc.data());
+        //console.log(doc.id, " => ", doc.data());
         let leader = {
           rank: index + 1,
           username: doc.data().username,
@@ -214,7 +208,6 @@ export default {
       console.log("Error getting documents: ", error);
     })
 
-    console.log(leaders)
     return leaders
   }
 }

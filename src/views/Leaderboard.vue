@@ -53,7 +53,7 @@ export default {
       .then(querySnapshot => {
         let docs = querySnapshot.docs
         docs.forEach((doc, index) => {
-          console.log(doc.id, " => ", doc.data());
+          //console.log(doc.id, " => ", doc.data());
           let leader = {
             rank: index + 1,
             username: doc.data().username,
@@ -78,8 +78,6 @@ export default {
         this.leaders = leaderQuery.queryWhiteWins()
       else if(this.criteriaIndex === 4)
         this.leaders = leaderQuery.queryBlackWins()
-
-      console.log(this.leaders)
     },
 
     moveCriteriaLeft() {
