@@ -3,18 +3,15 @@
     <b-button v-b-toggle.sidebar id="menu"><b-icon-caret-right-fill></b-icon-caret-right-fill></b-button>
     <b-sidebar id="sidebar" title="Check with Me" bg-variant="dark" text-variant="light">
       <div id="s-contents" class="px-3 py-2">
-        <h3>Play</h3>
-        <h3>Profile</h3>
-        <router-link to="/leaderboard" class="router-link">
-          <h3 class="cursor-pointer text-white">Leaderboard</h3>
-        </router-link>
         <router-link to="/" class="router-link">
           <h3 class="cursor-pointer text-white">Play</h3>
         </router-link>
         <router-link to="/profile" class="router-link">
           <h3 class="cursor-pointer text-white">Profile</h3>
         </router-link>
-        <h3>Leaderboard</h3>
+        <router-link to="/leaderboard" class="router-link">
+          <h3 class="cursor-pointer text-white">Leaderboard</h3>
+        </router-link>
         <router-link to="/help" class="router-link">
           <h3 class="cursor-pointer text-white">How to Play</h3>
         </router-link>
