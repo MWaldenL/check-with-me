@@ -1,6 +1,5 @@
 <template>
   <td :class="highlight" class="square" @click="onSquareClicked()" v-if="isDark">
-    <!-- {{row-1}}{{col-1}} -->
     <div id="checker-black" class="chip black-chip" v-show="hasBlackChip">
       <img class="king" src="../../public/assets/king.png" v-show="hasBlackKing"/>
     </div>
@@ -146,12 +145,14 @@ export default {
             } else if (this.isKingCaptureAttempt(source, coords)) {
               this.aKingCapturePiece(coords)
             } else {
-              this.cancelCurrentMove()
+              this.cancelCurrentMove()  
             }
           } else { 
             if (this.isCaptureAttempt(source)) {  
               this.aCapturePiece(coords)
             } else if (this.isMoveForwardAttempt(source)) {
+              this.$emit("makeMove", source)
+              console.log("Making move")
               this.aMoveForward(coords)
             } else {
               this.cancelCurrentMove()

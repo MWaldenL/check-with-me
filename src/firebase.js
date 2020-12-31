@@ -35,9 +35,7 @@ firebase.auth().onAuthStateChanged(user => {
 
 // Collections
 const usersCollection = db.collection('users')
-const chatsCollection = db.collection('chats')
 const gamesCollection = db.collection('games')
-const movesCollection = db.collection('moves')
 
 gamesCollection.doc("2gSaU2SjJeUpHEEbXPyX")
   .onSnapshot(doc => {
@@ -50,5 +48,5 @@ export {
   db,
   auth,
   usersCollection,
-  chatsCollection
+  gamesCollection
 }

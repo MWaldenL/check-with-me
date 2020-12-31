@@ -2,25 +2,34 @@
   <div id="box">
     <Sidebar />
     <div id="p1-details" class="details">
-      <h1> {{ strP1Name }} <span id="p1-time"> {{ printTime(nP1minutes) }}:{{ printTime(nP1seconds) }} </span> </h1> 
+      <h1> 
+        {{ strP1Name }} 
+        <Timer :secs="nP1Seconds" :isHost="false" :isRunning="bOtherRunning" />
+      </h1> 
       <h1 id="p1-count" class="pt-3"> Pieces left: {{ blackCount }} </h1>
     </div>
+
     <div id="table">
       <table>
         <tr v-for="row in 8" :key="row">
-          <Cell v-for="col in 8" :row="9 - row" :col="col" :key="col" />
+          <Cell v-for="col in 8" :row="9 - row" :col="col" :key="col" @makeMove="updateLastPlayerMoved"/>
         </tr>
       </table>
     </div>
+    
     <div id="p2-details" class="details">
       <h1 id="p2-count" class="pb-4"> Pieces left: {{ whiteCount }} </h1>
-      <h1> <span id="p2-time"> {{ printTime(nP2minutes) }}:{{ printTime(nP2seconds) }} </span> {{ strP2Name }}</h1>
+      <h1> 
+        <Timer :secs="nP2Seconds" :isHost="true" :isRunning="bHostRunning" />
+        {{ strP2Name }}
+      </h1>
     </div>
     <b-button id="resign" class="btn-danger">Resign</b-button>
   </div>
 </template>
 
 <script>
+import Timer from './timer'
 import Cell from './cell'
 import Sidebar from './sidebar'
 import { mapGetters, mapActions } from 'vuex'
@@ -29,33 +38,58 @@ export default {
   name: 'Grid',
   components: {
     Cell,
+    Timer,
     Sidebar
   },
-  data:
-    function () {
+
+  data () {
     return {
-      strP1Name: "MikaReyes",
-      strP2Name: "Sinigang",
-      nP1minutes: 2,
-      nP1seconds: 0,
-      nP2minutes: 1,
-      nP2seconds: 59
+      strP1Name: 'MikaReyes',
+      strP2Name: 'Sinigang',
+      
+      bHostRunning: true,
+      bOtherRunning: false,
+
+      nP1Seconds: 3,
+      nP2Seconds: 76
     }
   },
   computed: {
     ...mapGetters({
       whiteCount: 'getWhiteCount',
       blackCount: 'getBlackCount',
+      isHostWhite: 'getIsHostWhite',
+      lastPlayerMoved: 'getLastPlayerMoved', 
     })
   },
   methods: {
-    printTime: function (time) {
-      if (time > 10) {
-        return time.toString(10)
-      } else if (time > 0) {
-        return "0" + time
+    ...mapActions([
+      'aSetLastPlayerMoved'
+    ]),
+
+    updateLastPlayerMoved(source) {
+      const isMoveWhite = source.bHasWhiteChip || source.bHasWhiteKing 
+      
+      if (this.isHostWhite ^ isMoveWhite) {
+        this.aSetLastPlayerMoved('other')
       } else {
-        return "00"
+        this.aSetLastPlayerMoved('host')
+      }
+
+      console.log(this.lastPlayerMoved)
+      this.updateTimer()
+      console.log("Updaeting timer")
+      console.log(this.bHostRunning)
+      console.log(this.bOtherRunning)
+    },
+
+    updateTimer() {
+      if (this.lastPlayerMoved === 'host') {
+        this.bHostRunning = false
+        this.bOtherRunning = true
+      } else {
+        this.bHostRunning = true
+        this.bOtherRunning = false
       }
     }
   }
@@ -80,7 +114,7 @@ a {
   color: #42b983;
 }
 div#table {
-  display: flex;;
+  display: flex;
   align-items: center;
   justify-content: center;
 }
