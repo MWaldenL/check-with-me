@@ -83,9 +83,6 @@ export default {
     }),
 
     canMakeMove() {
-      console.log("lastMoved | currentUser")
-      console.log(this.lastPlayerMoved + " | " + auth.currentUser.uid)
-
       return this.lastPlayerMoved !== auth.currentUser.uid
     },
 
