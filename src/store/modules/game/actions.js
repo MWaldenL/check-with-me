@@ -1,4 +1,4 @@
-import { gamesCollection } from '@/firebase'
+import { gamesCollection, timersCollection } from '@/firebase'
 
 const actions = {
   /**
@@ -54,7 +54,10 @@ const actions = {
    */
   async aSetHostTimeLeft({ commit }) {
     const gameDoc = await gamesCollection.doc('Vc0H4f4EvY6drRKnvsk5').get()
-    const timeLeft = gameDoc.data().host_timeLeft
+    const timerID = gameDoc.data().timerID.id
+    const timerDoc = await timersCollection.doc(timerID).get()
+    const timeLeft = timerDoc.data().host_timeLeft
+
     commit('setHostTimeLeft', timeLeft)
   },
 
@@ -63,7 +66,10 @@ const actions = {
    */
   async aSetOtherTimeLeft({ commit }) {
     const gameDoc = await gamesCollection.doc('Vc0H4f4EvY6drRKnvsk5').get()
-    const timeLeft = gameDoc.data().other_timeLeft
+    const timerID = gameDoc.data().timerID.id
+    const timerDoc = await timersCollection.doc(timerID).get()
+    const timeLeft = timerDoc.data().other_timeLeft
+
     commit('setOtherTimeLeft', timeLeft)
   }
 }

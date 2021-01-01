@@ -35,22 +35,33 @@ firebase.auth().onAuthStateChanged(user => {
 // Collections
 const usersCollection = db.collection('users')
 const gamesCollection = db.collection('games')
+const timersCollection = db.collection('timers')
 
 // Listeners
 gamesCollection
-  .doc('Vc0H4f4EvY6drRKnvsk5')
+  .doc('Vc0H4f4EvY6drRKnvsk5') // .doc(getters.getCurrentGameID)
   .onSnapshot(doc => {
     const data = doc.data()
     
     store.dispatch('aSetLastPlayerMoved', data.last_player_moved)
-    // store.dispatch('aSetHostTimeLeft')
-    // store.dispatch('aSetOtherTimeLeft')
     store.dispatch('aUpdateBoard', data.board_state);
   });
+
+timersCollection
+  .doc('H48woDfI1lwIGZnJh4qz')    // .doc(getters.getTimerFromGameID) 
+  .onSnapshot(doc => {
+    const data = doc.data()
+    setTimeout(() => {
+
+      store.dispatch('aSetHostTimeLeft')
+      store.dispatch('aSetOtherTimeLeft')
+    }, 700)
+  })
 
 export {
   db,
   auth,
   usersCollection,
-  gamesCollection
+  gamesCollection,
+  timersCollection
 }

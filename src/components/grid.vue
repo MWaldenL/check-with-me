@@ -4,9 +4,11 @@
     <div id="p1-details" class="details">
       <h1> 
         {{ enemyName }} 
-        <span class="time text-white" id="enemyTime">
-          {{ enemySeconds | minutes | formattedTime }}:{{ enemySeconds | seconds | formattedTime }}
-        </span>
+        <keep-alive>
+          <span class="time text-white" id="enemyTime">
+            {{ enemySeconds | minutes | formattedTime }}:{{ enemySeconds | seconds | formattedTime }}
+          </span>
+        </keep-alive>
       </h1> 
       <h1 id="p1-count" class="pt-3"> Pieces left: {{ blackCount }} </h1>
     </div>
@@ -29,9 +31,11 @@
     <div id="p2-details" class="details">
       <h1 id="p2-count" class="pb-4"> Pieces left: {{ whiteCount }} </h1>
       <h1>
-        <span class="time text-white" id="selfTime">
-          {{ selfSeconds | minutes | formattedTime }}:{{ selfSeconds | seconds | formattedTime }}
-        </span>
+        <keep-alive>
+          <span class="time text-white" id="selfTime">
+            {{ selfSeconds | minutes | formattedTime }}:{{ selfSeconds | seconds | formattedTime }}
+          </span>
+        </keep-alive>
         {{ selfName }}
       </h1>
     </div>
@@ -40,8 +44,12 @@
 </template>
 
 <script>
-import { auth, gamesCollection, usersCollection } from '@/firebase'
-import Timer from './timer'
+import { 
+  auth, 
+  gamesCollection, 
+  usersCollection, 
+  timersCollection 
+} from '@/firebase'
 import Cell from './cell'
 import Sidebar from './sidebar'
 import { mapGetters, mapActions } from 'vuex'
@@ -50,24 +58,36 @@ export default {
   name: 'Grid',
   components: {
     Cell,
-    Timer,
     Sidebar
   },
   
   async created() {
     await this.aSetHostTimeLeft()
     await this.aSetOtherTimeLeft()
+    this.currentGameDoc = await gamesCollection.doc('Vc0H4f4EvY6drRKnvsk5')
+
+    this.tick('host')
   },
 
   async updated() {
     await this.aSetHostTimeLeft()
     await this.aSetOtherTimeLeft()
+
+    let player
+    if (this.canMakeMove) {
+      player = auth.currentUser.uid === this.hostUserID ? 'host' : 'other'
+    } else {
+      player = this.lastPlayerMoved === this.hostUserID ? 'other' : 'host'
+    }
+
+    this.tick('host')
   },
 
   data () {
     return {
       strP1Name: 'MikaReyes',
       strP2Name: 'Sinigang',
+      currentGame: null,
       bHostRunning: true,
       bOtherRunning: false,
     }
@@ -159,18 +179,20 @@ export default {
       let lastMoved = (this.isHostWhite ^ isMoveWhite) ? this.otherUserID : this.hostUserID
 
       // Write last player moved to db 
-      const currentGame = await gamesCollection.doc('Vc0H4f4EvY6drRKnvsk5')
-      currentGame.update({ last_player_moved: lastMoved })
+      this.currentGameDoc.update({ last_player_moved: lastMoved })
     },
 
-    updateTimer() {
-      if (this.lastPlayerMoved === 'host') {
-        this.bHostRunning = false
-        this.bOtherRunning = true
-      } else {
-        this.bHostRunning = true
-        this.bOtherRunning = false
-      }
+    async tick(player) {
+      await setTimeout(async () => {
+        if (this.hostTimeLeft > 0) {
+          const currentTimer = await timersCollection.doc('H48woDfI1lwIGZnJh4qz')
+          const timeObj = player === 'host' ? 
+            { host_timeLeft: this.hostTimeLeft - 1 } : 
+            { other_timeLeft: this.otherTimeLeft - 1 }
+
+          currentTimer.update(timeObj)
+        }
+      }, 500)
     }
   }
 }
