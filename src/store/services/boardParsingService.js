@@ -25,17 +25,18 @@ const getEmptyBoard = () => {
 const placePieces = (board, squares, color) => {
   for (let square of squares) {
     let cell = {
-      nRow: 0, // nRow number 1-8, 1 is bottom
-      nCol: 0, // column number 1-8, 1 is leftmost
+      nRow: 0,              // nRow number 1-8, 1 is bottom
+      nCol: 0,              // column number 1-8, 1 is leftmost
       bHasBlackChip: false, // boolean
       bHasWhiteChip: false, // boolean
       bHasBlackKing: false, // boolean
-      bHasWhiteKing: false, // boolean,
+      bHasWhiteKing: false, // boolean
       isHighlighted: false,
       isPossibleMove: false,
       isPossibleCapture: false
     }
 
+    // Check if the square contains a king
     if (square.charAt(0) === 'K') {
       square = square.replace('K', '')
       cell = (color === 'w') ? 
@@ -43,86 +44,113 @@ const placePieces = (board, squares, color) => {
         { ...cell, bHasBlackKing: true }
     } 
 
-    let row = Math.floor(Number(square) / 8)
-    if (Number(square) % 8 !== 0) {
-      row += 1
-    }
-    let col = Number(square) % 8
-    if (col === 0) {
-      col = 8
-    }
-
-    cell =  (color === 'w') ? 
+    // Set the square properties
+    const row = Math.floor((Number(square) - 1) / 8) + 1
+    const col = ((Number(square) - 1) % 8) + 1
+    cell = (color === 'w') ? 
       { ...cell, nRow: row, nCol: col, bHasWhiteChip: true } :
       { ...cell, nRow: row, nCol: col, bHasBlackChip: true }
 
+    // Place the square in the board
     board[row-1][col-1] = cell
   }
 }
 
-
 /**
- * PDN Grammar: [FEN "[Turn]:[Color 1][K][Square number][,]...]:[Color 2][K][Square number][,]...]"]
- * @param pdn the input in Portable Draughts Notation 
+ * PDN Grammar: 
+ * S -> [FEN "[Turn]:[Color][K][Square num],[K][Square num]...]:[Color][K][Square num], [K][Square num]...]"]
+ * [K] -> 'K' | ''
+ * @param pdn the board state in Portable Draughts Notation 
  */
 export const getBoardFromPDN = (pdn) => {
+
+  // Trim PDN string
+  pdn = pdn.substring(1, pdn.length - 2)
+
   const board = getEmptyBoard()
   let sections = pdn.split(':')
+  let white
+  let black
   const turn = sections[0][sections[0].length - 1]
 
+  console.log("Sections")
+  console.log(sections)
+
+  // If contains start, white, and black
   // White
-  let white = sections[1]
-    .replace('W', '')
-    .split(',')
-  placePieces(board, white, 'w')
+  if (sections.length === 3) {
+    white = sections[1]
+      .replace('W', '')
+      .split(',')
+    placePieces(board, white, 'w')
 
-  // Black 
-  let black = sections[2]
-    .replace('B', '')
-    .replace('"]', '')
-    .split(',')
-  placePieces(board, black, 'b')
-
+    // Black 
+    black = sections[2]
+      .replace('B', '')
+      .replace('"]', '')
+      .split(',')
+    placePieces(board, black, 'b')
+  } else {
+    let color = sections[1].charAt(0)
+    if (color === 'W') {
+      white = sections[1]
+        .replace('W', '')
+        .split(',')
+      placePieces(board, white, 'w')
+    } else {
+      black = sections[1]
+        .replace('B', '')
+        .replace('"]', '')
+        .split(',')
+      placePieces(board, black, 'b')
+    }
+  }
   return board
 }
 
 export const getPDNFromBoard = (board, turn) => {
-  let res = `[FEN "${turn}:W`
-  let white = []
-  let black = []
+  let res = `[FEN "${turn}:`
+  let white = ''
+  let black = ''
 
+  // Fill in the piece values
   for (let r = 0; r < 8; r++) {
     for (let c = 0; c < 8; c++) {
-      let square = 8 * r + c + 1
+      let square = 8*r + c + 1
       if (board[r][c].bHasWhiteChip) {
         if (board[r][c].bHasWhiteKing) {
-          white.push('K' + square)
+          white = white.concat(`K${square},`)
         } else {
-          white.push(square)
+          console.log(square)
+          white = white.concat(`${square},`)
         }
       } else if (board[r][c].bHasBlackChip) {
         if (board[r][c].bHasBlackKing) {
-          black.push('K' + square)
+          black = black.concat(`K${square},`)
         } else {
-          black.push(square)
+          black = black.concat(`${square},`)
         }
       }
     }
   }
 
-  for (let s of white) {
-    res = res.concat(s).concat(',')
+  // Create the string from the arrays
+  if (white.length > 0) {
+    res = res.concat(`W${white}`)
   }
-  res = res.slice(0, res.length-1).concat(':B')
-  for (let s of black) {
-    res = res.concat(s).concat(',')
-  }
-  res = res.slice(0, res.length-1).concat('"]')
   
+  if (black.length > 0) {
+    res = res.slice(0, res.length-1).concat(`:B${black}`)
+  }
+
+  res = res.slice(0, res.length-1).concat(`"]`)
   return res
 }
 
-// const board = getBoardFromPDN(`[FEN "O:W1,3,5,7,10,12,14,16,17,19,21,23:B42,44,46,48,49,51,53,55,56,58,60,62,64"]`)
-// Starting position: 
-// [FEN "O:W1,3,5,7,10,12,14,16,17,19,21,23:B42,44,46,48,49,51,53,55,56,58,60,62,64"]
-// With Kings: [FEN "O:WK1:BK42"]
+// Examples:
+// Starting position:   [FEN "O:W1,3,5,7,10,12,14,16,17,19,21,23:B42,44,46,48,49,51,53,55,56,58,60,62,64"]
+// With 2 Kings:        [FEN "O:WK1:BK42"]
+// White piece:         [FEN "O:W1"]
+// Black piece:         [FEN "O:B7"]
+// White king:          [FEN "O:WK3"]
+// Black king:          [FEN "O:BK1"]

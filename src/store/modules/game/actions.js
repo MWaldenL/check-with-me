@@ -1,5 +1,3 @@
-import { gamesCollection } from '@/firebase'
-
 const actions = {
   /**
    * Sets the current game 
@@ -47,6 +45,14 @@ const actions = {
    */
   async aSetLastPlayerMoved({ commit }, player) {
     commit('setLastPlayerMoved', player)
+  },
+
+  aSetHostTimeLeft({ commit }) {
+
+  },
+
+  aSetOtherTimeLeft({ commit }) {
+
   }
 }
 

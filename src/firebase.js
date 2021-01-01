@@ -43,8 +43,8 @@ gamesCollection
     const data = doc.data()
     
     store.dispatch('aSetLastPlayerMoved', data.last_player_moved)
-    store.dispatch('aSetHostTimeLeft')
-    store.dispatch('aSetOtherTimeLeft')
+    // store.dispatch('aSetHostTimeLeft')
+    // store.dispatch('aSetOtherTimeLeft')
     store.dispatch('aUpdateBoard', data.board_state);
   });
 
