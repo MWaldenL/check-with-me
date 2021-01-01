@@ -48,11 +48,11 @@ import {
   auth, 
   gamesCollection, 
   usersCollection, 
-  timersCollection 
 } from '@/firebase'
 import Cell from './cell'
 import Sidebar from './sidebar'
 import { mapGetters, mapActions } from 'vuex'
+import axios from 'axios'
 
 export default {
   name: 'Grid',
@@ -62,23 +62,17 @@ export default {
   },
   
   async created() {
-    await this.aSetHostTimeLeft()
-    await this.aSetOtherTimeLeft()
-    this.currentGameDoc = await gamesCollection.doc('Vc0H4f4EvY6drRKnvsk5')
-
+    await axios.get('http://localhost:5000/tick')
     this.tick('host')
   },
 
   async updated() {
-    await this.aSetHostTimeLeft()
-    await this.aSetOtherTimeLeft()
-
-    let player
-    if (this.canMakeMove) {
-      player = auth.currentUser.uid === this.hostUserID ? 'host' : 'other'
-    } else {
-      player = this.lastPlayerMoved === this.hostUserID ? 'other' : 'host'
-    }
+    // let player
+    // if (this.canMakeMove) {
+    //   player = auth.currentUser.uid === this.hostUserID ? 'host' : 'other'
+    // } else {
+    //   player = this.lastPlayerMoved === this.hostUserID ? 'other' : 'host'
+    // }
 
     this.tick('host')
   },
@@ -182,17 +176,8 @@ export default {
       this.currentGameDoc.update({ last_player_moved: lastMoved })
     },
 
-    async tick(player) {
-      await setTimeout(async () => {
-        if (this.hostTimeLeft > 0) {
-          const currentTimer = await timersCollection.doc('H48woDfI1lwIGZnJh4qz')
-          const timeObj = player === 'host' ? 
-            { host_timeLeft: this.hostTimeLeft - 1 } : 
-            { other_timeLeft: this.otherTimeLeft - 1 }
-
-          currentTimer.update(timeObj)
-        }
-      }, 500)
+    tick(player) {
+      // this.aSetHostTimeLeft()
     }
   }
 }

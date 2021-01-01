@@ -45,17 +45,12 @@ gamesCollection
     
     store.dispatch('aSetLastPlayerMoved', data.last_player_moved)
     store.dispatch('aUpdateBoard', data.board_state);
-  });
+  })
 
 timersCollection
-  .doc('H48woDfI1lwIGZnJh4qz')    // .doc(getters.getTimerFromGameID) 
+  .doc('H48woDfI1lwIGZnJh4qz')
   .onSnapshot(doc => {
-    const data = doc.data()
-    setTimeout(() => {
-
-      store.dispatch('aSetHostTimeLeft')
-      store.dispatch('aSetOtherTimeLeft')
-    }, 700)
+    store.dispatch('aSetHostTimeLeft')
   })
 
 export {

@@ -1,4 +1,6 @@
 import { gamesCollection, timersCollection } from '@/firebase'
+import axios from 'axios'
+
 
 const actions = {
   /**
@@ -53,24 +55,21 @@ const actions = {
    * Sets the host's time left from the database
    */
   async aSetHostTimeLeft({ commit }) {
-    const gameDoc = await gamesCollection.doc('Vc0H4f4EvY6drRKnvsk5').get()
-    const timerID = gameDoc.data().timerID.id
-    const timerDoc = await timersCollection.doc(timerID).get()
-    const timeLeft = timerDoc.data().host_timeLeft
-
-    commit('setHostTimeLeft', timeLeft)
+    await axios
+      .get('http://localhost:5000/hostTime')
+      .then(res => {
+        console.log(res)
+        commit('setHostTimeLeft', res.data.timeLeft)
+      }).catch(err => {
+        console.log(err)
+      })
   },
 
   /**
    * Sets the other player's time left from the database
    */
   async aSetOtherTimeLeft({ commit }) {
-    const gameDoc = await gamesCollection.doc('Vc0H4f4EvY6drRKnvsk5').get()
-    const timerID = gameDoc.data().timerID.id
-    const timerDoc = await timersCollection.doc(timerID).get()
-    const timeLeft = timerDoc.data().other_timeLeft
-
-    commit('setOtherTimeLeft', timeLeft)
+    // commit('setOtherTimeLeft', timeLeft)
   }
 }
 
