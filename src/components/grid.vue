@@ -16,6 +16,7 @@
             :row="9 - row" 
             :col="col" 
             :canMakeMove="canMakeMove"
+            :selfColor="selfColor"
             :key="col" 
             @makeMove="updateLastPlayerMoved"/>
         </tr>
@@ -28,7 +29,7 @@
         {{ selfName }}
       </h1>
     </div>
-    <b-button id="resign" class="btn-danger">Resign</b-button>
+    <!-- <b-button id="resign" class="btn-danger">Resign</b-button> -->
   </div>
 </template>
 
@@ -82,8 +83,9 @@ export default {
     }),
 
     canMakeMove() {
-      console.log("Can make move?")
+      console.log("lastMoved | currentUser")
       console.log(this.lastPlayerMoved + " | " + auth.currentUser.uid)
+
       return this.lastPlayerMoved !== auth.currentUser.uid
     },
 
@@ -103,8 +105,10 @@ export default {
         this.hostTimeLeft
     },
 
-    selfName() {
-      return this.currentUser.data.username 
+    selfColor() {
+      return (auth.currentUser.uid === this.hostUserID) ?
+        ((this.isHostWhite) ? 'w' : 'b') : 
+        ((this.isHostWhite) ? 'b' : 'w')
     }
   },
 
@@ -117,7 +121,13 @@ export default {
       const userDoc = await usersCollection.doc(uid).get()
       const username = userDoc.data().username
       return username
-    }
+    },
+
+    async selfName() {
+      const user = await this.currentUser.data
+       
+      return user.username
+    },
   },
 
   methods: {

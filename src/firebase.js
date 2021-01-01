@@ -2,7 +2,6 @@ import firebase from 'firebase'
 import 'firebase/auth'
 import 'firebase/firestore'
 import store from './store'
-import getters from './store/modules/game'
 
 const firebaseConfig = {
   apiKey: "AIzaSyA9SZagTMn8tSFeZkOQkrDmptaQLP-3c7k",
@@ -18,7 +17,6 @@ firebase.initializeApp(firebaseConfig)
 // Utilities
 const db = firebase.firestore()
 const auth = firebase.auth()
-
 
 firebase.getCurrentUser = () => {
   return new Promise((resolve, reject) => {
@@ -37,7 +35,9 @@ firebase.auth().onAuthStateChanged(user => {
 const usersCollection = db.collection('users')
 const gamesCollection = db.collection('games')
 
-gamesCollection.doc('Vc0H4f4EvY6drRKnvsk5')
+// Listeners
+gamesCollection
+  .doc('Vc0H4f4EvY6drRKnvsk5')
   .onSnapshot(doc => {
     const data = doc.data()
     

@@ -11,17 +11,12 @@
 </template>
 
 <script>
-import { 
-  bIsValidCapture
-} from '@/store/services/kingCaptureService'
-import { 
-  checkIfWhiteStuck,
-  checkIfBlackStuck
-} from '@/store/services/winCheckerService'
+import { bIsValidCapture } from '@/store/services/kingCaptureService'
+import { checkIfWhiteStuck, checkIfBlackStuck } from '@/store/services/winCheckerService'
 import { mapGetters, mapActions } from 'vuex'
 
 export default {
-  props: ['row', 'col', 'canMakeMove'],
+  props: ['row', 'col', 'canMakeMove', 'selfColor'],
   data () {
     return {
       dIsSelected: false,
@@ -29,6 +24,7 @@ export default {
       dIsPossibleCapture: false
     }
   },
+
   computed: {
     ...mapGetters({
       board: 'getEntireBoard',
@@ -94,6 +90,7 @@ export default {
       return this.board[this.row - 1][this.col - 1].bHasWhiteKing
     }
   },
+
   methods: {
     ...mapActions([
       'aKingMovement', 
@@ -121,11 +118,12 @@ export default {
     },
 
     onSquareClicked () {
-      if(this.bActiveGame) {
+      if (this.bActiveGame) {
         if (this.canMakeMove) {
           const source = this.firstClick
           const bContainsPiece = this.hasBlackChip || this.hasWhiteChip || this.hasWhiteKing || this.hasBlackKing
 
+          // Highlight or attempt to move a piece
           if (source != null) {
             this.isSelected = false
             const coords = {
@@ -135,10 +133,20 @@ export default {
               nDestCol: this.col
             }
             
-            const bIsKingMovement = source.bHasBlackKing || source.bHasWhiteKing
-      
+            // Prevent the player from moving another player's piece
+            const bWhitePiece = source.bHasWhiteChip || source.bHasWhiteKing
+            const bBlackPiece = source.bHasBlackChip || source.bHasBlackKing
+            const bIsMovingOwnPiece = (this.selfColor === 'w' && bWhitePiece) || (this.selfColor === 'b' && bBlackPiece)
+            if (!bIsMovingOwnPiece) {
+              return
+            }
+
             // Check for move or capture attempts. No legality checking
+            const bIsKingMovement = source.bHasBlackKing || source.bHasWhiteKing
+            let willEmit = true
+
             if (coords.nRow === coords.nDestRow && coords.nCol === coords.nDestCol) {
+              willEmit = false
               this.aUnhighlight(null)
             } else if (bIsKingMovement) {
               if (this.isKingMoveAttempt(source, coords)) {
@@ -146,18 +154,24 @@ export default {
               } else if (this.isKingCaptureAttempt(source, coords)) {
                 this.aKingCapturePiece(coords)
               } else {
+                willEmit = false
                 this.cancelCurrentMove()  
               }
             } else { 
               if (this.isCaptureAttempt(source)) {  
                 this.aCapturePiece(coords)
               } else if (this.isMoveForwardAttempt(source)) {
-                this.$emit("makeMove", source)
-                console.log("Making move")
                 this.aMoveForward(coords)
               } else {
+                willEmit = false
                 this.cancelCurrentMove()
               }
+            }
+
+            // Emit the move made
+            if (willEmit) {
+              console.log("Making move")
+              this.$emit("makeMove", source)
             }
           } else {
             if (bContainsPiece) {
@@ -172,6 +186,7 @@ export default {
             }
           }
 
+          // Determine game results
           let bWhiteStuck = checkIfWhiteStuck(this.board)
           let bBlackStuck = checkIfBlackStuck(this.board)
           if(bWhiteStuck && bBlackStuck) {
