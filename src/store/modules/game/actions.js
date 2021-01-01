@@ -1,3 +1,5 @@
+import { gamesCollection } from '@/firebase'
+
 const actions = {
   /**
    * Sets the current game 
@@ -47,12 +49,22 @@ const actions = {
     commit('setLastPlayerMoved', player)
   },
 
-  aSetHostTimeLeft({ commit }) {
-
+  /**
+   * Sets the host's time left from the database
+   */
+  async aSetHostTimeLeft({ commit }) {
+    const gameDoc = await gamesCollection.doc('Vc0H4f4EvY6drRKnvsk5').get()
+    const timeLeft = gameDoc.data().host_timeLeft
+    commit('setHostTimeLeft', timeLeft)
   },
 
-  aSetOtherTimeLeft({ commit }) {
-
+  /**
+   * Sets the other player's time left from the database
+   */
+  async aSetOtherTimeLeft({ commit }) {
+    const gameDoc = await gamesCollection.doc('Vc0H4f4EvY6drRKnvsk5').get()
+    const timeLeft = gameDoc.data().other_timeLeft
+    commit('setOtherTimeLeft', timeLeft)
   }
 }
 

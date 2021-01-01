@@ -73,9 +73,6 @@ export const getBoardFromPDN = (pdn) => {
   let black
   const turn = sections[0][sections[0].length - 1]
 
-  console.log("Sections")
-  console.log(sections)
-
   // If contains start, white, and black
   // White
   if (sections.length === 3) {

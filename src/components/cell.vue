@@ -61,6 +61,10 @@ export default {
       }
     },
 
+    bContainsPiece () {
+      return this.hasBlackChip || this.hasWhiteChip || this.hasWhiteKing || this.hasBlackKing
+    },  
+
     highlight () {
       return {
         'highlight-selected': this.isSelected,
@@ -103,9 +107,8 @@ export default {
       'aSetWinner'
     ]),
 
-    cancelCurrentMove () {
-      const bContainsPiece = this.hasBlackChip || this.hasWhiteChip || this.hasWhiteKing || this.hasBlackKing
-      if (bContainsPiece) {
+    cancelCurrentMove () { 
+      if (this.bContainsPiece) {
         this.aHighlight({
           nRow: this.row, 
           nCol: this.col, 
@@ -117,10 +120,6 @@ export default {
       }
     },
 
-    isMovingOwnPiece(color, isWhite, isBlack) {
-      return (color === 'w' && isWhite) || (color === 'b' && isBlack) 
-    },
-
     onSquareClicked () {
       if (this.bActiveGame) {
         if (this.canMakeMove) {
@@ -129,10 +128,9 @@ export default {
           // Prevent a player from clicking on another player's piece
           const bCurWhitePiece = this.hasWhiteChip || this.hasWhiteKing
           const bCurBlackPiece = this.hasBlackChip || this.hasBlackKing
-          if (source === null) {
-            if (!this.isMovingOwnPiece(this.selfColor, bCurWhitePiece, bCurBlackPiece)) {
-              return
-            }
+          const isSelectingOwnPiece = (this.selfColor === 'w' && bCurWhitePiece) || (this.selfColor === 'b' && bCurBlackPiece) 
+          if (source === null && !isSelectingOwnPiece) {
+            return
           }
 
           // Highlight or attempt to move a piece
@@ -147,9 +145,9 @@ export default {
 
             // Check for move or capture attempts. No legality checking
             const bIsKingMovement = source.bHasBlackKing || source.bHasWhiteKing
+            const bIsSameSquare = coords.nRow === coords.nDestRow && coords.nCol === coords.nDestCol
             let willEmit = true
-
-            if (coords.nRow === coords.nDestRow && coords.nCol === coords.nDestCol) {
+            if (bIsSameSquare) {
               willEmit = false
               this.aUnhighlight(null)
             } else if (bIsKingMovement) {
@@ -172,14 +170,14 @@ export default {
               }
             }
 
-            // Emit the move made
+            // Signal the game instance that a move has been made
             if (willEmit) {
               console.log("Making move")
               this.$emit("makeMove", source)
             }
-          } else {
+          } else {  // Simply highlight the piece clicked
             const bContainsPiece = this.hasBlackChip || this.hasWhiteChip || this.hasWhiteKing || this.hasBlackKing
-            if (bContainsPiece) {
+            if (this.bContainsPiece) {
               this.aHighlight({ 
                 nRow: this.row, 
                 nCol: this.col, 
@@ -191,21 +189,25 @@ export default {
             }
           }
 
-          // Determine game results
-          let bWhiteStuck = checkIfWhiteStuck(this.board)
-          let bBlackStuck = checkIfBlackStuck(this.board)
-          if(bWhiteStuck && bBlackStuck) {
-            this.aSetActiveGame(false)
-            this.aSetWinner('D')
-          } else if (bWhiteStuck || this.whiteCount === 0) {
-            this.aSetActiveGame(false)
-            this.aSetWinner('B')
-          } else if (bBlackStuck || this.blackCount === 0) {
-            this.aSetActiveGame(false)
-            this.aSetWinner('W')
-          } else {}
+          // Set the game results
+          this.setGameResults()
         }
       }
+    },
+
+    setGameResults () { // Put code back to previous method if it breaks
+      let bWhiteStuck = checkIfWhiteStuck(this.board)
+      let bBlackStuck = checkIfBlackStuck(this.board)
+      if (bWhiteStuck && bBlackStuck) {
+        this.aSetActiveGame(false)
+        this.aSetWinner('D')
+      } else if (bWhiteStuck || this.whiteCount === 0) {
+        this.aSetActiveGame(false)
+        this.aSetWinner('B')
+      } else if (bBlackStuck || this.blackCount === 0) {
+        this.aSetActiveGame(false)
+        this.aSetWinner('W')
+      } else {}
     },
 
     isDiagonal (coords) {

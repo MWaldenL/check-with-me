@@ -4,6 +4,9 @@
     <div id="p1-details" class="details">
       <h1> 
         {{ enemyName }} 
+        <span class="time text-white" id="enemyTime">
+          {{ enemySeconds | minutes | formattedTime }}:{{ enemySeconds | seconds | formattedTime }}
+        </span>
       </h1> 
       <h1 id="p1-count" class="pt-3"> Pieces left: {{ blackCount }} </h1>
     </div>
@@ -26,6 +29,9 @@
     <div id="p2-details" class="details">
       <h1 id="p2-count" class="pb-4"> Pieces left: {{ whiteCount }} </h1>
       <h1>
+        <span class="time text-white" id="selfTime">
+          {{ selfSeconds | minutes | formattedTime }}:{{ selfSeconds | seconds | formattedTime }}
+        </span>
         {{ selfName }}
       </h1>
     </div>
@@ -48,21 +54,20 @@ export default {
     Sidebar
   },
   
-  created() {
-    this.aSetHostTimeLeft()
-    this.aSetOtherTimeLeft()
+  async created() {
+    await this.aSetHostTimeLeft()
+    await this.aSetOtherTimeLeft()
   },
 
-  updated() {
-    this.aSetHostTimeLeft()
-    this.aSetOtherTimeLeft()
+  async updated() {
+    await this.aSetHostTimeLeft()
+    await this.aSetOtherTimeLeft()
   },
 
   data () {
     return {
       strP1Name: 'MikaReyes',
       strP2Name: 'Sinigang',
-      
       bHostRunning: true,
       bOtherRunning: false,
     }
@@ -110,6 +115,20 @@ export default {
         ((this.isHostWhite) ? 'b' : 'w')
     }
   },
+
+  filters: {
+    minutes(timeInSecs) {
+      return Math.floor(timeInSecs / 60)
+    },
+
+    seconds(timeInSecs) {
+      return timeInSecs % 60
+    },
+
+    formattedTime(time) {
+      return (time >= 10) ? time.toString(10) : `0${time}`
+    }
+  },  
 
   asyncComputed: {
     async enemyName() {
@@ -205,12 +224,12 @@ table {
   font-family: 'Raleway', Helvetica, Arial, sans-serif;
   font-size: 20px;
 }
-#p1-time {
+#enemyTime {
   margin-left: 100px;
   padding: 10px 30px;
   background-color: #424242;
 }
-#p2-time {
+#selfTime {
   margin-right: 100px;
   padding: 10px 30px;
   background-color: #424242;
