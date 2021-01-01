@@ -15,6 +15,7 @@ import {
   getPossibleMoveWhiteKing
 } from '../../services/highlightService'
 
+import { getBoardFromPDN } from '../../services/boardParsingService'
 import { bIsValidCapture } from '../../services/kingCaptureService'
 import { getBoard } from '../board'
 
@@ -377,6 +378,10 @@ const mutations = {
 
       helpers.handleValidMove(state, newCurr, newDest, newTarget)
     }
+  },
+
+  mUpdateBoard: (state, boardState) => {
+    state.cells = getBoardFromPDN(boardState)
   },
 
   mReducePiece: (state, whiteTakes) => {

@@ -1,3 +1,6 @@
+import { gamesCollection } from '@/firebase'
+import { getPDNFromBoard } from '../../services/boardParsingService'
+
 const actions = {
   aHighlight({ commit }, coords) {
     commit('mHighlight', coords)
@@ -7,6 +10,10 @@ const actions = {
     commit('mUnhighlight', coords)
   },
 
+  async aUpdateBoard({ commit }, boardState) {
+    commit('mUpdateBoard', boardState)
+  },
+
   /**
    * aMoveForward moves a black or white chip to an empty cell 1 space diagonally
    * @param nRow - 1-based row of active cell with piece to move
@@ -14,8 +21,13 @@ const actions = {
    * @param nDestRow - 1-based row of empty destination cell
    * @param nDestCol - 1-based column of empty destination cell
    */
-  aMoveForward({ commit }, coords) {
+  async aMoveForward({ commit, state }, coords) {
     commit('mMoveForward', coords)
+    await gamesCollection
+      .doc('Vc0H4f4EvY6drRKnvsk5')
+      .update({ 
+        board_state: getPDNFromBoard(state.cells, 'X') 
+      })
   },
 
   /**

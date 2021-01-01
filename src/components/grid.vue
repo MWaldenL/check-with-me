@@ -3,8 +3,7 @@
     <Sidebar />
     <div id="p1-details" class="details">
       <h1> 
-        {{ strP1Name }} 
-        <Timer :secs="nP1Seconds" :isHost="false" :isRunning="bOtherRunning" />
+        {{ enemyName }} 
       </h1> 
       <h1 id="p1-count" class="pt-3"> Pieces left: {{ blackCount }} </h1>
     </div>
@@ -12,16 +11,21 @@
     <div id="table">
       <table>
         <tr v-for="row in 8" :key="row">
-          <Cell v-for="col in 8" :row="9 - row" :col="col" :key="col" @makeMove="updateLastPlayerMoved"/>
+          <Cell 
+            v-for="col in 8" 
+            :row="9 - row" 
+            :col="col" 
+            :canMakeMove="canMakeMove"
+            :key="col" 
+            @makeMove="updateLastPlayerMoved"/>
         </tr>
       </table>
     </div>
     
     <div id="p2-details" class="details">
       <h1 id="p2-count" class="pb-4"> Pieces left: {{ whiteCount }} </h1>
-      <h1> 
-        <Timer :secs="nP2Seconds" :isHost="true" :isRunning="bHostRunning" />
-        {{ strP2Name }}
+      <h1>
+        {{ selfName }}
       </h1>
     </div>
     <b-button id="resign" class="btn-danger">Resign</b-button>
@@ -29,6 +33,7 @@
 </template>
 
 <script>
+import { auth, gamesCollection, usersCollection } from '@/firebase'
 import Timer from './timer'
 import Cell from './cell'
 import Sidebar from './sidebar'
@@ -41,6 +46,16 @@ export default {
     Timer,
     Sidebar
   },
+  
+  created() {
+    this.aSetHostTimeLeft()
+    this.aSetOtherTimeLeft()
+  },
+
+  updated() {
+    this.aSetHostTimeLeft()
+    this.aSetOtherTimeLeft()
+  },
 
   data () {
     return {
@@ -49,38 +64,76 @@ export default {
       
       bHostRunning: true,
       bOtherRunning: false,
-
-      nP1Seconds: 3,
-      nP2Seconds: 76
     }
   },
   computed: {
     ...mapGetters({
       whiteCount: 'getWhiteCount',
       blackCount: 'getBlackCount',
+
+      currentUser: 'getCurrentUser',
+      hostUserID: 'getHostUser',
+      otherUserID: 'getOtherUser',
+
       isHostWhite: 'getIsHostWhite',
-      lastPlayerMoved: 'getLastPlayerMoved', 
-    })
+      hostTimeLeft: 'getHostTimeLeft',
+      otherTimeLeft: 'getOtherTimeLeft',
+      lastPlayerMoved: 'getLastPlayerMoved'
+    }),
+
+    canMakeMove() {
+      console.log("Can make move?")
+      console.log(this.lastPlayerMoved + " | " + auth.currentUser.uid)
+      return this.lastPlayerMoved !== auth.currentUser.uid
+    },
+
+    selfSeconds() {
+      console.log(auth.currentUser.uid)
+      console.log(this.hostTimeLeft + " | " + this.otherTimeLeft)
+
+      return (auth.currentUser.uid === this.hostUserID) ?
+        this.hostTimeLeft :
+        this.otherTimeLeft
+    },
+
+    enemySeconds() {
+      console.log(this.hostTimeLeft + " | " + this.otherTimeLeft)
+      return (auth.currentUser.uid === this.hostUserID) ?
+        this.otherTimeLeft :
+        this.hostTimeLeft
+    },
+
+    selfName() {
+      return this.currentUser.data.username 
+    }
   },
+
+  asyncComputed: {
+    async enemyName() {
+      const uid = auth.currentUser.uid === this.hostUserID ? 
+        this.otherUserID : 
+        this.hostUserID
+
+      const userDoc = await usersCollection.doc(uid).get()
+      const username = userDoc.data().username
+      return username
+    }
+  },
+
   methods: {
     ...mapActions([
-      'aSetLastPlayerMoved'
+      'aSetLastPlayerMoved',
+      'aSetHostTimeLeft',
+      'aSetOtherTimeLeft'
     ]),
 
-    updateLastPlayerMoved(source) {
-      const isMoveWhite = source.bHasWhiteChip || source.bHasWhiteKing 
-      
-      if (this.isHostWhite ^ isMoveWhite) {
-        this.aSetLastPlayerMoved('other')
-      } else {
-        this.aSetLastPlayerMoved('host')
-      }
+    async updateLastPlayerMoved(square) {
+      const isMoveWhite = square.bHasWhiteChip || square.bHasWhiteKing 
+      let lastMoved = (this.isHostWhite ^ isMoveWhite) ? this.otherUserID : this.hostUserID
 
-      console.log(this.lastPlayerMoved)
-      this.updateTimer()
-      console.log("Updaeting timer")
-      console.log(this.bHostRunning)
-      console.log(this.bOtherRunning)
+      // Write last player moved to db 
+      const currentGame = await gamesCollection.doc('Vc0H4f4EvY6drRKnvsk5')
+      currentGame.update({ last_player_moved: lastMoved })
     },
 
     updateTimer() {

@@ -21,20 +21,20 @@ const actions = {
     commit('setHostIsWhite', isWhite)
   },
 
-  aSetLastPlayerMoved({ commit }, player) {
+  async aSetLastPlayerMoved({ commit }, player) {
     commit('setLastPlayerMoved', player)
   },
 
-  async aGetHostTimeLeft({ commit, state }) {
+  async aSetHostTimeLeft({ commit, state }) {
     const currentGame = await gamesCollection.doc(state.currentGameID).get()
     const timeLeft = currentGame.data().host_timeLeft
     commit('setHostTimeLeft', timeLeft)
   },
 
-  async aGetOtherTimeLeft({ commit, state }) {
+  async aSetOtherTimeLeft({ commit, state }) {
     const currentGame = await gamesCollection.doc(state.currentGameID).get()
     const timeLeft = currentGame.data().other_timeLeft
-    commit('setHostTimeLeft', timeLeft)
+    commit('setOtherTimeLeft', timeLeft)
   }
 }
 

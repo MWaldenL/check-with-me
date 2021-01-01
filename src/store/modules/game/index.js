@@ -3,10 +3,12 @@ import actions from './actions'
 import mutations from './mutations'
 
 const state = {
-  currentGameID: "",
+  currentGameID: "Vc0H4f4EvY6drRKnvsk5",
   boardState: "",
-  hostUser: "",
-  otherUser: "",
+  hostUser: "ktreyVNxpqRTE7mQPjreB0iWyFi1",
+  otherUser: "4pSu14srMSelGWQkSgGpRsA2jGf1",
+  hostTimeLeft: 0,
+  otherTimeLeft: 0,
   isHostWhite: true,
   lastPlayerMoved: ""
 }

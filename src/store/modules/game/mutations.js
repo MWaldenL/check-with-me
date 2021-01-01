@@ -14,6 +14,14 @@ const mutations = {
   setOtherUser(state, uid) {
     state.otherUser = uid
   },
+
+  setHostTimeLeft(state, time) {
+    state.hostTimeLeft = time
+  },
+
+  setOtherTimeLeft(state, time) {
+    state.otherTimeLeft = time
+  },
   
   setHostIsWhite(state, isWhite) {
     state.isHostWhite = isWhite

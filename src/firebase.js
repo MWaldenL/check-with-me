@@ -2,7 +2,7 @@ import firebase from 'firebase'
 import 'firebase/auth'
 import 'firebase/firestore'
 import store from './store'
-
+import getters from './store/modules/game'
 
 const firebaseConfig = {
   apiKey: "AIzaSyA9SZagTMn8tSFeZkOQkrDmptaQLP-3c7k",
@@ -37,11 +37,14 @@ firebase.auth().onAuthStateChanged(user => {
 const usersCollection = db.collection('users')
 const gamesCollection = db.collection('games')
 
-gamesCollection.doc("2gSaU2SjJeUpHEEbXPyX")
+gamesCollection.doc('Vc0H4f4EvY6drRKnvsk5')
   .onSnapshot(doc => {
-      // const boardState = doc.data().boardState
-      // console.log(boardState)
-      // store.dispatch('aUpdateBoard', boardState);
+    const data = doc.data()
+    
+    store.dispatch('aSetLastPlayerMoved', data.last_player_moved)
+    store.dispatch('aSetHostTimeLeft')
+    store.dispatch('aSetOtherTimeLeft')
+    store.dispatch('aUpdateBoard', data.board_state);
   });
 
 export {

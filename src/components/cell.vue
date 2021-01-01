@@ -21,7 +21,7 @@ import {
 import { mapGetters, mapActions } from 'vuex'
 
 export default {
-  props: ['row', 'col'],
+  props: ['row', 'col', 'canMakeMove'],
   data () {
     return {
       dIsSelected: false,
@@ -122,67 +122,69 @@ export default {
 
     onSquareClicked () {
       if(this.bActiveGame) {
-        const source = this.firstClick
-        const bContainsPiece = this.hasBlackChip || this.hasWhiteChip || this.hasWhiteKing || this.hasBlackKing
+        if (this.canMakeMove) {
+          const source = this.firstClick
+          const bContainsPiece = this.hasBlackChip || this.hasWhiteChip || this.hasWhiteKing || this.hasBlackKing
 
-        if (source != null) {
-          this.isSelected = false
-          const coords = {
-            nRow: source.nRow,
-            nCol: source.nCol,
-            nDestRow: this.row,
-            nDestCol: this.col
-          }
-          
-          const bIsKingMovement = source.bHasBlackKing || source.bHasWhiteKing
-    
-          // Check for move or capture attempts. No legality checking
-          if (coords.nRow === coords.nDestRow && coords.nCol === coords.nDestCol) {
-            this.aUnhighlight(null)
-          } else if (bIsKingMovement) {
-            if (this.isKingMoveAttempt(source, coords)) {
-              this.aKingMovement(coords)
-            } else if (this.isKingCaptureAttempt(source, coords)) {
-              this.aKingCapturePiece(coords)
-            } else {
-              this.cancelCurrentMove()  
+          if (source != null) {
+            this.isSelected = false
+            const coords = {
+              nRow: source.nRow,
+              nCol: source.nCol,
+              nDestRow: this.row,
+              nDestCol: this.col
             }
-          } else { 
-            if (this.isCaptureAttempt(source)) {  
-              this.aCapturePiece(coords)
-            } else if (this.isMoveForwardAttempt(source)) {
-              this.$emit("makeMove", source)
-              console.log("Making move")
-              this.aMoveForward(coords)
-            } else {
-              this.cancelCurrentMove()
+            
+            const bIsKingMovement = source.bHasBlackKing || source.bHasWhiteKing
+      
+            // Check for move or capture attempts. No legality checking
+            if (coords.nRow === coords.nDestRow && coords.nCol === coords.nDestCol) {
+              this.aUnhighlight(null)
+            } else if (bIsKingMovement) {
+              if (this.isKingMoveAttempt(source, coords)) {
+                this.aKingMovement(coords)
+              } else if (this.isKingCaptureAttempt(source, coords)) {
+                this.aKingCapturePiece(coords)
+              } else {
+                this.cancelCurrentMove()  
+              }
+            } else { 
+              if (this.isCaptureAttempt(source)) {  
+                this.aCapturePiece(coords)
+              } else if (this.isMoveForwardAttempt(source)) {
+                this.$emit("makeMove", source)
+                console.log("Making move")
+                this.aMoveForward(coords)
+              } else {
+                this.cancelCurrentMove()
+              }
+            }
+          } else {
+            if (bContainsPiece) {
+              this.aHighlight({ 
+                nRow: this.row, 
+                nCol: this.col, 
+                bHasWhiteChip: this.hasWhiteChip,  
+                bHasWhiteKing: this.hasWhiteKing,
+                bHasBlackChip: this.hasBlackChip,
+                bHasBlackKing: this.hasBlackKing
+              })
             }
           }
-        } else {
-          if (bContainsPiece) {
-            this.aHighlight({ 
-              nRow: this.row, 
-              nCol: this.col, 
-              bHasWhiteChip: this.hasWhiteChip,  
-              bHasWhiteKing: this.hasWhiteKing,
-              bHasBlackChip: this.hasBlackChip,
-              bHasBlackKing: this.hasBlackKing
-            })
-          }
+
+          let bWhiteStuck = checkIfWhiteStuck(this.board)
+          let bBlackStuck = checkIfBlackStuck(this.board)
+          if(bWhiteStuck && bBlackStuck) {
+            this.aSetActiveGame(false)
+            this.aSetWinner('D')
+          } else if (bWhiteStuck || this.whiteCount === 0) {
+            this.aSetActiveGame(false)
+            this.aSetWinner('B')
+          } else if (bBlackStuck || this.blackCount === 0) {
+            this.aSetActiveGame(false)
+            this.aSetWinner('W')
+          } else {}
         }
-
-        let bWhiteStuck = checkIfWhiteStuck(this.board)
-        let bBlackStuck = checkIfBlackStuck(this.board)
-        if(bWhiteStuck && bBlackStuck) {
-          this.aSetActiveGame(false)
-          this.aSetWinner('D')
-        } else if (bWhiteStuck || this.whiteCount === 0) {
-          this.aSetActiveGame(false)
-          this.aSetWinner('B')
-        } else if (bBlackStuck || this.blackCount === 0) {
-          this.aSetActiveGame(false)
-          this.aSetWinner('W')
-        } else {}
       }
     },
 

@@ -12,7 +12,7 @@ import { db, gamesCollection } from '@/firebase'
 import { mapGetters } from 'vuex'
 
 export default {
-  data () {
+  data() {
     return {
       secondsLeft: this.secs
     }
@@ -20,7 +20,6 @@ export default {
 
   props: { 
     secs: Number,
-    isHost: Boolean,
     isRunning: Boolean
   },
 
@@ -35,17 +34,17 @@ export default {
 
     seconds() {
       return this.secondsLeft % 60
-    }
+    },
   },
 
   methods: {
     tick() {
-      setTimeout(() => {
-        console.log("tick")
-        console.log(this.isRunning)
-        if (this.isRunning && this.secondsLeft > 0)
+       setTimeout(() => {
+        if (this.isRunning && this.secondsLeft > 0) {
+          console.log('wahatt')
           this.secondsLeft--
-          // this.uploadTime()
+          this.uploadTime()
+        }
       }, 1000)
     },
 
@@ -55,25 +54,20 @@ export default {
         { other_timeLeft: this.secondsLeft }
 
       // Update the timer of the current player
-      await gamesCollection.doc('fjEU36gMVBuVTLQn5mrD').update(timeObj)
+      await gamesCollection.doc('Vc0H4f4EvY6drRKnvsk5').update(timeObj)
     },
 
     printTime(time) {
-      if (time >= 10) {
-        return time.toString(10)
-      } else {
-        return "0" + time
-      }
+      return (time >= 10) ? time.toString(10) : `0${time}`
     }
   },
     
   created() {
-    console.log("created")
+    console.log(this.secondsLeft)
     this.tick()
   },
 
   updated() {
-    console.log("updated")
     this.tick()
   }
 }
