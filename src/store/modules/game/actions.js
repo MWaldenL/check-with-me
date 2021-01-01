@@ -56,9 +56,8 @@ const actions = {
    */
   async aSetHostTimeLeft({ commit }) {
     await axios
-      .get('http://localhost:5000/hostTime')
+      .get('http://localhost:5000/timeLeft/host')
       .then(res => {
-        console.log(res)
         commit('setHostTimeLeft', res.data.timeLeft)
       }).catch(err => {
         console.log(err)
@@ -69,7 +68,13 @@ const actions = {
    * Sets the other player's time left from the database
    */
   async aSetOtherTimeLeft({ commit }) {
-    // commit('setOtherTimeLeft', timeLeft)
+    await axios
+      .get('http://localhost:5000/timeLeft/other')
+      .then(res => {
+        commit('setOtherTimeLeft', res.data.timeLeft)
+      }).catch(err => {
+        console.log(err)
+      })
   }
 }
 

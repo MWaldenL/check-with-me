@@ -24,43 +24,52 @@ app.get('/hostTime', async (req, res) => {
   const timeLeft = timerDoc.data().host_timeLeft
 
   res.status(200).send({ timeLeft: timeLeft })
-});
-
-/**
- * Pass the updated time from Vue.js to Firebase
- */
-app.post('/updateTime/:player/:newTime', async (req, res) => {
-  const player = req.params.player
-  const newTime = req.params.newTime
-  const timerDoc = await timersCollection.doc('H48woDfI1lwIGZnJh4qz')
-  
-  const timeObj = player === 'host' ? 
-    { host_timeLeft: Number(newTime) } : 
-    { other_timeLeft: Number(newTime) } 
-
-  timerDoc.update(timeObj)
-  res.status(200).send("OK")
 })
 
-app.get('/tick', async (req, res) => {
+app.get('/timeLeft/:player', async (req, res) => {
+  const player = req.params.player
+  const timerDoc = await timersCollection.doc('H48woDfI1lwIGZnJh4qz').get()
+  const timeLeft = player === 'host' ? 
+    timerDoc.data().host_timeLeft : 
+    timerDoc.data().other_timeLeft
+
+  res.status(200).send({ timeLeft: timeLeft })
+});
+
+
+let countDown
+app.get('/startTime/:player', async (req, res) => {
+  const player = req.params.player
   const timerDoc = await timersCollection.doc('H48woDfI1lwIGZnJh4qz')
   
   // Perform every second
-  setInterval(async () => {
+  countDown = setInterval(async () => {
     // Get the current time
     const timer = await timerDoc.get()
-    const timeLeft = timer.data().host_timeLeft
+    const timeLeft = player === 'host' ? 
+      timer.data().host_timeLeft : 
+      timer.data().other_timeLeft
     
-    console.log(timeLeft)
+    console.log(player)
+
+    const timeObj = player === 'host' ?
+      { host_timeLeft: timeLeft - 1 } :
+      { other_timeLeft: timeLeft - 1 }
 
     // Keep writing the updated time to the database until it becomes 0
     if (timeLeft > 0) {
-      await timerDoc.update({ host_timeLeft: timeLeft - 1 })
+      await timerDoc.update(timeObj)
     } else {
-      return
+      clearInterval(countDown)
     }
   }, 1000)
 
+  res.status(200).send("Starting time")
+})
+
+app.get('/stopTime', async (req, res) => {
+  clearInterval(countDown)
+  res.status(200).send("Stopping time")
 })
 
 app.listen(5000)

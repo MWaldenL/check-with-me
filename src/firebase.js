@@ -51,6 +51,7 @@ timersCollection
   .doc('H48woDfI1lwIGZnJh4qz')
   .onSnapshot(doc => {
     store.dispatch('aSetHostTimeLeft')
+    store.dispatch('aSetOtherTimeLeft')
   })
 
 export {

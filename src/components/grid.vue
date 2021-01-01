@@ -62,19 +62,8 @@ export default {
   },
   
   async created() {
-    await axios.get('http://localhost:5000/tick')
-    this.tick('host')
-  },
-
-  async updated() {
-    // let player
-    // if (this.canMakeMove) {
-    //   player = auth.currentUser.uid === this.hostUserID ? 'host' : 'other'
-    // } else {
-    //   player = this.lastPlayerMoved === this.hostUserID ? 'other' : 'host'
-    // }
-
-    this.tick('host')
+    await axios.get('http://localhost:5000/startTime/host')
+    this.currentGame = gamesCollection.doc('Vc0H4f4EvY6drRKnvsk5')
   },
 
   data () {
@@ -170,14 +159,17 @@ export default {
 
     async updateLastPlayerMoved(square) {
       const isMoveWhite = square.bHasWhiteChip || square.bHasWhiteKing 
-      let lastMoved = (this.isHostWhite ^ isMoveWhite) ? this.otherUserID : this.hostUserID
+      const lastPlayerMoved = (this.isHostWhite ^ isMoveWhite) ? this.otherUserID : this.hostUserID
 
       // Write last player moved to db 
-      this.currentGameDoc.update({ last_player_moved: lastMoved })
-    },
+      this.currentGame.update({ last_player_moved: lastPlayerMoved })
 
-    tick(player) {
-      // this.aSetHostTimeLeft()
+      // Stop last player's clock
+      axios.get('http://localhost:5000/stopTime')
+      
+      // Start the other player's clock
+      const player = lastPlayerMoved === this.hostUserID ? 'other' : 'host'
+      axios.get(`http://localhost:5000/startTime/${player}`)
     }
   }
 }
