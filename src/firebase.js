@@ -27,6 +27,7 @@ firebase.getCurrentUser = () => {
   })
 }
 
+// Listen for logins and logouts
 firebase.auth().onAuthStateChanged(user => {
   store.dispatch("setUser", user);
 })

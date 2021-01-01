@@ -83,6 +83,8 @@ export default {
     }),
 
     canMakeMove() {
+      console.log(this.lastPlayerMoved)
+      console.log(auth.currentUser.uid)
       return this.lastPlayerMoved !== auth.currentUser.uid
     },
 
@@ -122,7 +124,6 @@ export default {
 
     async selfName() {
       const user = await this.currentUser.data
-       
       return user.username
     },
   },

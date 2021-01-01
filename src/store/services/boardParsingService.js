@@ -123,3 +123,6 @@ export const getPDNFromBoard = (board, turn) => {
 }
 
 // const board = getBoardFromPDN(`[FEN "O:W1,3,5,7,10,12,14,16,17,19,21,23:B42,44,46,48,49,51,53,55,56,58,60,62,64"]`)
+// Starting position: 
+// [FEN "O:W1,3,5,7,10,12,14,16,17,19,21,23:B42,44,46,48,49,51,53,55,56,58,60,62,64"]
+// With Kings: [FEN "O:WK1:BK42"]

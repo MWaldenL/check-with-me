@@ -117,11 +117,23 @@ export default {
       }
     },
 
+    isMovingOwnPiece(color, isWhite, isBlack) {
+      return (color === 'w' && isWhite) || (color === 'b' && isBlack) 
+    },
+
     onSquareClicked () {
       if (this.bActiveGame) {
         if (this.canMakeMove) {
           const source = this.firstClick
-          const bContainsPiece = this.hasBlackChip || this.hasWhiteChip || this.hasWhiteKing || this.hasBlackKing
+
+          // Prevent a player from clicking on another player's piece
+          const bCurWhitePiece = this.hasWhiteChip || this.hasWhiteKing
+          const bCurBlackPiece = this.hasBlackChip || this.hasBlackKing
+          if (source === null) {
+            if (!this.isMovingOwnPiece(this.selfColor, bCurWhitePiece, bCurBlackPiece)) {
+              return
+            }
+          }
 
           // Highlight or attempt to move a piece
           if (source != null) {
@@ -131,14 +143,6 @@ export default {
               nCol: source.nCol,
               nDestRow: this.row,
               nDestCol: this.col
-            }
-            
-            // Prevent the player from moving another player's piece
-            const bWhitePiece = source.bHasWhiteChip || source.bHasWhiteKing
-            const bBlackPiece = source.bHasBlackChip || source.bHasBlackKing
-            const bIsMovingOwnPiece = (this.selfColor === 'w' && bWhitePiece) || (this.selfColor === 'b' && bBlackPiece)
-            if (!bIsMovingOwnPiece) {
-              return
             }
 
             // Check for move or capture attempts. No legality checking
@@ -174,6 +178,7 @@ export default {
               this.$emit("makeMove", source)
             }
           } else {
+            const bContainsPiece = this.hasBlackChip || this.hasWhiteChip || this.hasWhiteKing || this.hasBlackKing
             if (bContainsPiece) {
               this.aHighlight({ 
                 nRow: this.row, 
