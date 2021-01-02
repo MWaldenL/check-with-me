@@ -68,9 +68,11 @@ export default {
     const lastPlayerMoved = game.data().last_player_moved
     const player = lastPlayerMoved === game.data().host_user ? 'other' : 'host'
     
+    // Check first if the time is running
     const timerState = await axios.get(`http://localhost:5000/isTimeRunning`)
     console.log(timerState.data.isTimeRunning)
 
+    // Only start the clock if no one else is running the clock
     if (!timerState.data.isTimeRunning)
       await axios.get(`http://localhost:5000/startTime/${player}`)
   },
@@ -208,7 +210,7 @@ export default {
       // Write last player moved to db 
       await this.currentGame.update({ last_player_moved: this.lastPlayerMoved })
 
-      // Stop last player's clock
+      // Stop the last player's clock
       await axios.get('http://localhost:5000/stopTime')
       
       // Start the other player's clock
