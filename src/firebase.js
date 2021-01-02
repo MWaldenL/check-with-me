@@ -3,6 +3,7 @@ import 'firebase/auth'
 import 'firebase/firestore'
 import store from './store'
 
+
 const firebaseConfig = {
   apiKey: "AIzaSyA9SZagTMn8tSFeZkOQkrDmptaQLP-3c7k",
   authDomain: "check-with-me.firebaseapp.com",

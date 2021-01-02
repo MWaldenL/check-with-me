@@ -1,11 +1,12 @@
 import { gamesCollection } from '@/firebase'
 import { getPDNFromBoard } from '../../services/boardParsingService'
 
-const writeBoardToDB = async (state) => {
+
+const writeBoardToDB = async (cells) => {
   await gamesCollection
     .doc('Vc0H4f4EvY6drRKnvsk5')
     .update({ 
-      board_state: getPDNFromBoard(state.cells, 'X') 
+      board_state: getPDNFromBoard(cells, 'X') 
     })
 }
 
@@ -43,7 +44,7 @@ const actions = {
    */
   async aMoveForward({ commit, state }, coords) {
     commit('mMoveForward', coords)
-    writeBoardToDB(state)
+    writeBoardToDB(state.cells)
   },
 
   /**
@@ -55,7 +56,7 @@ const actions = {
    */
   aKingMovement({ commit, state }, coords) {
     commit('mKingMovement', coords)
-    writeBoardToDB(state)
+    writeBoardToDB(state.cells)
   },
 
   /**
@@ -66,7 +67,7 @@ const actions = {
    */
   aCapturePiece({ commit, state }, coords) {
     commit('mCapturePiece', coords)
-    writeBoardToDB(state)
+    writeBoardToDB(state.cells)
   },
 
   /**
@@ -77,7 +78,7 @@ const actions = {
    */
   aKingCapturePiece({ commit, state }, coords) {
     commit('mKingCapturePiece', coords)
-    writeBoardToDB(state)
+    writeBoardToDB(state.cells)
   },
 
   /**

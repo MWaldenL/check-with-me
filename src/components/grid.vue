@@ -63,6 +63,9 @@ export default {
   
   async created() {
     await axios.get('http://localhost:5000/startTime/host')
+  },
+
+  mounted () {
     this.currentGame = gamesCollection.doc('Vc0H4f4EvY6drRKnvsk5')
   },
 

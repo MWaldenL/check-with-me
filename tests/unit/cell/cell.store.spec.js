@@ -262,6 +262,9 @@ describe('Mutation testing', () => {
 
       let coords = { nRow: 2, nCol: 2, nDestRow: 1, nDestCol: 1 }
       Cells.mutations.mMoveForward(state, coords)
+
+      console.log("Moving forward")
+
       expect(state.cells).toStrictEqual(expected)
       expect(state.firstClick).toBe(null)
     })

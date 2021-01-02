@@ -1,4 +1,3 @@
-import { gamesCollection, timersCollection } from '@/firebase'
 import axios from 'axios'
 
 

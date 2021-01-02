@@ -144,7 +144,7 @@ export const getPDNFromBoard = (board, turn) => {
   return res
 }
 
-// Examples:
+// Tests:
 // Starting position:   [FEN "O:W1,3,5,7,10,12,14,16,17,19,21,23:B42,44,46,48,49,51,53,55,56,58,60,62,64"]
 // With 2 Kings:        [FEN "O:WK1:BK42"]
 // White piece:         [FEN "O:W1"]
