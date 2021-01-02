@@ -1,6 +1,4 @@
-import { gamesCollection, timersCollection } from '@/firebase'
 import axios from 'axios'
-
 
 const actions = {
   /**
@@ -56,7 +54,7 @@ const actions = {
    */
   async aSetHostTimeLeft({ commit }) {
     await axios
-      .get('http://localhost:5000/timeLeft/host')
+      .get('http://localhost:5000/timeLeft/H48woDfI1lwIGZnJh4qz/host')
       .then(res => {
         commit('setHostTimeLeft', res.data.timeLeft)
       }).catch(err => {
@@ -69,7 +67,7 @@ const actions = {
    */
   async aSetOtherTimeLeft({ commit }) {
     await axios
-      .get('http://localhost:5000/timeLeft/other')
+      .get('http://localhost:5000/timeLeft/H48woDfI1lwIGZnJh4qz/other')
       .then(res => {
         commit('setOtherTimeLeft', res.data.timeLeft)
       }).catch(err => {

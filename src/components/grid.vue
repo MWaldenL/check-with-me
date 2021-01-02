@@ -1,6 +1,8 @@
 <template>
   <div id="box">
     <Sidebar />
+
+    <!-- Opponent -->
     <div id="p1-details" class="details">
       <h1> 
         {{ enemyName }} 
@@ -13,6 +15,7 @@
       <h1 id="p1-count" class="pt-3"> Pieces left: {{ blackCount }} </h1>
     </div>
 
+    <!-- Board -->
     <div id="table">
       <table>
         <tr v-for="row in 8" :key="row">
@@ -28,6 +31,7 @@
       </table>
     </div>
     
+    <!-- Self -->
     <div id="p2-details" class="details">
       <h1 id="p2-count" class="pb-4"> Pieces left: {{ whiteCount }} </h1>
       <h1>
@@ -50,10 +54,10 @@ import {
   usersCollection, 
   timersCollection
 } from '@/firebase'
-import Cell from './cell'
-import Sidebar from './sidebar'
 import { mapGetters, mapActions } from 'vuex'
 import axios from 'axios'
+import Cell from './cell'
+import Sidebar from './sidebar'
 
 export default {
   name: 'Grid',
@@ -74,7 +78,7 @@ export default {
 
     // Only start the clock if no one else is running the clock
     if (!timerState.data.isTimeRunning)
-      await axios.get(`http://localhost:5000/startTime/${player}`)
+      await axios.get(`http://localhost:5000/startTime/H48woDfI1lwIGZnJh4qz/${player}`)
   },
 
   async mounted() {
@@ -98,6 +102,7 @@ export default {
     timersCollection
       .doc('H48woDfI1lwIGZnJh4qz')
       .onSnapshot(doc => {
+        // Set the timer of the next player to move
         if (this.lastPlayerMoved === this.hostUserID) {
           this.aSetOtherTimeLeft()
         } else {
