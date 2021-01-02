@@ -48,6 +48,7 @@ import {
   auth, 
   gamesCollection, 
   usersCollection, 
+  timersCollection
 } from '@/firebase'
 import Cell from './cell'
 import Sidebar from './sidebar'
@@ -62,51 +63,90 @@ export default {
   },
   
   async created() {
-    await axios.get('http://localhost:5000/startTime/host')
+    const gameDoc = await gamesCollection.doc('Vc0H4f4EvY6drRKnvsk5')
+    const game = await gameDoc.get()
+    const lastPlayerMoved = game.data().last_player_moved
+    const player = lastPlayerMoved === game.data().host_user ? 'other' : 'host'
+    
+    const timerState = await axios.get(`http://localhost:5000/isTimeRunning`)
+    console.log(timerState.data.isTimeRunning)
+
+    if (!timerState.data.isTimeRunning)
+      await axios.get(`http://localhost:5000/startTime/${player}`)
+  },
+
+  async mounted() {
+    // Set the current game
     this.currentGame = gamesCollection.doc('Vc0H4f4EvY6drRKnvsk5')
+    await this.aSetHostTimeLeft()
+    await this.aSetOtherTimeLeft()
+
+    // Set up db listeners
+    // Listen for board state changes
+    gamesCollection
+      .doc('Vc0H4f4EvY6drRKnvsk5') // Obtain from state in the future when rooms are implemented
+      .onSnapshot(doc => {
+        const data = doc.data()
+        
+        this.lastPlayerMoved = data.last_player_moved
+        this.aUpdateBoard(data.board_state)
+      })
+
+    // Listen for timer ticks
+    timersCollection
+      .doc('H48woDfI1lwIGZnJh4qz')
+      .onSnapshot(doc => {
+        if (this.lastPlayerMoved === this.hostUserID) {
+          this.aSetOtherTimeLeft()
+        } else {
+          this.aSetHostTimeLeft()
+        }
+        
+        // Check if someone has won on time
+        const didBlackWin = (this.hostTimeLeft === 0 && this.isHostWhite) || (this.otherTimeLeft === 0 && !this.isHostWhite)
+        const didWhiteWin = (this.otherTimeLeft === 0 && this.isHostWhite) || (this.hostTimeLeft === 0 && !this.isHostWhite)
+        if (didBlackWin) {
+          this.aSetWinner('B')
+        } else if (didWhiteWin) {
+          this.aSetWinner('W')
+        }
+      })
   },
 
   data () {
     return {
-      strP1Name: 'MikaReyes',
-      strP2Name: 'Sinigang',
+      selfName: '',
+      enemyName: '',
       currentGame: null,
+      lastPlayerMoved: null,
       bHostRunning: true,
-      bOtherRunning: false,
+      bOtherRunning: false
     }
   },
+
   computed: {
     ...mapGetters({
       whiteCount: 'getWhiteCount',
       blackCount: 'getBlackCount',
-
       currentUser: 'getCurrentUser',
       hostUserID: 'getHostUser',
       otherUserID: 'getOtherUser',
-
       isHostWhite: 'getIsHostWhite',
       hostTimeLeft: 'getHostTimeLeft',
       otherTimeLeft: 'getOtherTimeLeft',
-      lastPlayerMoved: 'getLastPlayerMoved'
     }),
 
     canMakeMove() {
-      console.log(this.lastPlayerMoved)
-      console.log(auth.currentUser.uid)
       return this.lastPlayerMoved !== auth.currentUser.uid
     },
 
     selfSeconds() {
-      console.log(auth.currentUser.uid)
-      console.log(this.hostTimeLeft + " | " + this.otherTimeLeft)
-
       return (auth.currentUser.uid === this.hostUserID) ?
         this.hostTimeLeft :
         this.otherTimeLeft
     },
 
     enemySeconds() {
-      console.log(this.hostTimeLeft + " | " + this.otherTimeLeft)
       return (auth.currentUser.uid === this.hostUserID) ?
         this.otherTimeLeft :
         this.hostTimeLeft
@@ -114,8 +154,25 @@ export default {
 
     selfColor() {
       return (auth.currentUser.uid === this.hostUserID) ?
-        ((this.isHostWhite) ? 'w' : 'b') : 
-        ((this.isHostWhite) ? 'b' : 'w')
+        (this.isHostWhite ? 'w' : 'b') : 
+        (this.isHostWhite ? 'b' : 'w')
+    }
+  },
+
+  asyncComputed: {
+    async selfName() {
+      const data = await this.currentUser.data
+      return data.username
+    },
+    
+    async enemyName() {
+      const uid = auth.currentUser.uid === this.hostUserID ? 
+          this.otherUserID : 
+          this.hostUserID
+      const userDoc = await usersCollection.doc(uid).get()
+      const data = await userDoc.data()
+
+      return data.username
     }
   },
 
@@ -132,44 +189,31 @@ export default {
       return (time >= 10) ? time.toString(10) : `0${time}`
     }
   },  
-
-  asyncComputed: {
-    async enemyName() {
-      const uid = auth.currentUser.uid === this.hostUserID ? 
-        this.otherUserID : 
-        this.hostUserID
-
-      const userDoc = await usersCollection.doc(uid).get()
-      const username = userDoc.data().username
-      return username
-    },
-
-    async selfName() {
-      const user = await this.currentUser.data
-      return user.username
-    },
-  },
-
+  
   methods: {
     ...mapActions([
       'aSetLastPlayerMoved',
       'aSetHostTimeLeft',
-      'aSetOtherTimeLeft'
+      'aSetOtherTimeLeft',
+      'aSetWinner',
+      'aUpdateBoard'
     ]),
 
     async updateLastPlayerMoved(square) {
+      console.log("player moved")
+
       const isMoveWhite = square.bHasWhiteChip || square.bHasWhiteKing 
-      const lastPlayerMoved = (this.isHostWhite ^ isMoveWhite) ? this.otherUserID : this.hostUserID
+      this.lastPlayerMoved = (this.isHostWhite ^ isMoveWhite) ? this.otherUserID : this.hostUserID
 
       // Write last player moved to db 
-      this.currentGame.update({ last_player_moved: lastPlayerMoved })
+      await this.currentGame.update({ last_player_moved: this.lastPlayerMoved })
 
       // Stop last player's clock
-      axios.get('http://localhost:5000/stopTime')
+      await axios.get('http://localhost:5000/stopTime')
       
       // Start the other player's clock
-      const player = lastPlayerMoved === this.hostUserID ? 'other' : 'host'
-      axios.get(`http://localhost:5000/startTime/${player}`)
+      const player = this.lastPlayerMoved === this.hostUserID ? 'other' : 'host'
+      await axios.get(`http://localhost:5000/startTime/${player}`)
     }
   }
 }

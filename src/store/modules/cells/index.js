@@ -10,6 +10,7 @@ const state = {
   nBlackCount: 12,
   firstClick: null,
   bActiveGame: true,
+  bLastMoveLegal: true,
   cWinner: 'N' //'B' black 'W' white 'N' none 'D' draw
 }
 

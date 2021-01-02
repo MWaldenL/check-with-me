@@ -2,6 +2,7 @@ import firebase from 'firebase'
 import 'firebase/auth'
 import 'firebase/firestore'
 import store from './store'
+import gameStore from '@/store/modules/game/index.js'
 
 const firebaseConfig = {
   apiKey: "AIzaSyA9SZagTMn8tSFeZkOQkrDmptaQLP-3c7k",
@@ -18,6 +19,7 @@ firebase.initializeApp(firebaseConfig)
 const db = firebase.firestore()
 const auth = firebase.auth()
 
+// To be used in the Vue Router
 firebase.getCurrentUser = () => {
   return new Promise((resolve, reject) => {
     const unsubscribe = firebase.auth().onAuthStateChanged(user => {
@@ -36,23 +38,6 @@ firebase.auth().onAuthStateChanged(user => {
 const usersCollection = db.collection('users')
 const gamesCollection = db.collection('games')
 const timersCollection = db.collection('timers')
-
-// Listeners
-gamesCollection
-  .doc('Vc0H4f4EvY6drRKnvsk5') // .doc(getters.getCurrentGameID)
-  .onSnapshot(doc => {
-    const data = doc.data()
-    
-    store.dispatch('aSetLastPlayerMoved', data.last_player_moved)
-    store.dispatch('aUpdateBoard', data.board_state);
-  })
-
-timersCollection
-  .doc('H48woDfI1lwIGZnJh4qz')
-  .onSnapshot(doc => {
-    store.dispatch('aSetHostTimeLeft')
-    store.dispatch('aSetOtherTimeLeft')
-  })
 
 export {
   db,

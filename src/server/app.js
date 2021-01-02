@@ -38,11 +38,15 @@ app.get('/timeLeft/:player', async (req, res) => {
 
 
 let countDown
+let isTimeRunning = false
 app.get('/startTime/:player', async (req, res) => {
+  isTimeRunning = true
+
   const player = req.params.player
   const timerDoc = await timersCollection.doc('H48woDfI1lwIGZnJh4qz')
   
   // Perform every second
+  let i = 0
   countDown = setInterval(async () => {
     // Get the current time
     const timer = await timerDoc.get()
@@ -50,7 +54,7 @@ app.get('/startTime/:player', async (req, res) => {
       timer.data().host_timeLeft : 
       timer.data().other_timeLeft
     
-    console.log(player)
+    console.log(i++)
 
     const timeObj = player === 'host' ?
       { host_timeLeft: timeLeft - 1 } :
@@ -60,6 +64,7 @@ app.get('/startTime/:player', async (req, res) => {
     if (timeLeft > 0) {
       await timerDoc.update(timeObj)
     } else {
+      isTimeRunning = false
       clearInterval(countDown)
     }
   }, 1000)
@@ -70,6 +75,10 @@ app.get('/startTime/:player', async (req, res) => {
 app.get('/stopTime', async (req, res) => {
   clearInterval(countDown)
   res.status(200).send("Stopping time")
+})
+
+app.get('/isTimeRunning', (req, res) => {
+  res.send({ isTimeRunning })
 })
 
 app.listen(5000)
