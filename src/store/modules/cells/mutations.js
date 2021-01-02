@@ -37,6 +37,9 @@ const helpers = {
   },
 
   handleIllegalMove: (state, coords) => {
+    // Signal the cell component that the last move was illegal
+    state.bLastMoveLegal = false
+
     const bDestHasWhite = state.cells[coords.nDestRow - 1][coords.nDestCol - 1].bHasWhiteChip
     const bDestHasBlack = state.cells[coords.nDestRow - 1][coords.nDestCol - 1].bHasBlackChip
     const bSrcDestBlack = bSourceHasBlack(state.cells, coords) && bDestHasBlack

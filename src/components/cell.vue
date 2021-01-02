@@ -13,12 +13,15 @@
 <script>
 import { bIsValidCapture } from '@/store/services/kingCaptureService'
 import { checkIfWhiteStuck, checkIfBlackStuck } from '@/store/services/winCheckerService'
-import { mapGetters, mapActions } from 'vuex'
+import { mapState, mapGetters, mapActions } from 'vuex'
 
 export default {
   props: ['row', 'col', 'canMakeMove', 'selfColor'],
   data () {
     return {
+      ...mapState({
+        isLastMoveLegal: 'bLastMoveLegal'
+      }),
       dIsSelected: false,
       dIsPossibleMove: false,
       dIsPossibleCapture: false
@@ -147,26 +150,31 @@ export default {
             const bIsKingMovement = source.bHasBlackKing || source.bHasWhiteKing
             const bIsSameSquare = coords.nRow === coords.nDestRow && coords.nCol === coords.nDestCol
             let willEmit = true
+            
             if (bIsSameSquare) {
-              willEmit = false
               this.aUnhighlight(null)
+              willEmit = false
             } else if (bIsKingMovement) {
               if (this.isKingMoveAttempt(source, coords)) {
                 this.aKingMovement(coords)
+                willEmit = this.isLastMoveLegal
               } else if (this.isKingCaptureAttempt(source, coords)) {
                 this.aKingCapturePiece(coords)
+                willEmit = this.isLastMoveLegal
               } else {
-                willEmit = false
                 this.cancelCurrentMove()  
+                willEmit = false
               }
             } else { 
               if (this.isCaptureAttempt(source)) {  
                 this.aCapturePiece(coords)
+                willEmit = this.isLastMoveLegal
               } else if (this.isMoveForwardAttempt(source)) {
                 this.aMoveForward(coords)
+                willEmit = this.isLastMoveLegal
               } else {
-                willEmit = false
                 this.cancelCurrentMove()
+                willEmit = false
               }
             }
 
