@@ -58,12 +58,13 @@ const placePieces = (board, squares, color) => {
 
 /**
  * PDN Grammar: 
- * S -> [FEN "[Turn]:[Color][K][Square num],[K][Square num]...]:[Color][K][Square num], [K][Square num]...]"]
+ * S -> [FEN "[Turn]:[Color][K][Square],[K][Square]...]:[Color][K][Square], [K][Square]...]"]
+ * [Color] -> 'B' | 'W'
  * [K] -> 'K' | ''
- * @param pdn the board state in Portable Draughts Notation 
+ * [Square] -> (1 - 64)
+ * @param pdn the board state in Portable Draughts Notation from white's perspective
  */
 export const getBoardFromPDN = (pdn) => {
-
   // Trim PDN string
   pdn = pdn.substring(1, pdn.length - 2)
 
@@ -105,6 +106,12 @@ export const getBoardFromPDN = (pdn) => {
   return board
 }
 
+/**
+ * Returns a PDN string from an unpacked board instance.
+ * The PDN string is viewed from white's perspective
+ * @param board the unpacked board instance 
+ * @param turn the current player to move (dummy)
+ */
 export const getPDNFromBoard = (board, turn) => {
   let res = `[FEN "${turn}:`
   let white = ''
@@ -118,7 +125,6 @@ export const getPDNFromBoard = (board, turn) => {
         if (board[r][c].bHasWhiteKing) {
           white = white.concat(`K${square},`)
         } else {
-          console.log(square)
           white = white.concat(`${square},`)
         }
       } else if (board[r][c].bHasBlackChip) {
