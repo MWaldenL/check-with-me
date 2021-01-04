@@ -1,4 +1,4 @@
-export const getPossibleMoveBlack = (board, nRow, nCol) => {
+export const getPossibleMoves = (board, nRow, nCol, isWhite) => {
   let moves = []
 
   const bTopLeftValid = nRow >= 0 && nRow < 8 && nCol - 2 >= 0 && nCol - 2 < 8
@@ -11,14 +11,16 @@ export const getPossibleMoveBlack = (board, nRow, nCol) => {
 
   if (bTopLeftValid) {
     const bTopLeft = board[nRow][nCol - 2]
+    const bHasFriendlyPiece = isWhite ? bTopLeft.bHasWhiteChip : bTopLeft.bHasBlackChip 
+    const bHasEnemyPiece = isWhite ? bTopLeft.bHasBlackChip : bTopLeft.bHasWhiteChip
 
     if (!bTopLeft.bHasBlackChip && !bTopLeft.bHasWhiteChip) {
       moves.push([nRow, nCol - 2, 0])
-    } else if (bTopLeft.bHasBlackChip) {
+    } else if (bHasFriendlyPiece) {
       // skip
-    } else if (bTopLeft.bHasBlackChip && bTopLeftCaptValid && !bTopLeftCaptUnblocked) {
+    } else if (bHasEnemyPiece && bTopLeftCaptValid && !bTopLeftCaptUnblocked) {
       // skip
-    } else if (bTopLeft.bHasWhiteChip && bTopLeftCaptValid && bTopLeftCaptUnblocked) {
+    } else if (bHasEnemyPiece && bTopLeftCaptValid && bTopLeftCaptUnblocked) {
       moves.push([nRow, nCol - 2, 1])
       moves.push([nRow + 1, nCol - 3, 0])
     }
@@ -26,14 +28,16 @@ export const getPossibleMoveBlack = (board, nRow, nCol) => {
 
   if (bTopRightValid) {
     const bTopRight = board[nRow][nCol]
+    const bHasFriendlyPiece = isWhite ? bTopRight.bHasWhiteChip : bTopRight.bHasBlackChip
+    const bHasEnemyPiece = isWhite ? bTopRight.bHasBlackChip : bTopRight.bHasWhiteChip
 
     if (!bTopRight.bHasBlackChip && !bTopRight.bHasWhiteChip) {
       moves.push([nRow, nCol, 0])
-    } else if (bTopRight.bHasBlackChip) {
+    } else if (bHasFriendlyPiece) {
       // skip
-    } else if (bTopRight.bHasBlackChip && bTopRightCaptValid && !bTopRightCaptUnblocked) {
+    } else if (bHasEnemyPiece && bTopRightCaptValid && !bTopRightCaptUnblocked) {
       // skip
-    } else if (bTopRight.bHasWhiteChip && bTopRightCaptValid && bTopRightCaptUnblocked) {
+    } else if (bHasEnemyPiece && bTopRightCaptValid && bTopRightCaptUnblocked) {
       moves.push([nRow, nCol, 1])
       moves.push([nRow + 1, nCol + 1, 0])
     } 

@@ -106,12 +106,13 @@ const mutations = {
 
     // Fetch and store legal squares 
     let aPossibleCells = []
+    let isWhite = true
     if (srcCell.bHasWhiteKing || srcCell.bHasBlackKing) {
       aPossibleCells = getPossibleMoveWhiteKing(boardClone, coords.nRow, coords.nCol)
     } else if (srcCell.bHasWhiteChip) {
-      aPossibleCells = getPossibleMoveWhite(boardClone, coords.nRow, coords.nCol)
+      aPossibleCells = getPossibleMoves(boardClone, coords.nRow, coords.nCol, isWhite)
     } else if (srcCell.bHasBlackChip) {
-      aPossibleCells = getPossibleMoveBlack(boardClone, coords.nRow, coords.nCol)
+      aPossibleCells = getPossibleMoves(boardClone, coords.nRow, coords.nCol, !isWhite)
     }
 
     // Set these legal squares on the square object
@@ -298,8 +299,7 @@ const mutations = {
         if (bLastRowAbove) {
           newDest.bHasBlackKing = true
         }
-        whiteTakes = false
-        mutations.mReducePiece(state, whiteTakes)
+        mutations.mReducePiece(state, !whiteTakes)
       }
     }
 
