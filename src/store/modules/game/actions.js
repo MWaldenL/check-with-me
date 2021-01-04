@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { gamesCollection, usersCollection } from '@/firebase'
 
 const actions = {
   /**
@@ -73,7 +74,11 @@ const actions = {
       }).catch(err => {
         console.log(err)
       })
-  }
+  },
+
+  async aGetOtherPlayerUsername({ commit }, playerID) {
+    
+  }  
 }
 
 export default actions

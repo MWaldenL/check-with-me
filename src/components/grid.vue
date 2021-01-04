@@ -179,6 +179,9 @@ export default {
       const userDoc = await usersCollection.doc(uid).get()
       const data = await userDoc.data()
 
+      console.log("Enemy name")
+      console.log(data)
+
       return data.username
     }
   },

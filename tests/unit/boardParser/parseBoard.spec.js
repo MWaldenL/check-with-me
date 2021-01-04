@@ -26,7 +26,7 @@ describe('Converting Board to PDN', () => {
     for (let i=0; i < 3; i++) {
       it (`returns a PDN representing a board with two kings where their positions are defined ${i}`, () => {
         // Arrange
-        const min = 0
+        const min = 1
         const max = 65
         const randRange = (min, max) => Math.floor(Math.random() * (max - min) + min) 
         const whiteKPos = randRange(min, max) 

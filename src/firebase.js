@@ -1,7 +1,6 @@
 import firebase from 'firebase'
 import 'firebase/auth'
 import 'firebase/firestore'
-import store from './store'
 
 const firebaseConfig = {
   apiKey: "AIzaSyA9SZagTMn8tSFeZkOQkrDmptaQLP-3c7k",
@@ -27,11 +26,6 @@ firebase.getCurrentUser = () => {
     }, reject)
   })
 }
-
-// Listen for logins and logouts
-firebase.auth().onAuthStateChanged(user => {
-  store.dispatch("setUser", user);
-})
 
 // Collections
 const usersCollection = db.collection('users')
