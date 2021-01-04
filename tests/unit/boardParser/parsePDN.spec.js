@@ -40,75 +40,83 @@ describe('Converting PDN to board instance', () => {
   }),
 
   describe('One white piece only', () => {
-    it ('returns a board with only one white piece 1', () => {
-      // Arrange
-      const pdn = `[FEN "O:W19"]`
-      const whitePosList = [19]
-      const blackPosList = []
-      const whiteKingList = []
-      const blackKingList = []
-      const expected = getBoard(whitePosList, blackPosList, whiteKingList, blackKingList)
-
-      // Act 
-      const result = getBoardFromPDN(pdn)
-
-      // Assert
-      expect(result).toStrictEqual(expected)
-    })
+    for (let i=1; i < 65; i++) {
+      it (`returns a board with only one white piece ${i}`, () => {
+        // Arrange
+        const pdn = `[FEN "O:W${i}"]`
+        const whitePosList = [i]
+        const blackPosList = []
+        const whiteKingList = []
+        const blackKingList = []
+        const expected = getBoard(whitePosList, blackPosList, whiteKingList, blackKingList)
+        
+        // Act 
+        const result = getBoardFromPDN(pdn)
+        
+        // Assert
+        expect(result).toStrictEqual(expected)
+      })
+    }
   }),
 
   describe('One black piece only', () => {
-    it ('returns a board with only one black piece', () => {
-      // Arrange
-      const pdn = `[FEN "O:B42"]`
-      const whitePosList = []
-      const blackPosList = [42]
-      const whiteKingList = []
-      const blackKingList = []
-      const expected = getBoard(whitePosList, blackPosList, whiteKingList, blackKingList)
-
-      // Act 
-      const result = getBoardFromPDN(pdn)
-
-      // Assert
-      expect(result).toStrictEqual(expected)
-    })
+    for (let i=1; i < 65; i++) {
+      it (`returns a board with only one black piece ${i}`, () => {
+        // Arrange
+        const pdn = `[FEN "O:B${i}"]`
+        const whitePosList = []
+        const blackPosList = [i]
+        const whiteKingList = []
+        const blackKingList = []
+        const expected = getBoard(whitePosList, blackPosList, whiteKingList, blackKingList)
+        
+        // Act 
+        const result = getBoardFromPDN(pdn)
+        
+        // Assert
+        expect(result).toStrictEqual(expected)
+      })
+    }
   }),
 
   describe('One white king only', () => {
-    it ('returns a board with only one white king', () => {
-      // Arrange
-      const pdn = `[FEN "O:WK1"]`
-      const whitePosList = []
-      const blackPosList = []
-      const whiteKingList = [1]
-      const blackKingList = []
-      const expected = getBoard(whitePosList, blackPosList, whiteKingList, blackKingList)
+    for (let i=1; i < 65; i++) {
+      it (`returns a board with only one white king ${i}`, () => {
+        // Arrange
+        const pdn = `[FEN "O:WK${i}"]`
+        const whitePosList = []
+        const blackPosList = []
+        const whiteKingList = [i]
+        const blackKingList = []
+        const expected = getBoard(whitePosList, blackPosList, whiteKingList, blackKingList)
 
-      // Act 
-      const result = getBoardFromPDN(pdn)
+        // Act 
+        const result = getBoardFromPDN(pdn)
 
-      // Assert
-      expect(result).toStrictEqual(expected)
-    })
+        // Assert
+        expect(result).toStrictEqual(expected)
+      })
+    }
   }),
 
   describe('One black king only', () => {
-    it ('returns a board with only one black king', () => {
-      // Arrange
-      const pdn = `[FEN "O:BK64"]`
-      const whitePosList = []
-      const blackPosList = []
-      const whiteKingList = []
-      const blackKingList = [64]
-      const expected = getBoard(whitePosList, blackPosList, whiteKingList, blackKingList)
-
-      // Act 
-      const result = getBoardFromPDN(pdn)
-
-      // Assert
-      expect(result).toStrictEqual(expected)
-    })
+    for (let i=1; i < 65; i++) {
+      it (`returns a board with only one black king ${i}`, () => {
+        // Arrange
+        const pdn = `[FEN "O:BK${i}"]`
+        const whitePosList = []
+        const blackPosList = []
+        const whiteKingList = []
+        const blackKingList = [i]
+        const expected = getBoard(whitePosList, blackPosList, whiteKingList, blackKingList)
+        
+        // Act 
+        const result = getBoardFromPDN(pdn)
+        
+        // Assert
+        expect(result).toStrictEqual(expected)
+      })
+    }
   }),
 
   describe('Custom positions', () => {

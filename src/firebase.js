@@ -2,8 +2,6 @@ import firebase from 'firebase'
 import 'firebase/auth'
 import 'firebase/firestore'
 import store from './store'
-import gameStore from '@/store/modules/game/index.js'
-
 
 const firebaseConfig = {
   apiKey: "AIzaSyA9SZagTMn8tSFeZkOQkrDmptaQLP-3c7k",
