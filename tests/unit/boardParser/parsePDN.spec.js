@@ -22,21 +22,32 @@ describe('Converting PDN to board instance', () => {
   }),
 
   describe('Two Kings', () => {
-    it ('returns a board with two kings where their positions are defined', () => {
-      // Arrange
-      const pdn = `[FEN "O:WK1:BK42"]`
-      const whitePosList = []
-      const blackPosList = []
-      const whiteKingList = [1]
-      const blackKingList = [42]
-      const expected = getBoard(whitePosList, blackPosList, whiteKingList, blackKingList)
+    for (let i=0; i < 3; i++) {
+      it ('returns a board with two kings where their positions are defined', () => {
+        // Arrange
+        const min = 0
+        const max = 65
+        const randRange = (min, max) => Math.floor(Math.random() * (max - min) + min) 
+        const whiteKPos = randRange(min, max) 
+        let blackKPos = randRange(min, max)
+        while (blackKPos === whiteKPos) {
+          blackKPos = randRange(min, max)
+        }
 
-      // Act 
-      const result = getBoardFromPDN(pdn)
+        const pdn = `[FEN "O:WK${whiteKPos}:BK${blackKPos}"]`
+        const whitePosList = []
+        const blackPosList = []
+        const whiteKingList = [whiteKPos]
+        const blackKingList = [blackKPos]
+        const expected = getBoard(whitePosList, blackPosList, whiteKingList, blackKingList)
 
-      // Assert
-      expect(result).toStrictEqual(expected)
-    })
+        // Act 
+        const result = getBoardFromPDN(pdn)
+
+        // Assert
+        expect(result).toStrictEqual(expected)
+      })
+    }
   }),
 
   describe('One white piece only', () => {
