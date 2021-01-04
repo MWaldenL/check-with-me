@@ -5,7 +5,7 @@
     <!-- Opponent -->
     <div id="p1-details" class="details">
       <h1> 
-        {{ enemyName }} 
+        {{ enemyUsername }} 
         <keep-alive>
           <span class="time text-white" id="enemyTime">
             {{ enemySeconds | minutes | formattedTime }}:{{ enemySeconds | seconds | formattedTime }}
@@ -67,14 +67,17 @@ export default {
   },
   
   async created() {
+    console.log('createad')
     const gameDoc = await gamesCollection.doc('Vc0H4f4EvY6drRKnvsk5')
     const game = await gameDoc.get()
     const lastPlayerMoved = game.data().last_player_moved
     const player = lastPlayerMoved === game.data().host_user ? 'other' : 'host'
     
+    // Get the enemy username
+    await this.aGetEnemyUsername()
+
     // Check first if the time is running
     const timerState = await axios.get(`http://localhost:5000/isTimeRunning`)
-    console.log(timerState.data.isTimeRunning)
 
     // Only start the clock if no one else is running the clock
     if (!timerState.data.isTimeRunning)
@@ -82,6 +85,10 @@ export default {
   },
 
   async mounted() {
+    console.log('mounted')
+    console.log(this.enemyUsername) 
+    console.log('after pritn')
+
     // Set the current game
     this.currentGame = gamesCollection.doc('Vc0H4f4EvY6drRKnvsk5')
     await this.aSetHostTimeLeft()
@@ -138,6 +145,7 @@ export default {
       currentUser: 'getCurrentUser',
       hostUserID: 'getHostUser',
       otherUserID: 'getOtherUser',
+      enemyUsername: 'getEnemyUsername',
       isHostWhite: 'getIsHostWhite',
       hostTimeLeft: 'getHostTimeLeft',
       otherTimeLeft: 'getOtherTimeLeft',
@@ -172,18 +180,11 @@ export default {
       return data.username
     },
     
-    async enemyName() {
-      const uid = auth.currentUser.uid === this.hostUserID ? 
-          this.otherUserID : 
-          this.hostUserID
-      const userDoc = await usersCollection.doc(uid).get()
-      const data = await userDoc.data()
-
-      console.log("Enemy name")
-      console.log(data)
-
-      return data.username
-    }
+    // async enemyName() {
+    //   const username = await this.enemyUsername
+    //   console.log(username)
+    //   return username
+    // }
   },
 
   filters: {
@@ -206,12 +207,11 @@ export default {
       'aSetHostTimeLeft',
       'aSetOtherTimeLeft',
       'aSetWinner',
-      'aUpdateBoard'
+      'aUpdateBoard',
+      'aGetEnemyUsername'
     ]),
 
     async updateLastPlayerMoved(square) {
-      console.log("player moved")
-
       const isMoveWhite = square.bHasWhiteChip || square.bHasWhiteKing 
       this.lastPlayerMoved = (this.isHostWhite ^ isMoveWhite) ? this.otherUserID : this.hostUserID
 

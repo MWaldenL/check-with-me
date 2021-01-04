@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { gamesCollection, usersCollection } from '@/firebase'
+import { auth, usersCollection } from '@/firebase'
 
 const actions = {
   /**
@@ -76,8 +76,14 @@ const actions = {
       })
   },
 
-  async aGetOtherPlayerUsername({ commit }, playerID) {
-    
+  async aGetEnemyUsername({ commit, state }) {
+    const uid = auth.currentUser.uid === state.hostUser ? 
+      state.otherUser : 
+      state.hostUser
+    const userDoc = await usersCollection.doc(uid).get()
+    const username = userDoc.data().username  
+
+    commit('setEnemyUsername', username)
   }  
 }
 

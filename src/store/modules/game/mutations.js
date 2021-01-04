@@ -14,6 +14,10 @@ const mutations = {
   setOtherUser(state, uid) {
     state.otherUser = uid
   },
+  
+  setEnemyUsername(state, username) {
+    state.enemyUsername = username
+  },
 
   setHostTimeLeft(state, time) {
     state.hostTimeLeft = time
