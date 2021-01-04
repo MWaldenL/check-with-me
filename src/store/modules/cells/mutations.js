@@ -1,8 +1,7 @@
 import {
   bSourceHasBlack,
   bSourceHasWhite,
-  bBlackExistsAdj,
-  bWhiteExistsAdj,
+  bPieceExistsAdj,
   bPieceExistsAfterAdj,
   bNoBlackJumps,
   bNoWhiteJumps
@@ -109,9 +108,11 @@ const mutations = {
     let aPossibleCells = []
     if (srcCell.bHasWhiteKing || srcCell.bHasBlackKing) {
       aPossibleCells = getPossibleMoveWhiteKing(boardClone, coords.nRow, coords.nCol)
-    } else if (srcCell.bHasWhiteChip || srcCell.bHasBlackChip) {
+    } else if (srcCell.bHasWhiteChip) {
       aPossibleCells = getPossibleMoveWhite(boardClone, coords.nRow, coords.nCol)
-    } 
+    } else if (srcCell.bHasBlackChip) {
+      aPossibleCells = getPossibleMoveBlack(boardClone, coords.nRow, coords.nCol)
+    }
 
     // Set these legal squares on the square object
     for (const array of aPossibleCells) {
@@ -273,35 +274,32 @@ const mutations = {
     let bIsValidCapture = false
 
     // Check surrounding rows
-    const bNextRowBelow = coords.nRow - 2 === coords.nDestRow
     const bNextRowAbove = coords.nRow + 2 === coords.nDestRow
-    const bLastRowBelow = coords.nDestRow === 1
     const bLastRowAbove = coords.nDestRow === 8
 
     // Check if white and black can capture
-    const bWhiteCanCapture = bSourceHasWhite(state.cells, coords) && bBlackExistsAdj(state.cells, coords) && bNextRowAbove
-    const bBlackCanCapture = bSourceHasBlack(state.cells, coords) && bWhiteExistsAdj(state.cells, coords) && bNextRowBelow
+    const bWhiteCanCapture = bSourceHasWhite(state.cells, coords) && bPieceExistsAdj(state.cells, coords, true) && bNextRowAbove
+    const bBlackCanCapture = bSourceHasBlack(state.cells, coords) && bPieceExistsAdj(state.cells, coords, false) && bNextRowAbove
 
     // A piece can make a capture if the following conditions are met:
     // 1. An opposing piece exists diagonally adjacent to the current piece
-    // 2. There is no piece of any color diagonally adjacent to the target piece 
-    if (bWhiteCanCapture) {
-      if (!bPieceExistsAfterAdj(state.cells, coords)) {
-        bIsValidCapture = true
+    // 2. There is no piece of any color diagonally adjacent to the target piece
+    let whiteTakes = true
+    if (!bPieceExistsAfterAdj(state.cells, coords)) {
+      bIsValidCapture = true
+      if (bWhiteCanCapture) {
         newDest.bHasWhiteChip = true
         if (bLastRowAbove) {
           newDest.bHasWhiteKing = true
         }
-        mutations.mReducePiece(state, true)
-      }
-    } else if (bBlackCanCapture) {
-      if (!bPieceExistsAfterAdj(state.cells, coords)) {
-        bIsValidCapture = true
+        mutations.mReducePiece(state, whiteTakes)
+      } else if (bBlackCanCapture) {
         newDest.bHasBlackChip = true
-        if (bLastRowBelow) {
+        if (bLastRowAbove) {
           newDest.bHasBlackKing = true
         }
-        mutations.mReducePiece(state, false)
+        whiteTakes = false
+        mutations.mReducePiece(state, whiteTakes)
       }
     }
 

@@ -18,8 +18,8 @@ const filterWhite = board => {
 const filterBlack = board => {
   let blackCells = []
 
-  for(let r = 0; r < 8; r++) {
-    for(let c = 0; c < 8; c++) {
+  for (let r = 0; r < 8; r++) {
+    for (let c = 0; c < 8; c++) {
       if (board[r][c].bHasBlackChip || board[r][c].bHasBlackKing)
         blackCells.push(board[r][c])
     }
@@ -30,43 +30,41 @@ const filterBlack = board => {
 
 export const checkIfWhiteStuck = (board) => {
   let whiteCells = filterWhite(board)
-  //console.log("whiteCells")
-  let bBlocked = true
+  let bIsBlocked = true
 
   for (const cell of whiteCells) {
-    //console.log(cell.nRow + ' ' + cell.nCol)
-    // checks whether top right is blocked
-    if(bBlocked === true && cell.nCol < 8 && cell.nRow < 8) {
+    // Check whether top right is blocked
+    if (bIsBlocked === true && cell.nCol < 8 && cell.nRow < 8) {
       if (board[cell.nRow][cell.nCol].bHasWhiteChip || board[cell.nRow][cell.nCol].bHasWhiteKing) { // check for ally top right block
         ;
       } else if (board[cell.nRow][cell.nCol].bHasBlackChip || board[cell.nRow][cell.nCol].bHasBlackKing) { // check for top right capture
           if (cell.nCol < 7 && cell.nRow < 7) {
             if (!(board[cell.nRow + 1][cell.nCol + 1].bHasBlackChip || board[cell.nRow + 1][cell.nCol + 1].bHasBlackKing || board[cell.nRow + 1][cell.nCol + 1].bHasWhiteChip || board[cell.nRow + 1][cell.nCol + 1].bHasWhiteKing)) { // check for top right capture block 
-              bBlocked = false
+              bIsBlocked = false
             }
           } 
       } else {
-        bBlocked = false
+        bIsBlocked = false
       }
     }
 
-    // checks whether top left is blocked
-    if(bBlocked === true &&cell.nCol > 1 && cell.nRow < 8) {
+    // Check whether top left is blocked
+    if (bIsBlocked && cell.nCol > 1 && cell.nRow < 8) {
       if (board[cell.nRow][cell.nCol - 2].bHasWhiteChip || board[cell.nRow][cell.nCol - 2].bHasWhiteKing) { // check for ally top left block
         ;
       } else if (board[cell.nRow][cell.nCol - 2].bHasBlackChip || board[cell.nRow][cell.nCol - 2].bHasBlackKing) { // check for top left capture
           if (cell.nCol > 2 && cell.nRow < 7) {
             if (!(board[cell.nRow + 1][cell.nCol - 3].bHasBlackChip || board[cell.nRow + 1][cell.nCol - 3].bHasBlackKing || board[cell.nRow + 1][cell.nCol - 3].bHasWhiteChip || board[cell.nRow + 1][cell.nCol - 3].bHasWhiteKing)) { // check for top left capture block 
-              bBlocked = false
+              bIsBlocked = false
             }
           }
       } else {
-        bBlocked = false
+        bIsBlocked = false
       }
     }
   }
 
-  return bBlocked
+  return bIsBlocked
 }
 
 /*
