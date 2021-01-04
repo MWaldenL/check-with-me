@@ -383,8 +383,9 @@ const mutations = {
     }
   },
 
-  mUpdateBoard: (state, boardState) => {
-    state.cells = getBoardFromPDN(boardState)
+  mUpdateBoard: (state, payload) => {
+    const { boardState, playerIsBlack } = payload
+    state.cells = getBoardFromPDN(boardState, playerIsBlack)
   },
 
   mReducePiece: (state, whiteTakes) => {

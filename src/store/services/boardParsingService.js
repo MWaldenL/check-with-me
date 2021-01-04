@@ -22,8 +22,8 @@ const getEmptyBoard = () => {
   return board
 }
 
-const placePieces = (board, squares, color) => {
-  for (let square of squares) {
+const placePieces = (board, squares, pieceColor, playerIsBlack) => {
+  for (let squareString of squares) {
     let cell = {
       nRow: 0,              // nRow number 1-8, 1 is bottom
       nCol: 0,              // column number 1-8, 1 is leftmost
@@ -37,17 +37,22 @@ const placePieces = (board, squares, color) => {
     }
 
     // Check if the square contains a king
-    if (square.charAt(0) === 'K') {
-      square = square.replace('K', '')
-      cell = (color === 'w') ? 
+    if (squareString.charAt(0) === 'K') {
+      squareString = squareString.replace('K', '')
+      cell = (pieceColor === 'w') ? 
         { ...cell, bHasWhiteKing: true } : 
         { ...cell, bHasBlackKing: true }
     } 
 
     // Set the square properties
-    const row = Math.floor((Number(square) - 1) / 8) + 1
-    const col = ((Number(square) - 1) % 8) + 1
-    cell = (color === 'w') ? 
+    const square = playerIsBlack ? 
+      65 - Number(squareString) : // Reversed if the player is playing black 
+      Number(squareString)
+    console.log(playerIsBlack)
+
+    const row = Math.floor((square - 1) / 8) + 1
+    const col = ((square - 1) % 8) + 1
+    cell = (pieceColor === 'w') ? 
       { ...cell, nRow: row, nCol: col, bHasWhiteChip: true } :
       { ...cell, nRow: row, nCol: col, bHasBlackChip: true }
 
@@ -64,7 +69,7 @@ const placePieces = (board, squares, color) => {
  * [Square] -> (1 - 64)
  * @param pdn the board state in Portable Draughts Notation from white's perspective
  */
-export const getBoardFromPDN = (pdn) => {
+export const getBoardFromPDN = (pdn, playerIsBlack) => {
   // Trim PDN string
   pdn = pdn.substring(1, pdn.length - 2)
 
@@ -80,27 +85,27 @@ export const getBoardFromPDN = (pdn) => {
     white = sections[1]
       .replace('W', '')
       .split(',')
-    placePieces(board, white, 'w')
+    placePieces(board, white, 'w', playerIsBlack)
 
     // Black 
     black = sections[2]
       .replace('B', '')
       .replace('"]', '')
       .split(',')
-    placePieces(board, black, 'b')
+    placePieces(board, black, 'b', playerIsBlack)
   } else {
     let color = sections[1].charAt(0)
     if (color === 'W') {
       white = sections[1]
         .replace('W', '')
         .split(',')
-      placePieces(board, white, 'w')
+      placePieces(board, white, 'w', playerIsBlack)
     } else {
       black = sections[1]
         .replace('B', '')
         .replace('"]', '')
         .split(',')
-      placePieces(board, black, 'b')
+      placePieces(board, black, 'b', playerIsBlack)
     }
   }
   return board
@@ -112,7 +117,7 @@ export const getBoardFromPDN = (pdn) => {
  * @param board the unpacked board instance 
  * @param turn the current player to move (dummy)
  */
-export const getPDNFromBoard = (board, turn) => {
+export const getPDNFromBoard = (board, turn, isPlayerBlack) => {
   let res = `[FEN "${turn}:`
   let white = ''
   let black = ''
@@ -120,7 +125,13 @@ export const getPDNFromBoard = (board, turn) => {
   // Fill in the piece values
   for (let r = 0; r < 8; r++) {
     for (let c = 0; c < 8; c++) {
-      let square = 8*r + c + 1
+      let square = isPlayerBlack ? 
+        65 - (8*r + c + 1) : 
+        8*r + c + 1
+
+      console.log(isPlayerBlack)
+      console.log(square)
+
       if (board[r][c].bHasWhiteChip) {
         if (board[r][c].bHasWhiteKing) {
           white = white.concat(`K${square},`)
@@ -149,6 +160,7 @@ export const getPDNFromBoard = (board, turn) => {
   res = res.slice(0, res.length-1).concat(`"]`)
   return res
 }
+
 
 // Tests:
 // Starting position:   [FEN "O:W1,3,5,7,10,12,14,16,17,19,21,23:B42,44,46,48,49,51,53,55,56,58,60,62,64"]

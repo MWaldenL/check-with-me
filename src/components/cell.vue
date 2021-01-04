@@ -149,6 +149,10 @@ export default {
             // Check for move or capture attempts. No legality checking
             const bIsKingMovement = source.bHasBlackKing || source.bHasWhiteKing
             const bIsSameSquare = coords.nRow === coords.nDestRow && coords.nCol === coords.nDestCol
+            const payload = { 
+              coords, 
+              isPlayerBlack: this.selfColor === 'b'
+            }
             let willEmit = true
             
             if (bIsSameSquare) {
@@ -156,10 +160,10 @@ export default {
               willEmit = false
             } else if (bIsKingMovement) {
               if (this.isKingMoveAttempt(source, coords)) {
-                this.aKingMovement(coords)
+                this.aKingMovement(payload)
                 willEmit = this.isLastMoveLegal
               } else if (this.isKingCaptureAttempt(source, coords)) {
-                this.aKingCapturePiece(coords)
+                this.aKingCapturePiece(payload)
                 willEmit = this.isLastMoveLegal
               } else {
                 this.cancelCurrentMove()  
@@ -167,10 +171,11 @@ export default {
               }
             } else { 
               if (this.isCaptureAttempt(source)) {  
-                this.aCapturePiece(coords)
+                this.aCapturePiece(payload)
                 willEmit = this.isLastMoveLegal
               } else if (this.isMoveForwardAttempt(source)) {
-                this.aMoveForward(coords)
+                console.log("helo")
+                this.aMoveForward(payload)
                 willEmit = this.isLastMoveLegal
               } else {
                 this.cancelCurrentMove()

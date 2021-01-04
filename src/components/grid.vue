@@ -67,14 +67,20 @@ export default {
   },
   
   async created() {
-    console.log('createad')
     const gameDoc = await gamesCollection.doc('Vc0H4f4EvY6drRKnvsk5')
     const game = await gameDoc.get()
-    const lastPlayerMoved = game.data().last_player_moved
-    const player = lastPlayerMoved === game.data().host_user ? 'other' : 'host'
-    
+    this.lastPlayerMoved = game.data().last_player_moved // change to local var if fail
+    const player = this.lastPlayerMoved === game.data().host_user ? 'other' : 'host'
+
+    // Set the current game
+    this.currentGame = gameDoc // Put back in mounted if it fails
+
     // Get the enemy username
     await this.aGetEnemyUsername()
+
+    // Set the player's username
+    const currentUser = await this.currentUser.data 
+    this.selfName = currentUser.username
 
     // Check first if the time is running
     const timerState = await axios.get(`http://localhost:5000/isTimeRunning`)
@@ -82,27 +88,23 @@ export default {
     // Only start the clock if no one else is running the clock
     if (!timerState.data.isTimeRunning)
       await axios.get(`http://localhost:5000/startTime/H48woDfI1lwIGZnJh4qz/${player}`)
+
+    await this.aSetHostTimeLeft() // Put back in mounted if it fails
+    await this.aSetOtherTimeLeft()
   },
 
   async mounted() {
-    console.log('mounted')
-    console.log(this.enemyUsername) 
-    console.log('after pritn')
-
-    // Set the current game
-    this.currentGame = gamesCollection.doc('Vc0H4f4EvY6drRKnvsk5')
-    await this.aSetHostTimeLeft()
-    await this.aSetOtherTimeLeft()
-
     // Set up db listeners
     // Listen for board state changes
     gamesCollection
       .doc('Vc0H4f4EvY6drRKnvsk5') // Obtain from state in the future when rooms are implemented
       .onSnapshot(doc => {
         const data = doc.data()
-        
+        const boardState = data.board_state
+        const playerIsBlack = this.selfColor === 'b'
+
         this.lastPlayerMoved = data.last_player_moved
-        this.aUpdateBoard(data.board_state)
+        this.aUpdateBoard({ boardState, playerIsBlack })
       })
 
     // Listen for timer ticks
@@ -119,11 +121,11 @@ export default {
         // Check if someone has won on time
         const didBlackWin = (this.hostTimeLeft === 0 && this.isHostWhite) || (this.otherTimeLeft === 0 && !this.isHostWhite)
         const didWhiteWin = (this.otherTimeLeft === 0 && this.isHostWhite) || (this.hostTimeLeft === 0 && !this.isHostWhite)
-        if (didBlackWin) {
-          this.aSetWinner('B')
-        } else if (didWhiteWin) {
-          this.aSetWinner('W')
-        }
+        // if (didBlackWin) {
+        //   this.aSetWinner('B')
+        // } else if (didWhiteWin) {
+        //   this.aSetWinner('W')
+        // }
       })
   },
 
@@ -172,19 +174,6 @@ export default {
         (this.isHostWhite ? 'w' : 'b') : 
         (this.isHostWhite ? 'b' : 'w')
     }
-  },
-
-  asyncComputed: {
-    async selfName() {
-      const data = await this.currentUser.data
-      return data.username
-    },
-    
-    // async enemyName() {
-    //   const username = await this.enemyUsername
-    //   console.log(username)
-    //   return username
-    // }
   },
 
   filters: {

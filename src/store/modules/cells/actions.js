@@ -2,11 +2,11 @@ import { gamesCollection } from '@/firebase'
 import { getPDNFromBoard } from '../../services/boardParsingService'
 
 
-const writeBoardToDB = async (cells) => {
+const writeBoardToDB = async (cells, isPlayerBlack) => {
   await gamesCollection
     .doc('Vc0H4f4EvY6drRKnvsk5')
     .update({ 
-      board_state: getPDNFromBoard(cells, 'X') 
+      board_state: getPDNFromBoard(cells, 'X', isPlayerBlack) 
     })
 }
 
@@ -31,8 +31,8 @@ const actions = {
    * Updates the board state from a PDN String
    * @param boardState 
    */
-  async aUpdateBoard({ commit }, boardState) {
-    commit('mUpdateBoard', boardState)
+  async aUpdateBoard({ commit }, payload) {
+    commit('mUpdateBoard', payload)
   },
 
   /**
@@ -42,9 +42,10 @@ const actions = {
    * @param nDestRow - 1-based row of empty destination cell
    * @param nDestCol - 1-based column of empty destination cell
    */
-  async aMoveForward({ commit, state }, coords) {
+  async aMoveForward({ commit, state }, payload) {
+    const { coords, isPlayerBlack } = payload
     commit('mMoveForward', coords)
-    writeBoardToDB(state.cells)
+    writeBoardToDB(state.cells, isPlayerBlack)
   },
 
   /**
@@ -54,9 +55,10 @@ const actions = {
    * @param nDestRow - 1-based row of empty destination cell
    * @param nDestCol - 1-based column of empty destination cell
    */
-  aKingMovement({ commit, state }, coords) {
+  aKingMovement({ commit, state }, payload) {
+    const { coords, isPlayerBlack } = payload
     commit('mKingMovement', coords)
-    writeBoardToDB(state.cells)
+    writeBoardToDB(state.cells, isPlayerBlack)
   },
 
   /**
@@ -65,9 +67,10 @@ const actions = {
    *
    * @param coords - an object containing the source and destination coordinates
    */
-  aCapturePiece({ commit, state }, coords) {
+  aCapturePiece({ commit, state }, payload) {
+    const { coords, isPlayerBlack } = payload
     commit('mCapturePiece', coords)
-    writeBoardToDB(state.cells)
+    writeBoardToDB(state.cells, isPlayerBlack)
   },
 
   /**
@@ -76,9 +79,10 @@ const actions = {
    *
    * @param coords - an object containing the source and destination coordinates
    */
-  aKingCapturePiece({ commit, state }, coords) {
+  aKingCapturePiece({ commit, state }, payload) {
+    const { coords, isPlayerBlack } = payload
     commit('mKingCapturePiece', coords)
-    writeBoardToDB(state.cells)
+    writeBoardToDB(state.cells, isPlayerBlack)
   },
 
   /**
