@@ -149,43 +149,27 @@ const mutations = {
       let bIsValidMove = false
 
       // Check for adjacent squares
-      const srcCell = state.cells[coords.nRow - 1][coords.nCol - 1]
       const destCell = state.cells[coords.nDestRow - 1][coords.nDestCol - 1]
-
       const bIsSquareOpen = !(destCell.bHasBlackChip || destCell.bHasWhiteChip)
-      const bIsColLeftOrRight = coords.nCol - 1 === coords.nDestCol || coords.nCol + 1 === coords.nDestCol
-
-      const _bSourceHasBlack = srcCell.bHasBlackChip
-      const bNextRowBelow = coords.nRow - 1 === coords.nDestRow
-      const bLastRowBelow = coords.nDestRow === 1
-      const _bSourceHasWhite = srcCell.bHasWhiteChip
+      const bIsColAdjacent = coords.nCol - 1 === coords.nDestCol || coords.nCol + 1 === coords.nDestCol
       const bNextRowAbove = coords.nRow + 1 === coords.nDestRow
       const bLastRowAbove = coords.nDestRow === 8
 
-      // Set the black king
-      if (bIsSquareOpen && bIsColLeftOrRight && _bSourceHasBlack && bNextRowBelow && bLastRowBelow) {
+      // Check if a destination square is immediately diagonally adjacent
+      // and place the corresponding pieces
+      if (bIsSquareOpen && bNextRowAbove && bIsColAdjacent) {
         bIsValidMove = true
-        newDest.bHasBlackChip = true
-        newDest.bHasBlackKing = true
-      } 
-
-      // Set the white king
-      else if (bIsSquareOpen && bIsColLeftOrRight && _bSourceHasWhite && bNextRowAbove && bLastRowAbove) {
-        bIsValidMove = true
-        newDest.bHasWhiteChip = true
-        newDest.bHasWhiteKing = true
-      } 
-      
-      // Set the black piece
-      else if (bIsSquareOpen && bIsColLeftOrRight && _bSourceHasBlack && bNextRowBelow) {
-        bIsValidMove = true
-        newDest.bHasBlackChip = true
-      } 
-
-      // Set the white piece
-      else if (bIsSquareOpen && bIsColLeftOrRight && _bSourceHasWhite && bNextRowAbove) {
-        bIsValidMove = true
-        newDest.bHasWhiteChip = true
+        if (bSourceHasWhite(state.cells, coords)) {
+          newDest.bHasWhiteChip = true
+          if (bLastRowAbove) {
+            newDest.bHasWhiteKing = true
+          }
+        } else if (bSourceHasBlack(state.cells, coords)) {
+          newDest.bHasBlackChip = true
+          if (bLastRowAbove) {
+            newDest.bHasBlackKing = true
+          }
+        }
       }
 
       // Check if the move is valid
@@ -198,6 +182,7 @@ const mutations = {
   },
 
   mKingMovement: (state, coords) => {
+    // If the move is within the board's range
     if (coords.nDestCol >= 1 && coords.nDestCol <= 8 && coords.nDestRow >= 1 && coords.nDestRow <= 8) {
       const newCurr = {
         nRow: coords.nRow,
