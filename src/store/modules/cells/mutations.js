@@ -107,8 +107,10 @@ const mutations = {
     // Fetch and store legal squares 
     let aPossibleCells = []
     let isWhite = true
-    if (srcCell.bHasWhiteKing || srcCell.bHasBlackKing) {
+    if (srcCell.bHasWhiteKing) {
       aPossibleCells = getPossibleMoveWhiteKing(boardClone, coords.nRow, coords.nCol)
+    } else if (srcCell.bHasBlackKing) {
+      aPossibleCells = getPossibleMoveBlackKing(boardClone, coords.nRow, coords.nCol)
     } else if (srcCell.bHasWhiteChip) {
       aPossibleCells = getPossibleMoves(boardClone, coords.nRow, coords.nCol, isWhite)
     } else if (srcCell.bHasBlackChip) {
