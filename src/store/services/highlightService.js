@@ -76,6 +76,7 @@ export const getPossibleCaptures = (board, nRow, nCol, isWhite) => {
       moves.push([nRow + 1, nCol + 1, 0])
     }
   }
+  return moves
 }
 
 export const getPossibleMoveBlackKing = (board, nRow, nCol) => {

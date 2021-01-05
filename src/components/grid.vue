@@ -106,6 +106,8 @@ export default {
 
         this.lastPlayerMoved = data.last_player_moved
         this.aUpdateBoard({ boardState, playerIsBlack })
+
+        this.aHighlightBoardCaptures()
       })
 
     // Listen for timer ticks
@@ -203,7 +205,8 @@ export default {
       'aSetOtherTimeLeft',
       'aSetWinner',
       'aUpdateBoard',
-      'aGetEnemyUsername'
+      'aGetEnemyUsername',
+      'aHighlightBoardCaptures'
     ]),
 
     async updateLastPlayerMoved(square) {

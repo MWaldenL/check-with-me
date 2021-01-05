@@ -106,6 +106,15 @@ const actions = {
    */
   aSetWinner({ commit }, winner) {
     commit('mSetWinner', winner)
+  },
+
+  /**
+   * Highlights possible captures in the board
+   * @param {*} param0 
+   */
+  aHighlightBoardCaptures({ commit }) {
+    console.log("highlighting")
+    commit('mHighlightBoardCaptures')
   }
 }
 
