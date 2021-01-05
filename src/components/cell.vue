@@ -19,9 +19,6 @@ export default {
   props: ['row', 'col', 'canMakeMove', 'selfColor'],
   data () {
     return {
-      ...mapState({
-        isLastMoveLegal: 'bLastMoveLegal'
-      }),
       dIsSelected: false,
       dIsPossibleMove: false,
       dIsPossibleCapture: false
@@ -34,7 +31,8 @@ export default {
       firstClick: 'getFirstClick',
       whiteCount: 'getWhiteCount',
       blackCount: 'getBlackCount',
-      bActiveGame: 'getActiveGame'
+      bActiveGame: 'getActiveGame',
+      isLastMoveLegal: 'bLastMoveLegal'
     }),
 
     isSelected: {
@@ -172,9 +170,9 @@ export default {
             } else { 
               if (this.isCaptureAttempt(source)) {  
                 this.aCapturePiece(payload)
+                console.log(this.isLastMoveLegal)
                 willEmit = this.isLastMoveLegal
               } else if (this.isMoveForwardAttempt(source)) {
-                console.log("helo")
                 this.aMoveForward(payload)
                 willEmit = this.isLastMoveLegal
               } else {

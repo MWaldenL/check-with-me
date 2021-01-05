@@ -166,3 +166,4 @@ export const getPDNFromBoard = (board, turn, isPlayerBlack) => {
 // White king:          [FEN "O:WK3"]
 // Black king:          [FEN "O:BK1"]
 // Captures:            [FEN "O:W1,55:B10,64"]
+// test 1:  [FEN "O:W37,46:B19,28"]

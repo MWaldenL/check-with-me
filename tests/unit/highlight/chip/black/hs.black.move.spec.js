@@ -1,4 +1,4 @@
-import { getPossibleMoveWhite } from '@/store/services/highlightService'
+import { getPossibleMoves } from '@/store/services/highlightService'
 
 // dummy 8 x 8 board
 const getBoard = () => {
@@ -19,26 +19,28 @@ const getBoard = () => {
   return board
 }
 
-describe('movement for white', () => {
+const isWhite = false
+
+describe('movement for black', () => {
   /**
    * _ _ _ _ _ _ _ _
    * _ _ _ _ _ _ _ _
    * _ _ _ _ _ _ _ _
-   * _ _ _ _ _ W _ _
+   * _ _ _ _ _ b _ _
    * _ _ _ _ _ _ _ _
    * _ _ _ _ _ _ _ _
    * _ _ _ _ _ _ _ _
    * _ _ _ _ _ _ _ _
    */
-  it('return coordinates of northwest and northeast spaces if both are free and valid', () => {
+  it ('return coordinates of northwest and northeast spaces if both are free and valid', () => {
     // arrange
     const board = getBoard()
 
     board[4][5] = {
       nRow: 5, 
       nCol: 6, 
-      bHasBlackChip: false,
-      bHasWhiteChip: true
+      bHasBlackChip: true,
+      bHasWhiteChip: false
     }
 
     const expected = [
@@ -47,7 +49,7 @@ describe('movement for white', () => {
     ]
 
     // act
-    const result = getPossibleMoveWhite(board, board[4][5].nRow, board[4][5].nCol)
+    const result = getPossibleMoves(board, board[4][5].nRow, board[4][5].nCol, isWhite)
 
     // assert
     expect(result).toStrictEqual(expected)
@@ -70,8 +72,8 @@ describe('movement for white', () => {
     board[4][7] = {
       nRow: 5, 
       nCol: 8, 
-      bHasBlackChip: false,
-      bHasWhiteChip: true
+      bHasBlackChip: true,
+      bHasWhiteChip: false
     }
 
     const expected = [
@@ -79,7 +81,7 @@ describe('movement for white', () => {
     ]
 
     // act
-    const result = getPossibleMoveWhite(board, board[4][7].nRow, board[4][7].nCol)
+    const result = getPossibleMoves(board, board[4][7].nRow, board[4][7].nCol, isWhite)
 
     // assert
     expect(result).toStrictEqual(expected)
@@ -102,8 +104,8 @@ describe('movement for white', () => {
     board[4][0] = {
       nRow: 5, 
       nCol: 1, 
-      bHasBlackChip: false,
-      bHasWhiteChip: true
+      bHasBlackChip: true,
+      bHasWhiteChip: false
     }
 
     const expected = [
@@ -111,7 +113,7 @@ describe('movement for white', () => {
     ]
 
     // act
-    const result = getPossibleMoveWhite(board, board[4][0].nRow, board[4][0].nCol)
+    const result = getPossibleMoves(board, board[4][0].nRow, board[4][0].nCol, isWhite)
 
     // assert
     expect(result).toStrictEqual(expected)
@@ -134,15 +136,15 @@ describe('movement for white', () => {
     board[4][5] = {
       nRow: 5, 
       nCol: 6, 
-      bHasBlackChip: false,
-      bHasWhiteChip: true
+      bHasBlackChip: true,
+      bHasWhiteChip: false
     }
 
     board[5][6] = {
       nRow: 6, 
       nCol: 7, 
-      bHasBlackChip: false,
-      bHasWhiteChip: true
+      bHasBlackChip: true,
+      bHasWhiteChip: false
     }
 
     const expected = [
@@ -150,7 +152,7 @@ describe('movement for white', () => {
     ]
 
     // act
-    const result = getPossibleMoveWhite(board, board[4][5].nRow, board[4][5].nCol)
+    const result = getPossibleMoves(board, board[4][5].nRow, board[4][5].nCol, isWhite)
 
     // assert
     expect(result).toStrictEqual(expected)
@@ -173,15 +175,15 @@ describe('movement for white', () => {
     board[4][5] = {
       nRow: 5, 
       nCol: 6, 
-      bHasBlackChip: false,
-      bHasWhiteChip: true
+      bHasBlackChip: true,
+      bHasWhiteChip: false
     }
 
     board[5][4] = {
       nRow: 6, 
       nCol: 5, 
-      bHasBlackChip: false,
-      bHasWhiteChip: true
+      bHasBlackChip: true,
+      bHasWhiteChip: false
     }
 
     const expected = [
@@ -189,7 +191,7 @@ describe('movement for white', () => {
     ]
 
     // act
-    const result = getPossibleMoveWhite(board, board[4][5].nRow, board[4][5].nCol)
+    const result = getPossibleMoves(board, board[4][5].nRow, board[4][5].nCol, isWhite)
 
     // assert
     expect(result).toStrictEqual(expected)
@@ -212,28 +214,28 @@ describe('movement for white', () => {
     board[4][5] = {
       nRow: 5, 
       nCol: 6, 
-      bHasBlackChip: false,
-      bHasWhiteChip: true
+      bHasBlackChip: true,
+      bHasWhiteChip: false
     }
 
     board[5][6] = {
       nRow: 6, 
       nCol: 7, 
-      bHasBlackChip: false,
-      bHasWhiteChip: true
+      bHasBlackChip: true,
+      bHasWhiteChip: false
     }
 
     board[5][4] = {
       nRow: 6, 
       nCol: 5, 
-      bHasBlackChip: false,
-      bHasWhiteChip: true
+      bHasBlackChip: true,
+      bHasWhiteChip: false
     }
 
     const expected = []
 
     // act
-    const result = getPossibleMoveWhite(board, board[4][5].nRow, board[4][5].nCol)
+    const result = getPossibleMoves(board, board[4][5].nRow, board[4][5].nCol, isWhite)
 
     // assert
     expect(result).toStrictEqual(expected)

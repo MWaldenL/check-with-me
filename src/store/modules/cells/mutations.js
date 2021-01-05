@@ -280,22 +280,26 @@ const mutations = {
     const bLastRowAbove = coords.nDestRow === 8
 
     // Check if white and black can capture
-    const bWhiteCanCapture = bSourceHasWhite(state.cells, coords) && bPieceExistsAdj(state.cells, coords, true) && bNextRowAbove
-    const bBlackCanCapture = bSourceHasBlack(state.cells, coords) && bPieceExistsAdj(state.cells, coords, false) && bNextRowAbove
+    const isWhite = true
+    const bWhiteCanCapture = bSourceHasWhite(state.cells, coords) && bPieceExistsAdj(state.cells, coords, isWhite) && bNextRowAbove
+    const bBlackCanCapture = bSourceHasBlack(state.cells, coords) && bPieceExistsAdj(state.cells, coords, !isWhite) && bNextRowAbove
 
     // A piece can make a capture if the following conditions are met:
     // 1. An opposing piece exists diagonally adjacent to the current piece
     // 2. There is no piece of any color diagonally adjacent to the target piece
     let whiteTakes = true
     if (!bPieceExistsAfterAdj(state.cells, coords)) {
-      bIsValidCapture = true
       if (bWhiteCanCapture) {
+        bIsValidCapture = true
+        console.log("white can capture")
         newDest.bHasWhiteChip = true
         if (bLastRowAbove) {
           newDest.bHasWhiteKing = true
         }
         mutations.mReducePiece(state, whiteTakes)
       } else if (bBlackCanCapture) {
+        bIsValidCapture = true
+        console.log("black can capture")
         newDest.bHasBlackChip = true
         if (bLastRowAbove) {
           newDest.bHasBlackKing = true
@@ -305,8 +309,10 @@ const mutations = {
     }
 
     if (bIsValidCapture) {
+      console.log('valid capture')
       helpers.handleValidMove(state, newCurr, newDest, adjacent)
     } else {
+      console.log('invalidCapture')
       helpers.handleIllegalMove(state, coords)
     }
   },

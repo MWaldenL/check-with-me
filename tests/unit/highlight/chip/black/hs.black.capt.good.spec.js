@@ -1,5 +1,4 @@
-import { getPossibleMoveWhite } from '@/store/services/highlightService'
-import { BIconFileEarmarkEaselFill } from 'bootstrap-vue'
+import { getPossibleMoves } from '@/store/services/highlightService'
 
 // dummy 8 x 8 board
 const getBoard = () => {
@@ -20,7 +19,9 @@ const getBoard = () => {
   return board
 }
 
-describe('unblocked capture attempt for white', () => {
+const isWhite = false
+
+describe('unblocked capture attempt for black', () => {
   /**
    * _ _ _ _ _ _ _ _
    * _ _ _ _ _ _ _ _
@@ -39,15 +40,15 @@ describe('unblocked capture attempt for white', () => {
     board[4][5] = {
       nRow: 5, 
       nCol: 6, 
-      bHasBlackChip: false,
-      bHasWhiteChip: true
+      bHasBlackChip: true,
+      bHasWhiteChip: false
     }
 
     board[5][4] = {
       nRow: 6, 
       nCol: 5, 
-      bHasBlackChip: true,
-      bHasWhiteChip: false
+      bHasBlackChip: false,
+      bHasWhiteChip: true
     }
 
     const expected = [
@@ -57,7 +58,7 @@ describe('unblocked capture attempt for white', () => {
     ]
 
     // act
-    const result = getPossibleMoveWhite(board, board[4][5].nRow, board[4][5].nCol)
+    const result = getPossibleMoves(board, board[4][5].nRow, board[4][5].nCol, isWhite)
 
     // assert
     expect(result).toStrictEqual(expected)
@@ -80,15 +81,15 @@ describe('unblocked capture attempt for white', () => {
     board[4][5] = {
       nRow: 5, 
       nCol: 6, 
-      bHasBlackChip: false,
-      bHasWhiteChip: true
+      bHasBlackChip: true,
+      bHasWhiteChip: false
     }
 
     board[5][6] = {
       nRow: 6, 
       nCol: 7, 
-      bHasBlackChip: true,
-      bHasWhiteChip: false
+      bHasBlackChip: false,
+      bHasWhiteChip: true
     }
 
     const expected = [
@@ -98,7 +99,7 @@ describe('unblocked capture attempt for white', () => {
     ]
 
     // act
-    const result = getPossibleMoveWhite(board, board[4][5].nRow, board[4][5].nCol)
+    const result = getPossibleMoves(board, board[4][5].nRow, board[4][5].nCol, isWhite)
 
     // assert
     expect(result).toStrictEqual(expected)
@@ -122,22 +123,22 @@ describe('unblocked capture attempt for white', () => {
     board[4][5] = {
       nRow: 5, 
       nCol: 6, 
-      bHasBlackChip: false,
-      bHasWhiteChip: true
+      bHasBlackChip: true,
+      bHasWhiteChip: false
     }
 
     board[5][4] = {
       nRow: 6, 
       nCol: 5, 
-      bHasBlackChip: true,
-      bHasWhiteChip: false
+      bHasBlackChip: false,
+      bHasWhiteChip: true
     }
 
     board[5][6] = {
       nRow: 6, 
       nCol: 7, 
-      bHasBlackChip: true,
-      bHasWhiteChip: false
+      bHasBlackChip: false,
+      bHasWhiteChip: true
     }
 
     const expected = [
@@ -148,7 +149,7 @@ describe('unblocked capture attempt for white', () => {
     ]
 
     // act
-    const result = getPossibleMoveWhite(board, board[4][5].nRow, board[4][5].nCol)
+    const result = getPossibleMoves(board, board[4][5].nRow, board[4][5].nCol, isWhite)
 
     // assert
     expect(result).toStrictEqual(expected)
@@ -172,15 +173,15 @@ describe('unblocked capture attempt for white', () => {
     board[4][7] = {
       nRow: 5, 
       nCol: 8, 
-      bHasBlackChip: false,
-      bHasWhiteChip: true
+      bHasBlackChip: true,
+      bHasWhiteChip: false
     }
 
     board[5][6] = {
       nRow: 4, 
       nCol: 7, 
-      bHasBlackChip: true,
-      bHasWhiteChip: false
+      bHasBlackChip: false,
+      bHasWhiteChip: true
     }
 
     const expected = [
@@ -189,7 +190,7 @@ describe('unblocked capture attempt for white', () => {
     ]
 
     // act
-    const result = getPossibleMoveWhite(board, board[4][7].nRow, board[4][7].nCol)
+    const result = getPossibleMoves(board, board[4][7].nRow, board[4][7].nCol, isWhite)
 
     // assert
     expect(result).toStrictEqual(expected)
@@ -213,15 +214,15 @@ describe('unblocked capture attempt for white', () => {
     board[4][0] = {
       nRow: 5, 
       nCol: 1, 
-      bHasBlackChip: false,
-      bHasWhiteChip: true
+      bHasBlackChip: true,
+      bHasWhiteChip: false
     }
 
     board[5][1] = {
       nRow: 6, 
       nCol: 2, 
-      bHasBlackChip: true,
-      bHasWhiteChip: false
+      bHasBlackChip: false,
+      bHasWhiteChip: true
     }
 
     const expected = [
@@ -230,7 +231,7 @@ describe('unblocked capture attempt for white', () => {
     ]
 
     // act
-    const result = getPossibleMoveWhite(board, board[4][0].nRow, board[4][0].nCol)
+    const result = getPossibleMoves(board, board[4][0].nRow, board[4][0].nCol, isWhite)
 
     // assert
     expect(result).toStrictEqual(expected)

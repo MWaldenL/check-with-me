@@ -89,7 +89,8 @@ export default {
     if (!timerState.data.isTimeRunning)
       await axios.get(`http://localhost:5000/startTime/H48woDfI1lwIGZnJh4qz/${player}`)
 
-    await this.aSetHostTimeLeft() // Put back in mounted if it fails
+    // Put back in mounted hook if it fails
+    await this.aSetHostTimeLeft() 
     await this.aSetOtherTimeLeft()
   },
 
