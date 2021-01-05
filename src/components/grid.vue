@@ -108,7 +108,9 @@ export default {
         this.lastPlayerMoved = data.last_player_moved
         this.aUpdateBoard({ boardState, playerIsBlack })
 
-        this.aHighlightBoardCaptures(playerIsWhite)
+        if (!this.isCapturing) {
+          this.aHighlightBoardCaptures(playerIsWhite)
+        }
       })
 
     // Listen for timer ticks
@@ -153,13 +155,17 @@ export default {
     ...mapGetters({
       whiteCount: 'getWhiteCount',
       blackCount: 'getBlackCount',
+
       currentUser: 'getCurrentUser',
       hostUserID: 'getHostUser',
       otherUserID: 'getOtherUser',
       enemyUsername: 'getEnemyUsername',
+
       isHostWhite: 'getIsHostWhite',
       hostTimeLeft: 'getHostTimeLeft',
       otherTimeLeft: 'getOtherTimeLeft',
+
+      isCapturing: 'getCaptureSequenceState'
     }),
 
     canMakeMove() {
@@ -207,22 +213,27 @@ export default {
       'aSetWinner',
       'aUpdateBoard',
       'aGetEnemyUsername',
-      'aHighlightBoardCaptures'
+      'aHighlightBoardCaptures',
+      'aHighlightCaptureFromSquare'
     ]),
 
     async updateLastPlayerMoved(square) {
-      const isMoveWhite = square.bHasWhiteChip || square.bHasWhiteKing 
-      this.lastPlayerMoved = (this.isHostWhite ^ isMoveWhite) ? this.otherUserID : this.hostUserID
+      if (!this.isCapturing) {
+        const isMoveWhite = square.bHasWhiteChip || square.bHasWhiteKing 
+        this.lastPlayerMoved = (this.isHostWhite ^ isMoveWhite) ? this.otherUserID : this.hostUserID
 
-      // Write last player moved to db 
-      await this.currentGame.update({ last_player_moved: this.lastPlayerMoved })
+        // Write last player moved to db 
+        await this.currentGame.update({ last_player_moved: this.lastPlayerMoved })
 
-      // Stop the last player's clock
-      await axios.get('http://localhost:5000/stopTime')
-      
-      // Start the other player's clock
-      const player = this.lastPlayerMoved === this.hostUserID ? 'other' : 'host'
-      await axios.get(`http://localhost:5000/startTime/${player}`)
+        // Stop the last player's clock
+        await axios.get('http://localhost:5000/stopTime')
+        
+        // Start the other player's clock
+        const player = this.lastPlayerMoved === this.hostUserID ? 'other' : 'host'
+        await axios.get(`http://localhost:5000/startTime/${player}`)
+      } else {
+        this.aHighlightCaptureFromSquare(playerIsWhite)
+      }
     }
   }
 }

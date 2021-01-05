@@ -32,7 +32,8 @@ export default {
       whiteCount: 'getWhiteCount',
       blackCount: 'getBlackCount',
       bActiveGame: 'getActiveGame',
-      isLastMoveLegal: 'bLastMoveLegal'
+      isLastMoveLegal: 'getIsLastMoveLegal',
+      isCaptureRequired: 'getIsCaptureRequired'
     }),
 
     isSelected: {
@@ -159,10 +160,10 @@ export default {
             } else if (bIsKingMovement) {
               if (this.isKingMoveAttempt(source, coords)) {
                 this.aKingMovement(payload)
-                willEmit = this.isLastMoveLegal
+                willEmit = this.isLastMoveLegal && !this.isCaptureRequired
               } else if (this.isKingCaptureAttempt(source, coords)) {
                 this.aKingCapturePiece(payload)
-                willEmit = this.isLastMoveLegal
+                willEmit = this.isLastMoveLegal && !this.isCaptureRequired
               } else {
                 this.cancelCurrentMove()  
                 willEmit = false
@@ -170,11 +171,10 @@ export default {
             } else { 
               if (this.isCaptureAttempt(source)) {  
                 this.aCapturePiece(payload)
-                console.log(this.isLastMoveLegal)
-                willEmit = this.isLastMoveLegal
+                willEmit = this.isLastMoveLegal && !this.isCaptureRequired
               } else if (this.isMoveForwardAttempt(source)) {
                 this.aMoveForward(payload)
-                willEmit = this.isLastMoveLegal
+                willEmit = this.isLastMoveLegal && !this.isCaptureRequired
               } else {
                 this.cancelCurrentMove()
                 willEmit = false
@@ -183,7 +183,6 @@ export default {
 
             // Signal the game instance that a move has been made
             if (willEmit) {
-              console.log("Making move")
               this.$emit("makeMove", source)
             }
           } else {  // Simply highlight the piece clicked
@@ -218,7 +217,7 @@ export default {
       } else if (bBlackStuck || this.blackCount === 0) {
         this.aSetActiveGame(false)
         this.aSetWinner('W')
-      } else {}
+      }
     },
 
     isDiagonal (coords) {

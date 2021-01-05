@@ -115,6 +115,10 @@ const actions = {
    */
   aHighlightBoardCaptures({ commit }, playerIsWhite) {
     commit('mHighlightBoardCaptures', playerIsWhite)
+  },
+
+  aHighlightCaptureFromSquare({ commit }, playerIsWhite) {
+    commit('mHighlightCaptureFromSquare', playerIsWhite)
   }
 }
 

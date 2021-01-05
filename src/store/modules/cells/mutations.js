@@ -123,33 +123,35 @@ const mutations = {
 
     // Set the first click to the current square clicked 
     state.firstClick = coords
-
+    
     // Perform a deep copy for board updating
     const boardClone = JSON.parse(JSON.stringify(state.cells))
-
+    
     // Highlight the source cell
     const srcCell = boardClone[coords.nRow - 1][coords.nCol - 1]
     srcCell.isHighlighted = true
+    
+    if (!state.bIsCaptureRequired) { 
+      // Fetch and store legal squares 
+      let aPossibleCells = []
+      let isWhite = true
+      if (srcCell.bHasWhiteKing) {
+        aPossibleCells = getPossibleMoveWhiteKing(boardClone, coords.nRow, coords.nCol)
+      } else if (srcCell.bHasBlackKing) {
+        aPossibleCells = getPossibleMoveBlackKing(boardClone, coords.nRow, coords.nCol)
+      } else if (srcCell.bHasWhiteChip) {
+        aPossibleCells = getPossibleMoves(boardClone, coords.nRow, coords.nCol, isWhite)
+      } else if (srcCell.bHasBlackChip) {
+        aPossibleCells = getPossibleMoves(boardClone, coords.nRow, coords.nCol, !isWhite)
+      }
 
-    // Fetch and store legal squares 
-    let aPossibleCells = []
-    let isWhite = true
-    if (srcCell.bHasWhiteKing) {
-      aPossibleCells = getPossibleMoveWhiteKing(boardClone, coords.nRow, coords.nCol)
-    } else if (srcCell.bHasBlackKing) {
-      aPossibleCells = getPossibleMoveBlackKing(boardClone, coords.nRow, coords.nCol)
-    } else if (srcCell.bHasWhiteChip) {
-      aPossibleCells = getPossibleMoves(boardClone, coords.nRow, coords.nCol, isWhite)
-    } else if (srcCell.bHasBlackChip) {
-      aPossibleCells = getPossibleMoves(boardClone, coords.nRow, coords.nCol, !isWhite)
-    }
-
-    // Set these legal squares on the square object
-    for (const array of aPossibleCells) {
-      if (array[2] === 0) {
-        boardClone[array[0]][array[1]].isPossibleMove = true
-      } else { 
-        boardClone[array[0]][array[1]].isPossibleCapture = true
+      // Set these legal squares on the square object
+      for (const array of aPossibleCells) {
+        if (array[2] === 0) {
+          boardClone[array[0]][array[1]].isPossibleMove = true
+        } else { 
+          boardClone[array[0]][array[1]].isPossibleCapture = true
+        }
       }
     }
 
@@ -318,16 +320,24 @@ const mutations = {
     let whiteTakes = true
     if (!bPieceExistsAfterAdj(state.cells, coords)) {
       if (bWhiteCanCapture) {
+        // If a capture sequence hasn't started, start it
+        if (!state.bStartedCaptureSequence) {
+          mutations.mSetCaptureSequenceState(true)
+        }
+        
         bIsValidCapture = true
-        console.log("white can capture")
         newDest.bHasWhiteChip = true
         if (bLastRowAbove) {
           newDest.bHasWhiteKing = true
         }
         mutations.mReducePiece(state, whiteTakes)
       } else if (bBlackCanCapture) {
+        // If a capture sequence hasn't started, start it
+        if (!state.bStartedCaptureSequence) {
+          mutations.mSetCaptureSequenceState(true)
+        }
+        
         bIsValidCapture = true
-        console.log("black can capture")
         newDest.bHasBlackChip = true
         if (bLastRowAbove) {
           newDest.bHasBlackKing = true
@@ -425,6 +435,10 @@ const mutations = {
     state.cWinner = winner
   },
   
+  mSetCaptureSequenceState: (state, isCaptureOngoing) => {
+    state.bStartedCaptureSequence = isCaptureOngoing
+  },
+
   mHighlightCaptureFromSquare: (state, coords, playerIsWhite) => {
     const coordsTopLeft = (row, col) => {
       return { 
@@ -449,9 +463,13 @@ const mutations = {
       helpers.computed.bCanCapture(state.cells, coordsTopLeft(row, col), playerIsWhite) ||
       helpers.computed.bCanCapture(state.cells, coordsTopRight(row, col), playerIsWhite)
     
+    // If a player can capture, highlight. Otherwise, stop the capture sequence and end the turn
     if (bCanCapture) {
+      mutations.mSetCaptureRequired(true)
       aPossibleCaptures = getPossibleCaptures(state.cells, row, col, playerIsWhite)
       helpers.highlightCaptures(state, aPossibleCaptures)
+    } else {
+      mutations.mSetCaptureSequenceState(false)
     }
   },
 
@@ -470,6 +488,10 @@ const mutations = {
         } 
       }
     }
+  },
+
+  mSetCaptureRequired: (state, isRequired) => {
+    state.bIsCaptureRequired = isRequired
   }
 }
 
