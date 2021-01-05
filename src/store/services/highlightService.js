@@ -14,8 +14,6 @@ export const getPossibleMoves = (board, nRow, nCol, isWhite) => {
     const bHasFriendlyPiece = isWhite ? bTopLeft.bHasWhiteChip : bTopLeft.bHasBlackChip 
     const bHasEnemyPiece = isWhite ? bTopLeft.bHasBlackChip : bTopLeft.bHasWhiteChip
 
-    console.log(bHasEnemyPiece)
-
     if (!bTopLeft.bHasBlackChip && !bTopLeft.bHasWhiteChip) {
       moves.push([nRow, nCol - 2, 0])
     } else if (bHasFriendlyPiece) {
@@ -46,6 +44,38 @@ export const getPossibleMoves = (board, nRow, nCol, isWhite) => {
   }
 
   return moves
+}
+
+export const getPossibleCaptures = (board, nRow, nCol, isWhite) => {
+  let moves = []
+
+  const bTopLeftValid = nRow >= 0 && nRow < 8 && nCol - 2 >= 0 && nCol - 2 < 8
+  const bTopRightValid = nRow >= 0 && nRow < 8 && nCol >= 0 && nCol < 8
+
+  const bTopLeftCaptValid = nRow + 1 >= 0 && nRow + 1 < 8 && nCol - 3 >= 0 && nCol - 3 < 8
+  const bTopLeftCaptUnblocked = bTopLeftCaptValid && !board[nRow + 1][nCol - 3].bHasBlackChip && !board[nRow + 1][nCol - 3].bHasWhiteChip
+  const bTopRightCaptValid = nRow + 1 >= 0 && nRow + 1 < 8 && nCol + 1 >= 0 && nCol + 1 < 8
+  const bTopRightCaptUnblocked = bTopRightCaptValid && !board[nRow + 1][nCol + 1].bHasBlackChip && !board[nRow + 1][nCol + 1].bHasWhiteChip
+
+  if (bTopLeftValid) {
+    const bTopLeft = board[nRow][nCol - 2]
+    const bHasEnemyPiece = isWhite ? bTopLeft.bHasBlackChip : bTopLeft.bHasWhiteChip
+
+    if (bHasEnemyPiece && bTopLeftCaptValid && bTopLeftCaptUnblocked) {
+      moves.push([nRow, nCol - 2, 1])
+      moves.push([nRow + 1, nCol - 3, 0])
+    }
+  }
+
+  if (bTopRightValid) {
+    const bTopRight = board[nRow][nCol]
+    const bHasEnemyPiece = isWhite ? bTopRight.bHasBlackChip : bTopRight.bHasWhiteChip
+
+    if (bHasEnemyPiece && bTopRightCaptValid && bTopRightCaptUnblocked) {
+      moves.push([nRow, nCol, 1])
+      moves.push([nRow + 1, nCol + 1, 0])
+    }
+  }
 }
 
 export const getPossibleMoveBlackKing = (board, nRow, nCol) => {

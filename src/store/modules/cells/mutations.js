@@ -5,17 +5,19 @@ import {
   bPieceExistsAfterAdj,
   bNoBlackJumps,
   bNoWhiteJumps
-} from '../../services/moveCaptureService'
+} from '@/store/services/moveCaptureService'
 
 import {
   getPossibleMoves,
+  getPossibleCaptures,
   getPossibleMoveBlackKing,
   getPossibleMoveWhiteKing
-} from '../../services/highlightService'
+} from '@/store/services/highlightService'
 
-import { getBoardFromPDN } from '../../services/boardParsingService'
-import { bIsValidCapture } from '../../services/kingCaptureService'
+import { getBoardFromPDN } from '@/store/services/boardParsingService'
+import { bIsValidCapture } from '@/store/services/kingCaptureService'
 import { getBoard } from '../board'
+
 
 const helpers = {
   handleValidMove: (state, newCurr, newDest, adjacent) => {
@@ -63,6 +65,31 @@ const helpers = {
       mutations.mHighlight(state, newCoords)
     } else { // Otherwise, simply unhighlight the square
       mutations.mUnhighlight(state)
+    }
+  },
+
+  highlightCaptures: (state, aPossibleCaptures) => {
+    // Perform a deep copy for board updating
+    const boardClone = JSON.parse(JSON.stringify(state.cells))
+
+    for (const array of aPossibleCaptures) {
+      if (array[2] === 0) {
+        boardClone[array[0]][array[1]].isPossibleMove = true
+      } else { 
+        boardClone[array[0]][array[1]].isPossibleCapture = true
+      }
+    }
+    
+    state.cells = boardClone
+  },
+
+  computed: {
+    bCanCapture: (board, coords, isWhite) => {
+      const bNextRowAbove = coords.nRow + 2 === coords.nDestRow
+      const bSkippedEnemyPiece = bPieceExistsAdj(board, coords, isWhite) && bNextRowAbove
+      return isWhite ? 
+        bSourceHasWhite(board, coords) && bSkippedEnemyPiece : 
+        bSourceHasBlack(board, coords) && bSkippedEnemyPiece
     }
   }
 }
@@ -309,10 +336,8 @@ const mutations = {
     }
 
     if (bIsValidCapture) {
-      console.log('valid capture')
       helpers.handleValidMove(state, newCurr, newDest, adjacent)
     } else {
-      console.log('invalidCapture')
       helpers.handleIllegalMove(state, coords)
     }
   },
@@ -397,6 +422,50 @@ const mutations = {
 
   mSetWinner: (state, winner) => {
     state.cWinner = winner
+  },
+
+  mHighlightBoard: (state) => {
+    // For each square in the board, highlight possible captures
+    let bIsWhite, bCanCapture
+    const coordsTopLeft = (row, col) => {
+      return { 
+        nRow: row, 
+        nCol: col,
+        nDestRow: row + 2,
+        nDestCol: col + 2
+      }
+    }
+
+    const coordsTopRight = (row, col) => {
+      return { 
+        nRow: row, 
+        nCol: col,
+        nDestRow: row + 2,
+        nDestCol: col - 2
+      }
+    }
+
+    for (let row=0; row < 8; row++) {
+      for (let col=0; col < 8; col++) {
+        let coords = { nRow: row, nCol: col }
+        bContainsPiece = 
+          bSourceHasBlack(state.cells, coords) || 
+          bSourceHasWhite(state.cells, coords)
+         
+        if (bContainsPiece) {
+          bIsWhite = state.cells[row][col].bHasWhiteChip
+          bCanCapture = 
+            helpers.computed.bCanCapture(state.cells, coords, coordsTopLeft(row, col), bIsWhite) ||
+            helpers.computed.bCanCapture(state.cells, coords, coordsTopRight(row, col), bIsWhite)
+            
+          if (bCanCapture) {
+            aPossibleCaptures = getPossibleCaptures(state.cells, row, col, bIsWhite)
+            helpers.highlightCaptures(state, aPossibleCaptures)
+          }
+        } 
+      }
+    }
+
   }
 }
 
