@@ -424,10 +424,8 @@ const mutations = {
   mSetWinner: (state, winner) => {
     state.cWinner = winner
   },
-
-  mHighlightBoardCaptures: (state, playerIsWhite) => {
-    // For each square in the board, highlight possible captures
-    let bIsWhite, bCanCapture, bContainsPiece, aPossibleCaptures
+  
+  mHighlightCaptureFromSquare: (state, coords, playerIsWhite) => {
     const coordsTopLeft = (row, col) => {
       return { 
         nRow: row, 
@@ -446,6 +444,20 @@ const mutations = {
       }
     }
 
+    const { row, col } = coords
+    const bCanCapture = 
+      helpers.computed.bCanCapture(state.cells, coordsTopLeft(row, col), playerIsWhite) ||
+      helpers.computed.bCanCapture(state.cells, coordsTopRight(row, col), playerIsWhite)
+    
+    if (bCanCapture) {
+      aPossibleCaptures = getPossibleCaptures(state.cells, row, col, playerIsWhite)
+      helpers.highlightCaptures(state, aPossibleCaptures)
+    }
+  },
+
+  mHighlightBoardCaptures: (state, playerIsWhite) => {
+    let bContainsPiece
+    // For each square in the board, highlight possible captures
     for (let row=1; row <= 8; row++) {
       for (let col=1; col <= 8; col++) {
         let coords = { nRow: row, nCol: col }
@@ -454,18 +466,10 @@ const mutations = {
           bSourceHasBlack(state.cells, coords)
          
         if (bContainsPiece) {
-          bCanCapture = 
-            helpers.computed.bCanCapture(state.cells, coordsTopLeft(row, col), playerIsWhite) ||
-            helpers.computed.bCanCapture(state.cells, coordsTopRight(row, col), playerIsWhite)
-
-          if (bCanCapture) {
-            aPossibleCaptures = getPossibleCaptures(state.cells, row, col, playerIsWhite)
-            helpers.highlightCaptures(state, aPossibleCaptures)
-          }
+          mutations.mHighlightCaptureFromSquare(state, coords, playerIsWhite)
         } 
       }
     }
-
   }
 }
 

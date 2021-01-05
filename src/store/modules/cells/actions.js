@@ -110,6 +110,7 @@ const actions = {
 
   /**
    * Highlights possible captures in the board
+   * For initial highlighting if no starting capture has been made
    * @param playerIsWhite boolean whether the player is white 
    */
   aHighlightBoardCaptures({ commit }, playerIsWhite) {

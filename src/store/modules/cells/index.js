@@ -11,6 +11,7 @@ const state = {
   firstClick: null,
   bActiveGame: true,
   bLastMoveLegal: true,
+  bStartedCaptureSequence: false,
   cWinner: 'N' //'B' black 'W' white 'N' none 'D' draw
 }
 
