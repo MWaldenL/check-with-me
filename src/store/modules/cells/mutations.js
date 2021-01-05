@@ -8,8 +8,7 @@ import {
 } from '../../services/moveCaptureService'
 
 import {
-  getPossibleMoveBlack,
-  getPossibleMoveWhite,
+  getPossibleMoves,
   getPossibleMoveBlackKing,
   getPossibleMoveWhiteKing
 } from '../../services/highlightService'

@@ -129,6 +129,11 @@ export default {
       })
   },
 
+  async updated() {
+    // If last player moved = self
+    // If there are available captures: Highlight possible captures 
+  },
+
   data () {
     return {
       selfName: '',

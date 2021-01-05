@@ -37,10 +37,16 @@ describe('Mutation testing', () => {
 
   describe('Moving a piece forward', () => {
     it('Replaces the board with a deep copy of the updated board which \
-      contains the new position of a white chip', () => {
+      contains the new position of a white chip and sets the first click to null', () => {
+      // Arrange
       const board = new Array(2).fill(null).map(() => Array(2))
+      
+      /**
+       * Starting position looks like this:
+       * _ _
+       * o _
+       */
 
-      // Fake 2x2 board for testing
       board[0][0] = { 
         nRow: 1, nCol: 1, 
         bHasBlackChip: false,
@@ -84,12 +90,6 @@ describe('Mutation testing', () => {
         isPossibleCapture: false,
         isPossibleMove: false
       }
-
-      /**
-       * Starting position looks like this:
-       * _ _
-       * o _
-       */
 
       const state = {
         cells: board,
@@ -149,16 +149,22 @@ describe('Mutation testing', () => {
       Cells.mutations.mMoveForward(state, coords)
       expect(state.cells).toStrictEqual(expected)
       expect(state.firstClick).toBe(null)
-    })
-  
-    it('Replaces the board with a deep copy of the updated board which \
-      contains the new position of a black chip', () => {
-      const board = new Array(2).fill(null).map(() => Array(2))
+    }),
 
-      // Fake 2x2 board for testing
-      board[0][0] = {
-        nRow: 1, nCol: 1,  
-        bHasBlackChip: false,
+    it('Replaces the board with a deep copy of the updated board which \
+      contains the new position of a black chip and sets the first click to null', () => {
+      // Arrange
+      const board = new Array(2).fill(null).map(() => Array(2))
+      
+      /**
+       * Starting position looks like this:
+       * _ _
+       * o _
+       */
+
+      board[0][0] = { 
+        nRow: 1, nCol: 1, 
+        bHasBlackChip: true,
         bHasBlackKing: false, 
         bHasWhiteChip: false,
         bHasWhiteKing: false,
@@ -166,8 +172,8 @@ describe('Mutation testing', () => {
         isPossibleCapture: false,
         isPossibleMove: false
       }
-
-      board[0][1] = {
+      
+      board[0][1] = { 
         nRow: 1, nCol: 2, 
         bHasBlackChip: false,
         bHasBlackKing: false, 
@@ -178,7 +184,7 @@ describe('Mutation testing', () => {
         isPossibleMove: false
       }
 
-      board[1][0] = {
+      board[1][0] = { 
         nRow: 2, nCol: 1, 
         bHasBlackChip: false,
         bHasBlackKing: false, 
@@ -189,9 +195,9 @@ describe('Mutation testing', () => {
         isPossibleMove: false
       }
 
-      board[1][1] = {
+      board[1][1] = { 
         nRow: 2, nCol: 2, 
-        bHasBlackChip: true,
+        bHasBlackChip: false,
         bHasBlackKing: false, 
         bHasWhiteChip: false,
         bHasWhiteKing: false,
@@ -200,29 +206,23 @@ describe('Mutation testing', () => {
         isPossibleMove: false
       }
 
-      /**
-       * Starting position looks like this:
-       * _ o
-       * _ _
-       */
-
       const state = {
         cells: board,
-        firstClick: {row: 2, col: 2}
+        firstClick: {row: 1, col: 1}
       }
 
       const expected = [
         [
           { nRow: 1, nCol: 1, 
-            bHasBlackChip: true,
-            bHasBlackKing: true, 
+            bHasBlackChip: false,
+            bHasBlackKing: false, 
             bHasWhiteChip: false,
             bHasWhiteKing: false,
             isHighlighted: false,
             isPossibleCapture: false,
             isPossibleMove: false
           },
-          { nRow: 1, nCol: 2,  
+          { nRow: 1, nCol: 2,             
             bHasBlackChip: false,
             bHasBlackKing: false, 
             bHasWhiteChip: false,
@@ -233,7 +233,7 @@ describe('Mutation testing', () => {
           }
         ],
         [
-          { nRow: 2, nCol: 1,  
+          { nRow: 2, nCol: 1, 
             bHasBlackChip: false,
             bHasBlackKing: false, 
             bHasWhiteChip: false,
@@ -242,8 +242,8 @@ describe('Mutation testing', () => {
             isPossibleCapture: false,
             isPossibleMove: false
           },
-          { nRow: 2, nCol: 2, 
-            bHasBlackChip: false,
+          { nRow: 2, nCol: 2,
+            bHasBlackChip: true,
             bHasBlackKing: false, 
             bHasWhiteChip: false,
             bHasWhiteKing: false,
@@ -254,17 +254,17 @@ describe('Mutation testing', () => {
         ]
       ]
 
-      /**
-       * Ending position:
-       * _ _
-       * o _
-       */
-
-      let coords = { nRow: 2, nCol: 2, nDestRow: 1, nDestCol: 1 }
+      let coords = { nRow: 1, nCol: 1, nDestRow: 2, nDestCol: 2 }
+      
+      // Act
       Cells.mutations.mMoveForward(state, coords)
 
-      console.log("Moving forward")
-
+      // Assert
+      /**
+       * Ending position:
+       * _ o
+       * _ _
+       */
       expect(state.cells).toStrictEqual(expected)
       expect(state.firstClick).toBe(null)
     })
@@ -274,6 +274,12 @@ describe('Mutation testing', () => {
     it('Replaces the board with a deep copy of the updated board which \
       contains the new position of a white chip', () => {
         // Arrange
+        /**
+         * Starting position looks like this:
+         * _ _ _
+         * _ x _
+         * o _ _
+         */
         const board = getBoard()
         board[0][0] = { 
           nRow: 1, 
@@ -298,13 +304,6 @@ describe('Mutation testing', () => {
           isPossibleCapture: false,
           isPossibleMove: false
         }
-
-        /**
-         * Starting position looks like this:
-         * _ _ _
-         * _ x _
-         * o _ _
-         */
   
         const state = {
           cells: board,
@@ -401,132 +400,165 @@ describe('Mutation testing', () => {
           ]
         ]
 
-        /**
-         * Ending position looks like this:
-         * _ _ o
-         * _ x _
-         * _ _ _
-         */
 
         // Act
         let coords = { nRow: 1, nCol: 1, nDestRow: 3, nDestCol: 3 }
         Cells.mutations.mCapturePiece(state, coords)
 
         // Assert
+        /**
+         * Ending position looks like this:
+         * _ _ o
+         * _ _ _
+         * _ _ _
+         */
         expect(state.cells).toStrictEqual(expected)
         expect(state.firstClick).toBe(null)
     }),
 
     it('Replaces the board with a deep copy of the updated board which \
       contains the new position of a black chip', () => {
-      // Arrange
-      const board = getBoard()
-      board[2][2] = {
-        nRow: 3,
-        nCol: 3, 
-        bHasBlackChip: true, 
-        bHasWhiteChip: false,
-        bHasBlackKing: false,
-        bHasWhiteKing: false
-      }
-      board[1][1] = {
-        nRow: 2, 
-        nCol: 2, 
-        bHasBlackChip: false, 
-        bHasWhiteChip: true,
-        bHasBlackKing: false,
-        bHasWhiteKing: false
-      }
+        // Arrange
+        /**
+         * Starting position looks like this:
+         * _ _ _
+         * _ w _
+         * b _ _
+         */
+        const board = getBoard()
+        board[0][0] = { 
+          nRow: 1, 
+          nCol: 1, 
+          bHasBlackChip: true, 
+          bHasWhiteChip: false,
+          bHasBlackKing: false,
+          bHasWhiteKing: false,
+          isHighlighted: false,
+          isPossibleCapture: false,
+          isPossibleMove: false
+        }
 
-      /**
-       * Starting position looks like this:
-       * _ _ b
-       * _ w _
-       * _ _ _
-       */
+        board[1][1] = {
+          nRow: 2, 
+          nCol: 2, 
+          bHasBlackChip: false, 
+          bHasWhiteChip: true,
+          bHasBlackKing: false,
+          bHasWhiteKing: false,
+          isHighlighted: false,
+          isPossibleCapture: false,
+          isPossibleMove: false
+        }
 
-      const state = {
-        cells: board,
-        firstClick: {row: 2, col: 2}
-      }
+        const state = {
+          cells: board,
+          firstClick: {row: 0, col: 0}
+        }
 
-      const expected = [
-        [
-          { nRow: 1, nCol: 1,  
-            bHasBlackChip: true,
-            bHasBlackKing: true, 
-            bHasWhiteChip: false,
-            bHasWhiteKing: false 
-          },
-          { nRow: 1, nCol: 2, 
-            bHasBlackChip: false,
-            bHasBlackKing: false, 
-            bHasWhiteChip: false,
-            bHasWhiteKing: false 
-          },
-          { nRow: 1, nCol: 3, 
-            bHasBlackChip: false,
-            bHasBlackKing: false, 
-            bHasWhiteChip: false,
-            bHasWhiteKing: false 
-          }
-        ],
-        [
-          { nRow: 2, nCol: 1,  
-            bHasBlackChip: false,
-            bHasBlackKing: false, 
-            bHasWhiteChip: false,
-            bHasWhiteKing: false 
-          },
-          { nRow: 2, nCol: 2,  
-            bHasBlackChip: false,
-            bHasBlackKing: false, 
-            bHasWhiteChip: false,
-            bHasWhiteKing: false 
-          },
-          { nRow: 2, nCol: 3,  
-            bHasBlackChip: false,
-            bHasBlackKing: false, 
-            bHasWhiteChip: false,
-            bHasWhiteKing: false  
-          }
-        ],
-        [
-          { nRow: 3, nCol: 1, 
-            bHasBlackChip: false,
-            bHasBlackKing: false, 
-            bHasWhiteChip: false,
-            bHasWhiteKing: false 
-          },
-          { nRow: 3, nCol: 2, 
-            bHasBlackChip: false,
-            bHasBlackKing: false, 
-            bHasWhiteChip: false,
-            bHasWhiteKing: false 
-          },
-          { nRow: 3, nCol: 3, 
-            bHasBlackChip: false,
-            bHasBlackKing: false, 
-            bHasWhiteChip: false,
-            bHasWhiteKing: false 
-          }
+        const expected = [
+          [
+            { nRow: 1, nCol: 1,  
+              bHasBlackChip: false,
+              bHasBlackKing: false, 
+              bHasWhiteChip: false,
+              bHasWhiteKing: false,
+              isHighlighted: false,
+              isPossibleCapture: false,
+              isPossibleMove: false
+            },
+            { nRow: 1, nCol: 2, 
+              bHasBlackChip: false,
+              bHasBlackKing: false, 
+              bHasWhiteChip: false,
+              bHasWhiteKing: false,
+              isHighlighted: false,
+              isPossibleCapture: false,
+              isPossibleMove: false
+            },
+            { nRow: 1, nCol: 3, 
+              bHasBlackChip: false,
+              bHasBlackKing: false, 
+              bHasWhiteChip: false,
+              bHasWhiteKing: false,
+              isHighlighted: false,
+              isPossibleCapture: false,
+              isPossibleMove: false
+            }
+          ],
+          [
+            { nRow: 2, nCol: 1,  
+              bHasBlackChip: false,
+              bHasBlackKing: false, 
+              bHasWhiteChip: false,
+              bHasWhiteKing: false,
+              isHighlighted: false,
+              isPossibleCapture: false,
+              isPossibleMove: false
+            },
+            { nRow: 2, nCol: 2,  
+              bHasBlackChip: false,
+              bHasBlackKing: false, 
+              bHasWhiteChip: false,
+              bHasWhiteKing: false,
+              isHighlighted: false,
+              isPossibleCapture: false,
+              isPossibleMove: false
+            },
+            { nRow: 2, nCol: 3,  
+              bHasBlackChip: false,
+              bHasBlackKing: false, 
+              bHasWhiteChip: false,
+              bHasWhiteKing: false,
+              isHighlighted: false,
+              isPossibleCapture: false,
+              isPossibleMove: false
+            }
+          ],
+          [
+            { nRow: 3, nCol: 1, 
+              bHasBlackChip: false,
+              bHasBlackKing: false, 
+              bHasWhiteChip: false,
+              bHasWhiteKing: false,
+              isHighlighted: false,
+              isPossibleCapture: false,
+              isPossibleMove: false
+            },
+            { nRow: 3, nCol: 2, 
+              bHasBlackChip: false,
+              bHasBlackKing: false, 
+              bHasWhiteChip: false,
+              bHasWhiteKing: false,
+              isHighlighted: false,
+              isPossibleCapture: false,
+              isPossibleMove: false
+            },
+            { nRow: 3, nCol: 3, 
+              bHasBlackChip: true,
+              bHasBlackKing: false, 
+              bHasWhiteChip: false,
+              bHasWhiteKing: false,
+              isHighlighted: false,
+              isPossibleCapture: false,
+              isPossibleMove: false
+            }
+          ]
         ]
-      ]
 
-      /**
-       * Ending position looks like this:
-       * _ _ _
-       * _ w _
-       * b _ _
-       */
 
-      // Act
-      let coords = { nRow: 3, nCol: 3, nDestRow: 1, nDestCol: 1 }
-      Cells.mutations.mCapturePiece(state, coords)
+        // Act
+        let coords = { nRow: 1, nCol: 1, nDestRow: 3, nDestCol: 3 }
+        Cells.mutations.mCapturePiece(state, coords)
 
-      // Assert
-      expect(state.cells).toMatchObject(expected)
-      expect(state.firstClick).toBe(null)
+        // Assert
+        /**
+         * Ending position looks like this:
+         * _ _ b
+         * _ _ _
+         * _ _ _
+         */
+        expect(state.cells).toStrictEqual(expected)
+        expect(state.firstClick).toBe(null)
     })
   })
 })

@@ -48,7 +48,6 @@ const placePieces = (board, squares, pieceColor, playerIsBlack) => {
     const square = playerIsBlack ? 
       65 - Number(squareString) : // Reversed if the player is playing black 
       Number(squareString)
-    console.log(playerIsBlack)
 
     const row = Math.floor((square - 1) / 8) + 1
     const col = ((square - 1) % 8) + 1
@@ -128,10 +127,7 @@ export const getPDNFromBoard = (board, turn, isPlayerBlack) => {
       let square = isPlayerBlack ? 
         65 - (8*r + c + 1) : 
         8*r + c + 1
-
-      console.log(isPlayerBlack)
-      console.log(square)
-
+        
       if (board[r][c].bHasWhiteChip) {
         if (board[r][c].bHasWhiteKing) {
           white = white.concat(`K${square},`)
