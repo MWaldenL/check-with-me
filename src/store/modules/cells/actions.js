@@ -110,11 +110,10 @@ const actions = {
 
   /**
    * Highlights possible captures in the board
-   * @param {*} param0 
+   * @param playerIsWhite boolean whether the player is white 
    */
-  aHighlightBoardCaptures({ commit }) {
-    console.log("highlighting")
-    commit('mHighlightBoardCaptures')
+  aHighlightBoardCaptures({ commit }, playerIsWhite) {
+    commit('mHighlightBoardCaptures', playerIsWhite)
   }
 }
 

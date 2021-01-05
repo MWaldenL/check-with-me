@@ -88,9 +88,6 @@ const helpers = {
       console.log(coords)
       const bNextRowAbove = coords.nRow + 2 === coords.nDestRow
       const bSkippedEnemyPiece = bPieceExistsAdj(board, coords, isWhite) && bNextRowAbove
-      console.log(bNextRowAbove)
-      console.log(bPieceExistsAdj(board, coords, isWhite))
-
       return isWhite ? 
         bSourceHasWhite(board, coords) && bSkippedEnemyPiece : 
         bSourceHasBlack(board, coords) && bSkippedEnemyPiece
@@ -428,7 +425,7 @@ const mutations = {
     state.cWinner = winner
   },
 
-  mHighlightBoardCaptures: (state) => {
+  mHighlightBoardCaptures: (state, playerIsWhite) => {
     // For each square in the board, highlight possible captures
     let bIsWhite, bCanCapture, bContainsPiece, aPossibleCaptures
     const coordsTopLeft = (row, col) => {
@@ -452,23 +449,17 @@ const mutations = {
     for (let row=1; row <= 8; row++) {
       for (let col=1; col <= 8; col++) {
         let coords = { nRow: row, nCol: col }
-        bContainsPiece = 
-          bSourceHasBlack(state.cells, coords) || 
-          bSourceHasWhite(state.cells, coords)
+        bContainsPiece = playerIsWhite ? 
+          bSourceHasWhite(state.cells, coords) :
+          bSourceHasBlack(state.cells, coords)
          
         if (bContainsPiece) {
-          console.log('contains piece')
-          bIsWhite = state.cells[row-1][col-1].bHasWhiteChip
-          console.log(state.cells[row-1][col-1])
-          console.log('bIsWhite ' + bIsWhite)
           bCanCapture = 
-            helpers.computed.bCanCapture(state.cells, coordsTopLeft(row, col), bIsWhite) ||
-            helpers.computed.bCanCapture(state.cells, coordsTopRight(row, col), bIsWhite)
-          console.log('bCanCapture ' + bCanCapture )
+            helpers.computed.bCanCapture(state.cells, coordsTopLeft(row, col), playerIsWhite) ||
+            helpers.computed.bCanCapture(state.cells, coordsTopRight(row, col), playerIsWhite)
+
           if (bCanCapture) {
-            console.log('can capture')
-            aPossibleCaptures = getPossibleCaptures(state.cells, row, col, bIsWhite)
-            console.log(aPossibleCaptures)
+            aPossibleCaptures = getPossibleCaptures(state.cells, row, col, playerIsWhite)
             helpers.highlightCaptures(state, aPossibleCaptures)
           }
         } 

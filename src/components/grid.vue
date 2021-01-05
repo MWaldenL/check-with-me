@@ -102,12 +102,13 @@ export default {
       .onSnapshot(doc => {
         const data = doc.data()
         const boardState = data.board_state
+        const playerIsWhite = this.selfColor === 'w'
         const playerIsBlack = this.selfColor === 'b'
 
         this.lastPlayerMoved = data.last_player_moved
         this.aUpdateBoard({ boardState, playerIsBlack })
 
-        this.aHighlightBoardCaptures()
+        this.aHighlightBoardCaptures(playerIsWhite)
       })
 
     // Listen for timer ticks

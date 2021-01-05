@@ -9,8 +9,6 @@ export const bPieceExistsAdj = (board, coords, isWhite) => {
     const bTopLeft = coords.nDestRow === coords.nRow + 2 && coords.nDestCol === coords.nCol - 2
 
     if (bTopRight) {
-      console.log("top right " + isWhite)
-      console.log(board[coords.nRow + 1 - 1][coords.nCol + 1 - 1].bHasBlackChip)
       return isWhite ? 
         board[coords.nRow + 1 - 1][coords.nCol + 1 - 1].bHasBlackChip : 
         board[coords.nRow + 1 - 1][coords.nCol + 1 - 1].bHasWhiteChip
