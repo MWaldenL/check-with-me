@@ -67,6 +67,7 @@ const placePieces = (board, squares, pieceColor, playerIsBlack) => {
  * [K] -> 'K' | ''
  * [Square] -> (1 - 64)
  * @param pdn the board state in Portable Draughts Notation from white's perspective
+ * @param playerIsBlack if the player is black
  */
 export const getBoardFromPDN = (pdn, playerIsBlack) => {
   // Trim PDN string
@@ -115,6 +116,7 @@ export const getBoardFromPDN = (pdn, playerIsBlack) => {
  * The PDN string is viewed from white's perspective
  * @param board the unpacked board instance 
  * @param turn the current player to move (dummy)
+ * @param isPlayerBlack if the player is black
  */
 export const getPDNFromBoard = (board, turn, isPlayerBlack) => {
   let res = `[FEN "${turn}:`

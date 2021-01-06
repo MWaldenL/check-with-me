@@ -106,12 +106,10 @@ export default {
         const playerIsBlack = this.selfColor === 'b'
 
         this.lastPlayerMoved = data.last_player_moved
-        console.log('on snapshot')
-        console.log(this.lastPlayerMoved)
         this.aUpdateBoard({ boardState, playerIsBlack })
 
+        // Highlight all possible captures when player is not in a capture sequence
         if (!this.isCapturing && this.lastPlayerMoved !== auth.currentUser.uid) {
-          console.log('whhhaaa')
           this.aHighlightBoardCaptures(playerIsWhite)
         }
       })
@@ -213,14 +211,14 @@ export default {
       'aUpdateBoard',
       'aGetEnemyUsername',
       'aHighlightBoardCaptures',
-      'aHighlightCaptureFromSquare'
+      'aHighlightCaptureFromSequence'
     ]),
 
-    async endPlayerTurn(square) {
+    async endPlayerTurn(coords) {
+      const { nRow, nCol } = coords
+      const square = { nRow, nCol }
       const isMoveWhite = square.bHasWhiteChip || square.bHasWhiteKing 
       this.lastPlayerMoved = (this.isHostWhite ^ isMoveWhite) ? this.otherUserID : this.hostUserID
-
-      console.log(this.lastPlayerMoved)
 
       // Write last player moved to db 
       await this.currentGame.update({ last_player_moved: this.lastPlayerMoved })
@@ -233,12 +231,15 @@ export default {
       await axios.get(`http://localhost:5000/startTime/${player}`)
     },
 
-    async updateLastPlayerMoved(square) {
+    async updateLastPlayerMoved(coords) {
+      const { nDestRow, nDestCol } = coords
+      const square = { nRow: nDestRow, nCol: nDestCol }
+
       if (!this.isCapturing) {
         this.endPlayerTurn(square)
       } else {
         const playerIsWhite = this.selfColor === 'w'
-        this.aHighlightCaptureFromSquare(square, playerIsWhite)
+        this.aHighlightCaptureFromSequence(square, playerIsWhite)
 
         if (!this.isCapturing) {
           this.endPlayerTurn(square)

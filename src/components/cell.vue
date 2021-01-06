@@ -191,11 +191,10 @@ export default {
 
             // Signal the game instance that a move has been made
             if (willEmit) {
-              this.$emit("makeMove", source)
+              this.$emit("makeMove", coords)
             }
           } else {
             if (this.bContainsPiece) {
-
               // Prevent a player from making a non-capturing move when a capture is required  
               if (this.isCaptureRequired) {
                 const coordsTopLeft = {
@@ -214,14 +213,13 @@ export default {
                   bCanCapture(this.board, coordsTopLeft, this.selfColor === 'w') ||
                   bCanCapture(this.board, coordsTopRight, this.selfColor === 'w')
 
-                console.log(bCanCapture(this.board, coordsTopLeft, this.selfColor === 'w'))
-                console.log(bCanCapture(this.board, coordsTopRight, this.selfColor === 'w'))
-
+                // If the selected piece cannot capture, don't highlight
                 if (!canCapture) {
                   return
                 }
               }
 
+              // Simply highlight the square
               this.aHighlight({ 
                 nRow: this.row, 
                 nCol: this.col, 
