@@ -107,8 +107,9 @@ export default {
 
         this.lastPlayerMoved = data.last_player_moved
         this.aUpdateBoard({ boardState, playerIsBlack })
+        console.log(this.selfColor)
 
-        if (!this.isCapturing) {
+        if (!this.isCapturing && this.lastPlayerMoved !== auth.currentUser.uid) {
           this.aHighlightBoardCaptures(playerIsWhite)
         }
       })
@@ -227,7 +228,9 @@ export default {
         const player = this.lastPlayerMoved === this.hostUserID ? 'other' : 'host'
         await axios.get(`http://localhost:5000/startTime/${player}`)
       } else {
-        this.aHighlightCaptureFromSquare(playerIsWhite)
+        console.log("is capturing")
+        const playerIsWhite = this.selfColor === 'w'
+        this.aHighlightCaptureFromSquare(square, playerIsWhite)
       }
     }
   }

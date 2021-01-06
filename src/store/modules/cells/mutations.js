@@ -322,7 +322,7 @@ const mutations = {
       if (bWhiteCanCapture) {
         // If a capture sequence hasn't started, start it
         if (!state.bStartedCaptureSequence) {
-          mutations.mSetCaptureSequenceState(true)
+          mutations.mSetCaptureSequenceState(state, true)
         }
         
         bIsValidCapture = true
@@ -334,7 +334,7 @@ const mutations = {
       } else if (bBlackCanCapture) {
         // If a capture sequence hasn't started, start it
         if (!state.bStartedCaptureSequence) {
-          mutations.mSetCaptureSequenceState(true)
+          mutations.mSetCaptureSequenceState(state, true)
         }
         
         bIsValidCapture = true
@@ -458,18 +458,18 @@ const mutations = {
       }
     }
 
-    const { row, col } = coords
+    const { nRow, nCol } = coords
     const bCanCapture = 
-      helpers.computed.bCanCapture(state.cells, coordsTopLeft(row, col), playerIsWhite) ||
-      helpers.computed.bCanCapture(state.cells, coordsTopRight(row, col), playerIsWhite)
-    
+      helpers.computed.bCanCapture(state.cells, coordsTopLeft(nRow, nCol), playerIsWhite) ||
+      helpers.computed.bCanCapture(state.cells, coordsTopRight(nRow, nCol), playerIsWhite)
+
     // If a player can capture, highlight. Otherwise, stop the capture sequence and end the turn
     if (bCanCapture) {
-      mutations.mSetCaptureRequired(true)
-      aPossibleCaptures = getPossibleCaptures(state.cells, row, col, playerIsWhite)
+      mutations.mSetCaptureRequired(state, true)
+      const aPossibleCaptures = getPossibleCaptures(state.cells, nRow, nCol, playerIsWhite)
       helpers.highlightCaptures(state, aPossibleCaptures)
     } else {
-      mutations.mSetCaptureSequenceState(false)
+      mutations.mSetCaptureSequenceState(state, false)
     }
   },
 
