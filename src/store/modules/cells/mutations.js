@@ -80,7 +80,10 @@ const helpers = {
       }
     }
     
+    console.log(aPossibleCaptures)
+
     state.cells = boardClone
+    console.log(state.cells)
   },
 
   computed: {
@@ -129,6 +132,7 @@ const mutations = {
     
     // Highlight the source cell
     const srcCell = boardClone[coords.nRow - 1][coords.nCol - 1]
+    const isWhite = srcCell.bHasWhiteChip || srcCell.bHasWhiteKing
     srcCell.isHighlighted = true
     
     if (!state.bIsCaptureRequired) { 
@@ -153,6 +157,9 @@ const mutations = {
           boardClone[array[0]][array[1]].isPossibleCapture = true
         }
       }
+    } else {
+      console.log('hello')
+      mutations.mHighlightCaptureFromSquare(state, coords, isWhite)
     }
 
     // Update the board state
@@ -160,6 +167,10 @@ const mutations = {
   },
 
   mMoveForward: (state, coords) => {
+    if (state.bIsCaptureRequired) {
+      return
+    }
+
     // If the move is within the board's range
     if (coords.nDestCol >= 1 && coords.nDestCol <= 8 && coords.nDestRow >= 1 && coords.nDestRow <= 8) {
       const newCurr = {
@@ -215,6 +226,10 @@ const mutations = {
   },
 
   mKingMovement: (state, coords) => {
+    if (state.bIsCaptureRequired) {
+      return
+    }
+
     // If the move is within the board's range
     if (coords.nDestCol >= 1 && coords.nDestCol <= 8 && coords.nDestRow >= 1 && coords.nDestRow <= 8) {
       const newCurr = {
@@ -383,6 +398,11 @@ const mutations = {
     // isValidCapture returns a boolean and a newTarget coordinate tuple
     const result = bIsValidCapture(state.cells, coords, color)
     if (result.validCapture) {
+      // If a capture sequence hasn't started, start it
+      if (!state.bStartedCaptureSequence) {
+        mutations.mSetCaptureSequenceState(state, true)
+      }
+
       if (bSourceHasWhite(state.cells, coords)) {
         newDest.bHasWhiteChip = true
         newDest.bHasWhiteKing = true
@@ -459,6 +479,7 @@ const mutations = {
     }
 
     const { nRow, nCol } = coords
+    console.log(coords)
     const bCanCapture = 
       helpers.computed.bCanCapture(state.cells, coordsTopLeft(nRow, nCol), playerIsWhite) ||
       helpers.computed.bCanCapture(state.cells, coordsTopRight(nRow, nCol), playerIsWhite)
@@ -468,6 +489,7 @@ const mutations = {
       mutations.mSetCaptureRequired(state, true)
       const aPossibleCaptures = getPossibleCaptures(state.cells, nRow, nCol, playerIsWhite)
       helpers.highlightCaptures(state, aPossibleCaptures)
+      console.log('highlighted captues')
     } else {
       mutations.mSetCaptureSequenceState(state, false)
     }

@@ -155,7 +155,9 @@ export default {
             let willEmit = true
 
             if (bIsSameSquare) {
-              this.aUnhighlight(null)
+              if (!this.isCaptureRequired) {
+                this.aUnhighlight(null)
+              }
               willEmit = false
             } else if (bIsKingMovement) {
               if (this.isKingMoveAttempt(source, coords)) {
@@ -171,10 +173,7 @@ export default {
             } else { 
               if (this.isCaptureAttempt(source)) {  
                 this.aCapturePiece(payload)
-                console.log('From cell.vue' + this.isCaptureRequired)
                 willEmit = this.isLastMoveLegal && this.isCaptureRequired
-                console.log('From cell.vue' + this.isLastMoveLegal)
-                console.log('From cell.vue' + willEmit)
               } else if (this.isMoveForwardAttempt(source)) {
                 this.aMoveForward(payload)
                 willEmit = this.isLastMoveLegal && !this.isCaptureRequired
@@ -186,12 +185,9 @@ export default {
 
             // Signal the game instance that a move has been made
             if (willEmit) {
-              console.log(this.isCaptureRequired)
-              console.log("emitting")
               this.$emit("makeMove", source)
             }
           } else {  // Simply highlight the piece clicked
-            const bContainsPiece = this.hasBlackChip || this.hasWhiteChip || this.hasWhiteKing || this.hasBlackKing
             if (this.bContainsPiece) {
               this.aHighlight({ 
                 nRow: this.row, 
