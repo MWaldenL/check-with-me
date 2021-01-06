@@ -48,6 +48,7 @@
 </template>
 
 <script>
+import { bSourceHasWhite, bSourceHasWhiteKing } from '@/store/services/moveCaptureService'
 import { 
   auth, 
   gamesCollection, 
@@ -99,7 +100,7 @@ export default {
     // Listen for board state changes
     gamesCollection
       .doc('Vc0H4f4EvY6drRKnvsk5') // Obtain from state in the future when rooms are implemented
-      .onSnapshot(doc => {
+      .onSnapshot(async doc => {
         const data = doc.data()
         const boardState = data.board_state
         const playerIsWhite = this.selfColor === 'w'
@@ -111,7 +112,20 @@ export default {
         // Highlight all possible captures when player is not in a capture sequence
         if (this.lastPlayerMoved !== auth.currentUser.uid) {
           if (!this.isCapturing) {
+            console.log('not yet capturing')
             this.aHighlightBoardCaptures(playerIsWhite)
+          } else {
+            if (this.prevDestSquare) {
+              const payload = { 
+                coords: this.prevDestSquare, 
+                playerIsWhite 
+              }
+              this.aHighlightCaptureFromSequence(payload)
+
+              if (!this.isCapturing && this.sourceSquare) {
+                await this.endPlayerTurn(this.sourceSquare)
+              }
+            }
           }
         }
       })
@@ -147,12 +161,15 @@ export default {
       bHostRunning: true,
       bOtherRunning: false,
 
+      sourceSquare: null,
       prevDestSquare: null
     }
   },
 
   computed: {
     ...mapGetters({
+      board: 'getEntireBoard',
+
       whiteCount: 'getWhiteCount',
       blackCount: 'getBlackCount',
 
@@ -220,12 +237,19 @@ export default {
 
     async endPlayerTurn(coords) {
       console.log('ending turn')
-      const { nRow, nCol } = coords
-      const square = { nRow, nCol }
-      const isMoveWhite = square.bHasWhiteChip || square.bHasWhiteKing 
+      console.log(coords)
+
+      const isMoveWhite = 
+        bSourceHasWhite(this.board, this.prevDestSquare) || 
+        bSourceHasWhiteKing(this.board, this.prevDestSquare) 
       this.lastPlayerMoved = (this.isHostWhite ^ isMoveWhite) ? this.otherUserID : this.hostUserID
 
+
+      console.log(bSourceHasWhite(this.board, this.prevDestSquare))
+      console.log(bSourceHasWhiteKing(this.board, this.prevDestSquare))
       console.log(this.lastPlayerMoved)
+
+
 
       // Write last player moved to db 
       await this.currentGame.update({ last_player_moved: this.lastPlayerMoved })
@@ -238,25 +262,15 @@ export default {
       await axios.get(`http://localhost:5000/startTime/${player}`)
     },
 
-    async updateLastPlayerMoved(coords) {
+    updateLastPlayerMoved(coords) {
       const { nRow, nCol, nDestRow, nDestCol } = coords
-      const destSquare = { nRow: nDestRow, nCol: nDestCol }
-      const source = { nRow, nCol }
+      this.sourceSquare = { nRow, nCol }
+      this.prevDestSquare = { nRow: nDestRow, nCol: nDestCol }
 
       // If the player isn't capturing, end the turn.
       // Otherwise, keep highlighting captures until there are no more
       if (!this.isCapturing) {
-        this.endPlayerTurn(source)
-      } else {
-        const playerIsWhite = this.selfColor === 'w'
-        const payload = { 
-          coords: destSquare, 
-          playerIsWhite 
-        }
-        this.aHighlightCaptureFromSequence(payload)
-        if (!this.isCapturing) {
-          this.endPlayerTurn(source)
-        }
+        this.endPlayerTurn(this.sourceSquare)
       }
     }
   }

@@ -469,9 +469,6 @@ const mutations = {
   },
 
   mHighlightCaptureFromSequence: (state, payload) => {
-    console.log('hungry')
-    console.log(payload)
-    
     const { coordsTopLeft, coordsTopRight } = helpers.computed
     const { coords, playerIsWhite } = payload
     const { nRow, nCol } = coords
@@ -485,6 +482,7 @@ const mutations = {
       const aPossibleCaptures = getPossibleCaptures(state.cells, nRow, nCol, playerIsWhite)
       helpers.highlightCaptures(state, aPossibleCaptures)
     } else {
+      console.log('stop capturing')
       mutations.mSetCaptureSequenceState(state, false)
     }
   },
