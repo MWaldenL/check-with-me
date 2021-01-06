@@ -32,7 +32,6 @@ export const bPieceExistsAfterAdj = (board, coords) =>
 export const bCanCapture = (board, coords, isWhite) => {
   const bNextRowAbove = coords.nRow + 2 === coords.nDestRow
   const bSkippedEnemyPiece = bPieceExistsAdj(board, coords, isWhite) && bNextRowAbove
-
   return isWhite ? 
     bSourceHasWhite(board, coords) && bSkippedEnemyPiece && !bPieceExistsAfterAdj(board, coords) : 
     bSourceHasBlack(board, coords) && bSkippedEnemyPiece && !bPieceExistsAfterAdj(board, coords)

@@ -164,7 +164,11 @@ const mutations = {
         }
       }
     } else {
-      mutations.mHighlightCaptureFromSequence(state, coords, isWhite)
+      const payload = { 
+        coords: { nRow: coords.nRow, nCol: coords.nCol }, 
+        playerIsWhite: isWhite
+      }
+      mutations.mHighlightCaptureFromSequence(state, payload)
     }
 
     // Update the board state
@@ -341,9 +345,7 @@ const mutations = {
     if (!bPieceExistsAfterAdj(state.cells, coords)) {
       if (bWhiteCanCapture) {
         // If a capture sequence hasn't started, start it
-        console.log(state.bStartedCaptureSequence)
         if (!state.bStartedCaptureSequence) {
-          console.log('hello?')
           mutations.mSetCaptureSequenceState(state, true)
         }
         
@@ -466,8 +468,12 @@ const mutations = {
     state.bStartedCaptureSequence = isCaptureOngoing
   },
 
-  mHighlightCaptureFromSequence: (state, coords, playerIsWhite) => {
+  mHighlightCaptureFromSequence: (state, payload) => {
+    console.log('hungry')
+    console.log(payload)
+    
     const { coordsTopLeft, coordsTopRight } = helpers.computed
+    const { coords, playerIsWhite } = payload
     const { nRow, nCol } = coords
     const canCapture = 
       bCanCapture(state.cells, coordsTopLeft(nRow, nCol), playerIsWhite) ||

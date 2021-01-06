@@ -117,8 +117,8 @@ const actions = {
     commit('mHighlightBoardCaptures', playerIsWhite)
   },
 
-  aHighlightCaptureFromSequence({ commit }, playerIsWhite) {
-    commit('mHighlightCaptureFromSequence', playerIsWhite)
+  aHighlightCaptureFromSequence({ commit }, payload) {
+    commit('mHighlightCaptureFromSequence', payload)
   }
 }
 

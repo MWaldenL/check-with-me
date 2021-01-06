@@ -99,7 +99,7 @@ export default {
     // Listen for board state changes
     gamesCollection
       .doc('Vc0H4f4EvY6drRKnvsk5') // Obtain from state in the future when rooms are implemented
-      .onSnapshot(async doc => {
+      .onSnapshot(doc => {
         const data = doc.data()
         const boardState = data.board_state
         const playerIsWhite = this.selfColor === 'w'
@@ -107,10 +107,12 @@ export default {
 
         this.lastPlayerMoved = data.last_player_moved
         this.aUpdateBoard({ boardState, playerIsBlack })
-
+    
         // Highlight all possible captures when player is not in a capture sequence
-        if (!this.isCapturing && this.lastPlayerMoved !== auth.currentUser.uid) {
-          this.aHighlightBoardCaptures(playerIsWhite)
+        if (this.lastPlayerMoved !== auth.currentUser.uid) {
+          if (!this.isCapturing) {
+            this.aHighlightBoardCaptures(playerIsWhite)
+          }
         }
       })
 
@@ -143,7 +145,9 @@ export default {
       currentGame: null,
       lastPlayerMoved: null,
       bHostRunning: true,
-      bOtherRunning: false
+      bOtherRunning: false,
+
+      prevDestSquare: null
     }
   },
 
@@ -215,10 +219,13 @@ export default {
     ]),
 
     async endPlayerTurn(coords) {
+      console.log('ending turn')
       const { nRow, nCol } = coords
       const square = { nRow, nCol }
       const isMoveWhite = square.bHasWhiteChip || square.bHasWhiteKing 
       this.lastPlayerMoved = (this.isHostWhite ^ isMoveWhite) ? this.otherUserID : this.hostUserID
+
+      console.log(this.lastPlayerMoved)
 
       // Write last player moved to db 
       await this.currentGame.update({ last_player_moved: this.lastPlayerMoved })
@@ -232,17 +239,23 @@ export default {
     },
 
     async updateLastPlayerMoved(coords) {
-      const { nDestRow, nDestCol } = coords
-      const square = { nRow: nDestRow, nCol: nDestCol }
+      const { nRow, nCol, nDestRow, nDestCol } = coords
+      const destSquare = { nRow: nDestRow, nCol: nDestCol }
+      const source = { nRow, nCol }
 
+      // If the player isn't capturing, end the turn.
+      // Otherwise, keep highlighting captures until there are no more
       if (!this.isCapturing) {
-        this.endPlayerTurn(square)
+        this.endPlayerTurn(source)
       } else {
         const playerIsWhite = this.selfColor === 'w'
-        this.aHighlightCaptureFromSequence(square, playerIsWhite)
-
+        const payload = { 
+          coords: destSquare, 
+          playerIsWhite 
+        }
+        this.aHighlightCaptureFromSequence(payload)
         if (!this.isCapturing) {
-          this.endPlayerTurn(square)
+          this.endPlayerTurn(source)
         }
       }
     }
