@@ -706,4 +706,8 @@ describe ('Capture moves', () => {
       })
     })
   })
+
+  describe ('bCanCapture', () => {
+    
+  })
 })

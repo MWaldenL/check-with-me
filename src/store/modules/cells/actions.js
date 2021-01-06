@@ -64,7 +64,6 @@ const actions = {
   /**
    * aCapturePiece moves a black or white chip to capture an opposite-colored piece
    * diagonally adjacent from it.
-   *
    * @param coords - an object containing the source and destination coordinates
    */
   aCapturePiece({ commit, state }, payload) {
@@ -76,7 +75,6 @@ const actions = {
   /**
    * aKingCapturePiece moves a black or white king to capture an opposite-colored piece
    * in its diagonal
-   *
    * @param coords - an object containing the source and destination coordinates
    */
   aKingCapturePiece({ commit, state }, payload) {
@@ -117,8 +115,20 @@ const actions = {
     commit('mHighlightBoardCaptures', playerIsWhite)
   },
 
+  /**
+   * Highlights the possible captures from a sequence
+   * @param payload an object containing the coords and whether the player is white
+   */
   aHighlightCaptureFromSequence({ commit }, payload) {
     commit('mHighlightCaptureFromSequence', payload)
+  },
+
+  /**
+   * Set the last square that resulted from a capture
+   * @param prevDestSquare
+   */
+  aSetPrevDestSquare({ commit }, prevDestSquare) {
+    commit('mSetPrevDestSquare', prevDestSquare)
   }
 }
 

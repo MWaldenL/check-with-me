@@ -31,45 +31,46 @@ export default {
       board: 'getEntireBoard',
       firstClick: 'getFirstClick',
       whiteCount: 'getWhiteCount',
+      prevDestSquare: 'getPrevDestSquare',
       blackCount: 'getBlackCount',
       bActiveGame: 'getActiveGame',
-      captureSquaresList: 'getCaptureSquaresList',
       isLastMoveLegal: 'getIsLastMoveLegal',
-      isCaptureRequired: 'getIsCaptureRequired'
+      isCaptureRequired: 'getIsCaptureRequired',
+      isCapturing: 'getCaptureSequenceState'
     }),
 
     isSelected: {
-      get () {
+      get() {
         return this.board[this.row-1][this.col-1].isHighlighted
       },
-      set (val) {
+      set(val) {
         this.dIsSelected = val
       }
     },  
 
     isPossibleMove: {
-      get () {
+      get() {
         return this.board[this.row-1][this.col-1].isPossibleMove
       },
-      set (val) {
+      set(val) {
         this.dIsPossibleMove = val
       }
     },
 
     isPossibleCapture: {
-      get () {
+      get() {
         return this.board[this.row-1][this.col-1].isPossibleCapture
       },
-      set (val) {
+      set(val) {
         this.dIsPossibleCapture = val
       }
     },
 
-    bContainsPiece () {
+    bContainsPiece() {
       return this.hasBlackChip || this.hasWhiteChip || this.hasWhiteKing || this.hasBlackKing
     },  
 
-    highlight () {
+    highlight() {
       return {
         'highlight-selected': this.isSelected,
         'highlight-possible-move': this.isPossibleMove,
@@ -78,24 +79,56 @@ export default {
       }
     },
 
-    isDark () {
+    isDark() {
       return (this.row % 2 === 1) ? this.col % 2 === 1 : this.col % 2 === 0
     },
 
-    hasBlackChip () {
+    hasBlackChip() {
       return this.board[this.row - 1][this.col - 1].bHasBlackChip
     },
 
-    hasWhiteChip () {
+    hasWhiteChip() {
       return this.board[this.row - 1][this.col - 1].bHasWhiteChip
     },
 
-    hasBlackKing () {
+    hasBlackKing() {
       return this.board[this.row - 1][this.col - 1].bHasBlackKing
     },
 
-    hasWhiteKing () {
+    hasWhiteKing() {
       return this.board[this.row - 1][this.col - 1].bHasWhiteKing
+    },
+
+    isSelectingEnemyPiece() {
+      const bCurWhitePiece = this.hasWhiteChip || this.hasWhiteKing
+      const bCurBlackPiece = this.hasBlackChip || this.hasBlackKing
+      const isSelectingOwnPiece = 
+        (this.selfColor === 'w' && bCurWhitePiece) || 
+        (this.selfColor === 'b' && bCurBlackPiece) 
+
+      return this.firstClick === null && !isSelectingOwnPiece
+    },
+
+    canSelectedPieceCapture() { 
+      const coordsTopLeft = {
+        nRow: this.row, 
+        nCol: this.col,
+        nDestRow: this.row + 2,
+        nDestCol: this.col - 2
+      }
+
+      const coordsTopRight = {
+        ...coordsTopLeft,
+        nDestCol: this.col + 2
+      }
+
+      return bCanCapture(this.board, coordsTopLeft, this.selfColor === 'w') ||
+            bCanCapture(this.board, coordsTopRight, this.selfColor === 'w')
+    },
+
+    isAttemptingToCaptureOutsideSequence() {
+      const { nRow, nCol } = this.prevDestSquare
+      return nRow !== this.row || nCol !== this.col
     }
   },
 
@@ -111,7 +144,7 @@ export default {
       'aSetWinner'
     ]),
 
-    cancelCurrentMove () { 
+    cancelCurrentMove() { 
       if (this.bContainsPiece) {
         this.aHighlight({
           nRow: this.row, 
@@ -124,19 +157,11 @@ export default {
       }
     },
 
-    onSquareClicked () {
+    onSquareClicked() {
       if (this.bActiveGame) {
         if (this.canMakeMove) {
           const source = this.firstClick
-
-          // Prevent a player from clicking on another player's piece
-          const bCurWhitePiece = this.hasWhiteChip || this.hasWhiteKing
-          const bCurBlackPiece = this.hasBlackChip || this.hasBlackKing
-          const isSelectingOwnPiece = (this.selfColor === 'w' && bCurWhitePiece) || (this.selfColor === 'b' && bCurBlackPiece) 
-          if (source === null && !isSelectingOwnPiece) {
-            return
-          }
-
+          
           // Highlight or attempt to move a piece
           if (source != null) {
             this.isSelected = false
@@ -195,31 +220,24 @@ export default {
             }
           } else {
             if (this.bContainsPiece) {
+              // Prevent a player from clicking on another player's piece
+              if (this.isSelectingEnemyPiece) {
+                return
+              }
+
               // Prevent a player from making a non-capturing move when a capture is required  
-              if (this.isCaptureRequired) {
-                const coordsTopLeft = {
-                  nRow: this.row, 
-                  nCol: this.col,
-                  nDestRow: this.row + 2,
-                  nDestCol: this.col - 2
-                }
+              if (this.isCaptureRequired && !this.canSelectedPieceCapture) {
+                return
+              }
 
-                const coordsTopRight = {
-                  ...coordsTopLeft,
-                  nDestCol: this.col + 2
-                }
-
-                const canCapture = 
-                  bCanCapture(this.board, coordsTopLeft, this.selfColor === 'w') ||
-                  bCanCapture(this.board, coordsTopRight, this.selfColor === 'w')
-
-                // If the selected piece cannot capture, don't highlight
-                if (!canCapture) {
+              // Prevent a player from making a capture outside the current sequence
+              if (this.isCapturing && this.prevDestSquare !== null) {
+                if (this.isAttemptingToCaptureOutsideSequence) {
                   return
                 }
               }
 
-              // Simply highlight the square
+              // Otherwise, simply highlight the square
               this.aHighlight({ 
                 nRow: this.row, 
                 nCol: this.col, 

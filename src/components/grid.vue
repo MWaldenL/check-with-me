@@ -74,7 +74,7 @@ export default {
     const player = this.lastPlayerMoved === game.data().host_user ? 'other' : 'host'
 
     // Set the current game
-    this.currentGame = gameDoc // Put back in mounted if it fails
+    this.currentGame = gameDoc
 
     // Get the enemy username
     await this.aGetEnemyUsername()
@@ -87,8 +87,9 @@ export default {
     const timerState = await axios.get(`http://localhost:5000/isTimeRunning`)
 
     // Only start the clock if no one else is running the clock
-    if (!timerState.data.isTimeRunning)
+    if (!timerState.data.isTimeRunning) {
       await axios.get(`http://localhost:5000/startTime/H48woDfI1lwIGZnJh4qz/${player}`)
+    }
 
     // Put back in mounted hook if it fails
     await this.aSetHostTimeLeft() 
@@ -106,24 +107,25 @@ export default {
         const playerIsWhite = this.selfColor === 'w'
         const playerIsBlack = this.selfColor === 'b'
 
+        // Update the last player moved and the position
         this.lastPlayerMoved = data.last_player_moved
         this.aUpdateBoard({ boardState, playerIsBlack })
-    
+
         // Highlight all possible captures when player is not in a capture sequence
         if (this.lastPlayerMoved !== auth.currentUser.uid) {
           if (!this.isCapturing) {
-            console.log('not yet capturing')
             this.aHighlightBoardCaptures(playerIsWhite)
-          } else {
+          } else {  
+            // Highlight the capture from the current sequence
             if (this.prevDestSquare) {
-              const payload = { 
+              this.aHighlightCaptureFromSequence({ 
                 coords: this.prevDestSquare, 
                 playerIsWhite 
-              }
-              this.aHighlightCaptureFromSequence(payload)
+              })
 
-              if (!this.isCapturing && this.sourceSquare) {
-                await this.endPlayerTurn(this.sourceSquare)
+              // Once a capture sequence has finished, end the player's turn
+              if (!this.isCapturing && this.prevSourceSquare) {
+                await this.endPlayerTurn(this.prevSourceSquare)
               }
             }
           }
@@ -161,29 +163,25 @@ export default {
       bHostRunning: true,
       bOtherRunning: false,
 
-      sourceSquare: null,
-      prevDestSquare: null
+      prevSourceSquare: null
     }
   },
 
   computed: {
     ...mapGetters({
       board: 'getEntireBoard',
-
       whiteCount: 'getWhiteCount',
       blackCount: 'getBlackCount',
-
       currentUser: 'getCurrentUser',
       hostUserID: 'getHostUser',
       otherUserID: 'getOtherUser',
       enemyUsername: 'getEnemyUsername',
-
       isHostWhite: 'getIsHostWhite',
       hostTimeLeft: 'getHostTimeLeft',
       otherTimeLeft: 'getOtherTimeLeft',
-
       isCapturing: 'getCaptureSequenceState',
-      isCaptureRequired: 'getIsCaptureRequired'
+      isCaptureRequired: 'getIsCaptureRequired',
+      prevDestSquare: 'getPrevDestSquare'
     }),
 
     canMakeMove() {
@@ -232,24 +230,16 @@ export default {
       'aUpdateBoard',
       'aGetEnemyUsername',
       'aHighlightBoardCaptures',
-      'aHighlightCaptureFromSequence'
+      'aHighlightCaptureFromSequence',
+      'aSetPrevDestSquare'
     ]),
 
     async endPlayerTurn(coords) {
-      console.log('ending turn')
-      console.log(coords)
-
       const isMoveWhite = 
         bSourceHasWhite(this.board, this.prevDestSquare) || 
         bSourceHasWhiteKing(this.board, this.prevDestSquare) 
+
       this.lastPlayerMoved = (this.isHostWhite ^ isMoveWhite) ? this.otherUserID : this.hostUserID
-
-
-      console.log(bSourceHasWhite(this.board, this.prevDestSquare))
-      console.log(bSourceHasWhiteKing(this.board, this.prevDestSquare))
-      console.log(this.lastPlayerMoved)
-
-
 
       // Write last player moved to db 
       await this.currentGame.update({ last_player_moved: this.lastPlayerMoved })
@@ -263,14 +253,14 @@ export default {
     },
 
     updateLastPlayerMoved(coords) {
+      console.log('updating last player')
       const { nRow, nCol, nDestRow, nDestCol } = coords
-      this.sourceSquare = { nRow, nCol }
-      this.prevDestSquare = { nRow: nDestRow, nCol: nDestCol }
+      this.prevSourceSquare = { nRow, nCol }
+      // this.prevDestSquare = { nRow: nDestRow, nCol: nDestCol }
+      this.aSetPrevDestSquare({ nRow: nDestRow, nCol: nDestCol })
 
-      // If the player isn't capturing, end the turn.
-      // Otherwise, keep highlighting captures until there are no more
       if (!this.isCapturing) {
-        this.endPlayerTurn(this.sourceSquare)
+        this.endPlayerTurn(this.prevSourceSquare)
       }
     }
   }

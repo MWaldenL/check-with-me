@@ -83,6 +83,7 @@ const helpers = {
 
     state.cells = boardClone
   },
+
   computed: {
     coordsTopLeft: (row, col) => {
       return { 
@@ -353,10 +354,11 @@ const mutations = {
         newDest.bHasWhiteChip = true
         if (bLastRowAbove) {
           newDest.bHasWhiteKing = true
+          mutations.mSetCaptureSequenceState(state, false)
         }
         mutations.mReducePiece(state, whiteTakes)
       } else if (bBlackCanCapture) {
-        // If a capture sequence hasn't started, start it
+        // If a capture sequence hasn't been started yet, start it
         if (!state.bStartedCaptureSequence) {
           mutations.mSetCaptureSequenceState(state, true)
         }
@@ -365,6 +367,7 @@ const mutations = {
         newDest.bHasBlackChip = true
         if (bLastRowAbove) {
           newDest.bHasBlackKing = true
+          mutations.mSetCaptureSequenceState(state, false)
         }
         mutations.mReducePiece(state, !whiteTakes)
       }
@@ -463,7 +466,11 @@ const mutations = {
   mSetWinner: (state, winner) => {
     state.cWinner = winner
   },
+
   
+  /**
+   * Forced Capture Mutations
+   */
   mSetCaptureSequenceState: (state, isCaptureOngoing) => {
     state.bStartedCaptureSequence = isCaptureOngoing
   },
@@ -482,7 +489,6 @@ const mutations = {
       const aPossibleCaptures = getPossibleCaptures(state.cells, nRow, nCol, playerIsWhite)
       helpers.highlightCaptures(state, aPossibleCaptures)
     } else {
-      console.log('stop capturing')
       mutations.mSetCaptureSequenceState(state, false)
     }
   },
@@ -517,6 +523,10 @@ const mutations = {
 
   mSetCaptureRequired: (state, isRequired) => {
     state.bIsCaptureRequired = isRequired
+  },
+
+  mSetPrevDestSquare: (state, prevDestSquare) => {
+    state.prevDestSquare = prevDestSquare
   }
 }
 

@@ -1,32 +1,14 @@
 import Cells from '@/store/modules/cells/index.js'
+import { getBoard } from './board'
 
-const getBoard = () => {
-  const board = new Array(3).fill(null).map(() => Array(3))
-  for (let i = 0; i < 3; i++) {
-    for (let j = 0; j < 3; j++) {
-      board[i][j] = { 
-        nRow: i + 1, 
-        nCol: j + 1, 
-        bHasBlackChip: false, 
-        bHasWhiteChip: false,
-        bHasBlackKing: false,
-        bHasWhiteKing: false,
-        isHighlighted: false,
-        isPossibleCapture: false,
-        isPossibleMove: false
-      }
-    }
-  }
-  return board
-}
-
+const n = 3
 describe('Mutation testing', () => {
   describe('Highlighting the selected cell', () => {
     it(`sets the firstClick cell's to the coordinates of the cell
       clicked`, () => {
         const state = {
           firstClick: null,
-          cells: getBoard()
+          cells: getBoard(n)
         }
         
         let coords = { nRow: 2, nCol: 2 }
@@ -280,7 +262,7 @@ describe('Mutation testing', () => {
          * _ x _
          * o _ _
          */
-        const board = getBoard()
+        const board = getBoard(n)
         board[0][0] = { 
           nRow: 1, 
           nCol: 1, 
@@ -425,7 +407,7 @@ describe('Mutation testing', () => {
          * _ w _
          * b _ _
          */
-        const board = getBoard()
+        const board = getBoard(n)
         board[0][0] = { 
           nRow: 1, 
           nCol: 1, 

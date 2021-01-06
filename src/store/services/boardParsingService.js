@@ -158,16 +158,3 @@ export const getPDNFromBoard = (board, turn, isPlayerBlack) => {
   res = res.slice(0, res.length-1).concat(`"]`)
   return res
 }
-
-
-// Tests:
-// Starting position:   [FEN "O:W1,3,5,7,10,12,14,16,17,19,21,23:B42,44,46,48,49,51,53,55,56,58,60,62,64"]
-// With 2 Kings:        [FEN "O:WK1:BK42"]
-// White piece:         [FEN "O:W1"]
-// Black piece:         [FEN "O:B7"]
-// White king:          [FEN "O:WK3"]
-// Black king:          [FEN "O:BK1"]
-// Captures:            [FEN "O:W1,55:B10,64"]
-// Test 1 Capture Highlighting: [FEN "O:W19,21,37:B28,30,44,46"]`
-// Test 2: Multiple Captures: [FEN "O:W3:B12,23,28,44,46"]
-// Test 3: Multiple Captures with extra piece: [FEN "O:W3,16:B12,23,28,44,46"]
