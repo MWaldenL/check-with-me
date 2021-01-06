@@ -99,17 +99,19 @@ export default {
     // Listen for board state changes
     gamesCollection
       .doc('Vc0H4f4EvY6drRKnvsk5') // Obtain from state in the future when rooms are implemented
-      .onSnapshot(doc => {
+      .onSnapshot(async doc => {
         const data = doc.data()
         const boardState = data.board_state
         const playerIsWhite = this.selfColor === 'w'
         const playerIsBlack = this.selfColor === 'b'
 
         this.lastPlayerMoved = data.last_player_moved
+        console.log('on snapshot')
+        console.log(this.lastPlayerMoved)
         this.aUpdateBoard({ boardState, playerIsBlack })
-        console.log(this.selfColor)
 
         if (!this.isCapturing && this.lastPlayerMoved !== auth.currentUser.uid) {
+          console.log('whhhaaa')
           this.aHighlightBoardCaptures(playerIsWhite)
         }
       })
@@ -161,7 +163,8 @@ export default {
       hostTimeLeft: 'getHostTimeLeft',
       otherTimeLeft: 'getOtherTimeLeft',
 
-      isCapturing: 'getCaptureSequenceState'
+      isCapturing: 'getCaptureSequenceState',
+      isCaptureRequired: 'getIsCaptureRequired'
     }),
 
     canMakeMove() {
@@ -213,24 +216,33 @@ export default {
       'aHighlightCaptureFromSquare'
     ]),
 
+    async endPlayerTurn(square) {
+      const isMoveWhite = square.bHasWhiteChip || square.bHasWhiteKing 
+      this.lastPlayerMoved = (this.isHostWhite ^ isMoveWhite) ? this.otherUserID : this.hostUserID
+
+      console.log(this.lastPlayerMoved)
+
+      // Write last player moved to db 
+      await this.currentGame.update({ last_player_moved: this.lastPlayerMoved })
+
+      // Stop the last player's clock
+      await axios.get('http://localhost:5000/stopTime')
+      
+      // Start the other player's clock
+      const player = this.lastPlayerMoved === this.hostUserID ? 'other' : 'host'
+      await axios.get(`http://localhost:5000/startTime/${player}`)
+    },
+
     async updateLastPlayerMoved(square) {
       if (!this.isCapturing) {
-        const isMoveWhite = square.bHasWhiteChip || square.bHasWhiteKing 
-        this.lastPlayerMoved = (this.isHostWhite ^ isMoveWhite) ? this.otherUserID : this.hostUserID
-
-        // Write last player moved to db 
-        await this.currentGame.update({ last_player_moved: this.lastPlayerMoved })
-
-        // Stop the last player's clock
-        await axios.get('http://localhost:5000/stopTime')
-        
-        // Start the other player's clock
-        const player = this.lastPlayerMoved === this.hostUserID ? 'other' : 'host'
-        await axios.get(`http://localhost:5000/startTime/${player}`)
+        this.endPlayerTurn(square)
       } else {
-        console.log("is capturing")
         const playerIsWhite = this.selfColor === 'w'
         this.aHighlightCaptureFromSquare(square, playerIsWhite)
+
+        if (!this.isCapturing) {
+          this.endPlayerTurn(square)
+        }
       }
     }
   }

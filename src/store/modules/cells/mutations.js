@@ -3,6 +3,7 @@ import {
   bSourceHasWhite,
   bPieceExistsAdj,
   bPieceExistsAfterAdj,
+  bCanCapture,
   bNoBlackJumps,
   bNoWhiteJumps
 } from '@/store/services/moveCaptureService'
@@ -79,22 +80,8 @@ const helpers = {
         boardClone[array[0]][array[1]].isPossibleCapture = true
       }
     }
-    
-    console.log(aPossibleCaptures)
 
     state.cells = boardClone
-    console.log(state.cells)
-  },
-
-  computed: {
-    bCanCapture: (board, coords, isWhite) => {
-      console.log(coords)
-      const bNextRowAbove = coords.nRow + 2 === coords.nDestRow
-      const bSkippedEnemyPiece = bPieceExistsAdj(board, coords, isWhite) && bNextRowAbove
-      return isWhite ? 
-        bSourceHasWhite(board, coords) && bSkippedEnemyPiece : 
-        bSourceHasBlack(board, coords) && bSkippedEnemyPiece
-    }
   }
 }
 
@@ -134,7 +121,7 @@ const mutations = {
     const srcCell = boardClone[coords.nRow - 1][coords.nCol - 1]
     const isWhite = srcCell.bHasWhiteChip || srcCell.bHasWhiteKing
     srcCell.isHighlighted = true
-    
+
     if (!state.bIsCaptureRequired) { 
       // Fetch and store legal squares 
       let aPossibleCells = []
@@ -158,7 +145,6 @@ const mutations = {
         }
       }
     } else {
-      console.log('hello')
       mutations.mHighlightCaptureFromSquare(state, coords, isWhite)
     }
 
@@ -336,7 +322,9 @@ const mutations = {
     if (!bPieceExistsAfterAdj(state.cells, coords)) {
       if (bWhiteCanCapture) {
         // If a capture sequence hasn't started, start it
+        console.log(state.bStartedCaptureSequence)
         if (!state.bStartedCaptureSequence) {
+          console.log('hello?')
           mutations.mSetCaptureSequenceState(state, true)
         }
         
@@ -459,17 +447,8 @@ const mutations = {
     state.bStartedCaptureSequence = isCaptureOngoing
   },
 
-  mHighlightCaptureFromSquare: (state, coords, playerIsWhite) => {
+  a: (state, coords, playerIsWhite) => {
     const coordsTopLeft = (row, col) => {
-      return { 
-        nRow: row, 
-        nCol: col,
-        nDestRow: row + 2,
-        nDestCol: col + 2
-      }
-    }
-
-    const coordsTopRight = (row, col) => {
       return { 
         nRow: row, 
         nCol: col,
@@ -478,19 +457,33 @@ const mutations = {
       }
     }
 
+    const coordsTopRight = (row, col) => {
+      return { 
+        nRow: row, 
+        nCol: col,
+        nDestRow: row + 2,
+        nDestCol: col + 2
+      }
+    }
+
     const { nRow, nCol } = coords
-    console.log(coords)
-    const bCanCapture = 
-      helpers.computed.bCanCapture(state.cells, coordsTopLeft(nRow, nCol), playerIsWhite) ||
-      helpers.computed.bCanCapture(state.cells, coordsTopRight(nRow, nCol), playerIsWhite)
+    const canCapture = 
+      bCanCapture(state.cells, coordsTopLeft(nRow, nCol), playerIsWhite) ||
+      bCanCapture(state.cells, coordsTopRight(nRow, nCol), playerIsWhite)
 
     // If a player can capture, highlight. Otherwise, stop the capture sequence and end the turn
-    if (bCanCapture) {
+    if (canCapture) {
       mutations.mSetCaptureRequired(state, true)
       const aPossibleCaptures = getPossibleCaptures(state.cells, nRow, nCol, playerIsWhite)
       helpers.highlightCaptures(state, aPossibleCaptures)
-      console.log('highlighted captues')
-    } else {
+    } 
+
+    return canCapture
+  },
+
+  mHighlightCaptureFromSquare: (state, coords, playerIsWhite) => {
+    // mutations.a
+    if (!mutations.a(state, coords, playerIsWhite)) {
       mutations.mSetCaptureSequenceState(state, false)
     }
   },
@@ -506,7 +499,7 @@ const mutations = {
           bSourceHasBlack(state.cells, coords)
          
         if (bContainsPiece) {
-          mutations.mHighlightCaptureFromSquare(state, coords, playerIsWhite)
+          mutations.a(state, coords, playerIsWhite)
         } 
       }
     }

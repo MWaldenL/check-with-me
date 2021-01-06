@@ -11,6 +11,7 @@
 </template>
 
 <script>
+import { bCanCapture } from '@/store/services/moveCaptureService'
 import { bIsValidCapture } from '@/store/services/kingCaptureService'
 import { checkIfWhiteStuck, checkIfBlackStuck } from '@/store/services/winCheckerService'
 import { mapState, mapGetters, mapActions } from 'vuex'
@@ -32,6 +33,7 @@ export default {
       whiteCount: 'getWhiteCount',
       blackCount: 'getBlackCount',
       bActiveGame: 'getActiveGame',
+      captureSquaresList: 'getCaptureSquaresList',
       isLastMoveLegal: 'getIsLastMoveLegal',
       isCaptureRequired: 'getIsCaptureRequired'
     }),
@@ -167,7 +169,9 @@ export default {
                 this.aKingCapturePiece(payload)
                 willEmit = this.isLastMoveLegal && this.isCaptureRequired
               } else {
-                this.cancelCurrentMove()  
+                if (!this.isCaptureRequired) {
+                  this.cancelCurrentMove()
+                }
                 willEmit = false
               }
             } else { 
@@ -178,7 +182,9 @@ export default {
                 this.aMoveForward(payload)
                 willEmit = this.isLastMoveLegal && !this.isCaptureRequired
               } else {
-                this.cancelCurrentMove()
+                if (!this.isCaptureRequired) {
+                  this.cancelCurrentMove()
+                }
                 willEmit = false
               }
             }
@@ -187,8 +193,35 @@ export default {
             if (willEmit) {
               this.$emit("makeMove", source)
             }
-          } else {  // Simply highlight the piece clicked
+          } else {
             if (this.bContainsPiece) {
+
+              // Prevent a player from making a non-capturing move when a capture is required  
+              if (this.isCaptureRequired) {
+                const coordsTopLeft = {
+                  nRow: this.row, 
+                  nCol: this.col,
+                  nDestRow: this.row + 2,
+                  nDestCol: this.col - 2
+                }
+
+                const coordsTopRight = {
+                  ...coordsTopLeft,
+                  nDestCol: this.col + 2
+                }
+
+                const canCapture = 
+                  bCanCapture(this.board, coordsTopLeft, this.selfColor === 'w') ||
+                  bCanCapture(this.board, coordsTopRight, this.selfColor === 'w')
+
+                console.log(bCanCapture(this.board, coordsTopLeft, this.selfColor === 'w'))
+                console.log(bCanCapture(this.board, coordsTopRight, this.selfColor === 'w'))
+
+                if (!canCapture) {
+                  return
+                }
+              }
+
               this.aHighlight({ 
                 nRow: this.row, 
                 nCol: this.col, 

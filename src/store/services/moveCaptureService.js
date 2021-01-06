@@ -5,9 +5,13 @@ export const bSourceHasWhiteKing = (board, coords) => board[coords.nRow - 1][coo
 
 export const bPieceExistsAdj = (board, coords, isWhite) => {
   if (coords.nDestRow && coords.nDestCol) {
+    const bInBounds = coords.nDestRow > 0 && coords.nDestRow <= 8 && coords.nDestCol > 0 && coords.nDestCol <= 8
+    if (!bInBounds) {
+      return false
+    }
+
     const bTopRight = coords.nDestRow === coords.nRow + 2 && coords.nDestCol === coords.nCol + 2
     const bTopLeft = coords.nDestRow === coords.nRow + 2 && coords.nDestCol === coords.nCol - 2
-
     if (bTopRight) {
       return isWhite ? 
         board[coords.nRow + 1 - 1][coords.nCol + 1 - 1].bHasBlackChip : 
@@ -17,18 +21,22 @@ export const bPieceExistsAdj = (board, coords, isWhite) => {
         board[coords.nRow + 1 - 1][coords.nCol - 1 - 1].bHasBlackChip : 
         board[coords.nRow + 1 - 1][coords.nCol - 1 - 1].bHasWhiteChip
     }
-  } else {
-    return isWhite ? 
-      (board[coords.nRow + 1 - 1][coords.nCol + 1 - 1].bHasWhiteChip ||
-      board[coords.nRow + 1 - 1][coords.nCol - 1 - 1].bHasWhiteChip) :
-      (board[coords.nRow + 1 - 1][coords.nCol + 1 - 1].bHasBlackChip ||
-      board[coords.nRow + 1 - 1][coords.nCol - 1 - 1].bHasBlackChip) 
   }
 }
 
 export const bPieceExistsAfterAdj = (board, coords) =>
   board[coords.nDestRow - 1][coords.nDestCol - 1].bHasBlackChip ||
   board[coords.nDestRow - 1][coords.nDestCol - 1].bHasWhiteChip
+
+
+export const bCanCapture = (board, coords, isWhite) => {
+  const bNextRowAbove = coords.nRow + 2 === coords.nDestRow
+  const bSkippedEnemyPiece = bPieceExistsAdj(board, coords, isWhite) && bNextRowAbove
+
+  return isWhite ? 
+    bSourceHasWhite(board, coords) && bSkippedEnemyPiece && !bPieceExistsAfterAdj(board, coords) : 
+    bSourceHasBlack(board, coords) && bSkippedEnemyPiece && !bPieceExistsAfterAdj(board, coords)
+}
 
 export const bNoBlackJumps = (board, coords) => {
   let bFound = true

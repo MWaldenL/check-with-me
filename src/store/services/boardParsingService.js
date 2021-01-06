@@ -168,3 +168,4 @@ export const getPDNFromBoard = (board, turn, isPlayerBlack) => {
 // Captures:            [FEN "O:W1,55:B10,64"]
 // Test 1 Capture Highlighting: [FEN "O:W19,21,37:B28,30,44,46"]`
 // Test 2: Multiple Captures: [FEN "O:W3:B12,28,44"]
+// Test 3: Multiple Captures with extra piece: [FEN "O:W3,16:B12,28,44"]
