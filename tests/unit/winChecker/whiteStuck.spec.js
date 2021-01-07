@@ -46,5 +46,19 @@ describe ('Checking if white has no more legal moves', () => {
       // Assert
       expect(result).toEqual(expected)
     })
+  }),
+
+  it ('white king blocked on all four directions', () => {
+    // Arrange
+    const pdn = `[FEN "O:WK28:B10,14,19,21,35,37,42,46"]`
+    const board = getBoardFromPDN(pdn)
+    const isWhite = true
+    const expected = true
+
+    // Act
+    const result = checkIfPlayerStuck(board, isWhite)
+
+    // Assert
+    expect(result).toEqual(expected)
   })
 })  
