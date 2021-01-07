@@ -10,7 +10,7 @@ Vue.use(Vuex)
 
 // create store
 export default new Vuex.Store({
-  plugins: [createPersistedState()],
+  // plugins: [createPersistedState()],
   modules: {
     cells,
     auth,

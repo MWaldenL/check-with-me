@@ -21,7 +21,7 @@ const getBoard = () => {
   return board
 }
 
-describe('unblocked capture attempt for black king', () => {
+describe('unblocked capture attempt for white king', () => {
   /**
    * _ _ _ _ _ _ _ _
    * _ _ _ _ _ _ B _

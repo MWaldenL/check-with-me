@@ -1,6 +1,8 @@
 import {
-  bSourceHasBlack,
   bSourceHasWhite,
+  bSourceHasBlack,
+  bSourceHasWhiteKing,
+  bSourceHasBlackKing,
   bPieceExistsAdj,
   bPieceExistsAfterAdj,
   bCanCapture,
@@ -12,7 +14,8 @@ import {
   getPossibleMoves,
   getPossibleCaptures,
   getPossibleMoveBlackKing,
-  getPossibleMoveWhiteKing
+  getPossibleMoveWhiteKing,
+  getPossibleKingCaptures
 } from '@/store/services/highlightService'
 
 import { getBoardFromPDN } from '@/store/services/boardParsingService'
@@ -69,11 +72,11 @@ const helpers = {
     }
   },
 
-  highlightCaptures: (state, aPossibleCaptures) => {
+  highlightCaptures: (state, captureList) => {
     // Perform a deep copy for board updating
     const boardClone = JSON.parse(JSON.stringify(state.cells))
 
-    for (const array of aPossibleCaptures) {
+    for (const array of captureList) {
       if (array[2] === 0) {
         boardClone[array[0]][array[1]].isPossibleMove = true
       } else { 
@@ -83,7 +86,7 @@ const helpers = {
 
     state.cells = boardClone
   },
-
+  
   computed: {
     coordsTopLeft: (row, col) => {
       return { 
@@ -490,13 +493,18 @@ const mutations = {
       helpers.highlightCaptures(state, aPossibleCaptures)
     } else {
       mutations.mSetCaptureSequenceState(state, false)
+
+      // TODO: Potential bug. Remove if this breaks things
+      mutations.mSetCaptureRequired(state, false)
+      //********************************************/
+
     }
   },
 
   mHighlightBoardCaptures: (state, playerIsWhite) => {
     const { coordsTopLeft, coordsTopRight } = helpers.computed
 
-    let bContainsPiece
+    let bContainsPiece, bContainsKing
     // For each square in the board, highlight possible captures
     for (let row=1; row <= 8; row++) {
       for (let col=1; col <= 8; col++) {
@@ -504,19 +512,41 @@ const mutations = {
         bContainsPiece = playerIsWhite ? 
           bSourceHasWhite(state.cells, coords) :
           bSourceHasBlack(state.cells, coords)
-         
+
+        bContainsKing = playerIsWhite ? 
+          bSourceHasWhiteKing(state.cells, coords) :
+          bSourceHasBlackKing(state.cells, coords)
+        
+        // Highlight king captures
+        if (bContainsKing) {
+          const possibleCaptures = getPossibleKingCaptures(state.cells, row, col, playerIsWhite)
+
+          // Search the capture list and check if there is an array with a 1 at the end
+          // 1 means that there is a target piece to capture
+          let kingCanCapture = false 
+          for (let arr of possibleCaptures) {
+            kingCanCapture = kingCanCapture || (arr[2] === 1)
+          }
+          
+          if (kingCanCapture) {
+            mutations.mSetCaptureRequired(state, true)
+            helpers.highlightCaptures(state, possibleCaptures)
+          }
+        }
+
+        // Highlight piece captures
         if (bContainsPiece) {
-          const canCapture =
+          const pieceCanCapture =
             bCanCapture(state.cells, coordsTopLeft(row, col), playerIsWhite) ||
             bCanCapture(state.cells, coordsTopRight(row, col), playerIsWhite)
     
           // If a player can capture, highlight. Otherwise, stop the capture sequence and end the turn
-          if (canCapture) {
+          if (pieceCanCapture) {
             mutations.mSetCaptureRequired(state, true)
             const aPossibleCaptures = getPossibleCaptures(state.cells, row, col, playerIsWhite)
             helpers.highlightCaptures(state, aPossibleCaptures)
           }
-        } 
+        }
       }
     }
   },

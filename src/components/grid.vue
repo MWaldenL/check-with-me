@@ -162,7 +162,6 @@ export default {
       lastPlayerMoved: null,
       bHostRunning: true,
       bOtherRunning: false,
-
       prevSourceSquare: null
     }
   },
@@ -253,10 +252,8 @@ export default {
     },
 
     updateLastPlayerMoved(coords) {
-      console.log('updating last player')
       const { nRow, nCol, nDestRow, nDestCol } = coords
       this.prevSourceSquare = { nRow, nCol }
-      // this.prevDestSquare = { nRow: nDestRow, nCol: nDestCol }
       this.aSetPrevDestSquare({ nRow: nDestRow, nCol: nDestCol })
 
       if (!this.isCapturing) {

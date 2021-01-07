@@ -79,7 +79,7 @@ export const getPossibleCaptures = (board, nRow, nCol, isWhite) => {
   return moves
 }
 
-export const getPossibleMoveBlackKing = (board, nRow, nCol) => {
+export const getPossibleMoveBlackKing = (board, nRow, nCol, isCaptureRequired) => {
   let moves = []
 
   let nRowTraverser = nRow
@@ -107,7 +107,9 @@ export const getPossibleMoveBlackKing = (board, nRow, nCol) => {
         break
       }
     } else {
-      moves.push([nRowTraverser, nColTraverser, 0])
+      if (!isCaptureRequired) {
+        moves.push([nRowTraverser, nColTraverser, 0])
+      }
     }
     nRowTraverser++
     nColTraverser++
@@ -138,7 +140,9 @@ export const getPossibleMoveBlackKing = (board, nRow, nCol) => {
         break
       }
     } else {
-      moves.push([nRowTraverser, nColTraverser, 0])
+      if (!isCaptureRequired) {
+        moves.push([nRowTraverser, nColTraverser, 0])
+      }
     }
     nRowTraverser--
     nColTraverser++
@@ -169,7 +173,9 @@ export const getPossibleMoveBlackKing = (board, nRow, nCol) => {
         break
       }
     } else {
-      moves.push([nRowTraverser, nColTraverser, 0])
+      if (!isCaptureRequired) {
+        moves.push([nRowTraverser, nColTraverser, 0])
+      }
     }
     nRowTraverser--
     nColTraverser--
@@ -200,7 +206,9 @@ export const getPossibleMoveBlackKing = (board, nRow, nCol) => {
         break
       }
     } else {
-      moves.push([nRowTraverser, nColTraverser, 0])
+      if (!isCaptureRequired) {
+        moves.push([nRowTraverser, nColTraverser, 0])
+      }
     }
     nRowTraverser++
     nColTraverser--
@@ -209,7 +217,7 @@ export const getPossibleMoveBlackKing = (board, nRow, nCol) => {
   return moves
 }
 
-export const getPossibleMoveWhiteKing = (board, nRow, nCol) => {
+export const getPossibleMoveWhiteKing = (board, nRow, nCol, isCaptureRequired) => {
   let moves = []
 
   let nRowTraverser = nRow
@@ -237,7 +245,9 @@ export const getPossibleMoveWhiteKing = (board, nRow, nCol) => {
         break
       }
     } else {
-      moves.push([nRowTraverser, nColTraverser, 0])
+      if (!isCaptureRequired) {
+        moves.push([nRowTraverser, nColTraverser, 0])
+      }
     }
     nRowTraverser++
     nColTraverser++
@@ -268,7 +278,9 @@ export const getPossibleMoveWhiteKing = (board, nRow, nCol) => {
         break
       }
     } else {
-      moves.push([nRowTraverser, nColTraverser, 0])
+      if (!isCaptureRequired) {
+        moves.push([nRowTraverser, nColTraverser, 0])
+      }
     }
     nRowTraverser--
     nColTraverser++
@@ -299,7 +311,9 @@ export const getPossibleMoveWhiteKing = (board, nRow, nCol) => {
         break
       }
     } else {
-      moves.push([nRowTraverser, nColTraverser, 0])
+      if (!isCaptureRequired) {
+        moves.push([nRowTraverser, nColTraverser, 0])
+      }
     }
     nRowTraverser--
     nColTraverser--
@@ -330,11 +344,19 @@ export const getPossibleMoveWhiteKing = (board, nRow, nCol) => {
         break
       }
     } else {
-      moves.push([nRowTraverser, nColTraverser, 0])
+      if (!isCaptureRequired) {
+        moves.push([nRowTraverser, nColTraverser, 0])
+      }
     }
     nRowTraverser++
     nColTraverser--
   }
 
   return moves
+}
+
+export const getPossibleKingCaptures = (board, nRow, nCol, isWhite) => {
+  return isWhite ? 
+    getPossibleMoveWhiteKing(board, nRow, nCol, true) : 
+    getPossibleMoveBlackKing(board, nRow, nCol, true)
 }
