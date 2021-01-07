@@ -494,17 +494,25 @@ const mutations = {
     const { pieceCanCapture, kingCanCapture } = helpers.computed
     const { coords, playerIsWhite } = payload
     const { nRow, nCol } = coords
-    const kingCaptureList = getPossibleKingCaptures(state.cells, nRow, nCol, playerIsWhite)
+
+    const bContainsPiece = playerIsWhite ? 
+      bSourceHasWhite(state.cells, coords) :
+      bSourceHasBlack(state.cells, coords)
+    const bContainsKing = playerIsWhite ? 
+      bSourceHasWhiteKing(state.cells, coords) :
+      bSourceHasBlackKing(state.cells, coords)
+
+    const pieceCaptureList = bContainsPiece ? 
+      getPossibleCaptures(state.cells, nRow, nCol, playerIsWhite) : []
+    const kingCaptureList = bContainsKing ? 
+      getPossibleKingCaptures(state.cells, nRow, nCol, playerIsWhite) : []
+
     const canPieceCapture = pieceCanCapture(state, nRow, nCol, playerIsWhite)
     const canKingCapture = kingCanCapture(kingCaptureList)
-
+    
     // Highlight piece/king captures and end turn when no more captures are available
     if (canPieceCapture || canKingCapture) {
       mutations.mSetCaptureRequired(state, true)
-      
-      const pieceCaptureList = getPossibleCaptures(state.cells, nRow, nCol, playerIsWhite)
-      const kingCaptureList = getPossibleKingCaptures(state.cells, nRow, nCol, playerIsWhite)  
-
       helpers.highlightCaptures(state, pieceCaptureList)
       helpers.highlightCaptures(state, kingCaptureList)
     } else {
@@ -514,8 +522,10 @@ const mutations = {
   },
 
   mHighlightBoardCaptures: (state, playerIsWhite) => {
-    const { coordsTopLeft, coordsTopRight } = helpers.computed
-    let bContainsPiece, bContainsKing
+    const { pieceCanCapture, kingCanCapture } = helpers.computed
+    let bContainsPiece, bContainsKing, 
+      pieceCaptureList, kingCaptureList, 
+      canPieceCapture, canKingCapture
     
     // For each square in the board, highlight possible captures
     for (let row=1; row <= 8; row++) {
@@ -529,30 +539,18 @@ const mutations = {
           bSourceHasWhiteKing(state.cells, coords) :
           bSourceHasBlackKing(state.cells, coords)
         
-        // Highlight king captures
-        if (bContainsKing) {
-          const possibleCaptures = getPossibleKingCaptures(state.cells, row, col, playerIsWhite)
-
-          // Search the capture list and check if there is at least once possible capture
-          const kingCanCapture = possibleCaptures.reduce((a, c) => a || c[2], possibleCaptures[0][2])
-          if (kingCanCapture) {
-            mutations.mSetCaptureRequired(state, true)
-            helpers.highlightCaptures(state, possibleCaptures)
-          }
-        }
-
-        // Highlight piece captures
-        if (bContainsPiece) {
-          const pieceCanCapture =
-            bCanCapture(state.cells, coordsTopLeft(row, col), playerIsWhite) ||
-            bCanCapture(state.cells, coordsTopRight(row, col), playerIsWhite)
-    
-          // If a player can capture, highlight. Otherwise, stop the capture sequence and end the turn
-          if (pieceCanCapture) {
-            mutations.mSetCaptureRequired(state, true)
-            const aPossibleCaptures = getPossibleCaptures(state.cells, row, col, playerIsWhite)
-            helpers.highlightCaptures(state, aPossibleCaptures)
-          }
+        pieceCaptureList = bContainsPiece ? 
+          getPossibleCaptures(state.cells, row, col, playerIsWhite) : []
+        kingCaptureList = bContainsKing ? 
+          getPossibleKingCaptures(state.cells, row, col, playerIsWhite) : []
+          
+        canPieceCapture = pieceCanCapture(state, row, col, playerIsWhite)
+        canKingCapture = kingCanCapture(kingCaptureList)
+        
+        if (canPieceCapture || canKingCapture) {
+          mutations.mSetCaptureRequired(state, true)
+          helpers.highlightCaptures(state, pieceCaptureList)
+          helpers.highlightCaptures(state, kingCaptureList)
         }
       }
     }
