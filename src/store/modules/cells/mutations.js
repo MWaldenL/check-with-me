@@ -390,6 +390,7 @@ const mutations = {
 
     if (bIsValidCapture) {
       helpers.handleValidMove(state, newCurr, newDest, adjacent)
+      state.firstClick = newDest
     } else {
       helpers.handleIllegalMove(state, coords)
     }
@@ -449,6 +450,7 @@ const mutations = {
       }
 
       helpers.handleValidMove(state, newCurr, newDest, newTarget)
+      state.firstClick = newDest
     }
   },
 

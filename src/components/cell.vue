@@ -172,6 +172,8 @@ export default {
         if (this.canMakeMove) {
           const source = this.firstClick
           
+          console.log(source)
+
           // Highlight or attempt to move a piece
           if (source != null) {
             this.isSelected = false
@@ -232,20 +234,17 @@ export default {
             if (this.bContainsPiece) {
               // Prevent a player from clicking on another player's piece
               if (this.isSelectingEnemyPiece) {
-                console.log('selecting enemy piece')
                 return
               }
 
               // Prevent a player from making a non-capturing move when a capture is required  
               if (this.isCaptureRequired && !this.canSelectedPieceCapture && !this.canSelectedKingCapture) {
-                console.log('have to capture')
                 return
               }
 
               // Prevent a player from making a capture outside the current sequence
               if (this.isCapturing && this.prevDestSquare !== null) {
                 if (this.isAttemptingToCaptureOutsideSequence) {
-                  console.log('capturing outside sequence')
                   return
                 }
               }
