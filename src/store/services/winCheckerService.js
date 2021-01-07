@@ -23,52 +23,6 @@ const filterBlack = board => {
   return blackCells
 }
 
-export const checkIfWhiteStuck = (board) => {
-  let whiteCells = filterWhite(board)
-  let bIsBlocked = true
-  let topRight, currentSquare
-
-  for (const cell of whiteCells) {
-    const { nRow, nCol } = cell
-    
-    // Check whether top right is blocked
-    currentSquare = board[nRow][nCol]
-    if (bIsBlocked && nCol < 8 && nRow < 8) {
-      if (currentSquare.bHasBlackChip || currentSquare.bHasBlackKing) { // check for top right capture
-        if (nCol < 7 && nRow < 7) {
-          topRight = board[nRow + 1][nCol + 1]
-          bIsBlocked = 
-            topRight.bHasBlackChip || 
-            topRight.bHasBlackKing || 
-            topRight.bHasWhiteChip || 
-            topRight.bHasWhiteKing
-        } 
-      } else {
-        bIsBlocked = false
-      }
-    }
-
-    // Check whether top left is blocked
-    currentSquare = board[nRow][nCol - 2]
-    if (bIsBlocked && nCol > 1 && nRow < 8) {
-      if (currentSquare.bHasBlackChip || currentSquare.bHasBlackKing) { // check for top left capture
-        if (nCol > 2 && nRow < 7) {
-          topLeft = board[nRow + 1][nCol - 3]
-          bIsBlocked = 
-            topLeft.bHasBlackChip || 
-            topLeft.bHasBlackKing || 
-            topLeft.bHasWhiteChip || 
-            topLeft.bHasWhiteKing 
-        }
-      } else {
-        bIsBlocked = false
-      }
-    }
-  }
-
-  return bIsBlocked
-}
-
 export const checkIfPlayerStuck = (board, isWhite) => {
   let cells = isWhite ? filterWhite(board) : filterBlack(board)
   let bIsBlocked = true
