@@ -13,6 +13,7 @@
 <script>
 import { bCanCapture } from '@/store/services/moveCaptureService'
 import { bIsValidCapture } from '@/store/services/kingCaptureService'
+import { getPossibleKingCaptures } from '@/store/services/highlightService'
 import { checkIfWhiteStuck, checkIfBlackStuck } from '@/store/services/winCheckerService'
 import { mapState, mapGetters, mapActions } from 'vuex'
 
@@ -126,6 +127,13 @@ export default {
             bCanCapture(this.board, coordsTopRight, this.selfColor === 'w')
     },
 
+    canSelectedKingCapture() {
+      const playerIsWhite = this.selfColor === 'w'
+      const possibleCaptures = getPossibleKingCaptures(this.board, this.row, this.col, playerIsWhite)
+      const canKingCapture = possibleCaptures.reduce((a, c) => a || c[2], possibleCaptures[0][2])
+      return canKingCapture
+    },
+
     isAttemptingToCaptureOutsideSequence() {
       const { nRow, nCol } = this.prevDestSquare
       return nRow !== this.row || nCol !== this.col
@@ -227,7 +235,7 @@ export default {
               }
 
               // Prevent a player from making a non-capturing move when a capture is required  
-              if (this.isCaptureRequired && !this.canSelectedPieceCapture) {
+              if (this.isCaptureRequired && !this.canSelectedPieceCapture && !this.canSelectedKingCapture) {
                 console.log('have to capture')
                 return
               }
