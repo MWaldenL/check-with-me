@@ -351,8 +351,14 @@ const mutations = {
 
     // Check if white and black can capture
     const isWhite = true
-    const bWhiteCanCapture = bSourceHasWhite(state.cells, coords) && bPieceExistsAdj(state.cells, coords, isWhite) && bNextRowAbove
-    const bBlackCanCapture = bSourceHasBlack(state.cells, coords) && bPieceExistsAdj(state.cells, coords, !isWhite) && bNextRowAbove
+    const bWhiteCanCapture = 
+      bSourceHasWhite(state.cells, coords) && 
+      bPieceExistsAdj(state.cells, coords, isWhite) && 
+      bNextRowAbove
+    const bBlackCanCapture = 
+      bSourceHasBlack(state.cells, coords) && 
+      bPieceExistsAdj(state.cells, coords, !isWhite) && 
+      bNextRowAbove
 
     // A piece can make a capture if the following conditions are met:
     // 1. An opposing piece exists diagonally adjacent to the current piece

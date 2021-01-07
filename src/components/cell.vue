@@ -14,7 +14,7 @@
 import { bCanCapture } from '@/store/services/moveCaptureService'
 import { bIsValidCapture } from '@/store/services/kingCaptureService'
 import { getPossibleKingCaptures } from '@/store/services/highlightService'
-import { checkIfWhiteStuck, checkIfBlackStuck } from '@/store/services/winCheckerService'
+import { checkIfPlayerStuck } from '@/store/services/winCheckerService'
 import { mapState, mapGetters, mapActions } from 'vuex'
 
 export default {
@@ -171,8 +171,6 @@ export default {
       if (this.bActiveGame) {
         if (this.canMakeMove) {
           const source = this.firstClick
-          
-          console.log(source)
 
           // Highlight or attempt to move a piece
           if (source != null) {
@@ -267,9 +265,11 @@ export default {
       }
     },
 
-    setGameResults () { // Put code back to previous method if it breaks
-      let bWhiteStuck = checkIfWhiteStuck(this.board)
-      let bBlackStuck = checkIfBlackStuck(this.board)
+    setGameResults() {
+      const isWhite = true
+      let bWhiteStuck = checkIfPlayerStuck(this.board, isWhite)
+      let bBlackStuck = checkIfPlayerStuck(this.board, !isWhite)
+
       if (bWhiteStuck && bBlackStuck) {
         this.aSetActiveGame(false)
         this.aSetWinner('D')
