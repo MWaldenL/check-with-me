@@ -113,7 +113,9 @@ const helpers = {
     },
 
     kingCanCapture: (captureList) => {
-      return captureList.reduce((a, c) => a || c[2], captureList[0][2])
+      return (captureList.length > 0) ?  
+        captureList.reduce((a, c) => a || c[2], captureList[0][2]) : 
+        false
     }
   }
 }
@@ -500,11 +502,11 @@ const mutations = {
     if (canPieceCapture || canKingCapture) {
       mutations.mSetCaptureRequired(state, true)
       
-      let captureList = canPieceCapture ? 
-        getPossibleCaptures(state.cells, nRow, nCol, playerIsWhite) :
-        getPossibleKingCaptures(state.cells, nRow, nCol, playerIsWhite)  
+      const pieceCaptureList = getPossibleCaptures(state.cells, nRow, nCol, playerIsWhite)
+      const kingCaptureList = getPossibleKingCaptures(state.cells, nRow, nCol, playerIsWhite)  
 
-      helpers.highlightCaptures(state, captureList)
+      helpers.highlightCaptures(state, pieceCaptureList)
+      helpers.highlightCaptures(state, kingCaptureList)
     } else {
       mutations.mSetCaptureSequenceState(state, false)
       mutations.mSetCaptureRequired(state, false)

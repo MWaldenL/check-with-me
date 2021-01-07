@@ -130,8 +130,10 @@ export default {
     canSelectedKingCapture() {
       const playerIsWhite = this.selfColor === 'w'
       const possibleCaptures = getPossibleKingCaptures(this.board, this.row, this.col, playerIsWhite)
-      const canKingCapture = possibleCaptures.reduce((a, c) => a || c[2], possibleCaptures[0][2])
-      return canKingCapture
+      if (possibleCaptures.length > 0) {
+        const canKingCapture = possibleCaptures.reduce((a, c) => a || c[2], possibleCaptures[0][2])
+        return canKingCapture
+      } return false
     },
 
     isAttemptingToCaptureOutsideSequence() {
