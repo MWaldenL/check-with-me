@@ -382,6 +382,14 @@ describe('Mutation testing', () => {
           ]
         ]
 
+        const expectedFirstClick = {
+          nRow: 3,
+          nCol: 3, 
+          bHasBlackChip: false, 
+          bHasBlackKing: false, 
+          bHasWhiteChip: true, 
+          bHasWhiteKing: false, 
+        }
 
         // Act
         let coords = { nRow: 1, nCol: 1, nDestRow: 3, nDestCol: 3 }
@@ -395,7 +403,7 @@ describe('Mutation testing', () => {
          * _ _ _
          */
         expect(state.cells).toStrictEqual(expected)
-        expect(state.firstClick).toBe(null)
+        expect(state.firstClick).toStrictEqual(expectedFirstClick)
     }),
 
     it('Replaces the board with a deep copy of the updated board which \
@@ -526,7 +534,14 @@ describe('Mutation testing', () => {
             }
           ]
         ]
-
+        const expectedFirstClick = {
+          nRow: 3,
+          nCol: 3, 
+          bHasBlackChip: true, 
+          bHasBlackKing: false, 
+          bHasWhiteChip: false, 
+          bHasWhiteKing: false, 
+        }
 
         // Act
         let coords = { nRow: 1, nCol: 1, nDestRow: 3, nDestCol: 3 }
@@ -540,7 +555,7 @@ describe('Mutation testing', () => {
          * _ _ _
          */
         expect(state.cells).toStrictEqual(expected)
-        expect(state.firstClick).toBe(null)
+        expect(state.firstClick).toStrictEqual(expectedFirstClick)
     })
   })
 })
