@@ -227,6 +227,7 @@ export default {
       'aSetWinner',
       'aUpdateBoard',
       'aGetEnemyUsername',
+      'aResetFirstClick',
       'aHighlightBoardCaptures',
       'aHighlightCaptureFromSequence',
       'aSetPrevDestSquare'
@@ -238,16 +239,18 @@ export default {
         bSourceHasWhiteKing(this.board, this.prevDestSquare) 
 
       this.lastPlayerMoved = (this.isHostWhite ^ isMoveWhite) ? this.otherUserID : this.hostUserID
-
+  
       // Write last player moved to db 
       await this.currentGame.update({ last_player_moved: this.lastPlayerMoved })
 
       // Stop the last player's clock
       await axios.get('http://localhost:5000/stopTime')
-      
+
       // Start the other player's clock
       const player = this.lastPlayerMoved === this.hostUserID ? 'other' : 'host'
       await axios.get(`http://localhost:5000/startTime/${player}`)
+
+      this.aResetFirstClick()
     },
 
     updateLastPlayerMoved(coords) {

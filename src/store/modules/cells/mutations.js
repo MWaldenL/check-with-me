@@ -121,6 +121,10 @@ const helpers = {
 }
 
 const mutations = {
+  mResetFirstClick: state => {
+    state.firstClick = null
+  },
+
   mUnhighlight: state => {
     // Perform a deep copy for board updating
     const boardClone = JSON.parse(JSON.stringify(state.cells))
