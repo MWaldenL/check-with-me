@@ -222,7 +222,6 @@ export default {
   
   methods: {
     ...mapActions([
-      'aSetLastPlayerMoved',
       'aSetHostTimeLeft',
       'aSetOtherTimeLeft',
       'aSetWinner',

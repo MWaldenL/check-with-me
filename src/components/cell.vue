@@ -232,17 +232,20 @@ export default {
             if (this.bContainsPiece) {
               // Prevent a player from clicking on another player's piece
               if (this.isSelectingEnemyPiece) {
+                console.log('select enemy')
                 return
               }
 
               // Prevent a player from making a non-capturing move when a capture is required  
               if (this.isCaptureRequired && !this.canSelectedPieceCapture && !this.canSelectedKingCapture) {
+                console.log('piece cannot capture')
                 return
               }
 
               // Prevent a player from making a capture outside the current sequence
               if (this.isCapturing && this.prevDestSquare !== null) {
                 if (this.isAttemptingToCaptureOutsideSequence) {
+                  console.log('capture outside seq')
                   return
                 }
               }

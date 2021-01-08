@@ -3,10 +3,6 @@ const mutations = {
     state.currentGameID = gameID
   },
 
-  setCurrentBoardState(state, boardState) {
-    state.boardState = boardState
-  },
-
   setHostUser(state, uid) {
     state.hostUser = uid
   },
@@ -29,11 +25,7 @@ const mutations = {
   
   setHostIsWhite(state, isWhite) {
     state.isHostWhite = isWhite
-  },
-
-  setLastPlayerMoved(state, player) {
-    state.lastPlayerMoved = player
-  },
+  }
 }
 
 export default mutations

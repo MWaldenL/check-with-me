@@ -5,10 +5,8 @@ import auth from './modules/auth/index.js'
 import game from './modules/game/index.js'
 import createPersistedState from 'vuex-persistedstate'
 
-// load vuex
 Vue.use(Vuex)
 
-// create store
 export default new Vuex.Store({
   // plugins: [createPersistedState()],
   modules: {

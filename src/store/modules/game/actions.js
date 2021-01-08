@@ -11,14 +11,6 @@ const actions = {
   },
 
   /**
-   * Sets the current game's board state 
-   * @param boardState the board state in PDN format 
-   */
-  aSetCurrentBoardState({ commit }, boardState) {
-    commit('setCurrentBoardState', boardState)
-  },
-
-  /**
    * Sets the host user 
    * @param uid the Firebase UID of the game's host 
    */
@@ -40,14 +32,6 @@ const actions = {
    */
   aSetHostIsWhite({ commit }, isWhite) {
     commit('setHostIsWhite', isWhite)
-  },
-
-  /**
-   * Sets the last player moved
-   * @param player the Firebase UID of the player who last moved
-   */
-  async aSetLastPlayerMoved({ commit }, player) {
-    commit('setLastPlayerMoved', player)
   },
 
   /**
