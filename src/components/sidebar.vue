@@ -6,6 +6,9 @@
         <router-link to="/" class="router-link">
           <h3 class="cursor-pointer text-white">Play</h3>
         </router-link>
+          <router-link to="/gamelobby" class="router-link">
+            <h3 class="cursor-pointer text-white">Game Lobby</h3>
+          </router-link>
         <router-link to="/profile" class="router-link">
           <h3 class="cursor-pointer text-white">Profile</h3>
         </router-link>

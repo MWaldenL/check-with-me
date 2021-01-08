@@ -7,6 +7,7 @@ import Login from '../views/Login.vue'
 import Leaderboard from '../views/Leaderboard.vue'
 import ChangePassword from '../views/ChangePassword.vue'
 import ChangePasswordConfirm from '../views/ChangePasswordConfirm.vue'
+import GameLobby from '../views/GameLobby.vue'
 import Help from '../views/Help.vue'
 import firebase from  'firebase'
 import authStore from '@/store/modules/auth'
@@ -60,6 +61,12 @@ const routes = [
     path: '/leaderboard',
     name: 'Leaderboard',
     component: Leaderboard,
+    meta: { requiresNotAuth: false }
+  },
+  {
+    path: '/gamelobby',
+    name: 'GameLobby',
+    component: GameLobby,
     meta: { requiresNotAuth: false }
   }
 ]
