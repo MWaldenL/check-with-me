@@ -198,7 +198,7 @@ const mutations = {
         coords: { nRow: coords.nRow, nCol: coords.nCol }, 
         playerIsWhite: isWhite
       }
-      mutations.mHighlightCaptureFromSequence(state, payload, true)
+      mutations.mHighlightCaptureFromSequence(state, payload)
     }
   },
 
@@ -509,7 +509,7 @@ const mutations = {
     state.bStartedCaptureSequence = isCaptureOngoing
   },
 
-  mHighlightCaptureFromSequence: (state, payload, targetsOnly) => {
+  mHighlightCaptureFromSequence: (state, payload) => {
     const { pieceCanCapture, kingCanCapture } = helpers.computed
     const { boardClone, coords, playerIsWhite } = payload
     const { nRow, nCol } = coords
@@ -534,11 +534,11 @@ const mutations = {
       mutations.mSetCaptureRequired(state, true)
       
       if (pieceCaptureList.length > 0) { 
-        helpers.highlightCaptures(state, boardClone, pieceCaptureList, targetsOnly)
+        helpers.highlightCaptures(state, boardClone, pieceCaptureList, false)
       }
 
       if (kingCaptureList.length > 0) { 
-        helpers.highlightCaptures(state, boardClone, pieceCaptureList, targetsOnly)
+        helpers.highlightCaptures(state, boardClone, kingCaptureList, false)
       }
     } else {
       mutations.mSetCaptureSequenceState(state, false)
@@ -579,7 +579,7 @@ const mutations = {
           }
 
           if (kingCaptureList.length > 0) {
-            mutations._highlightCaptures(state, null, kingCaptureList, true)
+            helpers.highlightCaptures(state, null, kingCaptureList, true)
           }
         }
       }
