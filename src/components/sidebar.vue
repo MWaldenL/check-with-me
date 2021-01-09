@@ -75,7 +75,10 @@ export default {
 }
 
 .route-button {
-  background-color: transparent;
+  background-color: #343a40;
   border:none;
+}
+.route-button:active {
+  background-color: #343a40;
 }
 </style>
