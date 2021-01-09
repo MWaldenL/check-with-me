@@ -154,14 +154,28 @@ export default {
       'aSetWinner'
     ]),
 
-    cancelCurrentMove() { 
+    cancelCurrentMove(isCaptureRequired) { 
       if (this.bContainsPiece) {
-        this.aHighlight({
-          nRow: this.row, 
-          nCol: this.col, 
-          bHasBlackKing: this.hasBlackKing,
-          bHasWhiteKing: this.hasWhiteKing 
-        })
+        if (isCaptureRequired) {
+          // Check if a capture can be made
+          if (this.canSelectedPieceCapture) {
+            this.aHighlight({
+              nRow: this.row, 
+              nCol: this.col, 
+              bHasBlackKing: this.hasBlackKing,
+              bHasWhiteKing: this.hasWhiteKing 
+            })
+          } else {
+            this.aUnhighlight(null)
+          }
+        } else {
+          this.aHighlight({
+            nRow: this.row, 
+            nCol: this.col, 
+            bHasBlackKing: this.hasBlackKing,
+            bHasWhiteKing: this.hasWhiteKing 
+          })
+        }
       } else { // Illegal move
         this.aUnhighlight(null)
       }
@@ -204,9 +218,7 @@ export default {
                 this.aKingCapturePiece(payload)
                 willEmit = this.isLastMoveLegal && this.isCaptureRequired
               } else {
-                if (!this.isCaptureRequired) {
-                  this.cancelCurrentMove()
-                }
+                this.cancelCurrentMove(this.isCaptureRequired)
                 willEmit = false
               }
             } else { 
@@ -217,9 +229,7 @@ export default {
                 this.aMoveForward(payload)
                 willEmit = this.isLastMoveLegal && !this.isCaptureRequired
               } else {
-                if (!this.isCaptureRequired) {
-                  this.cancelCurrentMove()
-                }
+                this.cancelCurrentMove(this.isCaptureRequired)
                 willEmit = false
               }
             }
