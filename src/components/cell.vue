@@ -158,7 +158,7 @@ export default {
       if (this.bContainsPiece) {
         if (isCaptureRequired) {
           // Check if a capture can be made
-          if (this.canSelectedPieceCapture) {
+          if (this.canSelectedPieceCapture || this.canSelectedKingCapture) {
             this.aHighlight({
               nRow: this.row, 
               nCol: this.col, 
