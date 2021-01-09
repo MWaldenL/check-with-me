@@ -192,6 +192,7 @@ const mutations = {
           boardClone[array[0]][array[1]].isPossibleCapture = true
         }
       }
+      state.cells = boardClone
     } else {
       const payload = { 
         boardClone,
