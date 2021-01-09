@@ -79,6 +79,6 @@ export default {
   border:none;
 }
 .route-button:active {
-  background-color: #343a40;
+  outline: none;
 }
 </style>
