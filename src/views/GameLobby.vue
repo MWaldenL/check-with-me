@@ -176,25 +176,22 @@ export default {
     },
 
     joinRoom(room_id, index) {
-      let user = firebase.auth().currentUser.uid
-      console.log(user + " " + index)
+      let user_key = firebase.auth().currentUser.uid
+      console.log(user_key + " " + index)
 
       this.isActive.splice(index, 1, 0);
-      console.log(this.isActive)
 
-      // let path = "/users/" + user;
-      // let ref = db.getInstance().getReference(path);
-      // db.collection("games")
-      // .doc(room_id)
-      // .update({
-      //   other_user: ref
-      // })
-      // .then(() => {
+      db.collection("games")
+      .doc(room_id)
+      .update({
+        other_user:  db.doc('users/' + user_key)
+      })
+      .then(() => {
 
-      // })
-      // .catch(error => {
-      //   console.log("Error getting documents: ", error);
-      // })
+      })
+      .catch(error => {
+        console.log("Error getting documents: ", error);
+      })
     },
 
     createRoom() {
@@ -252,19 +249,21 @@ export default {
   .gameName {
     text-align: left;
     padding: 15px 8vw 30px 20px;
-    font-size: 1.25em;
+    font-size: 1.5em;
+    font-weight: bold;
   }
 
   #headerHost {
-    text-align: left;
+    text-align: Center;
     padding: 0px 15vw 10px 10px;
     font-size: 1.5em;
   }
   .gameHost {
-    text-align: left;
+    text-align: Center;
     column-width: 100px;
     padding: 15px 15vw 30px 10px;
-    font-size: 1.25em;
+    font-size: 1.5em;
+    font-weight: bold;
   }
 
   #headerButtonCont {
@@ -279,7 +278,8 @@ export default {
   .gameButton {
     text-align: right;
     padding: 15px 20px 30px 5vw;
-    font-size: 1.25em;
+    font-size: 1.5em;
+    font-weight: bold;
   }
   .greenButton {
     background-color: #779556;
@@ -330,6 +330,7 @@ export default {
   }
   .triangle-left:hover {
     border-right: 30px solid #BCFC8A;
+    cursor: pointer;
   }
 
   .triangle-right {
@@ -342,6 +343,7 @@ export default {
   }
   .triangle-right:hover {
     border-left: 30px solid #BCFC8A;
+    cursor: pointer;
   }
 
   .dead-triangle-right{
@@ -349,6 +351,7 @@ export default {
   }
   .dead-triangle-right:hover{
     border-left: 30px solid #444;
+    cursor: default;
   }
 
   .dead-triangle-left{
@@ -356,5 +359,6 @@ export default {
   }
   .dead-triangle-left:hover{
     border-right: 30px solid #444;
+    cursor: default;
   }
 </style>

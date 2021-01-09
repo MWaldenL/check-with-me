@@ -16,8 +16,8 @@ Vue.use(VueRouter)
 
 const routes = [
   {
-    path: '/',
-    name: 'Home',
+    path: '/play',
+    name: 'PlayBoard',
     component: Home,
     meta: { requiresAuth: true },
   },
@@ -64,7 +64,7 @@ const routes = [
     meta: { requiresNotAuth: false }
   },
   {
-    path: '/gamelobby',
+    path: '/',
     name: 'GameLobby',
     component: GameLobby,
     meta: { requiresNotAuth: false }
