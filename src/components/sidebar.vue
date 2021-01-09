@@ -18,7 +18,7 @@
         <router-link to="/help" class="router-link">
           <h3 class="cursor-pointer text-white">How to Play</h3>
         </router-link>
-        <router-link to="" class="router-link" @click.native="logout">
+        <router-link to="/login" class="router-link" @click.native="logout">
           <h3 class="cursor-pointer text-white">Logout</h3>
         </router-link>
       </div>
@@ -40,12 +40,12 @@ export default {
   methods: {
     ...mapActions(['logoutUser']),
     logout () {
-      // firebase.auth().signOut()
-      //   .then(() => {
-      //     this.logoutUser()
-      //     this.$router.push('/login')
-      //   })
-      console.log(this.$route.name)
+      firebase.auth().signOut()
+        .then(() => {
+          this.logoutUser()
+          this.$router.push('/login')
+        })
+      //console.log(this.$route.name)
     }
   }
 }
