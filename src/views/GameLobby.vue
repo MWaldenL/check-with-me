@@ -77,7 +77,7 @@ export default {
       return {
         'dead-triangle-right': this.pageNum === this.lastPageNum[0]
       }
-    },
+    }
   },
   created() {
     this.lastPageNum = getCount()
@@ -137,42 +137,46 @@ export default {
 
     subPageNum() {
       if(this.pageNum !== 1)
+      {
         this.pageNum = this.pageNum - 1
 
-      let promise = new Promise((resolve) => {
-        this.lobbyPrevQuery = this.lobbyPrevQuery.startAt(this.prevStart[this.pageNum - 1]).endBefore(this.firstVisible[0])
-        console.log(this.lobbyPrevQuery)
-        let prevPage = getGames(this.lobbyPrevQuery)
+        let promise = new Promise((resolve) => {
+          this.lobbyPrevQuery = this.lobbyPrevQuery.startAt(this.prevStart[this.pageNum - 1]).endBefore(this.firstVisible[0])
+          console.log(this.lobbyPrevQuery)
+          let prevPage = getGames(this.lobbyPrevQuery)
 
-        resolve(prevPage)
-      })
-      .then(prevPage => {
-        //this.prevStart = this.firstVisible
-        this.firstVisible = prevPage.firstVisible
-        this.lastVisible = prevPage.lastVisible
-        this.games = prevPage.games
-      })
+          resolve(prevPage)
+        })
+        .then(prevPage => {
+          //this.prevStart = this.firstVisible
+          this.firstVisible = prevPage.firstVisible
+          this.lastVisible = prevPage.lastVisible
+          this.games = prevPage.games
+        })
+      }
     },
 
     addPageNum() {
       console.log(this.lastPageNum[0])
 
       if(this.pageNum !== this.lastPageNum[0])
+      {
         this.pageNum = this.pageNum + 1
 
-      let promise = new Promise((resolve) => {
-        this.lobbyNextQuery = this.lobbyNextQuery.startAfter(this.lastVisible[0])
-        let nextPage = getGames(this.lobbyNextQuery)
+        let promise = new Promise((resolve) => {
+          this.lobbyNextQuery = this.lobbyNextQuery.startAfter(this.lastVisible[0])
+          let nextPage = getGames(this.lobbyNextQuery)
 
-        resolve(nextPage)
-      })
-      .then(nextPage => {
-        if(this.pageNum > this.prevStart.length)
-          this.prevStart.push(this.firstVisible[0])
-        this.firstVisible = nextPage.firstVisible
-        this.lastVisible = nextPage.lastVisible
-        this.games = nextPage.games
-      })
+          resolve(nextPage)
+        })
+        .then(nextPage => {
+          if(this.pageNum > this.prevStart.length)
+            this.prevStart.push(this.firstVisible[0])
+          this.firstVisible = nextPage.firstVisible
+          this.lastVisible = nextPage.lastVisible
+          this.games = nextPage.games
+        })
+      }
     },
 
     joinRoom(room_id, index) {

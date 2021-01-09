@@ -4,7 +4,7 @@
     <b-sidebar id="sidebar" title="Check with Me" bg-variant="dark" text-variant="light">
       <div id="s-contents" class="px-3 py-2">
         <router-link to="/" class="router-link route-button" tag="button" :disabled="isLobby">
-          <h3 class="cursor-pointer text-white">Play</h3>
+          <h3 class="cursor-pointer text-white" :class="{disabled:isLobby}">Play</h3>
         </router-link>
           <!-- <router-link to="/gamelobby" class="router-link route-button" tag="button" :disabled="isLobby">
             <h3 class="cursor-pointer text-white">Game Lobby</h3>
@@ -80,5 +80,9 @@ export default {
 }
 .route-button:active {
   outline: none;
+}
+
+.disabled {
+  color: gray;
 }
 </style>
