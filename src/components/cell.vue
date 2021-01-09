@@ -165,8 +165,6 @@ export default {
               bHasBlackKing: this.hasBlackKing,
               bHasWhiteKing: this.hasWhiteKing 
             })
-          } else {
-            this.aUnhighlight(null)
           }
         } else {
           this.aHighlight({
@@ -301,9 +299,7 @@ export default {
 
     isCaptureAttempt (source) {
       return (this.row === source.nRow + 2 && this.col === source.nCol + 2) ||
-        (this.row === source.nRow + 2 && this.col === source.nCol - 2) ||
-        (this.row === source.nRow - 2 && this.col === source.nCol + 2) ||
-        (this.row === source.nRow - 2 && this.col === source.nCol - 2)
+              (this.row === source.nRow + 2 && this.col === source.nCol - 2)
     },
 
     isMoveForwardAttempt (source) {

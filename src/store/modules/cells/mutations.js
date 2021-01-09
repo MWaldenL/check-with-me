@@ -72,18 +72,27 @@ const helpers = {
     }
   },
 
-  highlightCaptures: (state, captureList, targetsOnly) => {
-    // Perform a deep copy for board updating
-    const boardClone = JSON.parse(JSON.stringify(state.cells))
-    
-    for (const array of captureList) {
-      if (targetsOnly && array[2] === 0) {
-        boardClone[array[0]][array[1]].isPossibleMove = true
-      } else { 
-        boardClone[array[0]][array[1]].isPossibleCapture = true
+  highlightCaptures: (state, boardClone, captureList, targetsOnly) => {
+    // Make sure that this function makes the last board update
+    if (!boardClone) {
+      boardClone = JSON.parse(JSON.stringify(state.cells))
+    }
+
+    // Highlight targets only or possible captures
+    if (targetsOnly) {
+      const targetPiece = captureList.filter(arr => arr[2] === 1)[0]
+      boardClone[targetPiece[0]][targetPiece[1]].isPossibleCapture = true
+    } else {
+      for (const array of captureList) {
+        if (array[2] === 0) {
+          boardClone[array[0]][array[1]].isPossibleMove = true
+        } else { 
+          boardClone[array[0]][array[1]].isPossibleCapture = true
+        }
       }
     }
 
+    // This is the final write to state.cells
     state.cells = boardClone
   },
   
@@ -185,14 +194,12 @@ const mutations = {
       }
     } else {
       const payload = { 
+        boardClone,
         coords: { nRow: coords.nRow, nCol: coords.nCol }, 
         playerIsWhite: isWhite
       }
-      mutations.mHighlightCaptureFromSequence(state, payload)
+      mutations.mHighlightCaptureFromSequence(state, payload, true)
     }
-
-    // Update the board state
-    state.cells = boardClone
   },
 
   mMoveForward: (state, coords) => {
@@ -502,9 +509,9 @@ const mutations = {
     state.bStartedCaptureSequence = isCaptureOngoing
   },
 
-  mHighlightCaptureFromSequence: (state, payload) => {
+  mHighlightCaptureFromSequence: (state, payload, targetsOnly) => {
     const { pieceCanCapture, kingCanCapture } = helpers.computed
-    const { coords, playerIsWhite } = payload
+    const { boardClone, coords, playerIsWhite } = payload
     const { nRow, nCol } = coords
 
     const bContainsPiece = playerIsWhite ? 
@@ -525,9 +532,14 @@ const mutations = {
     // Highlight piece/king captures and end turn when no more captures are available
     if (canPieceCapture || canKingCapture) {
       mutations.mSetCaptureRequired(state, true)
-      const targetsOnly = false
-      helpers.highlightCaptures(state, pieceCaptureList, targetsOnly)
-      helpers.highlightCaptures(state, kingCaptureList, targetsOnly)
+      
+      if (pieceCaptureList.length > 0) { 
+        helpers.highlightCaptures(state, boardClone, pieceCaptureList, targetsOnly)
+      }
+
+      if (kingCaptureList.length > 0) { 
+        helpers.highlightCaptures(state, boardClone, pieceCaptureList, targetsOnly)
+      }
     } else {
       mutations.mSetCaptureSequenceState(state, false)
       mutations.mSetCaptureRequired(state, false)
@@ -562,9 +574,13 @@ const mutations = {
         
         if (canPieceCapture || canKingCapture) {
           mutations.mSetCaptureRequired(state, true)
-          const targetsOnly = true
-          helpers.highlightCaptures(state, pieceCaptureList, targetsOnly)
-          helpers.highlightCaptures(state, kingCaptureList, targetsOnly)
+          if (pieceCaptureList.length > 0) {
+            helpers.highlightCaptures(state, null, pieceCaptureList, true)
+          }
+
+          if (kingCaptureList.length > 0) {
+            mutations._highlightCaptures(state, null, kingCaptureList, true)
+          }
         }
       }
     }
