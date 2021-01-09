@@ -72,12 +72,12 @@ const helpers = {
     }
   },
 
-  highlightCaptures: (state, captureList) => {
+  highlightCaptures: (state, captureList, targetsOnly) => {
     // Perform a deep copy for board updating
     const boardClone = JSON.parse(JSON.stringify(state.cells))
-
+    
     for (const array of captureList) {
-      if (array[2] === 0) {
+      if (targetsOnly && array[2] === 0) {
         boardClone[array[0]][array[1]].isPossibleMove = true
       } else { 
         boardClone[array[0]][array[1]].isPossibleCapture = true
@@ -525,8 +525,9 @@ const mutations = {
     // Highlight piece/king captures and end turn when no more captures are available
     if (canPieceCapture || canKingCapture) {
       mutations.mSetCaptureRequired(state, true)
-      helpers.highlightCaptures(state, pieceCaptureList)
-      helpers.highlightCaptures(state, kingCaptureList)
+      const targetsOnly = false
+      helpers.highlightCaptures(state, pieceCaptureList, targetsOnly)
+      helpers.highlightCaptures(state, kingCaptureList, targetsOnly)
     } else {
       mutations.mSetCaptureSequenceState(state, false)
       mutations.mSetCaptureRequired(state, false)
@@ -561,8 +562,9 @@ const mutations = {
         
         if (canPieceCapture || canKingCapture) {
           mutations.mSetCaptureRequired(state, true)
-          helpers.highlightCaptures(state, pieceCaptureList)
-          helpers.highlightCaptures(state, kingCaptureList)
+          const targetsOnly = true
+          helpers.highlightCaptures(state, pieceCaptureList, targetsOnly)
+          helpers.highlightCaptures(state, kingCaptureList, targetsOnly)
         }
       }
     }
