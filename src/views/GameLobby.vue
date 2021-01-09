@@ -9,8 +9,8 @@
           <tr>
             <th id = "headerName">Room Name</th>
             <th id = "headerHost">Host</th>
-            <th id = "headerButton">
-              <button>
+            <th id = "headerButtonCont">
+              <button id = "headerButton" @click="createRoom()">
                 + Create Room
               </button>
             </th>
@@ -21,8 +21,8 @@
             <td class = "gameName">{{ game.room_name }}</td>
             <td class = "gameHost">{{ game.host_user }}</td>
             <td class = "gameButton">
-              <button v-bind:class="getButtonClass(game.button)">
-                {{ game.button }}
+              <button :disabled="!isActive[game.index]" v-bind:class="getButtonClass(game.button)" @click="[$event.target.classList.add('redButton'), joinRoom(game.room_id, game.index)]">
+                {{isActive[game.index] ? 'Join Room' : 'Full'}}
               </button>
             </td>
           </tr>
@@ -42,8 +42,10 @@ import firebase from 'firebase'
 import { db } from '@/firebase'
 import Sidebar from '@/components/sidebar.vue'
 import {
-  getNextGames,
-  getPrevGames
+  getGames,
+  getPrevGames,
+  roomQuery,
+  getCount
 } from '@/resources/gameModel.js'
 
 export default {
@@ -54,50 +56,46 @@ export default {
   data () {
     return{
       pageNum: 1,
-      lastPageNum: 3,
-      lastVisible: null,
-      games: [/*
-        {
-          room_name: "Michiko Gomi's Room",
-          host_user: "MichikoGomi",
-          button: "Join Room"
-        },
-        {
-          room_name: "Mika Reyes's Room",
-          host_user: "MikaReyes",
-          button: "Full"
-        }
-      */]
+      lastPageNum: [],
+      firstVisible: [],
+      lastVisible: [],
+      prevStart: [],
+      games: [],
+      isActive: [],
+      lobbyNextQuery: roomQuery,
+      lobbyPrevQuery: roomQuery
     }
   },
   computed: {
     leftClass: function () {
       return {
-        'dead-triangle': this.pageNum === 1
+        'dead-triangle-left': this.pageNum === 1
       }
     },
 
     rightClass: function () {
       return {
-        'dead-triangle': this.pageNum === this.lastPageNum
+        'dead-triangle-right': this.pageNum === this.lastPageNum[0]
       }
     },
   },
   created() {
-    db.collection("games")
-    .where("is_public", "==", true)
-    .orderBy("room_name", "asc")
-    .limit(10)
+    this.lastPageNum = getCount()
+
+    roomQuery
     .get()
     .then(querySnapshot => {
       let docs = querySnapshot.docs
 
-      this.lastVisible = docs[docs.length - 1].data().room_name
+      this.firstVisible.push(docs[0])
+      this.lastVisible = [docs[docs.length - 1]]
       console.log(this.lastVisible)
 
       docs.forEach((doc, index) => {
         //console.log(doc.id, " => ", doc.data());
         let game = {
+          index: index,
+          room_id: doc.id,
           room_name: doc.data().room_name
         }
 
@@ -109,10 +107,14 @@ export default {
           doc.data().other_user
           .get()
           .then(other => {
-            if(other.exists)
+            if(other.exists){
               game.button = "Full"
-            else
+              this.isActive.push(0)
+            }
+            else{
               game.button = "Join Room"
+              this.isActive.push(1)
+            }
 
             this.games.push(game)
           })
@@ -137,20 +139,66 @@ export default {
       if(this.pageNum !== 1)
         this.pageNum = this.pageNum - 1
 
-      //console.log("in sub " + this.lastVisible)
-      prevPage = getPrevGames(this.lastVisible)
-      this.lastVisible = prevPage.lastVisible
-      this.games = prevPage.games
+      let promise = new Promise((resolve) => {
+        this.lobbyPrevQuery = this.lobbyPrevQuery.startAt(this.prevStart[this.pageNum - 1]).endBefore(this.firstVisible[0])
+        console.log(this.lobbyPrevQuery)
+        let prevPage = getGames(this.lobbyPrevQuery)
+
+        resolve(prevPage)
+      })
+      .then(prevPage => {
+        //this.prevStart = this.firstVisible
+        this.firstVisible = prevPage.firstVisible
+        this.lastVisible = prevPage.lastVisible
+        this.games = prevPage.games
+      })
     },
 
     addPageNum() {
-      if(this.pageNum !== this.lastPageNum)
+      console.log(this.lastPageNum[0])
+
+      if(this.pageNum !== this.lastPageNum[0])
         this.pageNum = this.pageNum + 1
 
-      //console.log("in add " + this.lastVisible)
-      nextPage = getNextGames(this.lastVisible)
-      this.lastVisible = nextPage.lastVisible
-      this.games = nextPage.games
+      let promise = new Promise((resolve) => {
+        this.lobbyNextQuery = this.lobbyNextQuery.startAfter(this.lastVisible[0])
+        let nextPage = getGames(this.lobbyNextQuery)
+
+        resolve(nextPage)
+      })
+      .then(nextPage => {
+        if(this.pageNum > this.prevStart.length)
+          this.prevStart.push(this.firstVisible[0])
+        this.firstVisible = nextPage.firstVisible
+        this.lastVisible = nextPage.lastVisible
+        this.games = nextPage.games
+      })
+    },
+
+    joinRoom(room_id, index) {
+      let user = firebase.auth().currentUser.uid
+      console.log(user + " " + index)
+
+      this.isActive.splice(index, 1, 0);
+      console.log(this.isActive)
+
+      // let path = "/users/" + user;
+      // let ref = db.getInstance().getReference(path);
+      // db.collection("games")
+      // .doc(room_id)
+      // .update({
+      //   other_user: ref
+      // })
+      // .then(() => {
+
+      // })
+      // .catch(error => {
+      //   console.log("Error getting documents: ", error);
+      // })
+    },
+
+    createRoom() {
+      alert("Hello! I am create room (next ticket)!!");
     }
   }
 }
@@ -169,6 +217,7 @@ export default {
     font-size: 3em;
     color: #BCFC8A;
     padding-top: 10px;
+    font-weight: 600;
   }
 
   #GameLobbyRule {
@@ -178,7 +227,7 @@ export default {
   }
 
   #GameLobbyTable {
-    border-collapse:separate; 
+    border-collapse:collapse; 
     border-spacing: 0px 15px;
   }
 
@@ -197,31 +246,39 @@ export default {
 
   #headerName {
     text-align: left;
-    padding: 0px 8vw 0px 20px;
+    padding: 0px 20vw 10px 20px;
+    font-size: 1.5em;
   }
   .gameName {
     text-align: left;
-    padding: 15px 8vw 15px 20px;
+    padding: 15px 8vw 30px 20px;
     font-size: 1.25em;
   }
 
   #headerHost {
     text-align: left;
-    padding: 0px 30vw 0px 10px;
+    padding: 0px 15vw 10px 10px;
+    font-size: 1.5em;
   }
   .gameHost {
     text-align: left;
     column-width: 100px;
-    padding: 15px 30vw 15px 10px;
+    padding: 15px 15vw 30px 10px;
     font-size: 1.25em;
   }
 
+  #headerButtonCont {
+    padding: 0px 20px 10px 5vw;
+  }
   #headerButton {
-    padding: 0px 20px 0px 5vw;
+    background-color: #C4C4C4;
+    font-weight: bolder;
+    color:  #779556;
+    font-size: 1.5em;
   }
   .gameButton {
     text-align: right;
-    padding: 15px 20px 15px 5vw;
+    padding: 15px 20px 30px 5vw;
     font-size: 1.25em;
   }
   .greenButton {
@@ -243,6 +300,7 @@ export default {
     border-radius: 5px;
     height: 90%;
     width: 100%;
+    cursor: default
   }
 
   #CriteriaSelect {
@@ -286,12 +344,17 @@ export default {
     border-left: 30px solid #BCFC8A;
   }
 
-  .dead-triangle{
-    border-left: 0px solid #2d2d2d;
-    border-right: 0px solid #2d2d2d;
+  .dead-triangle-right{
+    border-left: 30px solid #444444;
   }
-  .dead-triangle:hover{
-    border-left: 0px solid #2d2d2d;
-    border-right: 0px solid #2d2d2d;
+  .dead-triangle-right:hover{
+    border-left: 30px solid #444;
+  }
+
+  .dead-triangle-left{
+    border-right: 30px solid #444;
+  }
+  .dead-triangle-left:hover{
+    border-right: 30px solid #444;
   }
 </style>
