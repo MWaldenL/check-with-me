@@ -1,63 +1,64 @@
 import firebase from 'firebase'
 import { db } from '@/firebase'
 
+class Room {
+  constructor (room_id, room_name, host_user, isFull) {
+      //console.log(host_user)
+      this.room_id = room_id
+      this.room_name = room_name
+      this.host_user = host_user
+      this.isFull = isFull
+  }
+}
+
+var RoomConverter = {
+  fromFirestore: function(snapshot, options) {
+    const data = snapshot.data(options)
+    
+    let isFull = true
+    if(data.other_user.id === "nil")
+      isFull = false
+    else
+      isFull = true
+
+    let userArray = []
+    data.host_user
+    .get()
+    .then(user => {
+      //console.log(user.id, " => ", user.data())
+      userArray.push(user.data().username)
+    })
+    
+    return new Room(snapshot.id, data.room_name, userArray, isFull)
+  }
+}
+
 export const roomQuery = db.collection("games")
             .where("is_public", "==", true)
             .orderBy("room_name", "asc")
             .limit(10)
 
 export const getGames = (lobbyQuery) => {
-  let games = []
-  let newLastVisible = []
-  let newFirstVisible = []
-  console.log(lobbyQuery)
-
-  lobbyQuery
+  return lobbyQuery
+    .withConverter(RoomConverter)
     .get()
     .then(querySnapshot => {
       let docs = querySnapshot.docs
-      newLastVisible.push(docs[docs.length - 1])
-      newFirstVisible.push(docs[0])
+
+      let games = []
+      let newLastVisible = [docs[docs.length - 1]]
+      let newFirstVisible = [docs[0]]
 
       docs.forEach((doc, index) => {
-        console.log(doc.id, " => ", doc.data());
-        let game = {
-          index: index,
-          room_id: doc.id,
-          room_name: doc.data().room_name
-        }
-
-        doc.data().host_user
-        .get()
-        .then(user => {
-          game.host_user = user.data().username
-
-          doc.data().other_user
-          .get()
-          .then(other => {
-            if(other.exists){
-              game.button = "Full"
-              this.isActive.push(0)
-            }
-            else{
-              game.button = "Join Room"
-              this.isActive.push(1)
-            }
-
-            games.push(game)
-          })
-        })
+        games.push(doc.data())
       })
+      let result = {
+        games: games,
+        lastVisible: newLastVisible,
+        firstVisible: newFirstVisible
+      }
+      return(result)
     })
-    .catch(function(error) {
-      console.log("Error getting documents: ", error);
-    })
-
-  return {
-    firstVisible: newFirstVisible,
-    lastVisible: newLastVisible,
-    games: games
-  }
 }
 
 export const getCount = (() => {

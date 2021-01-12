@@ -19,11 +19,14 @@
         <tbody>
           <tr class='gameEntry' v-for="game in games" :key="game['.key']">
             <td class = "gameName">{{ game.room_name }}</td>
-            <td class = "gameHost">{{ game.host_user }}</td>
+            <td class = "gameHost">{{ game.host_user[0] }}</td>
             <td class = "gameButton">
-              <button :disabled="!isActive[game.index]" v-bind:class="getButtonClass(game.button)" @click="[$event.target.classList.add('redButton'), joinRoom(game.room_id, game.index)]">
-                {{isActive[game.index] ? 'Join Room' : 'Full'}}
-              </button>
+              <router-link :to="`/room/${ game.room_id }`" tag="button" :disabled="game.isFull" v-bind:class="{active: !game.isFull,'greenButton': !game.isFull,'redButton': game.isFull}" v-on:click.native="joinRoom(game.room_id)">
+                {{game.isFull ? 'Full' : 'Join Room'}}
+              </router-link>
+              <!-- <button :disabled="game.isFull" v-bind:class="{active: !game.isFull,'greenButton': !game.isFull,'redButton': game.isFull}" @click="[$event.target.classList.add('redButton'), joinRoom(game.room_id)]">
+                {{game.isFull ? 'Full' : 'Join Room'}}
+              </button> -->
             </td>
           </tr>
         </tbody>
@@ -61,7 +64,6 @@ export default {
       lastVisible: [],
       prevStart: [],
       games: [],
-      isActive: [],
       lobbyNextQuery: roomQuery,
       lobbyPrevQuery: roomQuery
     }
@@ -82,116 +84,66 @@ export default {
   created() {
     this.lastPageNum = getCount()
 
-    roomQuery
-    .get()
-    .then(querySnapshot => {
-      let docs = querySnapshot.docs
+    let initGames = getGames(roomQuery)
+    initGames
+    .then(result => {
+      console.log(result.games)
 
-      this.firstVisible.push(docs[0])
-      this.lastVisible = [docs[docs.length - 1]]
-      console.log(this.lastVisible)
-
-      docs.forEach((doc, index) => {
-        //console.log(doc.id, " => ", doc.data());
-        let game = {
-          index: index,
-          room_id: doc.id,
-          room_name: doc.data().room_name
-        }
-
-        doc.data().host_user
-        .get()
-        .then(user => {
-          game.host_user = user.data().username
-
-          doc.data().other_user
-          .get()
-          .then(other => {
-            if(other.exists){
-              game.button = "Full"
-              this.isActive.push(0)
-            }
-            else{
-              game.button = "Join Room"
-              this.isActive.push(1)
-            }
-
-            this.games.push(game)
-          })
-        })
-      })
-    })
-    .catch(function(error) {
-      console.log("Error getting documents: ", error);
+      this.games = result.games
+      this.lastVisible = result.lastVisible
+      this.firstVisible = result.firstVisible
     })
   },
   methods: {
-    getButtonClass(text) {
-      let status = text === "Join Room"
-      return {
-        active: status,
-        'greenButton': status,
-        'redButton': !status
-      }
-    },
-
     subPageNum() {
       if(this.pageNum !== 1)
       {
         this.pageNum = this.pageNum - 1
+        this.lobbyPrevQuery = this.lobbyPrevQuery.startAt(this.prevStart[this.pageNum - 1]).endBefore(this.firstVisible[0])
 
-        let promise = new Promise((resolve) => {
-          this.lobbyPrevQuery = this.lobbyPrevQuery.startAt(this.prevStart[this.pageNum - 1]).endBefore(this.firstVisible[0])
-          console.log(this.lobbyPrevQuery)
-          let prevPage = getGames(this.lobbyPrevQuery)
-
-          resolve(prevPage)
-        })
-        .then(prevPage => {
-          //this.prevStart = this.firstVisible
-          this.firstVisible = prevPage.firstVisible
-          this.lastVisible = prevPage.lastVisible
-          this.games = prevPage.games
+        let prevPage = getGames(this.lobbyPrevQuery)
+        prevPage
+        .then(result => {
+          this.games = result.games
+          this.lastVisible = result.lastVisible
+          this.firstVisible = result.firstVisible
         })
       }
     },
 
     addPageNum() {
-      console.log(this.lastPageNum[0])
-
       if(this.pageNum !== this.lastPageNum[0])
       {
         this.pageNum = this.pageNum + 1
-
-        let promise = new Promise((resolve) => {
-          this.lobbyNextQuery = this.lobbyNextQuery.startAfter(this.lastVisible[0])
-          let nextPage = getGames(this.lobbyNextQuery)
-
-          resolve(nextPage)
-        })
-        .then(nextPage => {
+        this.lobbyNextQuery = this.lobbyNextQuery.startAfter(this.lastVisible[0])
+        
+        let nextPage = getGames(this.lobbyNextQuery)
+        nextPage
+        .then(result => {
           if(this.pageNum > this.prevStart.length)
             this.prevStart.push(this.firstVisible[0])
-          this.firstVisible = nextPage.firstVisible
-          this.lastVisible = nextPage.lastVisible
-          this.games = nextPage.games
+          this.games = result.games
+          this.lastVisible = result.lastVisible
+          this.firstVisible = result.firstVisible
         })
       }
     },
 
-    joinRoom(room_id, index) {
+    joinRoom(room_id) {
+      console.log("INSIDE")
       let user_key = firebase.auth().currentUser.uid
-      console.log(user_key + " " + index)
-
-      this.isActive.splice(index, 1, 0);
+      
+      let room = this.games.find(obj => {
+        return obj.room_id === room_id
+      })
+      let copy = this.games
+      copy[this.games.indexOf(room)].isFull = true
+      this.games = copy
 
       db.collection("games")
       .doc(room_id)
       .update({
         other_user:  db.doc('users/' + user_key)
-      })
-      .then(() => {
-
       })
       .catch(error => {
         console.log("Error getting documents: ", error);
