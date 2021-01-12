@@ -1,6 +1,7 @@
 <template>
   <div id = 'GameLobbyPage'>
     <Sidebar />
+    <CreateRoomModal v-if="showModal" @close="showModal = false" />
     <div id = 'GameLobbyProper'>
       <div id="GameLobbyPageLabel">Game Lobby</div>
       <hr id="GameLobbyRule">
@@ -44,6 +45,7 @@
 import firebase from 'firebase'
 import { db } from '@/firebase'
 import Sidebar from '@/components/sidebar.vue'
+import CreateRoomModal from '@/components/createRoomModal.vue'
 import {
   getGames,
   getPrevGames,
@@ -54,7 +56,8 @@ import {
 export default {
   name: 'GameLobby',
   components: {
-    Sidebar
+    Sidebar,
+    CreateRoomModal
   },
   data () {
     return{
@@ -65,7 +68,9 @@ export default {
       prevStart: [],
       games: [],
       lobbyNextQuery: roomQuery,
-      lobbyPrevQuery: roomQuery
+      lobbyPrevQuery: roomQuery,
+
+      showModal: true
     }
   },
   computed: {
@@ -151,7 +156,7 @@ export default {
     },
 
     createRoom() {
-      alert("Hello! I am create room (next ticket)!!");
+      this.showModal = true
     }
   }
 }
