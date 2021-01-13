@@ -12,14 +12,6 @@ const writeBoardToDB = async (cells, isPlayerBlack) => {
 
 const actions = {
   /**
-   * Resets the first click to null
-   */
-  aResetFirstClick({ commit }) {
-    console.log('resetting')
-    commit('mResetFirstClick')
-  },
-
-  /**
    * Highlights the current square
    * @param coords the coordinates of the current square clicked 
    */
@@ -141,6 +133,10 @@ const actions = {
 
   aSetCaptureRequired({ commit }, isRequired) {
     commit('mSetCaptureRequired', isRequired) 
+  },
+
+  aFlushStateAfterTurn({ commit }, updatedState) {
+    commit('mFlushStateAfterTurn', updatedState)
   }
 }
 

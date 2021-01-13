@@ -130,10 +130,6 @@ const helpers = {
 }
 
 const mutations = {
-  mResetFirstClick: state => {
-    state.firstClick = null
-  },
-
   mUnhighlight: state => {
     // Perform a deep copy for board updating
     const boardClone = JSON.parse(JSON.stringify(state.cells))
@@ -577,13 +573,7 @@ const mutations = {
         canKingCapture = kingCanCapture(kingCaptureList)
 
         if (canPieceCapture || canKingCapture) {
-                  console.log('canPieceCapture ' + canPieceCapture)
-        console.log(pieceCaptureList)
-        console.log('canKingCapture ' + canKingCapture)
-        console.log(kingCaptureList)
-
           mutations.mSetCaptureRequired(state, true)
-          console.log('capture set required')
           if (pieceCaptureList.length > 0) {
             helpers.highlightCaptures(state, null, pieceCaptureList, true)
           }
@@ -602,6 +592,20 @@ const mutations = {
 
   mSetPrevDestSquare: (state, prevDestSquare) => {
     state.prevDestSquare = prevDestSquare
+  },
+
+  mFlushStateAfterTurn: (state, updatedState) => {
+    const {
+      bIsCaptureRequired,
+      bStartedCaptureSequence,
+      prevDestSquare,
+      firstClick
+    } = updatedState
+
+    state.bIsCaptureRequired = bIsCaptureRequired
+    state.bStartedCaptureSequence = bStartedCaptureSequence
+    state.prevDestSquare = prevDestSquare
+    state.firstClick = firstClick
   }
 }
 

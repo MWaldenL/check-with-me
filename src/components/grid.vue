@@ -132,7 +132,13 @@ export default {
             }
           }
         } else {
-          this.aSetCaptureRequired(false)
+          const updatedState = {
+            bIsCaptureRequired: false,
+            bStartedCaptureSequence: false,
+            prevDestSquare: null,
+            firstClick: null
+          }
+          this.aFlushStateAfterTurn(updatedState)
         }
       })
 
@@ -231,11 +237,11 @@ export default {
       'aSetWinner',
       'aUpdateBoard',
       'aGetEnemyUsername',
-      'aResetFirstClick',
       'aHighlightBoardCaptures',
       'aHighlightCaptureFromSequence',
       'aSetPrevDestSquare',
-      'aSetCaptureRequired'
+      'aSetCaptureRequired',
+      'aFlushStateAfterTurn'
     ]),
 
     async endPlayerTurn(coords) {
@@ -246,7 +252,13 @@ export default {
       this.lastPlayerMoved = (this.isHostWhite ^ isMoveWhite) ? this.otherUserID : this.hostUserID
 
       // Set capture required to false to prevent state leaks
-      this.aSetCaptureRequired(false)
+      const updatedState = {
+        bIsCaptureRequired: false,
+        bStartedCaptureSequence: false,
+        prevDestSquare: null,
+        firstClick: null
+      }
+      this.aFlushStateAfterTurn(updatedState)
 
       // Write last player moved to db 
       await this.currentGame.update({ last_player_moved: this.lastPlayerMoved })
@@ -257,8 +269,6 @@ export default {
       // Start the other player's clock
       const player = this.lastPlayerMoved === this.hostUserID ? 'other' : 'host'
       await axios.get(`http://localhost:5000/startTime/${player}`)
-
-      this.aResetFirstClick()
     },
 
     updateLastPlayerMoved(coords) {
