@@ -114,6 +114,7 @@ export default {
         // Highlight all possible captures when player is not in a capture sequence
         if (this.lastPlayerMoved !== auth.currentUser.uid) {
           if (!this.isCapturing) {
+            console.log('From games listener')
             this.aHighlightBoardCaptures(playerIsWhite)
           } else {  
             // Highlight the capture from the current sequence
@@ -124,11 +125,14 @@ export default {
               })
 
               // Once a capture sequence has finished, end the player's turn
+              console.log(this.isCapturing)
               if (!this.isCapturing && this.prevSourceSquare) {
                 await this.endPlayerTurn(this.prevSourceSquare)
               }
             }
           }
+        } else {
+          this.aSetCaptureRequired(false)
         }
       })
 
@@ -230,7 +234,8 @@ export default {
       'aResetFirstClick',
       'aHighlightBoardCaptures',
       'aHighlightCaptureFromSequence',
-      'aSetPrevDestSquare'
+      'aSetPrevDestSquare',
+      'aSetCaptureRequired'
     ]),
 
     async endPlayerTurn(coords) {
@@ -239,7 +244,10 @@ export default {
         bSourceHasWhiteKing(this.board, this.prevDestSquare) 
 
       this.lastPlayerMoved = (this.isHostWhite ^ isMoveWhite) ? this.otherUserID : this.hostUserID
-  
+
+      // Set capture required to false to prevent state leaks
+      this.aSetCaptureRequired(false)
+
       // Write last player moved to db 
       await this.currentGame.update({ last_player_moved: this.lastPlayerMoved })
 

@@ -387,6 +387,7 @@ const mutations = {
         newDest.bHasWhiteChip = true
         if (bLastRowAbove) {
           newDest.bHasWhiteKing = true
+          mutations.mSetCaptureRequired(state, false)
           mutations.mSetCaptureSequenceState(state, false)
         }
         mutations.mReducePiece(state, whiteTakes)
@@ -400,6 +401,7 @@ const mutations = {
         newDest.bHasBlackChip = true
         if (bLastRowAbove) {
           newDest.bHasBlackKing = true
+          mutations.mSetCaptureRequired(state, false)
           mutations.mSetCaptureSequenceState(state, false)
         }
         mutations.mReducePiece(state, !whiteTakes)
@@ -531,7 +533,8 @@ const mutations = {
     const canKingCapture = kingCanCapture(kingCaptureList)
     
     // Highlight piece/king captures and end turn when no more captures are available
-    if (canPieceCapture || canKingCapture) {
+    if (canPieceCapture || canKingCapture) {  
+      console.log('piece can capture?')
       mutations.mSetCaptureRequired(state, true)
       
       if (pieceCaptureList.length > 0) { 
@@ -572,9 +575,15 @@ const mutations = {
           
         canPieceCapture = pieceCanCapture(state, row, col, playerIsWhite)
         canKingCapture = kingCanCapture(kingCaptureList)
-        
+
         if (canPieceCapture || canKingCapture) {
+                  console.log('canPieceCapture ' + canPieceCapture)
+        console.log(pieceCaptureList)
+        console.log('canKingCapture ' + canKingCapture)
+        console.log(kingCaptureList)
+
           mutations.mSetCaptureRequired(state, true)
+          console.log('capture set required')
           if (pieceCaptureList.length > 0) {
             helpers.highlightCaptures(state, null, pieceCaptureList, true)
           }

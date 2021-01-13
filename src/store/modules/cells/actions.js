@@ -137,6 +137,10 @@ const actions = {
    */
   aSetPrevDestSquare({ commit }, prevDestSquare) {
     commit('mSetPrevDestSquare', prevDestSquare)
+  },
+
+  aSetCaptureRequired({ commit }, isRequired) {
+    commit('mSetCaptureRequired', isRequired) 
   }
 }
 
