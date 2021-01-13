@@ -158,13 +158,15 @@ export default {
       if (this.bContainsPiece) {
         if (isCaptureRequired) {
           // Check if a capture can be made
-          if (this.canSelectedPieceCapture || this.canSelectedKingCapture) {
-            this.aHighlight({
-              nRow: this.row, 
-              nCol: this.col, 
-              bHasBlackKing: this.hasBlackKing,
-              bHasWhiteKing: this.hasWhiteKing 
-            })
+          if (!this.isCapturing) {
+            if (this.canSelectedPieceCapture || this.canSelectedKingCapture) {
+              this.aHighlight({
+                nRow: this.row, 
+                nCol: this.col, 
+                bHasBlackKing: this.hasBlackKing,
+                bHasWhiteKing: this.hasWhiteKing 
+              })
+            }
           }
         } else {
           this.aHighlight({
@@ -175,7 +177,9 @@ export default {
           })
         }
       } else { // Illegal move
-        this.aUnhighlight(null)
+        if (!isCaptureRequired) {
+          this.aUnhighlight(null)
+        }
       }
     },
 
@@ -214,7 +218,7 @@ export default {
                 willEmit = this.isLastMoveLegal && !this.isCaptureRequired
               } else if (this.isKingCaptureAttempt(source, coords)) {
                 this.aKingCapturePiece(payload)
-                willEmit = this.isLastMoveLegal && this.isCaptureRequired
+                willEmit = this.isLastMoveLegal
               } else {
                 this.cancelCurrentMove(this.isCaptureRequired)
                 willEmit = false
@@ -222,7 +226,7 @@ export default {
             } else { 
               if (this.isCaptureAttempt(source)) {  
                 this.aCapturePiece(payload)
-                willEmit = this.isLastMoveLegal && this.isCaptureRequired
+                willEmit = this.isLastMoveLegal
               } else if (this.isMoveForwardAttempt(source)) {
                 this.aMoveForward(payload)
                 willEmit = this.isLastMoveLegal && !this.isCaptureRequired
@@ -244,7 +248,7 @@ export default {
                 return
               }
 
-              // Prevent a player from making a non-capturing move when a capture is required  
+              // Prevent a player from making a non-capturing move when a capture is required  s
               if (this.isCaptureRequired && !this.canSelectedPieceCapture && !this.canSelectedKingCapture) {
                 console.log('piece cannot capture')
                 return

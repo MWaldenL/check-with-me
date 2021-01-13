@@ -3,9 +3,12 @@
     <b-button v-b-toggle.sidebar id="menu"><b-icon-caret-right-fill></b-icon-caret-right-fill></b-button>
     <b-sidebar id="sidebar" title="Check with Me" bg-variant="dark" text-variant="light">
       <div id="s-contents" class="px-3 py-2">
-        <router-link to="/" class="router-link">
-          <h3 class="cursor-pointer text-white">Play</h3>
+        <router-link to="/" class="router-link route-button" tag="button" :disabled="isLobby">
+          <h3 class="cursor-pointer text-white" :class="{disabled:isLobby}">Play</h3>
         </router-link>
+          <!-- <router-link to="/gamelobby" class="router-link route-button" tag="button" :disabled="isLobby">
+            <h3 class="cursor-pointer text-white">Game Lobby</h3>
+          </router-link> -->
         <router-link to="/profile" class="router-link">
           <h3 class="cursor-pointer text-white">Profile</h3>
         </router-link>
@@ -29,6 +32,11 @@ import { mapGetters, mapActions } from 'vuex'
 
 export default {
   name: 'Sidebar',
+  computed: {
+    isLobby() {
+        return this.$route.name === "GameLobby"
+    }
+  },
   methods: {
     ...mapActions(['logoutUser']),
     logout () {
@@ -37,6 +45,7 @@ export default {
           this.logoutUser()
           this.$router.push('/login')
         })
+      //console.log(this.$route.name)
     }
   }
 }
@@ -63,5 +72,17 @@ export default {
 #s-contents h3 {
   font-family: 'Raleway', Helvetica, Arial, sans-serif;
   padding-top: 30px;
+}
+
+.route-button {
+  background-color: #343a40;
+  border:none;
+}
+.route-button:active {
+  outline: none;
+}
+
+.disabled {
+  color: gray;
 }
 </style>
