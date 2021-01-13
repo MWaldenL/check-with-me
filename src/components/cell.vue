@@ -275,17 +275,6 @@ export default {
         }
       }
     },
-
-    _ALT_setGameResults() {
-      let isWhite = this.selfColor === 'w'
-      let bSelfStuck = checkIfSelfStuck(this.board, isWhite)
-      let bNoMorePieces = isWhite ? this.whiteCount === 0 : this.blackCount === 0
-
-      if (bSelfStuck || bNoMorePieces) {
-        this.aSetActiveGame(false)
-        this.aSetWinner(isWhite ? 'B' : 'W')
-      }
-    },
   
     setGameResults() {
       const isWhite = true
