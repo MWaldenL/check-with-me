@@ -14,7 +14,7 @@
 import { bCanCapture } from '@/store/services/moveCaptureService'
 import { bIsValidCapture } from '@/store/services/kingCaptureService'
 import { getPossibleKingCaptures } from '@/store/services/highlightService'
-import { checkIfPlayerStuck } from '@/store/services/winCheckerService'
+import { checkIfSelfStuck } from '@/store/services/winCheckerService'
 import { mapState, mapGetters, mapActions } from 'vuex'
 
 export default {
@@ -276,10 +276,21 @@ export default {
       }
     },
 
+    _ALT_setGameResults() {
+      let isWhite = this.selfColor === 'w'
+      let bSelfStuck = checkIfSelfStuck(this.board, isWhite)
+      let bNoMorePieces = isWhite ? this.whiteCount === 0 : this.blackCount === 0
+
+      if (bSelfStuck || bNoMorePieces) {
+        this.aSetActiveGame(false)
+        this.aSetWinner(isWhite ? 'B' : 'W')
+      }
+    },
+  
     setGameResults() {
       const isWhite = true
-      let bWhiteStuck = checkIfPlayerStuck(this.board, isWhite)
-      let bBlackStuck = checkIfPlayerStuck(this.board, !isWhite)
+      let bWhiteStuck = checkIfSelfStuck(this.board, isWhite)
+      let bBlackStuck = checkIfSelfStuck(this.board, !isWhite)
 
       if (bWhiteStuck && bBlackStuck) {
         this.aSetActiveGame(false)

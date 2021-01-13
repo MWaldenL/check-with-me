@@ -1,4 +1,4 @@
-import { checkIfPlayerStuck } from '@/store/services/winCheckerService'
+import { checkIfSelfStuck } from '@/store/services/winCheckerService'
 import { getBoardFromPDN } from '@/store/services/boardParsingService'
 
 describe ('Positions where white still has legal moves', () => {
@@ -11,7 +11,7 @@ describe ('Positions where white still has legal moves', () => {
       const expected = false
 
       // Act
-      const result = checkIfPlayerStuck(board, isWhite)
+      const result = checkIfSelfStuck(board, isWhite)
 
       // Assert
       expect(result).toEqual(expected)
@@ -25,7 +25,7 @@ describe ('Positions where white still has legal moves', () => {
       const expected = false
 
       // Act
-      const result = checkIfPlayerStuck(board, isWhite)
+      const result = checkIfSelfStuck(board, isWhite)
 
       // Assert
       expect(result).toEqual(expected)
@@ -39,7 +39,7 @@ describe ('Positions where white still has legal moves', () => {
       const expected = false
 
       // Act
-      const result = checkIfPlayerStuck(board, isWhite)
+      const result = checkIfSelfStuck(board, isWhite)
 
       // Assert
       expect(result).toEqual(expected)
@@ -55,7 +55,7 @@ describe ('Positions where white still has legal moves', () => {
       const expected = false
 
       // Act
-      const result = checkIfPlayerStuck(board, isWhite)
+      const result = checkIfSelfStuck(board, isWhite)
 
       // Assert
       expect(result).toEqual(expected)
@@ -69,7 +69,7 @@ describe ('Positions where white still has legal moves', () => {
       const expected = false
 
       // Act
-      const result = checkIfPlayerStuck(board, isWhite)
+      const result = checkIfSelfStuck(board, isWhite)
 
       // Assert
       expect(result).toEqual(expected)

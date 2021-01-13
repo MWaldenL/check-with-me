@@ -1,4 +1,4 @@
-import { checkIfPlayerStuck } from '@/store/services/winCheckerService'
+import { checkIfSelfStuck } from '@/store/services/winCheckerService'
 import { getBoardFromPDN } from '@/store/services/boardParsingService'
 
 describe ('Checking if white has no more legal moves', () => {
@@ -11,7 +11,7 @@ describe ('Checking if white has no more legal moves', () => {
       const expected = true
 
       // Act
-      const result = checkIfPlayerStuck(board, isWhite)
+      const result = checkIfSelfStuck(board, isWhite)
 
       // Assert
       expect(result).toEqual(expected)
@@ -25,7 +25,7 @@ describe ('Checking if white has no more legal moves', () => {
       const expected = true
 
       // Act
-      const result = checkIfPlayerStuck(board, isWhite)
+      const result = checkIfSelfStuck(board, isWhite)
 
       // Assert
       expect(result).toEqual(expected)
@@ -41,7 +41,7 @@ describe ('Checking if white has no more legal moves', () => {
       const expected = true
 
       // Act
-      const result = checkIfPlayerStuck(board, isWhite)
+      const result = checkIfSelfStuck(board, isWhite)
 
       // Assert
       expect(result).toEqual(expected)
@@ -56,7 +56,7 @@ describe ('Checking if white has no more legal moves', () => {
     const expected = true
 
     // Act
-    const result = checkIfPlayerStuck(board, isWhite)
+    const result = checkIfSelfStuck(board, isWhite)
 
     // Assert
     expect(result).toEqual(expected)
