@@ -2,44 +2,53 @@
   <div class="modal-mask">
     <div class="modal-wrapper">
       <div class="modal-container">
-        <div class="modal-header">
-          <slot name="header">
-            default header
-            <button class="modal-default-button" @click="$emit('close')">
-              X
+        <div>
+          <button id="close-button" @click="$emit('close')">
+            X
+          </button>
+        </div>
+        <br>
+        <div id="label-container">
+          Create Room
+        </div>
+
+        <div class="modal-body name-container">
+          <slot name="body">
+            <div id="name-label">
+              Room Name
+            </div>
+            <input v-model="roomNameInput" placeholder="Enter room name">
+          </slot>
+        </div>
+
+        <div class="modal-body type-container">
+          <slot name="body">
+            <div id="type-label">
+              Room Type
+            </div>
+            <select v-model="typeInput" id="type-select">
+              <option disabled value="">Select a type...</option>
+              <option value=true>Public</option>
+              <option value=false>Private</option>
+            </select>
+          </slot>
+        </div>
+
+        <div class="modal-body time-container">
+          <slot name="body">
+            <div v-bind:class="{'box-active': timeInput === 10, 'box-inactive': timeInput !== 10}" @click="putTime(10)">10 min</div>
+            <div v-bind:class="{'box-active': timeInput === 5, 'box-inactive': timeInput !== 5}" @click="putTime(5)">5 min</div>
+            <div v-bind:class="{'box-active': timeInput === 3, 'box-inactive': timeInput !== 3}" @click="putTime(3)">3 min</div>
+            <div v-bind:class="{'box-active': timeInput === 1, 'box-inactive': timeInput !== 1}" @click="putTime(1)">1 min</div>
+          </slot>
+        </div>
+
+        <div class="button-container">
+            <button :disabled="!valid" 
+                    v-bind:class="{'submit-button': valid, 'submit-disabled': !valid}"
+                    @click="createRoom">
+              {{valid ? 'Create!' : 'Missing Fields'}}
             </button>
-          </slot>
-        </div>
-
-        <div class="modal-body">
-          <slot name="body">
-            Give Room Name
-            <input type="text" name="" id="" value="MichikoGomi">
-          </slot>
-        </div>
-
-        <div class="modal-body">
-          <slot name="body">
-            Give Room Type
-            <input type="checkbox" name="" id="" value="public">
-            Public
-            <input type="checkbox" name="" id="" value="private">
-            Private
-          </slot>
-        </div>
-
-        <div class="modal-body">
-          <slot name="body">
-            Gimme Time
-          </slot>
-        </div>
-
-        <div class="modal-footer">
-          <slot name="footer">
-            <button class="modal-default-button" @click="createRoom">
-              Submit
-            </button>
-          </slot>
         </div>
       </div>
     </div>
@@ -49,16 +58,39 @@
 <script>
 import firebase from 'firebase'
 import { db } from '@/firebase'
-import {
-} from '@/resources/gameModel.js'
+import { addGameDoc } from '@/resources/gameModel.js'
+import { addTimerDoc } from '@/resources/timerModel.js'
 
 export default {
   name: 'CreateRoomModal',
+  data() {
+    return {
+      roomNameInput: "",
+      typeInput: 0,
+      timeInput: 0
+    }
+  },
+  computed: {
+    valid: function() {
+      return !!this.timeInput && !!this.typeInput && !!this.roomNameInput
+    }
+  },
   methods: {
-    createRoom() {
-      alert("Labyu")
-
+    async createRoom() {
+      if(this.valid)
+      {
+        let timer = await addTimerDoc(this.timeInput)
+        let game = await addGameDoc(this.roomNameInput, this.typeInput, timer.id)
+        //console.log("WOO" + game.id)
+        this.$router.push({ path: '/room/' + game.id })
+      }
+      
       this.$emit('close')
+    },
+
+    putTime(time) {
+      this.timeInput = time
+      //console.log(this.valid)
     }
   }
 }
@@ -79,18 +111,19 @@ export default {
 
 .modal-wrapper {
   display: table-cell;
+  z-index: 9998;
   vertical-align: middle;
 }
 
 .modal-container {
   width: 300px;
   margin: 0px auto;
-  padding: 20px 30px;
-  background-color: pink;
-  border-radius: 2px;
+  padding: 10px 10px;
+  background-color:white;
+  border-radius: 15px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.33);
   transition: all 0.3s ease;
-  font-family: Helvetica, Arial, sans-serif;
+  font-family: 'Raleway', Arial, Helvetica, sans-serif;
 }
 
 .modal-header {
@@ -99,11 +132,102 @@ export default {
 }
 
 .modal-body {
-  margin: 20px 0;
+  margin: 0px 0;
 }
 
-.modal-default-button {
-  float: center;
+#label-container {
+  color: black;
+
+  text-align: center;
+  font-weight: bolder;
+  font-size: 1.75em;
+
+  margin-left: 25px;
+  margin-right: 0px;
+}
+
+#name-label {
+  color: black;
+  margin-bottom: 10px;
+}
+
+#type-label {
+  color: black;
+  margin-bottom: 10px;
+}
+#type-select {
+  background-color: #c4c4c4a6;
+  height: 25px;
+  width: 60%;
+  outline: none;
+}
+
+#close-button {
+  position: relative;
+  float: right;
+  background-color: #FF4949;
+  border: 0px solid #FF4949;
+  font-weight: bold;
+  border-radius: 3px;
+  color: #FFF;
+}
+
+.time-container{
+  margin: 0px 0px 15px 0px;
+  width:100%;
+  height:50%;
+  background-color:#fff;
+  display:grid;
+  grid-template-columns: 46% 46%;
+  grid-row: auto auto;
+  grid-column-gap: 20px;
+  grid-row-gap: 20px;
+}
+.box-active{
+    background-color:#E6912C;
+    padding:8px;
+    border-radius:0px;
+    color:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:1em;
+    font-weight: bold;
+}
+.box-inactive{
+    background-color:#b37f40;
+    padding:8px;
+    border-radius:0px;
+    color:rgb(214, 208, 208);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:1em;
+    font-weight: bold;
+}
+
+.submit-button {
+    background-color: #6FC186;
+    color: #FFF;
+    font-size: 1em;
+    text-align: center;
+    border: 0px solid #6FC186;
+    border-radius: 0px;
+    height: 35px;
+    width: 90%;
+    margin-bottom: 20px;
+}
+.submit-disabled {
+    background-color: #6b9778;
+    color: rgb(199, 198, 198);
+    font-size: 1em;
+    text-align: center;
+    border: 0px solid #6FC186;
+    border-radius: 0px;
+    height: 35px;
+    width: 90%;
+    margin-bottom: 20px;
+    cursor: default;
 }
 
 /*
@@ -128,5 +252,4 @@ export default {
   -webkit-transform: scale(1.1);
   transform: scale(1.1);
 }
-
 </style>

@@ -79,3 +79,17 @@ export const getCount = (() => {
 
   return count
 })
+
+export const addGameDoc = ((roomName, roomType, timerID) => {
+  return db.collection("games").add({
+    board_state: "",
+    host_user: db.doc('users/' + firebase.auth().currentUser.uid),
+    other_user:  db.doc('users/' + 'nil'),
+    is_host_white: true,
+    is_public: roomType === "true",
+    last_player_moved: "white",
+    room_link: "link",
+    room_name: roomName,
+    timer_id: db.doc('timers/' + timerID)
+  })
+})

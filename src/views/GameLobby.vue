@@ -70,7 +70,7 @@ export default {
       lobbyNextQuery: roomQuery,
       lobbyPrevQuery: roomQuery,
 
-      showModal: true
+      showModal: false
     }
   },
   computed: {
