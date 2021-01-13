@@ -1,4 +1,4 @@
-import { getPossibleMoveBlack } from '@/store/services/highlightService'
+import { getPossibleMoves } from '@/store/services/highlightService'
 
 // dummy 8 x 8 board
 const getBoard = () => {
@@ -19,35 +19,37 @@ const getBoard = () => {
   return board
 }
 
+const isWhite = false
+
 describe('movement for black', () => {
   /**
    * _ _ _ _ _ _ _ _
    * _ _ _ _ _ _ _ _
    * _ _ _ _ _ _ _ _
+   * _ _ _ _ _ b _ _
    * _ _ _ _ _ _ _ _
-   * _ _ B _ _ _ _ _
    * _ _ _ _ _ _ _ _
    * _ _ _ _ _ _ _ _
    * _ _ _ _ _ _ _ _
    */
-  it('return coordinates of southwest and southeast spaces if both are free and valid', () => {
+  it ('return coordinates of northwest and northeast spaces if both are free and valid', () => {
     // arrange
     const board = getBoard()
 
-    board[3][2] = {
-      nRow: 4, 
-      nCol: 3, 
+    board[4][5] = {
+      nRow: 5, 
+      nCol: 6, 
       bHasBlackChip: true,
       bHasWhiteChip: false
     }
 
     const expected = [
-      [2, 1, 0],
-      [2, 3, 0]
+      [5, 4, 0],
+      [5, 6, 0]
     ]
 
     // act
-    const result = getPossibleMoveBlack(board, board[3][2].nRow, board[3][2].nCol)
+    const result = getPossibleMoves(board, board[4][5].nRow, board[4][5].nCol, isWhite)
 
     // assert
     expect(result).toStrictEqual(expected)
@@ -57,29 +59,29 @@ describe('movement for black', () => {
    * _ _ _ _ _ _ _ _
    * _ _ _ _ _ _ _ _
    * _ _ _ _ _ _ _ _
+   * _ _ _ _ _ _ _ W
    * _ _ _ _ _ _ _ _
-   * _ _ _ _ _ _ _ B
    * _ _ _ _ _ _ _ _
    * _ _ _ _ _ _ _ _
    * _ _ _ _ _ _ _ _
    */
-  it('return coordinates of southwest when it is free and valid, southeast is out of bounds', () => {
+  it('return coordinates of northwest when it is free and valid, northeast is out of bounds', () => {
     // arrange
     const board = getBoard()
 
-    board[3][7] = {
-      nRow: 4, 
+    board[4][7] = {
+      nRow: 5, 
       nCol: 8, 
       bHasBlackChip: true,
       bHasWhiteChip: false
     }
 
     const expected = [
-      [2, 6, 0]
+      [5, 6, 0]
     ]
 
     // act
-    const result = getPossibleMoveBlack(board, board[3][7].nRow, board[3][7].nCol)
+    const result = getPossibleMoves(board, board[4][7].nRow, board[4][7].nCol, isWhite)
 
     // assert
     expect(result).toStrictEqual(expected)
@@ -89,29 +91,29 @@ describe('movement for black', () => {
    * _ _ _ _ _ _ _ _
    * _ _ _ _ _ _ _ _
    * _ _ _ _ _ _ _ _
+   * W _ _ _ _ _ _ _
    * _ _ _ _ _ _ _ _
-   * B _ _ _ _ _ _ _
    * _ _ _ _ _ _ _ _
    * _ _ _ _ _ _ _ _
    * _ _ _ _ _ _ _ _
    */
-  it('return coordinates of southeast when it is free and valid, southwest is out of bounds', () => {
+  it('return coordinates of northeast when it is free and valid, northwest is out of bounds', () => {
     // arrange
     const board = getBoard()
 
-    board[3][0] = {
-      nRow: 4, 
+    board[4][0] = {
+      nRow: 5, 
       nCol: 1, 
       bHasBlackChip: true,
       bHasWhiteChip: false
     }
 
     const expected = [
-      [2, 1, 0]
+      [5, 1, 0]
     ]
 
     // act
-    const result = getPossibleMoveBlack(board, board[3][0].nRow, board[3][0].nCol)
+    const result = getPossibleMoves(board, board[4][0].nRow, board[4][0].nCol, isWhite)
 
     // assert
     expect(result).toStrictEqual(expected)
@@ -120,37 +122,37 @@ describe('movement for black', () => {
   /**
    * _ _ _ _ _ _ _ _
    * _ _ _ _ _ _ _ _
+   * _ _ _ _ _ _ W _
+   * _ _ _ _ _ W _ _
    * _ _ _ _ _ _ _ _
    * _ _ _ _ _ _ _ _
-   * _ _ B _ _ _ _ _
-   * _ _ _ B _ _ _ _
    * _ _ _ _ _ _ _ _
    * _ _ _ _ _ _ _ _
    */
-  it('return coordinates of southwest when it is free and valid, southeast has black chip', () => {
+  it('return coordinates of northwest when it is free and valid, northeast has white chip', () => {
     // arrange
     const board = getBoard()
 
-    board[3][2] = {
-      nRow: 4, 
-      nCol: 3, 
+    board[4][5] = {
+      nRow: 5, 
+      nCol: 6, 
       bHasBlackChip: true,
       bHasWhiteChip: false
     }
 
-    board[2][3] = {
-      nRow: 3, 
-      nCol: 4, 
+    board[5][6] = {
+      nRow: 6, 
+      nCol: 7, 
       bHasBlackChip: true,
       bHasWhiteChip: false
     }
 
     const expected = [
-      [2, 1, 0]
+      [5, 4, 0]
     ]
 
     // act
-    const result = getPossibleMoveBlack(board, board[3][2].nRow, board[3][2].nCol)
+    const result = getPossibleMoves(board, board[4][5].nRow, board[4][5].nCol, isWhite)
 
     // assert
     expect(result).toStrictEqual(expected)
@@ -159,37 +161,37 @@ describe('movement for black', () => {
   /**
    * _ _ _ _ _ _ _ _
    * _ _ _ _ _ _ _ _
+   * _ _ _ _ W _ _ _
+   * _ _ _ _ _ W _ _
    * _ _ _ _ _ _ _ _
    * _ _ _ _ _ _ _ _
-   * _ _ B _ _ _ _ _
-   * _ B _ _ _ _ _ _
    * _ _ _ _ _ _ _ _
    * _ _ _ _ _ _ _ _
    */
-  it('return coordinates of southeast when it is free and valid, southwest has black chip', () => {
+  it('return coordinates of northeast when it is free and valid, northwest has white chip', () => {
     // arrange
     const board = getBoard()
 
-    board[3][2] = {
-      nRow: 4, 
-      nCol: 3, 
+    board[4][5] = {
+      nRow: 5, 
+      nCol: 6, 
       bHasBlackChip: true,
       bHasWhiteChip: false
     }
 
-    board[2][1] = {
-      nRow: 3, 
-      nCol: 2, 
+    board[5][4] = {
+      nRow: 6, 
+      nCol: 5, 
       bHasBlackChip: true,
       bHasWhiteChip: false
     }
 
     const expected = [
-      [2, 3, 0]
+      [5, 6, 0]
     ]
 
     // act
-    const result = getPossibleMoveBlack(board, board[3][2].nRow, board[3][2].nCol)
+    const result = getPossibleMoves(board, board[4][5].nRow, board[4][5].nCol, isWhite)
 
     // assert
     expect(result).toStrictEqual(expected)
@@ -198,34 +200,34 @@ describe('movement for black', () => {
   /**
    * _ _ _ _ _ _ _ _
    * _ _ _ _ _ _ _ _
+   * _ _ _ _ W _ W _
+   * _ _ _ _ _ W _ _
    * _ _ _ _ _ _ _ _
    * _ _ _ _ _ _ _ _
-   * _ _ B _ _ _ _ _
-   * _ B _ B _ _ _ _
    * _ _ _ _ _ _ _ _
    * _ _ _ _ _ _ _ _
    */
-  it('return none when southwest and southeast have black chips', () => {
+  it('return none when northwest and northeast have white chips', () => {
     // arrange
     const board = getBoard()
 
-    board[3][2] = {
-      nRow: 4, 
-      nCol: 3, 
+    board[4][5] = {
+      nRow: 5, 
+      nCol: 6, 
       bHasBlackChip: true,
       bHasWhiteChip: false
     }
 
-    board[2][3] = {
-      nRow: 3, 
-      nCol: 4, 
+    board[5][6] = {
+      nRow: 6, 
+      nCol: 7, 
       bHasBlackChip: true,
       bHasWhiteChip: false
     }
 
-    board[2][1] = {
-      nRow: 3, 
-      nCol: 2, 
+    board[5][4] = {
+      nRow: 6, 
+      nCol: 5, 
       bHasBlackChip: true,
       bHasWhiteChip: false
     }
@@ -233,7 +235,7 @@ describe('movement for black', () => {
     const expected = []
 
     // act
-    const result = getPossibleMoveBlack(board, board[3][2].nRow, board[3][2].nCol)
+    const result = getPossibleMoves(board, board[4][5].nRow, board[4][5].nCol, isWhite)
 
     // assert
     expect(result).toStrictEqual(expected)

@@ -1,4 +1,4 @@
-import { getPossibleMoveWhite } from '@/store/services/highlightService'
+import { getPossibleMoves } from '@/store/services/highlightService'
 
 // dummy 8 x 8 board
 const getBoard = () => {
@@ -19,7 +19,9 @@ const getBoard = () => {
   return board
 }
 
-describe('blocked capture attempt for white', () => {
+const isWhite = true
+
+describe ('Blocked capture attempt for white', () => {
   /**
    * _ _ _ _ _ _ _ _
    * _ _ _ B _ _ _ _
@@ -30,9 +32,10 @@ describe('blocked capture attempt for white', () => {
    * _ _ _ _ _ _ _ _
    * _ _ _ _ _ _ _ _
    */
-  it('when northwest has black chip, two spaces northwest has black chip, northeast is free and valid, \
-  return coordinates of latest for movement', () => {
-    // arrange
+  it ('returns coordinates of latest for movement \
+      when northwest has black chip, two spaces northwest has black chip, northeast is free and valid', 
+      () => {
+    // Arrange
     const board = getBoard()
 
     board[4][5] = {
@@ -61,7 +64,7 @@ describe('blocked capture attempt for white', () => {
     ]
 
     // act
-    const result = getPossibleMoveWhite(board, board[4][5].nRow, board[4][5].nCol)
+    const result = getPossibleMoves(board, board[4][5].nRow, board[4][5].nCol, isWhite)
 
     // assert
     expect(result).toStrictEqual(expected)
@@ -77,8 +80,9 @@ describe('blocked capture attempt for white', () => {
    * _ _ _ _ _ _ _ _
    * _ _ _ _ _ _ _ _
    */
-  it('when northwest has black chip, two spaces northwest has white chip, northeast is free and valid, \
-  return coordinates of latest for movement', () => {
+  it ('returns coordinates of latest for movement \
+    when northwest has black chip, two spaces northwest has white chip, northeast is free and valid', 
+    () => {
     // arrange
     const board = getBoard()
 
@@ -108,7 +112,7 @@ describe('blocked capture attempt for white', () => {
     ]
 
     // act
-    const result = getPossibleMoveWhite(board, board[4][5].nRow, board[4][5].nCol)
+    const result = getPossibleMoves(board, board[4][5].nRow, board[4][5].nCol, isWhite)
 
     // assert
     expect(result).toStrictEqual(expected)
@@ -155,7 +159,7 @@ describe('blocked capture attempt for white', () => {
     ]
 
     // act
-    const result = getPossibleMoveWhite(board, board[4][5].nRow, board[4][5].nCol)
+    const result = getPossibleMoves(board, board[4][5].nRow, board[4][5].nCol, isWhite)
 
     // assert
     expect(result).toStrictEqual(expected)
@@ -202,7 +206,7 @@ describe('blocked capture attempt for white', () => {
     ]
 
     // act
-    const result = getPossibleMoveWhite(board, board[4][5].nRow, board[4][5].nCol)
+    const result = getPossibleMoves(board, board[4][5].nRow, board[4][5].nCol, isWhite)
 
     // assert
     expect(result).toStrictEqual(expected)
@@ -242,7 +246,7 @@ describe('blocked capture attempt for white', () => {
     ]
 
     // act
-    const result = getPossibleMoveWhite(board, board[4][6].nRow, board[4][6].nCol)
+    const result = getPossibleMoves(board, board[4][6].nRow, board[4][6].nCol, isWhite)
 
     // assert
     expect(result).toStrictEqual(expected)
@@ -282,7 +286,7 @@ describe('blocked capture attempt for white', () => {
     ]
 
     // act
-    const result = getPossibleMoveWhite(board, board[4][1].nRow, board[4][1].nCol)
+    const result = getPossibleMoves(board, board[4][1].nRow, board[4][1].nCol, isWhite)
 
     // assert
     expect(result).toStrictEqual(expected)

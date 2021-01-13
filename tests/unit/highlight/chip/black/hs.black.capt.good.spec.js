@@ -1,4 +1,4 @@
-import { getPossibleMoveBlack } from '@/store/services/highlightService'
+import { getPossibleMoves } from '@/store/services/highlightService'
 
 // dummy 8 x 8 board
 const getBoard = () => {
@@ -19,177 +19,87 @@ const getBoard = () => {
   return board
 }
 
+const isWhite = false
+
 describe('unblocked capture attempt for black', () => {
   /**
    * _ _ _ _ _ _ _ _
    * _ _ _ _ _ _ _ _
+   * _ _ _ _ B _ _ _
+   * _ _ _ _ _ W _ _
    * _ _ _ _ _ _ _ _
    * _ _ _ _ _ _ _ _
-   * _ _ B _ _ _ _ _
-   * _ W _ _ _ _ _ _
    * _ _ _ _ _ _ _ _
    * _ _ _ _ _ _ _ _
    */
-  it('when southwest has white chip, two spaces southwest is free and valid, southeast is free and valid, \
+  it('when northwest has black chip, two spaces northwest is free and valid, northeast is free and valid, \
   return coordinates of former for capture, latter two for movement', () => {
     // arrange
     const board = getBoard()
 
-    board[3][2] = {
-      nRow: 4, 
-      nCol: 3, 
+    board[4][5] = {
+      nRow: 5, 
+      nCol: 6, 
       bHasBlackChip: true,
       bHasWhiteChip: false
     }
 
-    board[2][1] = {
-      nRow: 3, 
-      nCol: 2, 
+    board[5][4] = {
+      nRow: 6, 
+      nCol: 5, 
       bHasBlackChip: false,
       bHasWhiteChip: true
     }
 
     const expected = [
-      [2, 1, 1],
-      [1, 0, 0],
-      [2, 3, 0]
+      [5, 4, 1],
+      [6, 3, 0],
+      [5, 6, 0]
     ]
 
     // act
-    const result = getPossibleMoveBlack(board, board[3][2].nRow, board[3][2].nCol)
+    const result = getPossibleMoves(board, board[4][5].nRow, board[4][5].nCol, isWhite)
 
     // assert
     expect(result).toStrictEqual(expected)
   })
-
   /**
    * _ _ _ _ _ _ _ _
    * _ _ _ _ _ _ _ _
+   * _ _ _ _ _ _ B _
+   * _ _ _ _ _ W _ _
    * _ _ _ _ _ _ _ _
    * _ _ _ _ _ _ _ _
-   * _ _ B _ _ _ _ _
-   * _ _ _ W _ _ _ _
    * _ _ _ _ _ _ _ _
    * _ _ _ _ _ _ _ _
    */
-  it('when southeast has white chip, two spaces southeast is free and valid, southwest is free and valid, \
+  it('when northeast has black chip, two spaces northeast is free and valid, northwest is free and valid, \
   return coordinates of former for capture, latter two for movement', () => {
     // arrange
     const board = getBoard()
 
-    board[3][2] = {
-      nRow: 4, 
-      nCol: 3, 
+    board[4][5] = {
+      nRow: 5, 
+      nCol: 6, 
       bHasBlackChip: true,
       bHasWhiteChip: false
     }
 
-    board[2][3] = {
-      nRow: 3, 
-      nCol: 4, 
-      bHasBlackChip: false,
-      bHasWhiteChip: true
-    }
-
-    const expected = [
-      [2, 1, 0],
-      [2, 3, 1],
-      [1, 4, 0]
-    ]
-
-    // act
-    const result = getPossibleMoveBlack(board, board[3][2].nRow, board[3][2].nCol)
-
-    // assert
-    expect(result).toStrictEqual(expected)
-  })
-
-  /**
-   * _ _ _ _ _ _ _ _
-   * _ _ _ _ _ _ _ _
-   * _ _ _ _ _ _ _ _
-   * _ _ _ _ _ _ _ _
-   * _ _ B _ _ _ _ _
-   * _ W _ W _ _ _ _
-   * _ _ _ _ _ _ _ _
-   * _ _ _ _ _ _ _ _
-   */
-  it('when southwest and southeast have white chips, two spaces southeast and southwest are free and valid, \
-  return coordinates of former two for capture, latter two for movement', () => {
-    // arrange
-    const board = getBoard()
-
-    board[3][2] = {
-      nRow: 4, 
-      nCol: 3, 
-      bHasBlackChip: true,
-      bHasWhiteChip: false
-    }
-
-    board[2][1] = {
-      nRow: 3, 
-      nCol: 2, 
-      bHasBlackChip: false,
-      bHasWhiteChip: true
-    }
-
-    board[2][3] = {
-      nRow: 3, 
-      nCol: 4, 
-      bHasBlackChip: false,
-      bHasWhiteChip: true
-    }
-
-    const expected = [
-      [2, 1, 1],
-      [1, 0, 0],
-      [2, 3, 1],
-      [1, 4, 0]
-    ]
-
-    // act
-    const result = getPossibleMoveBlack(board, board[3][2].nRow, board[3][2].nCol)
-
-    // assert
-    expect(result).toStrictEqual(expected)
-  })
-
-  /**
-   * _ _ _ _ _ _ _ _
-   * _ _ _ _ _ _ _ _
-   * _ _ _ _ _ _ _ _
-   * _ _ _ _ _ _ _ _
-   * _ _ _ _ _ _ _ B
-   * _ _ _ _ _ _ W _
-   * _ _ _ _ _ _ _ _
-   * _ _ _ _ _ _ _ _
-   */
-  it('when southwest has white chip, two spaces southwest is free and valid, southeast is out of bounds, \
-  return coordinates of first for capture, second for movement', () => {
-    // arrange
-    const board = getBoard()
-
-    board[3][7] = {
-      nRow: 4, 
-      nCol: 8, 
-      bHasBlackChip: true,
-      bHasWhiteChip: false
-    }
-
-    board[2][6] = {
-      nRow: 3, 
+    board[5][6] = {
+      nRow: 6, 
       nCol: 7, 
       bHasBlackChip: false,
       bHasWhiteChip: true
     }
 
     const expected = [
-      [2, 6, 1],
-      [1, 5, 0]
+      [5, 4, 0],
+      [5, 6, 1],
+      [6, 7, 0]
     ]
 
     // act
-    const result = getPossibleMoveBlack(board, board[3][7].nRow, board[3][7].nCol)
+    const result = getPossibleMoves(board, board[4][5].nRow, board[4][5].nCol, isWhite)
 
     // assert
     expect(result).toStrictEqual(expected)
@@ -198,39 +108,130 @@ describe('unblocked capture attempt for black', () => {
   /**
    * _ _ _ _ _ _ _ _
    * _ _ _ _ _ _ _ _
+   * _ _ _ _ B _ B _
+   * _ _ _ _ _ W _ _
    * _ _ _ _ _ _ _ _
    * _ _ _ _ _ _ _ _
-   * B _ _ _ _ _ _ _
-   * _ W _ _ _ _ _ _
    * _ _ _ _ _ _ _ _
    * _ _ _ _ _ _ _ _
    */
-  it('when southeast has white chip, two spaces southeast is free and valid, southwest is out of bounds, \
+  it('when northwest and northeast have black chips, two spaces northeast and northwest are free and valid, \
+  return coordinates of former two for capture, latter two for movement', () => {
+    // arrange
+    const board = getBoard()
+
+    board[4][5] = {
+      nRow: 5, 
+      nCol: 6, 
+      bHasBlackChip: true,
+      bHasWhiteChip: false
+    }
+
+    board[5][4] = {
+      nRow: 6, 
+      nCol: 5, 
+      bHasBlackChip: false,
+      bHasWhiteChip: true
+    }
+
+    board[5][6] = {
+      nRow: 6, 
+      nCol: 7, 
+      bHasBlackChip: false,
+      bHasWhiteChip: true
+    }
+
+    const expected = [
+      [5, 4, 1],
+      [6, 3, 0],
+      [5, 6, 1],
+      [6, 7, 0]
+    ]
+
+    // act
+    const result = getPossibleMoves(board, board[4][5].nRow, board[4][5].nCol, isWhite)
+
+    // assert
+    expect(result).toStrictEqual(expected)
+  })
+
+  /**
+   * _ _ _ _ _ _ _ _
+   * _ _ _ _ _ _ _ _
+   * _ _ _ _ _ _ B _
+   * _ _ _ _ _ _ _ W
+   * _ _ _ _ _ _ _ _
+   * _ _ _ _ _ _ _ _
+   * _ _ _ _ _ _ _ _
+   * _ _ _ _ _ _ _ _
+   */
+  it('when northwest has black chip, two spaces northwest is free and valid, northeast is out of bounds, \
   return coordinates of first for capture, second for movement', () => {
     // arrange
     const board = getBoard()
 
-    board[3][0] = {
+    board[4][7] = {
+      nRow: 5, 
+      nCol: 8, 
+      bHasBlackChip: true,
+      bHasWhiteChip: false
+    }
+
+    board[5][6] = {
       nRow: 4, 
+      nCol: 7, 
+      bHasBlackChip: false,
+      bHasWhiteChip: true
+    }
+
+    const expected = [
+      [5, 6, 1],
+      [6, 5, 0]
+    ]
+
+    // act
+    const result = getPossibleMoves(board, board[4][7].nRow, board[4][7].nCol, isWhite)
+
+    // assert
+    expect(result).toStrictEqual(expected)
+  })
+
+  /**
+   * _ _ _ _ _ _ _ _
+   * _ _ _ _ _ _ _ _
+   * _ B _ _ _ _ _ _
+   * W _ _ _ _ _ _ _
+   * _ _ _ _ _ _ _ _
+   * _ _ _ _ _ _ _ _
+   * _ _ _ _ _ _ _ _
+   * _ _ _ _ _ _ _ _
+   */
+  it('when northeast has black chip, two spaces northeast is free and valid, northwest is out of bounds, \
+  return coordinates of first for capture, second for movement', () => {
+    // arrange
+    const board = getBoard()
+
+    board[4][0] = {
+      nRow: 5, 
       nCol: 1, 
       bHasBlackChip: true,
       bHasWhiteChip: false
     }
 
-    board[2][1] = {
-      nRow: 3, 
+    board[5][1] = {
+      nRow: 6, 
       nCol: 2, 
       bHasBlackChip: false,
       bHasWhiteChip: true
     }
 
     const expected = [
-      [2, 1, 1],
-      [1, 2, 0]
+      [5, 1, 1],
+      [6, 2, 0]
     ]
 
     // act
-    const result = getPossibleMoveBlack(board, board[3][0].nRow, board[3][0].nCol)
+    const result = getPossibleMoves(board, board[4][0].nRow, board[4][0].nCol, isWhite)
 
     // assert
     expect(result).toStrictEqual(expected)

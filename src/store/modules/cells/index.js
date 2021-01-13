@@ -10,6 +10,10 @@ const state = {
   nBlackCount: 12,
   firstClick: null,
   bActiveGame: true,
+  bLastMoveLegal: true,
+  bIsCaptureRequired: false,
+  bStartedCaptureSequence: false,
+  prevDestSquare: null,
   cWinner: 'N' //'B' black 'W' white 'N' none 'D' draw
 }
 

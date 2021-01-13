@@ -1,8 +1,6 @@
 import firebase from 'firebase'
 import 'firebase/auth'
 import 'firebase/firestore'
-import store from './store'
-
 
 const firebaseConfig = {
   apiKey: "AIzaSyA9SZagTMn8tSFeZkOQkrDmptaQLP-3c7k",
@@ -19,7 +17,7 @@ firebase.initializeApp(firebaseConfig)
 const db = firebase.firestore()
 const auth = firebase.auth()
 
-
+// To be used in the Vue Router
 firebase.getCurrentUser = () => {
   return new Promise((resolve, reject) => {
     const unsubscribe = firebase.auth().onAuthStateChanged(user => {
@@ -29,26 +27,15 @@ firebase.getCurrentUser = () => {
   })
 }
 
-firebase.auth().onAuthStateChanged(user => {
-  store.dispatch("setUser", user);
-})
-
 // Collections
 const usersCollection = db.collection('users')
-const chatsCollection = db.collection('chats')
 const gamesCollection = db.collection('games')
-const movesCollection = db.collection('moves')
-
-gamesCollection.doc("2gSaU2SjJeUpHEEbXPyX")
-  .onSnapshot(doc => {
-      // const boardState = doc.data().boardState
-      // console.log(boardState)
-      // store.dispatch('aUpdateBoard', boardState);
-  });
+const timersCollection = db.collection('timers')
 
 export {
   db,
   auth,
   usersCollection,
-  chatsCollection
+  gamesCollection,
+  timersCollection
 }

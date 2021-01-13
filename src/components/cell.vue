@@ -1,6 +1,5 @@
 <template>
   <td :class="highlight" class="square" @click="onSquareClicked()" v-if="isDark">
-    <!-- {{row-1}}{{col-1}} -->
     <div id="checker-black" class="chip black-chip" v-show="hasBlackChip">
       <img class="king" src="../../public/assets/king.png" v-show="hasBlackKing"/>
     </div>
@@ -12,17 +11,14 @@
 </template>
 
 <script>
-import { 
-  bIsValidCapture
-} from '@/store/services/kingCaptureService'
-import { 
-  checkIfWhiteStuck,
-  checkIfBlackStuck
-} from '@/store/services/winCheckerService'
-import { mapGetters, mapActions } from 'vuex'
+import { bCanCapture } from '@/store/services/moveCaptureService'
+import { bIsValidCapture } from '@/store/services/kingCaptureService'
+import { getPossibleKingCaptures } from '@/store/services/highlightService'
+import { checkIfPlayerStuck } from '@/store/services/winCheckerService'
+import { mapState, mapGetters, mapActions } from 'vuex'
 
 export default {
-  props: ['row', 'col'],
+  props: ['row', 'col', 'canMakeMove', 'selfColor'],
   data () {
     return {
       dIsSelected: false,
@@ -30,43 +26,52 @@ export default {
       dIsPossibleCapture: false
     }
   },
+
   computed: {
     ...mapGetters({
       board: 'getEntireBoard',
       firstClick: 'getFirstClick',
       whiteCount: 'getWhiteCount',
+      prevDestSquare: 'getPrevDestSquare',
       blackCount: 'getBlackCount',
-      bActiveGame: 'getActiveGame'
+      bActiveGame: 'getActiveGame',
+      isLastMoveLegal: 'getIsLastMoveLegal',
+      isCaptureRequired: 'getIsCaptureRequired',
+      isCapturing: 'getCaptureSequenceState'
     }),
 
     isSelected: {
-      get () {
+      get() {
         return this.board[this.row-1][this.col-1].isHighlighted
       },
-      set (val) {
+      set(val) {
         this.dIsSelected = val
       }
     },  
 
     isPossibleMove: {
-      get () {
+      get() {
         return this.board[this.row-1][this.col-1].isPossibleMove
       },
-      set (val) {
+      set(val) {
         this.dIsPossibleMove = val
       }
     },
 
     isPossibleCapture: {
-      get () {
+      get() {
         return this.board[this.row-1][this.col-1].isPossibleCapture
       },
-      set (val) {
+      set(val) {
         this.dIsPossibleCapture = val
       }
     },
 
-    highlight () {
+    bContainsPiece() {
+      return this.hasBlackChip || this.hasWhiteChip || this.hasWhiteKing || this.hasBlackKing
+    },  
+
+    highlight() {
       return {
         'highlight-selected': this.isSelected,
         'highlight-possible-move': this.isPossibleMove,
@@ -75,26 +80,68 @@ export default {
       }
     },
 
-    isDark () {
+    isDark() {
       return (this.row % 2 === 1) ? this.col % 2 === 1 : this.col % 2 === 0
     },
 
-    hasBlackChip () {
+    hasBlackChip() {
       return this.board[this.row - 1][this.col - 1].bHasBlackChip
     },
 
-    hasWhiteChip () {
+    hasWhiteChip() {
       return this.board[this.row - 1][this.col - 1].bHasWhiteChip
     },
 
-    hasBlackKing () {
+    hasBlackKing() {
       return this.board[this.row - 1][this.col - 1].bHasBlackKing
     },
 
-    hasWhiteKing () {
+    hasWhiteKing() {
       return this.board[this.row - 1][this.col - 1].bHasWhiteKing
+    },
+
+    isSelectingEnemyPiece() {
+      const bCurWhitePiece = this.hasWhiteChip || this.hasWhiteKing
+      const bCurBlackPiece = this.hasBlackChip || this.hasBlackKing
+      const isSelectingOwnPiece = 
+        (this.selfColor === 'w' && bCurWhitePiece) || 
+        (this.selfColor === 'b' && bCurBlackPiece) 
+
+      return this.firstClick === null && !isSelectingOwnPiece
+    },
+
+    canSelectedPieceCapture() { 
+      const coordsTopLeft = {
+        nRow: this.row, 
+        nCol: this.col,
+        nDestRow: this.row + 2,
+        nDestCol: this.col - 2
+      }
+
+      const coordsTopRight = {
+        ...coordsTopLeft,
+        nDestCol: this.col + 2
+      }
+
+      return bCanCapture(this.board, coordsTopLeft, this.selfColor === 'w') ||
+            bCanCapture(this.board, coordsTopRight, this.selfColor === 'w')
+    },
+
+    canSelectedKingCapture() {
+      const playerIsWhite = this.selfColor === 'w'
+      const possibleCaptures = getPossibleKingCaptures(this.board, this.row, this.col, playerIsWhite)
+      if (possibleCaptures.length > 0) {
+        const canKingCapture = possibleCaptures.reduce((a, c) => a || c[2], possibleCaptures[0][2])
+        return canKingCapture
+      } return false
+    },
+
+    isAttemptingToCaptureOutsideSequence() {
+      const { nRow, nCol } = this.prevDestSquare
+      return nRow !== this.row || nCol !== this.col
     }
   },
+
   methods: {
     ...mapActions([
       'aKingMovement', 
@@ -107,81 +154,142 @@ export default {
       'aSetWinner'
     ]),
 
-    cancelCurrentMove () {
-      const bContainsPiece = this.hasBlackChip || this.hasWhiteChip || this.hasWhiteKing || this.hasBlackKing
-      if (bContainsPiece) {
-        this.aHighlight({
-          nRow: this.row, 
-          nCol: this.col, 
-          bHasBlackKing: this.hasBlackKing,
-          bHasWhiteKing: this.hasWhiteKing 
-        })
+    cancelCurrentMove(isCaptureRequired) { 
+      if (this.bContainsPiece) {
+        if (isCaptureRequired) {
+          // Check if a capture can be made
+          if (this.canSelectedPieceCapture || this.canSelectedKingCapture) {
+            this.aHighlight({
+              nRow: this.row, 
+              nCol: this.col, 
+              bHasBlackKing: this.hasBlackKing,
+              bHasWhiteKing: this.hasWhiteKing 
+            })
+          }
+        } else {
+          this.aHighlight({
+            nRow: this.row, 
+            nCol: this.col, 
+            bHasBlackKing: this.hasBlackKing,
+            bHasWhiteKing: this.hasWhiteKing 
+          })
+        }
       } else { // Illegal move
         this.aUnhighlight(null)
       }
     },
 
-    onSquareClicked () {
-      if(this.bActiveGame) {
-        const source = this.firstClick
-        const bContainsPiece = this.hasBlackChip || this.hasWhiteChip || this.hasWhiteKing || this.hasBlackKing
+    onSquareClicked() {
+      if (this.bActiveGame) {
+        if (this.canMakeMove) {
+          const source = this.firstClick
 
-        if (source != null) {
-          this.isSelected = false
-          const coords = {
-            nRow: source.nRow,
-            nCol: source.nCol,
-            nDestRow: this.row,
-            nDestCol: this.col
-          }
-          
-          const bIsKingMovement = source.bHasBlackKing || source.bHasWhiteKing
-    
-          // Check for move or capture attempts. No legality checking
-          if (coords.nRow === coords.nDestRow && coords.nCol === coords.nDestCol) {
-            this.aUnhighlight(null)
-          } else if (bIsKingMovement) {
-            if (this.isKingMoveAttempt(source, coords)) {
-              this.aKingMovement(coords)
-            } else if (this.isKingCaptureAttempt(source, coords)) {
-              this.aKingCapturePiece(coords)
-            } else {
-              this.cancelCurrentMove()
+          // Highlight or attempt to move a piece
+          if (source != null) {
+            this.isSelected = false
+            const coords = {
+              nRow: source.nRow,
+              nCol: source.nCol,
+              nDestRow: this.row,
+              nDestCol: this.col
             }
-          } else { 
-            if (this.isCaptureAttempt(source)) {  
-              this.aCapturePiece(coords)
-            } else if (this.isMoveForwardAttempt(source)) {
-              this.aMoveForward(coords)
-            } else {
-              this.cancelCurrentMove()
+
+            // Check for move or capture attempts. No legality checking
+            const bIsKingMovement = source.bHasBlackKing || source.bHasWhiteKing
+            const bIsSameSquare = coords.nRow === coords.nDestRow && coords.nCol === coords.nDestCol
+            const payload = { 
+              coords, 
+              isPlayerBlack: this.selfColor === 'b'
+            }
+            let willEmit = true
+
+            if (bIsSameSquare) {
+              if (!this.isCaptureRequired) {
+                this.aUnhighlight(null)
+              }
+              willEmit = false
+            } else if (bIsKingMovement) {
+              if (this.isKingMoveAttempt(source, coords)) {
+                this.aKingMovement(payload)
+                willEmit = this.isLastMoveLegal && !this.isCaptureRequired
+              } else if (this.isKingCaptureAttempt(source, coords)) {
+                this.aKingCapturePiece(payload)
+                willEmit = this.isLastMoveLegal && this.isCaptureRequired
+              } else {
+                this.cancelCurrentMove(this.isCaptureRequired)
+                willEmit = false
+              }
+            } else { 
+              if (this.isCaptureAttempt(source)) {  
+                this.aCapturePiece(payload)
+                willEmit = this.isLastMoveLegal && this.isCaptureRequired
+              } else if (this.isMoveForwardAttempt(source)) {
+                this.aMoveForward(payload)
+                willEmit = this.isLastMoveLegal && !this.isCaptureRequired
+              } else {
+                this.cancelCurrentMove(this.isCaptureRequired)
+                willEmit = false
+              }
+            }
+
+            // Signal the game instance that a move has been made
+            if (willEmit) {
+              this.$emit("makeMove", coords)
+            }
+          } else {
+            if (this.bContainsPiece) {
+              // Prevent a player from clicking on another player's piece
+              if (this.isSelectingEnemyPiece) {
+                console.log('select enemy')
+                return
+              }
+
+              // Prevent a player from making a non-capturing move when a capture is required  
+              if (this.isCaptureRequired && !this.canSelectedPieceCapture && !this.canSelectedKingCapture) {
+                console.log('piece cannot capture')
+                return
+              }
+
+              // Prevent a player from making a capture outside the current sequence
+              if (this.isCapturing && this.prevDestSquare !== null) {
+                if (this.isAttemptingToCaptureOutsideSequence) {
+                  console.log('capture outside seq')
+                  return
+                }
+              }
+
+              // Otherwise, simply highlight the square
+              this.aHighlight({ 
+                nRow: this.row, 
+                nCol: this.col, 
+                bHasWhiteChip: this.hasWhiteChip,  
+                bHasWhiteKing: this.hasWhiteKing,
+                bHasBlackChip: this.hasBlackChip,
+                bHasBlackKing: this.hasBlackKing
+              })
             }
           }
-        } else {
-          if (bContainsPiece) {
-            this.aHighlight({ 
-              nRow: this.row, 
-              nCol: this.col, 
-              bHasWhiteChip: this.hasWhiteChip,  
-              bHasWhiteKing: this.hasWhiteKing,
-              bHasBlackChip: this.hasBlackChip,
-              bHasBlackKing: this.hasBlackKing
-            })
-          }
+
+          // Set the game results
+          this.setGameResults()
         }
+      }
+    },
 
-        let bWhiteStuck = checkIfWhiteStuck(this.board)
-        let bBlackStuck = checkIfBlackStuck(this.board)
-        if(bWhiteStuck && bBlackStuck) {
-          this.aSetActiveGame(false)
-          this.aSetWinner('D')
-        } else if (bWhiteStuck || this.whiteCount === 0) {
-          this.aSetActiveGame(false)
-          this.aSetWinner('B')
-        } else if (bBlackStuck || this.blackCount === 0) {
-          this.aSetActiveGame(false)
-          this.aSetWinner('W')
-        } else {}
+    setGameResults() {
+      const isWhite = true
+      let bWhiteStuck = checkIfPlayerStuck(this.board, isWhite)
+      let bBlackStuck = checkIfPlayerStuck(this.board, !isWhite)
+
+      if (bWhiteStuck && bBlackStuck) {
+        this.aSetActiveGame(false)
+        this.aSetWinner('D')
+      } else if (bWhiteStuck || this.whiteCount === 0) {
+        this.aSetActiveGame(false)
+        this.aSetWinner('B')
+      } else if (bBlackStuck || this.blackCount === 0) {
+        this.aSetActiveGame(false)
+        this.aSetWinner('W')
       }
     },
 
@@ -191,9 +299,7 @@ export default {
 
     isCaptureAttempt (source) {
       return (this.row === source.nRow + 2 && this.col === source.nCol + 2) ||
-        (this.row === source.nRow + 2 && this.col === source.nCol - 2) ||
-        (this.row === source.nRow - 2 && this.col === source.nCol + 2) ||
-        (this.row === source.nRow - 2 && this.col === source.nCol - 2)
+              (this.row === source.nRow + 2 && this.col === source.nCol - 2)
     },
 
     isMoveForwardAttempt (source) {
