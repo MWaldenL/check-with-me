@@ -175,7 +175,9 @@ export default {
           })
         }
       } else { // Illegal move
-        this.aUnhighlight(null)
+        if (!isCaptureRequired) {
+          this.aUnhighlight(null)
+        }
       }
     },
 
