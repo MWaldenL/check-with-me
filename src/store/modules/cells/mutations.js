@@ -76,14 +76,19 @@ const helpers = {
 
   highlightCaptures: (state, boardClone, captureList, targetsOnly) => {
     // Make sure that this function makes the last board update
-    if (!boardClone) {
+    if (boardClone === null) {
       boardClone = JSON.parse(JSON.stringify(state.cells))
     }
 
+    console.log(captureList)
+
     // Highlight targets only or possible captures
     if (targetsOnly) {
-      const targetPiece = captureList.filter(arr => arr[2] === 1)[0]
-      boardClone[targetPiece[0]][targetPiece[1]].isPossibleCapture = true
+      for (const array of captureList) {
+        if (array[2] === 1) {
+          boardClone[array[0]][array[1]].isPossibleCapture = true
+        }
+      }
     } else {
       for (const array of captureList) {
         if (array[2] === 0) {
@@ -471,6 +476,8 @@ const mutations = {
 
       helpers.handleValidMove(state, newCurr, newDest, newTarget)
       state.firstClick = newDest
+    } else {
+      helpers.handleIllegalMove(state, coords)
     }
   },
 
