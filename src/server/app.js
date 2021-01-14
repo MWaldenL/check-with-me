@@ -1,7 +1,7 @@
-import express from 'express'
-import cors from 'cors'
-import serviceAccount from './permissions.json'
-import * as admin from 'firebase-admin'
+let express = require('express')
+let cors = require('cors')
+let serviceAccount = require('./permissions.json')
+let admin = require('firebase-admin')
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
@@ -83,4 +83,4 @@ app.get('/isTimeRunning', (req, res) => {
   res.send({ isTimeRunning })
 })
 
-app.listen(5000)
+app.listen(5000, () => console.log('Listening on port 5000'))
