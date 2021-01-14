@@ -76,11 +76,9 @@ const helpers = {
 
   highlightCaptures: (state, boardClone, captureList, targetsOnly) => {
     // Make sure that this function makes the last board update
-    if (boardClone === null) {
+    if (!boardClone) {
       boardClone = JSON.parse(JSON.stringify(state.cells))
     }
-
-    console.log(captureList)
 
     // Highlight targets only or possible captures
     if (targetsOnly) {
@@ -207,11 +205,6 @@ const mutations = {
   },
 
   mMoveForward: (state, coords) => {
-    if (state.bIsCaptureRequired) {
-      helpers.handleIllegalMove(state, coords)
-      return
-    }
-
     // If the move is within the board's range
     if (coords.nDestCol >= 1 && coords.nDestCol <= 8 && coords.nDestRow >= 1 && coords.nDestRow <= 8) {
       const newCurr = {
@@ -267,11 +260,6 @@ const mutations = {
   },
 
   mKingMovement: (state, coords) => {
-    if (state.bIsCaptureRequired) {
-      helpers.handleIllegalMove(state, coords)
-      return
-    }
-
     // If the move is within the board's range
     if (coords.nDestCol >= 1 && coords.nDestCol <= 8 && coords.nDestRow >= 1 && coords.nDestRow <= 8) {
       const newCurr = {

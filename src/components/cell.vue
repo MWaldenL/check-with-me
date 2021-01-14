@@ -128,12 +128,19 @@ export default {
     },
 
     canSelectedKingCapture() {
+      const isKing = this.hasBlackKing || this.hasWhiteKing 
+      if (!isKing) {
+        return false
+      }
+
       const playerIsWhite = this.selfColor === 'w'
       const possibleCaptures = getPossibleKingCaptures(this.board, this.row, this.col, playerIsWhite)
       if (possibleCaptures.length > 0) {
         const canKingCapture = possibleCaptures.reduce((a, c) => a || c[2], possibleCaptures[0][2])
-        return canKingCapture
-      } return false
+        return canKingCapture === 1
+      } else {
+        return false
+      }
     },
 
     isAttemptingToCaptureOutsideSequence() {
@@ -154,15 +161,27 @@ export default {
       'aSetWinner'
     ]),
 
-    cancelCurrentMove(isCaptureRequired) { 
+    cancelCurrentMove(isCaptureRequired) {
       if (this.bContainsPiece) {
         if (isCaptureRequired) {
           // Check if a capture can be made
           if (!this.isCapturing) {
-            if (this.canSelectedPieceCapture || this.canSelectedKingCapture) {
+            if (this.canSelectedPieceCapture) { // short circuit
+              console.log('hello')
               this.aHighlight({
                 nRow: this.row, 
                 nCol: this.col, 
+                bHasBlackChip: this.bHasBlackChip,
+                bHasWhiteChip: this.bHasWhiteChip,
+                bHasBlackKing: this.hasBlackKing,
+                bHasWhiteKing: this.hasWhiteKing 
+              })
+            } else if (this.canSelectedKingCapture) {
+              this.aHighlight({
+                nRow: this.row, 
+                nCol: this.col, 
+                bHasBlackChip: this.bHasBlackChip,
+                bHasWhiteChip: this.bHasWhiteChip,
                 bHasBlackKing: this.hasBlackKing,
                 bHasWhiteKing: this.hasWhiteKing 
               })
@@ -214,7 +233,9 @@ export default {
               willEmit = false
             } else if (bIsKingMovement) {
               if (this.isKingMoveAttempt(source, coords)) {
-                this.aKingMovement(payload)
+                if (!this.isCaptureRequired) {
+                  this.aKingMovement(payload)
+                }
                 willEmit = this.isLastMoveLegal && !this.isCaptureRequired
               } else if (this.isKingCaptureAttempt(source, coords)) {
                 this.aKingCapturePiece(payload)
@@ -228,7 +249,9 @@ export default {
                 this.aCapturePiece(payload)
                 willEmit = this.isLastMoveLegal
               } else if (this.isMoveForwardAttempt(source)) {
-                this.aMoveForward(payload)
+                if (!this.isCaptureRequired) {
+                  this.aMoveForward(payload)
+                }
                 willEmit = this.isLastMoveLegal && !this.isCaptureRequired
               } else {
                 this.cancelCurrentMove(this.isCaptureRequired)
@@ -249,7 +272,7 @@ export default {
               }
 
               // Prevent a player from making a non-capturing move when a capture is required  s
-              if (this.isCaptureRequired && !(this.canSelectedPieceCapture && this.canSelectedKingCapture)) {
+              if (this.isCaptureRequired && !(this.canSelectedPieceCapture || this.canSelectedKingCapture)) {
                 console.log('piece cannot capture')
                 return
               }
