@@ -23,8 +23,8 @@ const actions = {
    * Unhighlights the current square
    * @param coords the coordinates of the current square clicked 
    */
-  aUnhighlight({ commit }, coords) {
-    commit('mUnhighlight', coords)
+  aUnhighlight({ commit }) {
+    commit('mUnhighlight')
   },
 
   /**

@@ -178,7 +178,7 @@ export default {
         }
       } else { // Illegal move
         if (!isCaptureRequired) {
-          this.aUnhighlight(null)
+          this.aUnhighlight()
         }
       }
     },
@@ -209,7 +209,7 @@ export default {
 
             if (bIsSameSquare) {
               if (!this.isCaptureRequired) {
-                this.aUnhighlight(null)
+                this.aUnhighlight()
               }
               willEmit = false
             } else if (bIsKingMovement) {
@@ -249,7 +249,7 @@ export default {
               }
 
               // Prevent a player from making a non-capturing move when a capture is required  s
-              if (this.isCaptureRequired && !this.canSelectedPieceCapture && !this.canSelectedKingCapture) {
+              if (this.isCaptureRequired && !(this.canSelectedPieceCapture && this.canSelectedKingCapture)) {
                 console.log('piece cannot capture')
                 return
               }
@@ -308,9 +308,7 @@ export default {
 
     isMoveForwardAttempt (source) {
       return (this.row === source.nRow + 1 && this.col === source.nCol + 1) ||
-        (this.row === source.nRow + 1 && this.col === source.nCol - 1) ||
-        (this.row === source.nRow - 1 && this.col === source.nCol + 1) ||
-        (this.row === source.nRow - 1 && this.col === source.nCol - 1) &&
+        (this.row === source.nRow + 1 && this.col === source.nCol - 1) &&
         !(this.hasBlackChip || this.hasWhiteChip || this.hasBlackKing || this.hasWhiteKing)
     },
 

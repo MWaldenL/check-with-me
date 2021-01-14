@@ -114,7 +114,6 @@ export default {
         // Highlight all possible captures when player is not in a capture sequence
         if (this.lastPlayerMoved !== auth.currentUser.uid) {
           if (!this.isCapturing) {
-            console.log('From games listener')
             this.aHighlightBoardCaptures(playerIsWhite)
           } else {  
             // Highlight the capture from the current sequence
@@ -125,9 +124,8 @@ export default {
               })
 
               // Once a capture sequence has finished, end the player's turn
-              console.log(this.isCapturing)
-              if (!this.isCapturing && this.prevSourceSquare) {
-                await this.endPlayerTurn(this.prevSourceSquare)
+              if (!this.isCapturing) {
+                await this.endPlayerTurn()
               }
             }
           }
@@ -171,8 +169,7 @@ export default {
       currentGame: null,
       lastPlayerMoved: null,
       bHostRunning: true,
-      bOtherRunning: false,
-      prevSourceSquare: null
+      bOtherRunning: false
     }
   },
 
@@ -244,7 +241,7 @@ export default {
       'aFlushStateAfterTurn'
     ]),
 
-    async endPlayerTurn(coords) {
+    async endPlayerTurn() {
       const isMoveWhite = 
         bSourceHasWhite(this.board, this.prevDestSquare) || 
         bSourceHasWhiteKing(this.board, this.prevDestSquare) 
@@ -259,7 +256,7 @@ export default {
         firstClick: null
       }
       this.aFlushStateAfterTurn(updatedState)
-
+      
       // Write last player moved to db 
       await this.currentGame.update({ last_player_moved: this.lastPlayerMoved })
 
@@ -273,11 +270,10 @@ export default {
 
     updateLastPlayerMoved(coords) {
       const { nRow, nCol, nDestRow, nDestCol } = coords
-      this.prevSourceSquare = { nRow, nCol }
       this.aSetPrevDestSquare({ nRow: nDestRow, nCol: nDestCol })
 
       if (!this.isCapturing) {
-        this.endPlayerTurn(this.prevSourceSquare)
+        this.endPlayerTurn()
       }
     }
   }
