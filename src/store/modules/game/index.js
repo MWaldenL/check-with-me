@@ -11,8 +11,7 @@ const state = {
   hostTimeLeft: 0,
   otherTimeLeft: 0,
   isHostWhite: true,
-  lastPlayerMoved: '',
-  firstRun: true
+  lastPlayerMoved: ''
 }
 
 export default {
