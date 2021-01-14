@@ -35,6 +35,7 @@ const helpers = {
     }
 
     // Update the state
+    state.bLastMoveLegal = true
     state.cells = boardClone
     state.firstClick = null
     mutations.mUnhighlight(state)

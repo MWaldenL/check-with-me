@@ -187,10 +187,9 @@ export default {
       if (this.bActiveGame) {
         if (this.canMakeMove) {
           const source = this.firstClick
-          console.log(this.firstClick)
+
           // Highlight or attempt to move a piece
           if (source !== null) {
-            console.log('source?')
             this.isSelected = false
             const coords = {
               nRow: source.nRow,
@@ -262,8 +261,6 @@ export default {
                   return
                 }
               }
-
-              console.log('no source')
 
               // Otherwise, simply highlight the square
               this.aHighlight({ 
