@@ -238,16 +238,24 @@ export default {
                 }
                 willEmit = this.isLastMoveLegal && !this.isCaptureRequired
               } else if (this.isKingCaptureAttempt(source, coords)) {
-                this.aKingCapturePiece(payload)
-                willEmit = this.isLastMoveLegal
+                if (this.board[coords.nDestRow-1][coords.nDestCol-1].isPossibleMove) {
+                  this.aKingCapturePiece(payload)
+                  willEmit = this.isLastMoveLegal
+                } else {
+                  willEmit = false
+                }
               } else {
                 this.cancelCurrentMove(this.isCaptureRequired)
                 willEmit = false
               }
             } else { 
-              if (this.isCaptureAttempt(source)) {  
-                this.aCapturePiece(payload)
-                willEmit = this.isLastMoveLegal
+              if (this.isCaptureAttempt(source)) {
+                if (this.board[coords.nDestRow-1][coords.nDestCol-1].isPossibleMove) {
+                  this.aCapturePiece(payload)
+                  willEmit = this.isLastMoveLegal
+                } else {
+                  willEmit = false
+                }
               } else if (this.isMoveForwardAttempt(source)) {
                 if (!this.isCaptureRequired) {
                   this.aMoveForward(payload)

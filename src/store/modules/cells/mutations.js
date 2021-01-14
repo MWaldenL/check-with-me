@@ -209,7 +209,7 @@ const mutations = {
     if (coords.nDestCol >= 1 && coords.nDestCol <= 8 && coords.nDestRow >= 1 && coords.nDestRow <= 8) {
       const newCurr = {
         nRow: coords.nRow,
-        nCol: coords.nCol, 
+        nCol: coords.nCol,
         bHasBlackChip: false,
         bHasWhiteChip: false,
         bHasBlackKing: false,
@@ -320,7 +320,7 @@ const mutations = {
     }
   },
 
-  mCapturePiece: (state, coords) => {
+  mCapturePiece: (state, coords) => {  
     const newCurr = {
       nRow: coords.nRow,
       nCol: coords.nCol,
