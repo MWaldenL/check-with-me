@@ -75,6 +75,12 @@ const routes = [
     name: 'Room',
     component: Room,
     meta: { requiresNotAuth: false }
+  },
+  {
+    path: '/matts',
+    name: 'MattsSandbox',
+    component: Home,
+    meta: { requiresAuth: true }
   }
 ]
 

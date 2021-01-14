@@ -54,7 +54,7 @@ export default {
         { other_timeLeft: this.secondsLeft }
 
       // Update the timer of the current player
-      await gamesCollection.doc('Vc0H4f4EvY6drRKnvsk5').update(timeObj)
+      await gamesCollection.doc('A0uAJ0jG79JwEd2FCsay').update(timeObj)
     },
 
     printTime(time) {

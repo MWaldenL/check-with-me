@@ -68,9 +68,9 @@ export default {
   },
   
   async created() {
-    const gameDoc = await gamesCollection.doc('Vc0H4f4EvY6drRKnvsk5')
+    const gameDoc = await gamesCollection.doc('A0uAJ0jG79JwEd2FCsay')
     const game = await gameDoc.get()
-    this.lastPlayerMoved = game.data().last_player_moved // change to local var if fail
+    this.lastPlayerMoved = game.data().last_player_moved
     const player = this.lastPlayerMoved === game.data().host_user ? 'other' : 'host'
 
     // Set the current game
@@ -97,10 +97,9 @@ export default {
   },
 
   async mounted() {
-    // Set up db listeners
     // Listen for board state changes
     gamesCollection
-      .doc('Vc0H4f4EvY6drRKnvsk5') // Obtain from state in the future when rooms are implemented
+      .doc('A0uAJ0jG79JwEd2FCsay') // Obtain from state in the future when rooms are implemented
       .onSnapshot(async doc => {
         const data = doc.data()
         const boardState = data.board_state
@@ -114,7 +113,6 @@ export default {
         // Highlight all possible captures when player is not in a capture sequence
         if (this.lastPlayerMoved !== auth.currentUser.uid) {
           if (!this.isCapturing) {
-            console.log('From games listener')
             this.aHighlightBoardCaptures(playerIsWhite)
           } else {  
             // Highlight the capture from the current sequence
@@ -131,7 +129,7 @@ export default {
               }
             }
           }
-        } else {
+        } else {  // Ensure that leaky states don't have unnecessary values 
           const updatedState = {
             bIsCaptureRequired: false,
             bStartedCaptureSequence: false,
@@ -154,8 +152,13 @@ export default {
         }
         
         // Check if someone has won on time
-        const didBlackWin = (this.hostTimeLeft === 0 && this.isHostWhite) || (this.otherTimeLeft === 0 && !this.isHostWhite)
-        const didWhiteWin = (this.otherTimeLeft === 0 && this.isHostWhite) || (this.hostTimeLeft === 0 && !this.isHostWhite)
+        const didBlackWin = 
+          (this.hostTimeLeft === 0 && this.isHostWhite) || 
+          (this.otherTimeLeft === 0 && !this.isHostWhite)
+        const didWhiteWin = 
+          (this.otherTimeLeft === 0 && this.isHostWhite) || 
+          (this.hostTimeLeft === 0 && !this.isHostWhite)
+
         // if (didBlackWin) {
         //   this.aSetWinner('B')
         // } else if (didWhiteWin) {
@@ -251,7 +254,7 @@ export default {
 
       this.lastPlayerMoved = (this.isHostWhite ^ isMoveWhite) ? this.otherUserID : this.hostUserID
 
-      // Set capture required to false to prevent state leaks
+      // Flush leaky states after turns 
       const updatedState = {
         bIsCaptureRequired: false,
         bStartedCaptureSequence: false,
@@ -268,16 +271,19 @@ export default {
 
       // Start the other player's clock
       const player = this.lastPlayerMoved === this.hostUserID ? 'other' : 'host'
-      await axios.get(`http://localhost:5000/startTime/${player}`)
+      await axios.get(`http://localhost:5000/startTime/H48woDfI1lwIGZnJh4qz/${player}`)
     },
 
-    updateLastPlayerMoved(coords) {
+    async updateLastPlayerMoved(coords) {
       const { nRow, nCol, nDestRow, nDestCol } = coords
       this.prevSourceSquare = { nRow, nCol }
       this.aSetPrevDestSquare({ nRow: nDestRow, nCol: nDestCol })
 
       if (!this.isCapturing) {
-        this.endPlayerTurn(this.prevSourceSquare)
+        // TRIAL
+        await this.endPlayerTurn(this.prevSourceSquare)
+        
+        // this.endPlayerTurn(this.prevSourceSquare)
       }
     }
   }

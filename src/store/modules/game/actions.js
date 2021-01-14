@@ -18,7 +18,7 @@ const actions = {
     commit('setHostUser', uid)
   },
 
-  /**
+  /** 
    * Sets the other user 
    * @param uid the Firebase UID of the game's other user 
    */
