@@ -39,7 +39,7 @@ const actions = {
    * @param val if the game is being run for the first time
    */
   async aSetFirstRun({ commit }, value) {
-    const gameDoc = await gamesCollection.doc('A0uAJ0jG79JwEd2FCsay')
+    const gameDoc = await gamesCollection.doc('Vc0H4f4EvY6drRKnvsk5')
     gameDoc.update({ is_first_run: value })
   },
 

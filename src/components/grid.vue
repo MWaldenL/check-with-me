@@ -69,7 +69,7 @@ export default {
   
   // Called on refreshes or new loads 
   async created() {
-    const gameDoc = gamesCollection.doc('A0uAJ0jG79JwEd2FCsay')
+    const gameDoc = gamesCollection.doc('Vc0H4f4EvY6drRKnvsk5')
     const game = await gameDoc.get()
     const data = game.data()
 
@@ -104,7 +104,7 @@ export default {
   async mounted() {
     // Listen for board state changes
     gamesCollection
-      .doc('A0uAJ0jG79JwEd2FCsay') // Obtain from state in the future when rooms are implemented
+      .doc('Vc0H4f4EvY6drRKnvsk5') // Obtain from state in the future when rooms are implemented
       .onSnapshot(async doc => {
         const data = doc.data()
         const boardState = data.board_state

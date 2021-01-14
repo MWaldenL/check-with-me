@@ -4,7 +4,7 @@ import { getPDNFromBoard } from '../../services/boardParsingService'
 
 const writeBoardToDB = async (cells, isPlayerBlack) => {
   await gamesCollection
-    .doc('A0uAJ0jG79JwEd2FCsay')
+    .doc('Vc0H4f4EvY6drRKnvsk5')
     .update({ 
       board_state: getPDNFromBoard(cells, 'X', isPlayerBlack) 
     })
