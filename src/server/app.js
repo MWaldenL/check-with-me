@@ -16,7 +16,6 @@ app.use(express.json())
 app.use(cors())
 app.use(express.urlencoded({ extended: false }))
 
-// Routes
 /**
  * Gets the player's time left from the database
  * @param timerID the timer object's id
@@ -64,7 +63,7 @@ app.get('/startTime/:timerID/:player', async (req, res) => {
       isTimeRunning = false
       clearInterval(countDown)
     }
-  }, 1000)
+  }, 1050)
 
   res.status(200).send("Starting time")
 })

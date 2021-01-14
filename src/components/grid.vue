@@ -71,7 +71,8 @@ export default {
     const gameDoc = await gamesCollection.doc('A0uAJ0jG79JwEd2FCsay')
     const game = await gameDoc.get()
     this.lastPlayerMoved = game.data().last_player_moved
-    const player = this.lastPlayerMoved === game.data().host_user ? 'other' : 'host'
+    this.aSetHostTimeLeft()
+    this.aSetOtherTimeLeft()
 
     // Set the current game
     this.currentGame = gameDoc
@@ -86,14 +87,18 @@ export default {
     // Check first if the time is running
     const timerState = await axios.get(`http://localhost:5000/isTimeRunning`)
 
+    // Decide which clock to run 
+    let player
+    if (this.isFirstRun) {
+      player = this.isHostWhite ? 'host' : 'other'
+    } else {
+      player = this.lastPlayerMoved === game.data().host_user ? 'other' : 'host'
+    }
+
     // Only start the clock if no one else is running the clock
     if (!timerState.data.isTimeRunning) {
       await axios.get(`http://localhost:5000/startTime/H48woDfI1lwIGZnJh4qz/${player}`)
     }
-
-    // Put back in mounted hook if it fails
-    await this.aSetHostTimeLeft() 
-    await this.aSetOtherTimeLeft()
   },
 
   async mounted() {
@@ -143,12 +148,18 @@ export default {
     // Listen for timer ticks
     timersCollection
       .doc('H48woDfI1lwIGZnJh4qz')
-      .onSnapshot(doc => {
+      .onSnapshot(async doc => {
         // Set the timer of the next player to move
-        if (this.lastPlayerMoved === this.hostUserID) {
-          this.aSetOtherTimeLeft()
+        if (this.isFirstRun) {
+          console.log('firstRun')
+          await (this.isHostWhite) ?
+            this.aSetHostTimeLeft() :
+            this.aSetOtherTimeLeft()
         } else {
-          this.aSetHostTimeLeft()
+          console.log('not first run')
+          await (this.lastPlayerMoved === this.hostUserID) ?
+            this.aSetOtherTimeLeft() : 
+            this.aSetHostTimeLeft()
         }
         
         // Check if someone has won on time
@@ -193,7 +204,8 @@ export default {
       otherTimeLeft: 'getOtherTimeLeft',
       isCapturing: 'getCaptureSequenceState',
       isCaptureRequired: 'getIsCaptureRequired',
-      prevDestSquare: 'getPrevDestSquare'
+      prevDestSquare: 'getPrevDestSquare',
+      isFirstRun: 'getIsFirstRun'
     }),
 
     canMakeMove() {
@@ -244,7 +256,8 @@ export default {
       'aHighlightCaptureFromSequence',
       'aSetPrevDestSquare',
       'aSetCaptureRequired',
-      'aFlushStateAfterTurn'
+      'aFlushStateAfterTurn',
+      'aSetFirstRun'
     ]),
 
     async endPlayerTurn(coords) {
@@ -279,11 +292,13 @@ export default {
       this.prevSourceSquare = { nRow, nCol }
       this.aSetPrevDestSquare({ nRow: nDestRow, nCol: nDestCol })
 
+      // The game has started/a move has been made
+      if (this.isFirstRun) {
+        this.aSetFirstRun(false)
+      }
+
       if (!this.isCapturing) {
-        // TRIAL
         await this.endPlayerTurn(this.prevSourceSquare)
-        
-        // this.endPlayerTurn(this.prevSourceSquare)
       }
     }
   }

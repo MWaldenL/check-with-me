@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { auth, usersCollection } from '@/firebase'
+import { auth, usersCollection, timersCollection } from '@/firebase'
 
 const actions = {
   /**
@@ -7,7 +7,7 @@ const actions = {
    * @param gameID the Firebase game ID
    */
   aSetCurrentGame({ commit }, gameID) {
-    commit('setCurrentGame', gameID)
+    commit('mSetCurrentGame', gameID)
   },
 
   /**
@@ -15,7 +15,7 @@ const actions = {
    * @param uid the Firebase UID of the game's host 
    */
   aSetHostUser({ commit }, uid) {
-    commit('setHostUser', uid)
+    commit('mSetHostUser', uid)
   },
 
   /** 
@@ -23,7 +23,7 @@ const actions = {
    * @param uid the Firebase UID of the game's other user 
    */
   aSetOtherUser({ commit }, uid) {
-    commit('setOtherUser', uid)
+    commit('mSetOtherUser', uid)
   },
 
   /**
@@ -31,33 +31,59 @@ const actions = {
    * @param isWhite whether the host's is playing white
    */
   aSetHostIsWhite({ commit }, isWhite) {
-    commit('setHostIsWhite', isWhite)
+    commit('mSetHostIsWhite', isWhite)
+  },
+
+  /**
+   * Sets whether the game is being run for the first time
+   * @param val if the game is being run for the first time
+   */
+  aSetFirstRun({ commit }, val) {
+    commit('mSetFirstRun', val)
   },
 
   /**
    * Sets the host's time left from the database
    */
   async aSetHostTimeLeft({ commit }) {
-    await axios
-      .get('http://localhost:5000/timeLeft/H48woDfI1lwIGZnJh4qz/host')
-      .then(res => {
-        commit('setHostTimeLeft', res.data.timeLeft)
-      }).catch(err => {
-        console.log(err)
-      })
+    setTimeout(async () => {
+      await axios
+        .get('http://localhost:5000/timeLeft/H48woDfI1lwIGZnJh4qz/host')
+        .then(res => {
+          commit('mSetHostTimeLeft', res.data.timeLeft)
+        }).catch(err => {
+          console.log(err)
+        })
+    }, 1000)
+    
+    // Delay 100ms for error padding
+    // setTimeout(async () => {
+      // const timerDoc = await timersCollection.doc('H48woDfI1lwIGZnJh4qz').get()
+      // const data = timerDoc.data()
+      // commit('mSetHostTimeLeft', data.host_timeLeft)
+    // }, 50)
   },
 
   /**
    * Sets the other player's time left from the database
    */
   async aSetOtherTimeLeft({ commit }) {
-    await axios
-      .get('http://localhost:5000/timeLeft/H48woDfI1lwIGZnJh4qz/other')
-      .then(res => {
-        commit('setOtherTimeLeft', res.data.timeLeft)
-      }).catch(err => {
-        console.log(err)
-      })
+    setTimeout(async () => {
+      await axios
+        .get('http://localhost:5000/timeLeft/H48woDfI1lwIGZnJh4qz/other')
+        .then(res => {
+          commit('mSetOtherTimeLeft', res.data.timeLeft)
+        }).catch(err => {
+          console.log(err)
+        })
+    }, 1000)
+
+    // Delay 100ms for error padding
+    // setTimeout(async () => {
+      // const timerDoc = await timersCollection.doc('H48woDfI1lwIGZnJh4qz').get()
+      // const data = timerDoc.data()
+      // commit('mSetOtherTimeLeft', data.other_timeLeft)
+    // }, 50)
   },
 
   async aGetEnemyUsername({ commit, state }) {
@@ -67,8 +93,8 @@ const actions = {
     const userDoc = await usersCollection.doc(uid).get()
     const username = userDoc.data().username  
 
-    commit('setEnemyUsername', username)
-  }  
+    commit('mSetEnemyUsername', username)
+  }
 }
 
 export default actions
