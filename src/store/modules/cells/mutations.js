@@ -35,6 +35,7 @@ const helpers = {
     }
 
     // Update the state
+    state.bLastMoveLegal = true
     state.cells = boardClone
     state.firstClick = null
     mutations.mUnhighlight(state)
@@ -68,6 +69,7 @@ const helpers = {
       state.firstClick = newCoords
       mutations.mHighlight(state, newCoords)
     } else { // Otherwise, simply unhighlight the square
+      state.firstClick = null
       mutations.mUnhighlight(state)
     }
   },
@@ -201,6 +203,7 @@ const mutations = {
 
   mMoveForward: (state, coords) => {
     if (state.bIsCaptureRequired) {
+      helpers.handleIllegalMove(state, coords)
       return
     }
 
@@ -252,7 +255,7 @@ const mutations = {
       // Check if the move is valid
       if (bIsValidMove) {
         helpers.handleValidMove(state, coords, newCurr, newDest)
-      } else {
+      } else {   
         helpers.handleIllegalMove(state, coords)
       }
     }
@@ -260,6 +263,7 @@ const mutations = {
 
   mKingMovement: (state, coords) => {
     if (state.bIsCaptureRequired) {
+      helpers.handleIllegalMove(state, coords)
       return
     }
 
@@ -530,7 +534,6 @@ const mutations = {
     
     // Highlight piece/king captures and end turn when no more captures are available
     if (canPieceCapture || canKingCapture) {  
-      console.log('piece can capture?')
       mutations.mSetCaptureRequired(state, true)
       
       if (pieceCaptureList.length > 0) { 

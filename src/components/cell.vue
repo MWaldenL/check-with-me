@@ -189,7 +189,7 @@ export default {
           const source = this.firstClick
 
           // Highlight or attempt to move a piece
-          if (source !== null) { 
+          if (source !== null) {
             this.isSelected = false
             const coords = {
               nRow: source.nRow,
@@ -261,7 +261,6 @@ export default {
                   return
                 }
               }
-              
               // Otherwise, simply highlight the square
               this.aHighlight({ 
                 nRow: this.row, 
