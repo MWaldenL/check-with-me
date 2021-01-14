@@ -8,7 +8,7 @@ import createPersistedState from 'vuex-persistedstate'
 Vue.use(Vuex)
 
 export default new Vuex.Store({
-  // plugins: [createPersistedState()],
+  plugins: [createPersistedState({ paths: ['cells'] })],
   modules: {
     cells,
     auth,
