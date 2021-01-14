@@ -41,7 +41,7 @@ let isTimeRunning = false
 app.get('/startTime/:timerID/:player', async (req, res) => {
   const { timerID, player } = req.params
   const timerDoc = await timersCollection.doc(timerID)
-  
+  console.log('starting time')
   isTimeRunning = true
 
   // Perform every second
@@ -63,7 +63,7 @@ app.get('/startTime/:timerID/:player', async (req, res) => {
       isTimeRunning = false
       clearInterval(countDown)
     }
-  }, 1050)
+  }, 1050) 
 
   res.status(200).send("Starting time")
 })
@@ -72,6 +72,7 @@ app.get('/startTime/:timerID/:player', async (req, res) => {
  * Stops the time of the currently running clock 
  */
 app.get('/stopTime', async (req, res) => {
+  console.log('stopping time')
   clearInterval(countDown)
   res.status(200).send("Stopping time")
 })
@@ -80,6 +81,7 @@ app.get('/stopTime', async (req, res) => {
  * Checks if a client is running the current clock
  */
 app.get('/isTimeRunning', (req, res) => {
+  console.log('isTimeRunning: ' + isTimeRunning)
   res.send({ isTimeRunning })
 })
 

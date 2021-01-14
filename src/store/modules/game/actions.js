@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { auth, usersCollection, timersCollection } from '@/firebase'
+import { auth, usersCollection, gamesCollection, timersCollection } from '@/firebase'
 
 const actions = {
   /**
@@ -38,55 +38,33 @@ const actions = {
    * Sets whether the game is being run for the first time
    * @param val if the game is being run for the first time
    */
-  aSetFirstRun({ commit }, val) {
-    commit('mSetFirstRun', val)
+  async aSetFirstRun({ commit }, value) {
+    const gameDoc = await gamesCollection.doc('A0uAJ0jG79JwEd2FCsay')
+    gameDoc.update({ is_first_run: value })
   },
 
   /**
    * Sets the host's time left from the database
    */
   async aSetHostTimeLeft({ commit }) {
-    // Query server -> query firebase -> return to server -> return to client
-    // setTimeout(async () => {
-      // await axios
-      //   .get('http://localhost:5000/timeLeft/H48woDfI1lwIGZnJh4qz/host')
-      //   .then(res => {
-      //     commit('mSetHostTimeLeft', res.data.timeLeft)
-      //   }).catch(err => {
-      //     console.log(err)
-      //   })
-    // }, 50)
-    
-
-    // Query firebase -> return to client
     // Delay 100ms for error padding
-    // setTimeout(async () => {
-      // const timerDoc = await timersCollection.doc('H48woDfI1lwIGZnJh4qz').get()
-      // const data = timerDoc.data()
-      // commit('mSetHostTimeLeft', data.host_timeLeft)
-    // }, 50)
+    setTimeout(async () => {
+      const timerDoc = await timersCollection.doc('H48woDfI1lwIGZnJh4qz').get()
+      const data = timerDoc.data()
+      commit('mSetHostTimeLeft', data.host_timeLeft)
+    }, 200)
   },
 
   /**
    * Sets the other player's time left from the database
    */
   async aSetOtherTimeLeft({ commit }) {
-    setTimeout(async () => {
-      await axios
-        .get('http://localhost:5000/timeLeft/H48woDfI1lwIGZnJh4qz/other')
-        .then(res => {
-          commit('mSetOtherTimeLeft', res.data.timeLeft)
-        }).catch(err => {
-          console.log(err)
-        })
-    }, 50)
-
     // Delay 100ms for error padding
-    // setTimeout(async () => {
-      // const timerDoc = await timersCollection.doc('H48woDfI1lwIGZnJh4qz').get()
-      // const data = timerDoc.data()
-      // commit('mSetOtherTimeLeft', data.other_timeLeft)
-    // }, 50)
+    setTimeout(async () => {
+      const timerDoc = await timersCollection.doc('H48woDfI1lwIGZnJh4qz').get()
+      const data = timerDoc.data()
+      commit('mSetOtherTimeLeft', data.other_timeLeft)
+    }, 200)
   },
 
   async aGetEnemyUsername({ commit, state }) {

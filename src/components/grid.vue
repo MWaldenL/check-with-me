@@ -67,35 +67,35 @@ export default {
     Sidebar
   },
   
+  // Called on refreshes or new loads 
   async created() {
-    const gameDoc = await gamesCollection.doc('A0uAJ0jG79JwEd2FCsay')
+    const gameDoc = gamesCollection.doc('A0uAJ0jG79JwEd2FCsay')
     const game = await gameDoc.get()
-    this.lastPlayerMoved = game.data().last_player_moved
-    this.aSetHostTimeLeft()
-    this.aSetOtherTimeLeft()
+    const data = game.data()
 
-    // Set the current game
+    // Set data 
+    this.bIsFirstRun = data.is_first_run
+    this.lastPlayerMoved = data.last_player_moved
+    await this.aSetHostTimeLeft()
+    await this.aSetOtherTimeLeft()
     this.currentGame = gameDoc
+
+    const currentUser = await this.currentUser.data 
+    this.selfName = currentUser.username
 
     // Get the enemy username
     await this.aGetEnemyUsername()
 
-    // Set the player's username
-    const currentUser = await this.currentUser.data 
-    this.selfName = currentUser.username
-
-    // Check first if the time is running
-    const timerState = await axios.get(`http://localhost:5000/isTimeRunning`)
-
     // Decide which clock to run 
     let player
-    if (this.isFirstRun) {
+    if (this.bIsFirstRun) {
       player = this.isHostWhite ? 'host' : 'other'
     } else {
       player = this.lastPlayerMoved === game.data().host_user ? 'other' : 'host'
     }
 
-    // Only start the clock if no one else is running the clock
+    // Only start the clock if isn't already running
+    const timerState = await axios.get(`http://localhost:5000/isTimeRunning`)
     if (!timerState.data.isTimeRunning) {
       await axios.get(`http://localhost:5000/startTime/H48woDfI1lwIGZnJh4qz/${player}`)
     }
@@ -128,7 +128,6 @@ export default {
               })
 
               // Once a capture sequence has finished, end the player's turn
-              console.log(this.isCapturing)
               if (!this.isCapturing && this.prevSourceSquare) {
                 await this.endPlayerTurn(this.prevSourceSquare)
               }
@@ -150,7 +149,7 @@ export default {
       .doc('H48woDfI1lwIGZnJh4qz')
       .onSnapshot(async doc => {
         // Set the timer of the next player to move
-        if (this.isFirstRun) {
+        if (this.bIsFirstRun) {
           console.log('firstRun')
           await (this.isHostWhite) ?
             this.aSetHostTimeLeft() :
@@ -163,10 +162,10 @@ export default {
         }
         
         // Check if someone has won on time
-        const didBlackWin = 
+        const didBlackWinOnTime = 
           (this.hostTimeLeft === 0 && this.isHostWhite) || 
           (this.otherTimeLeft === 0 && !this.isHostWhite)
-        const didWhiteWin = 
+        const didWhiteWinOnTime = 
           (this.otherTimeLeft === 0 && this.isHostWhite) || 
           (this.hostTimeLeft === 0 && !this.isHostWhite)
 
@@ -186,6 +185,7 @@ export default {
       lastPlayerMoved: null,
       bHostRunning: true,
       bOtherRunning: false,
+      bIsFirstRun: true,
       prevSourceSquare: null
     }
   },
@@ -204,8 +204,7 @@ export default {
       otherTimeLeft: 'getOtherTimeLeft',
       isCapturing: 'getCaptureSequenceState',
       isCaptureRequired: 'getIsCaptureRequired',
-      prevDestSquare: 'getPrevDestSquare',
-      isFirstRun: 'getIsFirstRun'
+      prevDestSquare: 'getPrevDestSquare'
     }),
 
     canMakeMove() {
@@ -292,8 +291,8 @@ export default {
       this.prevSourceSquare = { nRow, nCol }
       this.aSetPrevDestSquare({ nRow: nDestRow, nCol: nDestCol })
 
-      // The game has started/a move has been made
-      if (this.isFirstRun) {
+      // The first move has been made
+      if (this.bIsFirstRun) {
         this.aSetFirstRun(false)
       }
 

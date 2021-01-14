@@ -25,10 +25,6 @@ const mutations = {
   
   mSetHostIsWhite(state, isWhite) {
     state.isHostWhite = isWhite
-  },
-
-  mSetFirstRun(state, value) {
-    state.firstRun = value
   }
 }
 
