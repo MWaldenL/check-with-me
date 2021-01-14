@@ -46,16 +46,19 @@ const actions = {
    * Sets the host's time left from the database
    */
   async aSetHostTimeLeft({ commit }) {
-    setTimeout(async () => {
-      await axios
-        .get('http://localhost:5000/timeLeft/H48woDfI1lwIGZnJh4qz/host')
-        .then(res => {
-          commit('mSetHostTimeLeft', res.data.timeLeft)
-        }).catch(err => {
-          console.log(err)
-        })
-    }, 1000)
+    // Query server -> query firebase -> return to server -> return to client
+    // setTimeout(async () => {
+      // await axios
+      //   .get('http://localhost:5000/timeLeft/H48woDfI1lwIGZnJh4qz/host')
+      //   .then(res => {
+      //     commit('mSetHostTimeLeft', res.data.timeLeft)
+      //   }).catch(err => {
+      //     console.log(err)
+      //   })
+    // }, 50)
     
+
+    // Query firebase -> return to client
     // Delay 100ms for error padding
     // setTimeout(async () => {
       // const timerDoc = await timersCollection.doc('H48woDfI1lwIGZnJh4qz').get()
@@ -76,7 +79,7 @@ const actions = {
         }).catch(err => {
           console.log(err)
         })
-    }, 1000)
+    }, 50)
 
     // Delay 100ms for error padding
     // setTimeout(async () => {
