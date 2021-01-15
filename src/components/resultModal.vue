@@ -8,6 +8,12 @@
 
 <script>
 import { mapGetters, mapActions } from 'vuex'
+import { 
+  auth, 
+  gamesCollection, 
+  usersCollection, 
+  timersCollection
+} from '@/firebase'
 
 export default {
   name: 'ResultModal',
@@ -28,9 +34,13 @@ export default {
     },
   },
   methods: {
-    ...mapActions(['aSetActiveGame', 'aResetGame']),
+    ...mapActions([
+      'aSetActiveGame', 
+      'aResetGame']),
     restartGame () {
-      this.aResetGame()
+      // this.aResetGame()
+      this.aSetActiveGame(true)
+      this.$refs['modal'].hide()
     },
     exitModal () {
       this.$refs['modal'].hide()

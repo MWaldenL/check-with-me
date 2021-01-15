@@ -49,6 +49,7 @@
 
 <script>
 import { bSourceHasWhite, bSourceHasWhiteKing } from '@/store/services/moveCaptureService'
+import { checkIfSelfStuck, checkIfEnemyStuck } from '@/store/services/winCheckerService'
 import { 
   auth, 
   gamesCollection, 
@@ -114,6 +115,23 @@ export default {
           white: data.white_count, 
           black: data.black_count
         })
+
+        const whiteStuck = checkIfSelfStuck(this.board, true)
+        const blackStuck = checkIfEnemyStuck(this.board, true)
+
+        if (whiteStuck && blackStuck) {
+          this.aSetWinner('D')
+          this.aSetActiveGame(false)
+          return
+        } else if (whiteStuck || data.white_count === 0) {
+          this.aSetWinner('B')
+          this.aSetActiveGame(false)
+          return
+        } else if (blackStuck || data.black_count === 0) {
+          this.aSetWinner('W')
+          this.aSetActiveGame(false)
+          return
+        }
 
         // Highlight all possible captures when player is not in a capture sequence
         if (this.lastPlayerMoved !== auth.currentUser.uid) {
@@ -245,7 +263,8 @@ export default {
       'aHighlightCaptureFromSequence',
       'aSetPrevDestSquare',
       'aSetCaptureRequired',
-      'aFlushStateAfterTurn'
+      'aFlushStateAfterTurn',
+      'aSetActiveGame'
     ]),
 
     async endPlayerTurn() {
