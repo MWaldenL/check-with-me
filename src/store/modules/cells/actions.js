@@ -38,6 +38,10 @@ const actions = {
     commit('mUpdateBoard', payload)
   },
 
+  async aUpdateCount ({ commit }, count) {
+    commit('mUpdateCount', count)
+  },
+
   /**
    * aMoveForward moves a black or white chip to an empty cell 1 space diagonally
    * @param nRow - 1-based row of active cell with piece to move

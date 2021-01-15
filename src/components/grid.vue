@@ -12,7 +12,7 @@
           </span>
         </keep-alive>
       </h1> 
-      <h1 id="p1-count" class="pt-3"> Pieces left: {{ blackCount }} </h1>
+      <h1 id="p1-count" class="pt-3"> Pieces left: {{ otherCount }} </h1>
     </div>
 
     <!-- Board -->
@@ -33,7 +33,7 @@
     
     <!-- Self -->
     <div id="p2-details" class="details">
-      <h1 id="p2-count" class="pb-4"> Pieces left: {{ whiteCount }} </h1>
+      <h1 id="p2-count" class="pb-4"> Pieces left: {{ selfCount }} </h1>
       <h1>
         <keep-alive>
           <span class="time text-white" id="selfTime">
@@ -110,6 +110,10 @@ export default {
         // Update the last player moved and the position
         this.lastPlayerMoved = data.last_player_moved
         this.aUpdateBoard({ boardState, playerIsBlack })
+        this.aUpdateCount({ 
+          white: data.white_count, 
+          black: data.black_count
+        })
 
         // Highlight all possible captures when player is not in a capture sequence
         if (this.lastPlayerMoved !== auth.currentUser.uid) {
@@ -204,6 +208,14 @@ export default {
       return (auth.currentUser.uid === this.hostUserID) ?
         (this.isHostWhite ? 'w' : 'b') : 
         (this.isHostWhite ? 'b' : 'w')
+    },
+
+    selfCount() {
+      return (this.selfColor === 'w') ? this.whiteCount : this.blackCount
+    },
+
+    otherCount() {
+      return (this.selfColor === 'w') ? this.blackCount : this.whiteCount
     }
   },
 
@@ -227,6 +239,7 @@ export default {
       'aSetOtherTimeLeft',
       'aSetWinner',
       'aUpdateBoard',
+      'aUpdateCount',
       'aGetEnemyUsername',
       'aHighlightBoardCaptures',
       'aHighlightCaptureFromSequence',

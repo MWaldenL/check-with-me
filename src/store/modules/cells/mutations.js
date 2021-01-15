@@ -472,6 +472,11 @@ const mutations = {
     state.cells = getBoardFromPDN(boardState, playerIsBlack)
   },
 
+  mUpdateCount: (state, count) => {
+    state.nWhiteCount = count.white
+    state.nBlackCount = count.black
+  },
+
   mReducePiece: (state, whiteTakes) => {
     if (!whiteTakes) {
       state.nWhiteCount--
