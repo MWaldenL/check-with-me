@@ -135,8 +135,8 @@ const actions = {
     commit('mSetCaptureRequired', isRequired) 
   },
 
-  aFlushStateAfterTurn({ commit }, updatedState) {
-    commit('mFlushStateAfterTurn', updatedState)
+  aFlushStateAfterTurn({ commit }) {
+    commit('mFlushStateAfterTurn')
   }
 }
 

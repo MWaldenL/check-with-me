@@ -130,13 +130,7 @@ export default {
             }
           }
         } else {
-          const updatedState = {
-            bIsCaptureRequired: false,
-            bStartedCaptureSequence: false,
-            prevDestSquare: null,
-            firstClick: null
-          }
-          this.aFlushStateAfterTurn(updatedState)
+          this.aFlushStateAfterTurn()
         }
       })
 
@@ -249,15 +243,10 @@ export default {
       this.lastPlayerMoved = (this.isHostWhite ^ isMoveWhite) ? this.otherUserID : this.hostUserID
 
       console.log('ending player turn')
-      // Set capture required to false to prevent state leaks
-      const updatedState = {
-        bIsCaptureRequired: false,
-        bStartedCaptureSequence: false,
-        prevDestSquare: null,
-        firstClick: null
-      }
-      this.aFlushStateAfterTurn(updatedState)
       
+      // Prevent state leaks
+      this.aFlushStateAfterTurn()
+
       // Write last player moved to db 
       await this.currentGame.update({ last_player_moved: this.lastPlayerMoved })
 

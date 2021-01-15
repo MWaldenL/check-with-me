@@ -167,7 +167,6 @@ export default {
           // Check if a capture can be made
           if (!this.isCapturing) {
             if (this.canSelectedPieceCapture) { // short circuit
-              console.log('hello')
               this.aHighlight({
                 nRow: this.row, 
                 nCol: this.col, 
@@ -185,6 +184,8 @@ export default {
                 bHasBlackKing: this.hasBlackKing,
                 bHasWhiteKing: this.hasWhiteKing 
               })
+            } else {
+              this.aUnhighlight()
             }
           }
         } else {
@@ -196,7 +197,7 @@ export default {
           })
         }
       } else { // Illegal move
-        if (!isCaptureRequired) {
+        if (!this.isCapturing) {
           this.aUnhighlight()
         }
       }
@@ -227,7 +228,7 @@ export default {
             let willEmit = true
 
             if (bIsSameSquare) {
-              if (!this.isCaptureRequired) {
+              if (!this.isCapturing) {
                 this.aUnhighlight()
               }
               willEmit = false
@@ -235,6 +236,10 @@ export default {
               if (this.isKingMoveAttempt(source, coords)) {
                 if (!this.isCaptureRequired) {
                   this.aKingMovement(payload)
+                } else {
+                  if (!this.isCapturing) {
+                    this.aUnhighlight()
+                  }
                 }
                 willEmit = this.isLastMoveLegal && !this.isCaptureRequired
               } else if (this.isKingCaptureAttempt(source, coords)) {
@@ -242,6 +247,9 @@ export default {
                   this.aKingCapturePiece(payload)
                   willEmit = this.isLastMoveLegal
                 } else {
+                  if (!this.isCapturing) {
+                    this.aUnhighlight()
+                  }
                   willEmit = false
                 }
               } else {
@@ -254,14 +262,24 @@ export default {
                   this.aCapturePiece(payload)
                   willEmit = this.isLastMoveLegal
                 } else {
+                  if (!this.isCapturing) {
+                    this.aUnhighlight()
+                  }
                   willEmit = false
                 }
               } else if (this.isMoveForwardAttempt(source)) {
+                console.log(this.isCapturing)
                 if (!this.isCaptureRequired) {
                   this.aMoveForward(payload)
+                } else {
+                  if (!this.isCapturing) {
+                    console.log('not capturing')
+                    this.aUnhighlight()
+                  }
                 }
                 willEmit = this.isLastMoveLegal && !this.isCaptureRequired
               } else {
+                console.log('else block')
                 this.cancelCurrentMove(this.isCaptureRequired)
                 willEmit = false
               }
