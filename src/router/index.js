@@ -11,7 +11,7 @@ import GameLobby from '../views/GameLobby.vue'
 import Room from '../views/Room.vue'
 import Help from '../views/Help.vue'
 import firebase from  'firebase'
-import authStore from '@/store/modules/auth'
+import { gamesCollection } from '@/firebase'
 
 Vue.use(VueRouter)
 
@@ -74,7 +74,10 @@ const routes = [
     path: '/room/:id',
     name: 'Room',
     component: Room,
-    meta: { requiresNotAuth: false }
+    meta: { 
+      requiresAuth: true,
+      isRoom: true
+    }
   }
 ]
 
@@ -86,12 +89,25 @@ router.beforeEach(async (to, from, next) => {
   const user = await firebase.getCurrentUser()
   if (to.meta.requiresAuth && !user) {
     next({ name: 'Login' })
-  } 
-  else if (to.meta.requiresNotAuth && user) {
-    console.log('called ')
-    next({ name: 'Home' })
-  } 
-  else {
+  } else if (to.meta.requiresNotAuth && user) {
+    next({ name: 'GameLobby' })
+  } else if (to.meta.isRoom) {
+    const gameDoc = await gamesCollection.doc(to.params.id).get()
+    const data = gameDoc.data()
+    const hostUser = data.host_user
+    const otherUser = data.other_user 
+    
+    console.log(hostUser.id)
+    console.log(otherUser.id === 'nil')
+  
+    // Check if host and other player are present
+    const isRoomFull = hostUser.id !== 'nil' && otherUser.id !== 'nil'
+    if (isRoomFull) {
+      next({ name: 'GameLobby' })
+    } else {
+      next()
+    }
+  } else {
     next()
   }
 })
