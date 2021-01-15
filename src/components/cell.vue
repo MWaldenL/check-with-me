@@ -196,7 +196,7 @@ export default {
           })
         }
       } else { // Illegal move
-        if (!isCaptureRequired) {
+        if (!this.isCapturing) {
           this.aUnhighlight()
         }
       }
@@ -227,7 +227,7 @@ export default {
             let willEmit = true
 
             if (bIsSameSquare) {
-              if (!this.isCaptureRequired) {
+              if (!this.isCapturing) {
                 this.aUnhighlight()
               }
               willEmit = false
@@ -235,6 +235,10 @@ export default {
               if (this.isKingMoveAttempt(source, coords)) {
                 if (!this.isCaptureRequired) {
                   this.aKingMovement(payload)
+                } else {
+                  if (!this.isCapturing) {
+                    this.aUnhighlight()
+                  }
                 }
                 willEmit = this.isLastMoveLegal && !this.isCaptureRequired
               } else if (this.isKingCaptureAttempt(source, coords)) {
@@ -242,6 +246,9 @@ export default {
                   this.aKingCapturePiece(payload)
                   willEmit = this.isLastMoveLegal
                 } else {
+                  if (!this.isCapturing) {
+                    this.aUnhighlight()
+                  }
                   willEmit = false
                 }
               } else {
@@ -254,11 +261,18 @@ export default {
                   this.aCapturePiece(payload)
                   willEmit = this.isLastMoveLegal
                 } else {
+                  if (!this.isCapturing) {
+                    this.aUnhighlight()
+                  }
                   willEmit = false
                 }
               } else if (this.isMoveForwardAttempt(source)) {
                 if (!this.isCaptureRequired) {
                   this.aMoveForward(payload)
+                } else {
+                  if (!this.isCapturing) {
+                    this.aUnhighlight()
+                  }
                 }
                 willEmit = this.isLastMoveLegal && !this.isCaptureRequired
               } else {

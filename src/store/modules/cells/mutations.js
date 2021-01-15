@@ -143,7 +143,9 @@ const mutations = {
     for (let i in boardClone) {
       for (let j in boardClone[i]) {
         boardClone[i][j].isPossibleMove = false
-        boardClone[i][j].isPossibleCapture = false
+        if (!state.bIsCaptureRequired) {
+          boardClone[i][j].isPossibleCapture = false
+        }
         boardClone[i][j].isHighlighted = false
       }
     }
@@ -592,18 +594,11 @@ const mutations = {
     state.prevDestSquare = prevDestSquare
   },
 
-  mFlushStateAfterTurn: (state, updatedState) => {
-    const {
-      bIsCaptureRequired,
-      bStartedCaptureSequence,
-      prevDestSquare,
-      firstClick
-    } = updatedState
-
-    state.bIsCaptureRequired = bIsCaptureRequired
-    state.bStartedCaptureSequence = bStartedCaptureSequence
-    state.prevDestSquare = prevDestSquare
-    state.firstClick = firstClick
+  mFlushStateAfterTurn: (state) => {
+    state.bIsCaptureRequired = false
+    state.bStartedCaptureSequence = false
+    state.prevDestSquare = null
+    state.firstClick = null
   }
 }
 
