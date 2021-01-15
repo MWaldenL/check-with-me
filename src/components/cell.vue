@@ -167,7 +167,6 @@ export default {
           // Check if a capture can be made
           if (!this.isCapturing) {
             if (this.canSelectedPieceCapture) { // short circuit
-              console.log('hello')
               this.aHighlight({
                 nRow: this.row, 
                 nCol: this.col, 
@@ -185,6 +184,8 @@ export default {
                 bHasBlackKing: this.hasBlackKing,
                 bHasWhiteKing: this.hasWhiteKing 
               })
+            } else {
+              this.aUnhighlight()
             }
           }
         } else {
@@ -267,15 +268,18 @@ export default {
                   willEmit = false
                 }
               } else if (this.isMoveForwardAttempt(source)) {
+                console.log(this.isCapturing)
                 if (!this.isCaptureRequired) {
                   this.aMoveForward(payload)
                 } else {
                   if (!this.isCapturing) {
+                    console.log('not capturing')
                     this.aUnhighlight()
                   }
                 }
                 willEmit = this.isLastMoveLegal && !this.isCaptureRequired
               } else {
+                console.log('else block')
                 this.cancelCurrentMove(this.isCaptureRequired)
                 willEmit = false
               }
