@@ -46,25 +46,19 @@ const actions = {
   /**
    * Sets the host's time left from the database
    */
-  async aSetHostTimeLeft({ commit }) {
-    // Delay 100ms for error padding
-    setTimeout(async () => {
-      const timerDoc = await timersCollection.doc('H48woDfI1lwIGZnJh4qz').get()
-      const data = timerDoc.data()
-      commit('mSetHostTimeLeft', data.host_timeLeft)
-    }, 200)
+  async aSetHostTimeLeft({ commit }) {      
+    const timerDoc = await timersCollection.doc('H48woDfI1lwIGZnJh4qz').get()
+    const data = timerDoc.data()
+    commit('mSetHostTimeLeft', data.host_timeLeft)
   },
 
   /**
    * Sets the other player's time left from the database
    */
   async aSetOtherTimeLeft({ commit }) {
-    // Delay 100ms for error padding
-    setTimeout(async () => {
-      const timerDoc = await timersCollection.doc('H48woDfI1lwIGZnJh4qz').get()
-      const data = timerDoc.data()
-      commit('mSetOtherTimeLeft', data.other_timeLeft)
-    }, 200)
+    const timerDoc = await timersCollection.doc('H48woDfI1lwIGZnJh4qz').get()
+    const data = timerDoc.data()
+    commit('mSetOtherTimeLeft', data.other_timeLeft)
   },
 
   async aGetEnemyUsername({ commit, state }) {

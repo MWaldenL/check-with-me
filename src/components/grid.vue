@@ -69,17 +69,23 @@ export default {
   
   // Called on refreshes or new loads 
   async created() {
-    const gameDoc = gamesCollection.doc('Vc0H4f4EvY6drRKnvsk5')
+    const gameDoc = gamesCollection.doc('Vc0H4f4EvY6drRKnvsk5')   // hardcoded
+    const timerDoc = timersCollection.doc('H48woDfI1lwIGZnJh4qz') // hardcoded
     const game = await gameDoc.get()
+    const timer = await timerDoc.get()
     const data = game.data()
 
-    // Set data 
+    // Set pertinent data 
     this.bIsFirstRun = data.is_first_run
     this.lastPlayerMoved = data.last_player_moved
-    await this.aSetHostTimeLeft()
-    await this.aSetOtherTimeLeft()
-    this.currentGame = gameDoc
+    // await this.aSetHostTimeLeft()
+    // await this.aSetOtherTimeLeft()
 
+    // Set collections
+    this.currentGameDoc = gameDoc
+    this.currentTimerDoc = timerDoc
+
+    // Set self username
     const currentUser = await this.currentUser.data 
     this.selfName = currentUser.username
 
@@ -87,18 +93,18 @@ export default {
     await this.aGetEnemyUsername()
 
     // Decide which clock to run 
-    let player
-    if (this.bIsFirstRun) {
-      player = this.isHostWhite ? 'host' : 'other'
-    } else {
-      player = this.lastPlayerMoved === game.data().host_user ? 'other' : 'host'
-    }
+    const playerIfFirstRun = this.isSelfHost ? 
+      (this.isHostWhite ? 'self' : 'enemy') : 
+      (this.isHostWhite ? 'enemy' : 'self')
+    
+    const playerIfOngoingGame = this.isSelfHost ?
+      this.lastPlayerMoved === game.data().host_user ? 'enemy' : 'self' :
+      this.lastPlayerMoved === game.data().host_user ? 'self' : 'enemy'
+    
+    const player = this.bIsFirstRun ? playerIfFirstRun : playerIfOngoingGame
 
-    // Only start the clock if isn't already running
-    const timerState = await axios.get(`http://localhost:5000/isTimeRunning`)
-    if (!timerState.data.isTimeRunning) {
-      await axios.get(`http://localhost:5000/startTime/H48woDfI1lwIGZnJh4qz/${player}`)
-    }
+    // Start the clock
+    this.runClock(player)
   },
 
   async mounted() {
@@ -144,23 +150,16 @@ export default {
         }
       })
 
-    // Listen for timer ticks
+    // Listen for timer state changes
+    // This will happen if the enemy's clock is updated
     timersCollection
       .doc('H48woDfI1lwIGZnJh4qz')
       .onSnapshot(async doc => {
-        // Set the timer of the next player to move
-        if (this.bIsFirstRun) {
-          console.log('firstRun')
-          await (this.isHostWhite) ?
-            this.aSetHostTimeLeft() :
-            this.aSetOtherTimeLeft()
-        } else {
-          console.log('not first run')
-          await (this.lastPlayerMoved === this.hostUserID) ?
-            this.aSetOtherTimeLeft() : 
-            this.aSetHostTimeLeft()
-        }
-        
+        // Sync the other player's timer with the db
+        const data = doc.data()
+        const remoteEnemyTime = this.isSelfHost ? data.other_timeLeft : data.host_timeLeft
+        this.enemySeconds = remoteEnemyTime // might implement finer conditions but this one for now
+      
         // Check if someone has won on time
         const didBlackWinOnTime = 
           (this.hostTimeLeft === 0 && this.isHostWhite) || 
@@ -168,7 +167,7 @@ export default {
         const didWhiteWinOnTime = 
           (this.otherTimeLeft === 0 && this.isHostWhite) || 
           (this.hostTimeLeft === 0 && !this.isHostWhite)
-
+  
         // if (didBlackWin) {
         //   this.aSetWinner('B')
         // } else if (didWhiteWin) {
@@ -180,11 +179,15 @@ export default {
   data () {
     return {
       selfName: '',
-      enemyName: '',
-      currentGame: null,
+      currentGameDoc: null,
+      currentTimerDoc: null,
+
       lastPlayerMoved: null,
-      bHostRunning: true,
-      bOtherRunning: false,
+      selfSeconds: 0,      
+      enemySeconds: 0,
+
+      isSelfTimeRunning: false,
+      isEnemyTimeRunning: false,
       bIsFirstRun: true,
       prevSourceSquare: null
     }
@@ -207,20 +210,12 @@ export default {
       prevDestSquare: 'getPrevDestSquare'
     }),
 
+    isSelfHost() {
+      return auth.currentUser.uid === this.hostUserID
+    },
+
     canMakeMove() {
       return this.lastPlayerMoved !== auth.currentUser.uid
-    },
-
-    selfSeconds() {
-      return (auth.currentUser.uid === this.hostUserID) ?
-        this.hostTimeLeft :
-        this.otherTimeLeft
-    },
-
-    enemySeconds() {
-      return (auth.currentUser.uid === this.hostUserID) ?
-        this.otherTimeLeft :
-        this.hostTimeLeft
     },
 
     selfColor() {
@@ -259,6 +254,24 @@ export default {
       'aSetFirstRun'
     ]),
 
+    async fetchTimeFromDB() {
+      const timer = await this.currentTimerDoc.get()
+      const timerData = timer.data()
+      const hostTime = timerData.host_timeLeft
+      const otherTime = timerData.other_timeLeft
+
+      // Set the timer states depending on the players
+      this.selfTime = this.isSelfHost ? hostTime : otherTime
+      this.enemyTime = this.isSelfHost ? otherTime : hostTime
+    },
+
+    async writeUpdatedTimeToDB() {
+      const newTimeObj = this.isSelfHost ? 
+        { host_timeLeft: this.selfTime } : 
+        { other_timeLeft: this.otherTime } 
+      await this.currentTimerDoc.update(newTimeObj)   
+    },
+
     async endPlayerTurn(coords) {
       const isMoveWhite = 
         bSourceHasWhite(this.board, this.prevDestSquare) || 
@@ -275,15 +288,17 @@ export default {
       }
       this.aFlushStateAfterTurn(updatedState)
 
+      // Stop self time and start enemy time
+      this.stopSelfTime()
+      this.startEnemyTime()
+
       // Write last player moved to db 
-      await this.currentGame.update({ last_player_moved: this.lastPlayerMoved })
+      await this.currentGameDoc.update({ 
+        last_player_moved: this.lastPlayerMoved 
+      })
 
-      // Stop the last player's clock
-      await axios.get('http://localhost:5000/stopTime')
-
-      // Start the other player's clock
-      const player = this.lastPlayerMoved === this.hostUserID ? 'other' : 'host'
-      await axios.get(`http://localhost:5000/startTime/H48woDfI1lwIGZnJh4qz/${player}`)
+      // Write the updated self time to db
+      this.writeUpdatedTimeToDB() 
     },
 
     async updateLastPlayerMoved(coords) {
@@ -293,11 +308,38 @@ export default {
 
       // The first move has been made
       if (this.bIsFirstRun) {
-        this.aSetFirstRun(false)
+        this.bIsFirstRun = false
       }
 
+      // End the player's turn if they are not currently capturing
       if (!this.isCapturing) {
         await this.endPlayerTurn(this.prevSourceSquare)
+      }
+    },
+
+    stopSelfTime() {
+      this.isSelfTimeRunning = false
+    },
+
+    startEnemyTime() {
+      this.isEnemyTimeRunning = true
+    },
+
+    async runClock(playerType) {
+      let timer
+      const isTimeRunning = playerType === 'self' ? 
+        this.isSelfTimeRunning : 
+        this.isEnemyTimeRunning
+
+      const shouldTimeTick = isTimeRunning && this.selfSeconds > 0 
+      
+      // If time is running and still has time left, tick; else stop the clock
+      if (shouldTimeTick) {
+        timer = playerType === 'self' ? 
+          setInterval(() => this.selfSeconds--, 1000) : 
+          setInterval(() => this.enemySeconds--, 1000)
+      } else {
+        clearInterval(timer)
       }
     }
   }
