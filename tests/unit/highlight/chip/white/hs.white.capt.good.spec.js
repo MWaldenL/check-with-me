@@ -1,5 +1,4 @@
-import { getPossibleMoveWhite } from '@/store/services/highlightService'
-import { BIconFileEarmarkEaselFill } from 'bootstrap-vue'
+import { getPossibleMoves } from '@/store/services/highlightService'
 
 // dummy 8 x 8 board
 const getBoard = () => {
@@ -20,7 +19,9 @@ const getBoard = () => {
   return board
 }
 
-describe('unblocked capture attempt for white', () => {
+const isWhite = true
+
+describe ('unblocked capture attempt for white', () => {
   /**
    * _ _ _ _ _ _ _ _
    * _ _ _ _ _ _ _ _
@@ -31,7 +32,7 @@ describe('unblocked capture attempt for white', () => {
    * _ _ _ _ _ _ _ _
    * _ _ _ _ _ _ _ _
    */
-  it('when northwest has black chip, two spaces northwest is free and valid, northeast is free and valid, \
+  it ('when northwest has black chip, two spaces northwest is free and valid, northeast is free and valid, \
   return coordinates of former for capture, latter two for movement', () => {
     // arrange
     const board = getBoard()
@@ -57,7 +58,7 @@ describe('unblocked capture attempt for white', () => {
     ]
 
     // act
-    const result = getPossibleMoveWhite(board, board[4][5].nRow, board[4][5].nCol)
+    const result = getPossibleMoves(board, board[4][5].nRow, board[4][5].nCol, isWhite)
 
     // assert
     expect(result).toStrictEqual(expected)
@@ -72,7 +73,7 @@ describe('unblocked capture attempt for white', () => {
    * _ _ _ _ _ _ _ _
    * _ _ _ _ _ _ _ _
    */
-  it('when northeast has black chip, two spaces northeast is free and valid, northwest is free and valid, \
+  it ('when northeast has black chip, two spaces northeast is free and valid, northwest is free and valid, \
   return coordinates of former for capture, latter two for movement', () => {
     // arrange
     const board = getBoard()
@@ -98,7 +99,7 @@ describe('unblocked capture attempt for white', () => {
     ]
 
     // act
-    const result = getPossibleMoveWhite(board, board[4][5].nRow, board[4][5].nCol)
+    const result = getPossibleMoves(board, board[4][5].nRow, board[4][5].nCol, isWhite)
 
     // assert
     expect(result).toStrictEqual(expected)
@@ -148,7 +149,7 @@ describe('unblocked capture attempt for white', () => {
     ]
 
     // act
-    const result = getPossibleMoveWhite(board, board[4][5].nRow, board[4][5].nCol)
+    const result = getPossibleMoves(board, board[4][5].nRow, board[4][5].nCol, isWhite)
 
     // assert
     expect(result).toStrictEqual(expected)
@@ -189,7 +190,7 @@ describe('unblocked capture attempt for white', () => {
     ]
 
     // act
-    const result = getPossibleMoveWhite(board, board[4][7].nRow, board[4][7].nCol)
+    const result = getPossibleMoves(board, board[4][7].nRow, board[4][7].nCol, isWhite)
 
     // assert
     expect(result).toStrictEqual(expected)
@@ -230,7 +231,7 @@ describe('unblocked capture attempt for white', () => {
     ]
 
     // act
-    const result = getPossibleMoveWhite(board, board[4][0].nRow, board[4][0].nCol)
+    const result = getPossibleMoves(board, board[4][0].nRow, board[4][0].nCol, isWhite)
 
     // assert
     expect(result).toStrictEqual(expected)

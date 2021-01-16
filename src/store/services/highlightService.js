@@ -1,95 +1,85 @@
-export const getPossibleMoveBlack = (board, nRow, nCol) => {
-  let moves = []
-
-  const bBottLeftValid = nRow - 2 >= 0 && nRow - 2 < 8 && nCol - 2 >= 0 && nCol - 2 < 8
-  const bBottRightValid = nRow - 2 >= 0 && nRow - 2 < 8 && nCol >= 0 && nCol < 8
-
-  const bBottLeftCaptValid = nRow - 3 >= 0 && nRow - 3 < 8 && nCol - 3 >= 0 && nCol - 3 < 8
-  const bBottLeftCaptUnblocked = bBottLeftCaptValid  && !board[nRow - 3][nCol - 3].bHasBlackChip && !board[nRow - 3][nCol - 3].bHasWhiteChip
-  const bBottRightCaptValid = nRow - 3 >= 0 && nRow - 3 < 8 && nCol + 1 >= 0 && nCol + 1 < 8
-  const bBottRightCaptUnblocked = bBottRightCaptValid && !board[nRow - 3][nCol + 1].bHasBlackChip && !board[nRow - 3][nCol + 1].bHasWhiteChip
-
-  if (bBottLeftValid) {
-    const bBottLeft = board[nRow - 2][nCol - 2]
-
-    if (!bBottLeft.bHasBlackChip && !bBottLeft.bHasWhiteChip) {
-      moves.push([nRow - 2, nCol - 2, 0])
-    } else if (bBottLeft.bHasBlackChip) {
-      // skip
-    } else if (bBottLeft.bHasWhiteChip && bBottLeftCaptValid && !bBottLeftCaptUnblocked) {
-      // skip
-    } else if (bBottLeft.bHasWhiteChip && bBottLeftCaptValid && bBottLeftCaptUnblocked) {
-      moves.push([nRow - 2, nCol - 2, 1])
-      moves.push([nRow - 3, nCol - 3, 0])
-    }
-    
-  }
-
-  if (bBottRightValid) {
-    const bBottRight = board[nRow - 2][nCol]
-
-    if (!bBottRight.bHasBlackChip && !bBottRight.bHasWhiteChip) {
-      moves.push([nRow - 2, nCol, 0])
-    } else if (bBottRight.bHasBlackChip) {
-      // skip
-    } else if (bBottRight.bHasWhiteChip && bBottRightCaptValid && !bBottRightCaptUnblocked) {
-      // skip
-    } else if (bBottRight.bHasWhiteChip && bBottRightCaptValid && bBottRightCaptUnblocked) {
-      moves.push([nRow - 2, nCol, 1])
-      moves.push([nRow - 3, nCol + 1, 0])
-    } 
-    
-  }
-  return moves
-}
-
-export const getPossibleMoveWhite = (board, nRow, nCol) => {
+export const getPossibleMoves = (board, nRow, nCol, isWhite) => {
   let moves = []
 
   const bTopLeftValid = nRow >= 0 && nRow < 8 && nCol - 2 >= 0 && nCol - 2 < 8
   const bTopRightValid = nRow >= 0 && nRow < 8 && nCol >= 0 && nCol < 8
 
   const bTopLeftCaptValid = nRow + 1 >= 0 && nRow + 1 < 8 && nCol - 3 >= 0 && nCol - 3 < 8
-  const bTopLeftCaptUnblocked = bTopLeftCaptValid  && !board[nRow + 1][nCol - 3].bHasBlackChip && !board[nRow + 1][nCol - 3].bHasWhiteChip
+  const bTopLeftCaptUnblocked = bTopLeftCaptValid && !board[nRow + 1][nCol - 3].bHasBlackChip && !board[nRow + 1][nCol - 3].bHasWhiteChip
   const bTopRightCaptValid = nRow + 1 >= 0 && nRow + 1 < 8 && nCol + 1 >= 0 && nCol + 1 < 8
   const bTopRightCaptUnblocked = bTopRightCaptValid && !board[nRow + 1][nCol + 1].bHasBlackChip && !board[nRow + 1][nCol + 1].bHasWhiteChip
 
   if (bTopLeftValid) {
     const bTopLeft = board[nRow][nCol - 2]
+    const bHasFriendlyPiece = isWhite ? bTopLeft.bHasWhiteChip : bTopLeft.bHasBlackChip 
+    const bHasEnemyPiece = isWhite ? bTopLeft.bHasBlackChip : bTopLeft.bHasWhiteChip
 
     if (!bTopLeft.bHasBlackChip && !bTopLeft.bHasWhiteChip) {
       moves.push([nRow, nCol - 2, 0])
-    } else if (bTopLeft.bHasWhiteChip) {
+    } else if (bHasFriendlyPiece) {
       // skip
-    } else if (bTopLeft.bHasBlackChip && bTopLeftCaptValid && !bTopLeftCaptUnblocked) {
+    } else if (bHasEnemyPiece && bTopLeftCaptValid && !bTopLeftCaptUnblocked) {
       // skip
-    } else if (bTopLeft.bHasBlackChip && bTopLeftCaptValid && bTopLeftCaptUnblocked) {
+    } else if (bHasEnemyPiece && bTopLeftCaptValid && bTopLeftCaptUnblocked) {
       moves.push([nRow, nCol - 2, 1])
       moves.push([nRow + 1, nCol - 3, 0])
     }
-    
   }
 
   if (bTopRightValid) {
     const bTopRight = board[nRow][nCol]
+    const bHasFriendlyPiece = isWhite ? bTopRight.bHasWhiteChip : bTopRight.bHasBlackChip
+    const bHasEnemyPiece = isWhite ? bTopRight.bHasBlackChip : bTopRight.bHasWhiteChip
 
     if (!bTopRight.bHasBlackChip && !bTopRight.bHasWhiteChip) {
       moves.push([nRow, nCol, 0])
-    } else if (bTopRight.bHasWhiteChip) {
+    } else if (bHasFriendlyPiece) {
       // skip
-    } else if (bTopRight.bHasBlackChip && bTopRightCaptValid && !bTopRightCaptUnblocked) {
+    } else if (bHasEnemyPiece && bTopRightCaptValid && !bTopRightCaptUnblocked) {
       // skip
-    } else if (bTopRight.bHasBlackChip && bTopRightCaptValid && bTopRightCaptUnblocked) {
+    } else if (bHasEnemyPiece && bTopRightCaptValid && bTopRightCaptUnblocked) {
       moves.push([nRow, nCol, 1])
       moves.push([nRow + 1, nCol + 1, 0])
-    } 
-    
+    }
   }
 
   return moves
 }
 
-export const getPossibleMoveBlackKing = (board, nRow, nCol) => {
+export const getPossibleCaptures = (board, nRow, nCol, isWhite) => {
+  let moves = []
+
+  const bTopLeftValid = nRow >= 0 && nRow < 8 && nCol - 2 >= 0 && nCol - 2 < 8
+  const bTopRightValid = nRow >= 0 && nRow < 8 && nCol >= 0 && nCol < 8
+
+  const bTopLeftCaptValid = nRow + 1 >= 0 && nRow + 1 < 8 && nCol - 3 >= 0 && nCol - 3 < 8
+  const bTopLeftCaptUnblocked = bTopLeftCaptValid && !board[nRow + 1][nCol - 3].bHasBlackChip && !board[nRow + 1][nCol - 3].bHasWhiteChip
+  const bTopRightCaptValid = nRow + 1 >= 0 && nRow + 1 < 8 && nCol + 1 >= 0 && nCol + 1 < 8
+  const bTopRightCaptUnblocked = bTopRightCaptValid && !board[nRow + 1][nCol + 1].bHasBlackChip && !board[nRow + 1][nCol + 1].bHasWhiteChip
+
+  if (bTopLeftValid) {
+    const bTopLeft = board[nRow][nCol - 2]
+    const bHasEnemyPiece = isWhite ? bTopLeft.bHasBlackChip : bTopLeft.bHasWhiteChip
+
+    if (bHasEnemyPiece && bTopLeftCaptValid && bTopLeftCaptUnblocked) {
+      moves.push([nRow, nCol - 2, 1])
+      moves.push([nRow + 1, nCol - 3, 0])
+    }
+  }
+
+  if (bTopRightValid) {
+    const bTopRight = board[nRow][nCol]
+    const bHasEnemyPiece = isWhite ? bTopRight.bHasBlackChip : bTopRight.bHasWhiteChip
+
+    if (bHasEnemyPiece && bTopRightCaptValid && bTopRightCaptUnblocked) {
+      moves.push([nRow, nCol, 1])
+      moves.push([nRow + 1, nCol + 1, 0])
+    }
+  }
+  return moves
+}
+
+export const getPossibleMoveBlackKing = (board, nRow, nCol, isCaptureRequired) => {
   let moves = []
 
   let nRowTraverser = nRow
@@ -117,7 +107,9 @@ export const getPossibleMoveBlackKing = (board, nRow, nCol) => {
         break
       }
     } else {
-      moves.push([nRowTraverser, nColTraverser, 0])
+      if (!isCaptureRequired) {
+        moves.push([nRowTraverser, nColTraverser, 0])
+      }
     }
     nRowTraverser++
     nColTraverser++
@@ -148,7 +140,9 @@ export const getPossibleMoveBlackKing = (board, nRow, nCol) => {
         break
       }
     } else {
-      moves.push([nRowTraverser, nColTraverser, 0])
+      if (!isCaptureRequired) {
+        moves.push([nRowTraverser, nColTraverser, 0])
+      }
     }
     nRowTraverser--
     nColTraverser++
@@ -179,7 +173,9 @@ export const getPossibleMoveBlackKing = (board, nRow, nCol) => {
         break
       }
     } else {
-      moves.push([nRowTraverser, nColTraverser, 0])
+      if (!isCaptureRequired) {
+        moves.push([nRowTraverser, nColTraverser, 0])
+      }
     }
     nRowTraverser--
     nColTraverser--
@@ -210,7 +206,9 @@ export const getPossibleMoveBlackKing = (board, nRow, nCol) => {
         break
       }
     } else {
-      moves.push([nRowTraverser, nColTraverser, 0])
+      if (!isCaptureRequired) {
+        moves.push([nRowTraverser, nColTraverser, 0])
+      }
     }
     nRowTraverser++
     nColTraverser--
@@ -219,7 +217,7 @@ export const getPossibleMoveBlackKing = (board, nRow, nCol) => {
   return moves
 }
 
-export const getPossibleMoveWhiteKing = (board, nRow, nCol) => {
+export const getPossibleMoveWhiteKing = (board, nRow, nCol, isCaptureRequired) => {
   let moves = []
 
   let nRowTraverser = nRow
@@ -247,7 +245,9 @@ export const getPossibleMoveWhiteKing = (board, nRow, nCol) => {
         break
       }
     } else {
-      moves.push([nRowTraverser, nColTraverser, 0])
+      if (!isCaptureRequired) {
+        moves.push([nRowTraverser, nColTraverser, 0])
+      }
     }
     nRowTraverser++
     nColTraverser++
@@ -278,7 +278,9 @@ export const getPossibleMoveWhiteKing = (board, nRow, nCol) => {
         break
       }
     } else {
-      moves.push([nRowTraverser, nColTraverser, 0])
+      if (!isCaptureRequired) {
+        moves.push([nRowTraverser, nColTraverser, 0])
+      }
     }
     nRowTraverser--
     nColTraverser++
@@ -309,7 +311,9 @@ export const getPossibleMoveWhiteKing = (board, nRow, nCol) => {
         break
       }
     } else {
-      moves.push([nRowTraverser, nColTraverser, 0])
+      if (!isCaptureRequired) {
+        moves.push([nRowTraverser, nColTraverser, 0])
+      }
     }
     nRowTraverser--
     nColTraverser--
@@ -340,11 +344,19 @@ export const getPossibleMoveWhiteKing = (board, nRow, nCol) => {
         break
       }
     } else {
-      moves.push([nRowTraverser, nColTraverser, 0])
+      if (!isCaptureRequired) {
+        moves.push([nRowTraverser, nColTraverser, 0])
+      }
     }
     nRowTraverser++
     nColTraverser--
   }
 
   return moves
+}
+
+export const getPossibleKingCaptures = (board, nRow, nCol, isWhite) => {
+  return isWhite ? 
+    getPossibleMoveWhiteKing(board, nRow, nCol, true) : 
+    getPossibleMoveBlackKing(board, nRow, nCol, true)
 }

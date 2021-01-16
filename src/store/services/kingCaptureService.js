@@ -211,7 +211,6 @@ export const bPieceExistsOnTargetBottomRight = (board, coords, targetPiece) => {
   let prevCol = srcCol
   let curPos
 
-
   // Always check the previous diagonally adjacent square 
   for (let i = srcRow; i >= destRow; i--) {
     for (let j = srcCol; j <= destCol; j++) {

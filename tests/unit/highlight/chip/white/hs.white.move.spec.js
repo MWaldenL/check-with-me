@@ -1,4 +1,4 @@
-import { getPossibleMoveWhite } from '@/store/services/highlightService'
+import { getPossibleMoves } from '@/store/services/highlightService'
 
 // dummy 8 x 8 board
 const getBoard = () => {
@@ -18,6 +18,8 @@ const getBoard = () => {
   }
   return board
 }
+
+const isWhite = true
 
 describe('movement for white', () => {
   /**
@@ -47,7 +49,7 @@ describe('movement for white', () => {
     ]
 
     // act
-    const result = getPossibleMoveWhite(board, board[4][5].nRow, board[4][5].nCol)
+    const result = getPossibleMoves(board, board[4][5].nRow, board[4][5].nCol, isWhite)
 
     // assert
     expect(result).toStrictEqual(expected)
@@ -79,7 +81,7 @@ describe('movement for white', () => {
     ]
 
     // act
-    const result = getPossibleMoveWhite(board, board[4][7].nRow, board[4][7].nCol)
+    const result = getPossibleMoves(board, board[4][7].nRow, board[4][7].nCol, isWhite)
 
     // assert
     expect(result).toStrictEqual(expected)
@@ -111,7 +113,7 @@ describe('movement for white', () => {
     ]
 
     // act
-    const result = getPossibleMoveWhite(board, board[4][0].nRow, board[4][0].nCol)
+    const result = getPossibleMoves(board, board[4][0].nRow, board[4][0].nCol, isWhite)
 
     // assert
     expect(result).toStrictEqual(expected)
@@ -127,7 +129,7 @@ describe('movement for white', () => {
    * _ _ _ _ _ _ _ _
    * _ _ _ _ _ _ _ _
    */
-  it('return coordinates of northwest when it is free and valid, northeast has white chip', () => {
+  it ('return coordinates of northwest when it is free and valid, northeast has white chip', () => {
     // arrange
     const board = getBoard()
 
@@ -150,7 +152,7 @@ describe('movement for white', () => {
     ]
 
     // act
-    const result = getPossibleMoveWhite(board, board[4][5].nRow, board[4][5].nCol)
+    const result = getPossibleMoves(board, board[4][5].nRow, board[4][5].nCol, isWhite)
 
     // assert
     expect(result).toStrictEqual(expected)
@@ -189,7 +191,7 @@ describe('movement for white', () => {
     ]
 
     // act
-    const result = getPossibleMoveWhite(board, board[4][5].nRow, board[4][5].nCol)
+    const result = getPossibleMoves(board, board[4][5].nRow, board[4][5].nCol, isWhite)
 
     // assert
     expect(result).toStrictEqual(expected)
@@ -233,7 +235,7 @@ describe('movement for white', () => {
     const expected = []
 
     // act
-    const result = getPossibleMoveWhite(board, board[4][5].nRow, board[4][5].nCol)
+    const result = getPossibleMoves(board, board[4][5].nRow, board[4][5].nCol, isWhite)
 
     // assert
     expect(result).toStrictEqual(expected)
