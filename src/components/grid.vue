@@ -73,13 +73,24 @@ export default {
     const timerDoc = timersCollection.doc('H48woDfI1lwIGZnJh4qz') // hardcoded
     const game = await gameDoc.get()
     const timer = await timerDoc.get()
-    const data = game.data()
+    this.currentGameData = game.data()
 
     // Set pertinent data 
-    this.bIsFirstRun = data.is_first_run
-    this.lastPlayerMoved = data.last_player_moved
-    // await this.aSetHostTimeLeft()
-    // await this.aSetOtherTimeLeft()
+    this.bIsFirstRun = this.currentGameData.is_first_run
+    this.lastPlayerMoved = this.currentGameData.last_player_moved
+
+    // Set timer data
+    if (!this.isSelfTimeRunning) {
+      this.selfSeconds = this.isSelfHost ? 
+        timer.data().host_timeLeft : 
+        timer.data().other_timeLeft
+    }   
+
+    if (!this.isEnemyTimeRunning) {
+      this.enemySeconds = this.isSelfHost ? 
+        timer.data().other_timeLeft :        
+        timer.data().host_timeLeft 
+    }
 
     // Set collections
     this.currentGameDoc = gameDoc
@@ -92,16 +103,23 @@ export default {
     // Get the enemy username
     await this.aGetEnemyUsername()
 
-    // Decide which clock to run 
-    const playerIfFirstRun = this.isSelfHost ? 
-      (this.isHostWhite ? 'self' : 'enemy') : 
-      (this.isHostWhite ? 'enemy' : 'self')
-    
-    const playerIfOngoingGame = this.isSelfHost ?
-      this.lastPlayerMoved === game.data().host_user ? 'enemy' : 'self' :
-      this.lastPlayerMoved === game.data().host_user ? 'self' : 'enemy'
-    
+    // Run self clock if self white
+    const isSelfWhite = this.isSelfHost && this.isHostWhite 
+    const playerIfFirstRun = isSelfWhite ? 'self' : 'enemy'
+    const playerIfOngoingGame = this.lastPlayerMoved === auth.currentUser.uid ? 'enemy' : 'self'
+
     const player = this.bIsFirstRun ? playerIfFirstRun : playerIfOngoingGame
+
+    this.playerToMove = player
+    if (this.bIsFirstRun && isSelfWhite) {
+      this.isSelfTimeRunning = isSelfWhite
+      this.isEnemyTimeRunning = !isSelfWhite
+    }
+
+    console.log(this.isHostWhite)
+    console.log(playerIfOngoingGame)
+    console.log(this.isSelfTimeRunning)
+    console.log(this.isEnemyTimeRunning)
 
     // Start the clock
     this.runClock(player)
@@ -159,7 +177,9 @@ export default {
         const data = doc.data()
         const remoteEnemyTime = this.isSelfHost ? data.other_timeLeft : data.host_timeLeft
         this.enemySeconds = remoteEnemyTime // might implement finer conditions but this one for now
-      
+
+        console.log(this.enemySeconds)
+
         // Check if someone has won on time
         const didBlackWinOnTime = 
           (this.hostTimeLeft === 0 && this.isHostWhite) || 
@@ -176,12 +196,29 @@ export default {
       })
   },
 
+  updated() {
+    if (!this.isSelfTimeRunning) {
+      clearInterval(this.currentRunningTimer)
+    }
+
+    if (!this.isOtherTimeRunning) {
+      clearInterval(this.currentRunningTimer)
+    }
+
+    console.log(this.playerToMove)
+
+    this.runClock(this.playerToMove)
+  },
+
   data () {
     return {
       selfName: '',
       currentGameDoc: null,
+      currentGameData: null,
       currentTimerDoc: null,
+      currentRunningTimer: null,
 
+      playerToMove: null,
       lastPlayerMoved: null,
       selfSeconds: 0,      
       enemySeconds: 0,
@@ -192,6 +229,11 @@ export default {
       prevSourceSquare: null
     }
   },
+
+  persist: [
+    'selfSeconds', 
+    'enemySeconds'
+  ],
 
   computed: {
     ...mapGetters({
@@ -261,14 +303,15 @@ export default {
       const otherTime = timerData.other_timeLeft
 
       // Set the timer states depending on the players
-      this.selfTime = this.isSelfHost ? hostTime : otherTime
-      this.enemyTime = this.isSelfHost ? otherTime : hostTime
+      this.selfSeconds = this.isSelfHost ? hostTime : otherTime
+      this.enemySeconds = this.isSelfHost ? otherTime : hostTime
     },
 
     async writeUpdatedTimeToDB() {
+      console.log('writing time to db')
       const newTimeObj = this.isSelfHost ? 
-        { host_timeLeft: this.selfTime } : 
-        { other_timeLeft: this.otherTime } 
+        { host_timeLeft: this.selfSeconds } : 
+        { other_timeLeft: this.enemySeconds } 
       await this.currentTimerDoc.update(newTimeObj)   
     },
 
@@ -318,10 +361,13 @@ export default {
     },
 
     stopSelfTime() {
+      console.log('stopping self time')
       this.isSelfTimeRunning = false
+      this.playerToMove = 'enemy'
     },
 
     startEnemyTime() {
+      console.log('starting enemy time')
       this.isEnemyTimeRunning = true
     },
 
@@ -335,11 +381,11 @@ export default {
       
       // If time is running and still has time left, tick; else stop the clock
       if (shouldTimeTick) {
-        timer = playerType === 'self' ? 
+        this.currentRunningTimer = playerType === 'self' ? 
           setInterval(() => this.selfSeconds--, 1000) : 
           setInterval(() => this.enemySeconds--, 1000)
       } else {
-        clearInterval(timer)
+        clearInterval(this.currentRunningTimer)
       }
     }
   }
