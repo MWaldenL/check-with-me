@@ -30,19 +30,7 @@ firebase.getCurrentUser = () => {
 // Collections
 const usersCollection = db.collection('users')
 const gamesCollection = db.collection('games')
-<<<<<<< HEAD
 const timersCollection = db.collection('timers')
-=======
-const movesCollection = db.collection('moves')
-const timersCollection = db.collection('timers')
-
-gamesCollection.doc("2gSaU2SjJeUpHEEbXPyX")
-  .onSnapshot(doc => {
-      // const boardState = doc.data().boardState
-      // console.log(boardState)
-      // store.dispatch('aUpdateBoard', boardState);
-  });
->>>>>>> a043ed3311ad637513a9acaed19bf5f367d002b4
 
 export {
   db,
