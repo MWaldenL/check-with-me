@@ -38,7 +38,7 @@ var RoomConverter = {
 
 export const roomQuery = gamesCollection
             .where("is_public", "==", true)
-            .orderBy("room_name", "asc")
+            .orderBy("room_name_lc", "asc")
             .limit(10)
 
 export const getGames = (lobbyQuery) => {
@@ -69,7 +69,7 @@ export const getCount = (() => {
 
   gamesCollection
   .where("is_public", "==", true)
-  .orderBy("room_name", "asc")
+  .orderBy("room_name_lc", "asc")
   .get()
   .then(querySnapshot => {
     let docs = querySnapshot.docs
@@ -93,6 +93,7 @@ export const addGameDoc = ((roomName, roomType, timerID) => {
     last_player_moved: "white",
     room_link: "link",
     room_name: roomName,
+    room_name_lc: roomName.toLowerCase(),
     timer_id: db.doc('timers/' + timerID),
     white_count: 12,
     black_count: 12
@@ -100,7 +101,7 @@ export const addGameDoc = ((roomName, roomType, timerID) => {
 })
 
 export const checkNameUnique = (async roomName => {
-  const query = gamesCollection.where("room_name", "==", roomName)
+  const query = gamesCollection.where("room_name_lc", "==", roomName.toLowerCase())
   const doc = await query.get()
   //console.log(doc)
   return doc.empty

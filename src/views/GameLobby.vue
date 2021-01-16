@@ -93,7 +93,7 @@ export default {
     let initGames = getGames(roomQuery)
     initGames
     .then(result => {
-      console.log(result.games)
+      //console.log(result.games)
 
       this.games = result.games
       this.lastVisible = result.lastVisible
