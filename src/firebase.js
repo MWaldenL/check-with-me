@@ -37,6 +37,5 @@ export {
   auth,
   usersCollection,
   gamesCollection,
-  timersCollection,
-  chatsCollection
+  timersCollection
 }
