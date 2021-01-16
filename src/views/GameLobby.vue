@@ -1,7 +1,8 @@
 <template>
   <div id = 'GameLobbyPage'>
     <Sidebar />
-    <CreateRoomModal v-if="showModal" @close="showModal = false" />
+    <CreateRoomModal v-show="showModal" @close="showModal = false" />
+    <!-- <CreateRoomModal v-bind:showModal="showModal" @close="showModal = false" /> -->
     <div id = 'GameLobbyProper'>
       <div id="GameLobbyPageLabel">Game Lobby</div>
       <hr id="GameLobbyRule">
@@ -135,7 +136,7 @@ export default {
     },
 
     joinRoom(room_id) {
-      console.log("INSIDE")
+      //console.log("INSIDE")
       let user_key = firebase.auth().currentUser.uid
       
       let room = this.games.find(obj => {

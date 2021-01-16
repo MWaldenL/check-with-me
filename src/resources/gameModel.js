@@ -1,5 +1,8 @@
 import firebase from 'firebase'
-import { db } from '@/firebase'
+import { 
+  db,
+  gamesCollection
+} from '@/firebase'
 
 class Room {
   constructor (room_id, room_name, host_user, isFull) {
@@ -33,7 +36,7 @@ var RoomConverter = {
   }
 }
 
-export const roomQuery = db.collection("games")
+export const roomQuery = gamesCollection
             .where("is_public", "==", true)
             .orderBy("room_name", "asc")
             .limit(10)
@@ -64,7 +67,7 @@ export const getGames = (lobbyQuery) => {
 export const getCount = (() => {
   let count = []
 
-  db.collection("games")
+  gamesCollection
   .where("is_public", "==", true)
   .orderBy("room_name", "asc")
   .get()
@@ -81,7 +84,7 @@ export const getCount = (() => {
 })
 
 export const addGameDoc = ((roomName, roomType, timerID) => {
-  return db.collection("games").add({
+  return gamesCollection.add({
     board_state: "",
     host_user: db.doc('users/' + firebase.auth().currentUser.uid),
     other_user:  db.doc('users/' + 'nil'),
@@ -90,6 +93,15 @@ export const addGameDoc = ((roomName, roomType, timerID) => {
     last_player_moved: "white",
     room_link: "link",
     room_name: roomName,
-    timer_id: db.doc('timers/' + timerID)
+    timer_id: db.doc('timers/' + timerID),
+    white_count: 12,
+    black_count: 12
   })
+})
+
+export const checkNameUnique = (async roomName => {
+  const query = gamesCollection.where("room_name", "==", roomName)
+  const doc = await query.get()
+  //console.log(doc)
+  return doc.empty
 })

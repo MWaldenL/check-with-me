@@ -17,7 +17,8 @@
             <div id="name-label">
               Room Name
             </div>
-            <input v-model="roomNameInput" placeholder="Enter room name">
+            <input v-model.trim="roomNameInput" placeholder="Enter room name">
+            <b-alert show variant="danger" v-show="nameTaken" id="name-alert">Room name not available!</b-alert>
           </slot>
         </div>
 
@@ -53,21 +54,25 @@
       </div>
     </div>
   </div>
+  <!-- <b-modal v-model="this.showModal" id="modal" centered hide-footer no-close-on-backdrop no-close-on-esc hide-header>
+  </b-modal> -->
 </template>
 
 <script>
 import firebase from 'firebase'
 import { db } from '@/firebase'
-import { addGameDoc } from '@/resources/gameModel.js'
+import { addGameDoc, checkNameUnique } from '@/resources/gameModel.js'
 import { addTimerDoc } from '@/resources/timerModel.js'
 
 export default {
   name: 'CreateRoomModal',
+  //props: ['showModal'],
   data() {
     return {
       roomNameInput: "",
       typeInput: 0,
-      timeInput: 0
+      timeInput: 0,
+      nameTaken: false
     }
   },
   computed: {
@@ -79,18 +84,24 @@ export default {
     async createRoom() {
       if(this.valid)
       {
-        let timer = await addTimerDoc(this.timeInput)
-        let game = await addGameDoc(this.roomNameInput, this.typeInput, timer.id)
-        //console.log("WOO" + game.id)
-        this.$router.push({ path: '/room/' + game.id })
+        let uniqueName = await checkNameUnique(this.roomNameInput);
+        //console.log("uniqueName: " + uniqueName)
+
+        if(uniqueName) {
+          let timer = await addTimerDoc(this.timeInput)
+          let game = await addGameDoc(this.roomNameInput, this.typeInput, timer.id)
+          this.$router.push({ path: '/room/' + game.id })
+
+          this.$emit('close')
+        } else {
+          this.nameTaken = true
+          //this.roomNameInput = ""
+        }
       }
-      
-      this.$emit('close')
     },
 
     putTime(time) {
       this.timeInput = time
-      //console.log(this.valid)
     }
   }
 }
@@ -149,6 +160,13 @@ export default {
 #name-label {
   color: black;
   margin-bottom: 10px;
+}
+#name-alert {
+  margin-top: 10px;
+  margin-bottom: 0px;
+  padding-top: 3px;
+  padding-bottom: 3px;
+
 }
 
 #type-label {

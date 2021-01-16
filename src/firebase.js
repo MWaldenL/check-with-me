@@ -38,6 +38,7 @@ const usersCollection = db.collection('users')
 const chatsCollection = db.collection('chats')
 const gamesCollection = db.collection('games')
 const movesCollection = db.collection('moves')
+const timersCollection = db.collection('timers')
 
 gamesCollection.doc("2gSaU2SjJeUpHEEbXPyX")
   .onSnapshot(doc => {
@@ -50,5 +51,7 @@ export {
   db,
   auth,
   usersCollection,
+  gamesCollection,
+  timersCollection,
   chatsCollection
 }

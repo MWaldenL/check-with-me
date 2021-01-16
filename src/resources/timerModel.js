@@ -1,8 +1,11 @@
 import firebase from 'firebase'
-import { db } from '@/firebase'
+import { 
+  db,
+  timersCollection
+} from '@/firebase'
 
 export const addTimerDoc = ((time) => {
-  return db.collection("timers").add({
+  return timersCollection.add({
     host_timeLeft: time,
     other_timeLeft: time
   })
