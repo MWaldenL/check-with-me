@@ -18,14 +18,17 @@ app.use(express.urlencoded({ extended: false }))
 let countDown
 let timeLeft
 let isTimeRunning = false
+let currentTimeRunningPlayer = 'host'
 /**
  * Starts a given player's time given the timer ID
  * @param timerID the timer object's id
  * @param player the player type, which can either be "host" or "other"
  */
-app.get('/startTime/:currentTime', async (req, res) => {
-  let timeLeft = req.params.currentTime
+app.get('/startTime/:player/:currentTime', async (req, res) => {
+  let { player, currentTime } = req.params
+  let timeLeft = currentTime
   isTimeRunning = true
+  currentTimeRunningPlayer = player
 
   // Perform every second
   countDown = setInterval(async () => {
@@ -56,9 +59,14 @@ app.get('/stopTime', async (req, res) => {
 /**
  * Checks if a client is running the current clock
  */
-app.get('/isTimeRunning', (req, res) => {
-  console.log('isTimeRunning: ' + isTimeRunning)
-  res.send({ isTimeRunning })
+app.get('/isTimeRunning/:player', (req, res) => {
+  const { player } = req.params
+  console.log(player + ' isTimeRunning: ' + isTimeRunning)
+  if (player === currentTimeRunningPlayer) {
+    res.send({ isTimeRunning })
+  } else {
+    res.send({ isTimeRunning: false })
+  }
 })
 
 app.listen(5000, () => console.log('Listening on port 5000'))
