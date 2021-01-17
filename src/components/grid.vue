@@ -105,24 +105,7 @@ export default {
     this.playerToMove = playerToMove
     
     // Check if time is already running
-    const hostTimeRunningQuery = await axios.get('http://localhost:5000/isTimeRunning/host')
-    const otherTimeRunningQuery = await axios.get('http://localhost:5000/isTimeRunning/other')
-    const isHostTimeRunning = hostTimeRunningQuery.data.isTimeRunning
-    const isOtherTimeRunning = otherTimeRunningQuery.data.isTimeRunning
-    const isTimeRunning = isHostTimeRunning || isOtherTimeRunning
-
-    console.log('isTimeRunning: ')
-    console.log(isTimeRunning)
-  
-    if (!isTimeRunning) {
-      if ((this.bIsFirstRun && this.isSelfWhite) || playerToMove === 'self') {
-        console.log('running self ')
-        this.startSelfTime()
-      } else {
-        console.log('running other')
-        this.startEnemyTime()
-      }
-    }
+    this.runTimeForCreatedHook()
   },
 
   async mounted() {
@@ -173,9 +156,6 @@ export default {
     timersCollection
       .doc('H48woDfI1lwIGZnJh4qz')
       .onSnapshot(async doc => {
-        console.log('timer on snapshot')
-        console.log('snapshot() bIsFirstRun ' + this.bIsFirstRun)
-
         // Sync the other player's timer with the db
         const data = doc.data()
         const remoteEnemyTime = this.isSelfHost ? data.other_timeLeft : data.host_timeLeft
@@ -222,11 +202,6 @@ export default {
       prevSourceSquare: null
     }
   },
-
-  // persist: [
-  //   'selfSeconds', 
-  //   'enemySeconds'
-  // ],
 
   computed: {
     ...mapGetters({
@@ -298,6 +273,23 @@ export default {
       'aFlushStateAfterTurn'
     ]),
 
+    async runTimeForCreatedHook() {
+      const hostTimeRunningQuery = await axios.get('http://localhost:5000/isTimeRunning/host')
+      const otherTimeRunningQuery = await axios.get('http://localhost:5000/isTimeRunning/other')
+      const isHostTimeRunning = hostTimeRunningQuery.data.isTimeRunning
+      const isOtherTimeRunning = otherTimeRunningQuery.data.isTimeRunning
+      const isTimeRunning = isHostTimeRunning || isOtherTimeRunning
+      const shouldRunSelfTime = (this.bIsFirstRun && this.isSelfWhite) || playerToMove === 'self'
+
+      if (!isTimeRunning && shouldRunSelfTime) {
+        console.log('running self ')
+        this.startSelfTime()
+      } else {
+        console.log('running other')
+        this.startEnemyTime()
+      }
+    },
+
     async fetchTimeFromDB() {
       const timer = await this.currentTimerDoc.get()
       const timerData = timer.data()
@@ -311,15 +303,15 @@ export default {
       console.log(this.enemySeconds)
     },
 
-    determineClockToRun() {
+    async determineClockToRun() {
       if (this.lastPlayerMoved !== auth.currentUser.uid) { // opponent last move
         console.log('DRC self clock')
-        this.startSelfTime()
-        this.stopEnemyTime()
+        await this.startSelfTime()
+        await this.stopEnemyTime()
       } else { // self made last move
         console.log('DRC enemy clock')
-        this.stopSelfTime()
-        this.startEnemyTime()
+        await this.stopSelfTime()
+        await this.startEnemyTime()
       }
     },
 
@@ -378,11 +370,16 @@ export default {
 
     async startSelfTime() {
       // Set flags in client
-      this.isSelfTimeRunning = true
+      // this.isSelfTimeRunning = true
       this.playerToMove = 'self'
 
-      const isSelfServerTimeRunning = await axios.get(`http://localhost:5000/isTimeRunning/${this.selfPlayerType}`)
-      const shouldTimeTick = this.isSelfTimeRunning && this.selfSeconds > 0
+      const selfTimeQuery = await axios.get(`http://localhost:5000/isTimeRunning/${this.selfPlayerType}`)
+      const selfTimeLeftQuery = await axios.get(`http://localhost:5000/currentTimeLeft/${this.selfPlayerType}`)
+      const isSelfServerTimeRunning = selfTimeQuery.data.isTimeRunning
+      const shouldTimeTick = this.selfSeconds > 0
+
+      console.log(this.selfSeconds)
+
       if (shouldTimeTick) {
         console.log('start self time: ' + this.selfPlayerType)
         // Start server time
@@ -395,14 +392,21 @@ export default {
         }
 
         // Start client time
-        this.currentRunningTimer = setInterval(() => this.selfSeconds--, 1000)
+        this.currentRunningTimer = setInterval(() => {
+          this.selfSeconds--
+          if (this.selfSeconds <= 0) {
+            clearInterval(this.currentRunningTimer)
+          }
+        }, 1000)
         console.log('starting self time')
+      } else {
+        clearInterval(this.currentRunningTimer)
       }
     },
 
     async stopSelfTime() {
       // Stop client time
-      this.isSelfTimeRunning = false
+      // this.isSelfTimeRunning = false
       clearInterval(this.currentRunningTimer)
       
       // Stop server time
@@ -417,12 +421,15 @@ export default {
 
     async startEnemyTime() {
       // Set flags in client
-      this.isEnemyTimeRunning = true
+      // this.isEnemyTimeRunning = true
       this.playerToMove = 'enemy'
 
       // Start time in server
-      const isEnemyServerTimeRunning = await axios.get(`http://localhost:5000/isTimeRunning/${this.enemyPlayerType}`)
-      const shouldTimeTick = this.isEnemyTimeRunning && this.enemySeconds > 0
+      const enemyTimeQuery = await axios.get(`http://localhost:5000/isTimeRunning/${this.enemyPlayerType}`)
+      const isEnemyServerTimeRunning = enemyTimeQuery.data.isTimeRunning
+      console.log(isEnemyServerTimeRunning)
+      const shouldTimeTick = this.enemySeconds > 0
+      
       if (shouldTimeTick) {
         if (!isEnemyServerTimeRunning) {
           if (this.enemyPlayerType === 'host') {
@@ -433,14 +440,21 @@ export default {
         }
       
         // Start client time
-        this.currentRunningTimer = setInterval(() => this.enemySeconds--, 1000)
+        this.currentRunningTimer = setInterval(() => {
+          this.enemySeconds--
+          if (this.enemySeconds <= 0) {
+            clearInterval(this.currentRunningTimer)
+          }
+        }, 1000)
         console.log('starting enemy time')
+      } else {
+        clearInterval(this.currentRunningTimer)
       }
     },
 
     async stopEnemyTime() {
-      // Set flags in client
-      this.isEnemyTimeRunning = false
+      // Stop the client's timer
+      // this.isEnemyTimeRunning = false
       clearInterval(this.currentRunningTimer)
 
       // Start time in server
@@ -453,6 +467,7 @@ export default {
     },
 
     async setSelfTimeFromServerOrDB() {
+      console.log('setting self time initially')
       const timerDB = await this.currentTimerDoc.get()
       const timeQuery = await axios.get(`http://localhost:5000/isTimeRunning/${this.selfPlayerType}`)
       
@@ -466,11 +481,12 @@ export default {
       } else {
         const selfTimeQuery = await axios.get(`http://localhost:5000/currentTimeLeft/${this.selfPlayerType}`)
         this.selfSeconds = selfTimeQuery.data.timeLeft
-        console.log(selfTimeLeft)
+        console.log(selfTimeQuery.data)
       }
     },
 
     async setEnemyTimeFromServerOrDB() {
+      console.log('setting enemy time initially')
       const timeQuery = await axios.get(`http://localhost:5000/isTimeRunning/${this.enemyPlayerType}`)
       const timerDB = await this.currentTimerDoc.get()
       this.isEnemyTimeRunning = timeQuery.data.isTimeRunning
@@ -482,7 +498,6 @@ export default {
       } else {
         const enemyTimeQuery = await axios.get(`http://localhost:5000/currentTimeLeft/${this.enemyPlayerType}`)
         this.enemySeconds = enemyTimeQuery.data.timeLeft
-        console.log(enemyTimeLeft)
       }
     }
   }
