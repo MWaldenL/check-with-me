@@ -98,10 +98,8 @@ export default {
     this.setPlayerToMove(playerToMove)
     
     // Check if time is already running
-    // if (this.bIsFirstRun) {
     console.log('Running clock from created()')
     this.determineClockToRun()
-    // }
   },
 
   async mounted() {
@@ -351,8 +349,6 @@ export default {
       }
     },
 
-
-
     async startSelfTime() {
       this.isSelfTimeRunning = true
       this.setPlayerToMove('self')
@@ -379,7 +375,7 @@ export default {
           }
         }
 
-        // Start client time
+        // Flush then start client time
         clearInterval(this.currentRunningTimer)
         this.currentRunningTimer = setInterval(() => {
           this.selfSeconds--
@@ -434,13 +430,10 @@ export default {
         clearInterval(this.currentRunningTimer)
         this.currentRunningTimer = setInterval(() => {
           this.enemySeconds--
-          console.log(this.enemySeconds)
           if (this.enemySeconds <= 0) {
             clearInterval(this.currentRunningTimer)
           }
         }, 1000)
-
-        console.log('starting enemy time')
       } 
     },
 
@@ -458,17 +451,10 @@ export default {
       console.log('stopping enemy time')
     },
 
-
-
     async setSelfTimeFromServerOrDB() {
-      console.log('setting self time initially')
-
       const timerDB = await this.currentTimerDoc.get()
       const timeRunningQuery = await axios.get(`http://localhost:5000/isTimeRunning/${this.selfPlayerType}`)
-      
       this.isSelfTimeRunning = timeRunningQuery.data.isTimeRunning
-      console.log(this.selfPlayerType)
-      console.log(timeRunningQuery.data.isTimeRunning)
 
       // If player's time is not running, sync with db
       if (!this.isSelfTimeRunning) {
@@ -484,8 +470,6 @@ export default {
     },
 
     async setEnemyTimeFromServerOrDB() {
-      console.log('setting enemy time initially')
-
       const timerDB = await this.currentTimerDoc.get()
       const timeQuery = await axios.get(`http://localhost:5000/isTimeRunning/${this.enemyPlayerType}`)
       this.isEnemyTimeRunning = timeQuery.data.isTimeRunning
