@@ -103,7 +103,7 @@ app.get('/stopHostTime', async (req, res) => {
   clearInterval(hostCountDown)
 
   isTimeRunning = false
-  currentTimeRunningPlayer = 'nil'
+  // currentTimeRunningPlayer = 'nil'
   res.status(200).send("Stopping host time")
 })
 
@@ -115,7 +115,7 @@ app.get('/stopOtherTime', async (req, res) => {
   clearInterval(otherCountDown)
 
   isTimeRunning = false
-  currentTimeRunningPlayer = 'nil'
+  // currentTimeRunningPlayer = 'nil'
   res.status(200).send("Stopping other time")
 })
 
@@ -125,9 +125,7 @@ app.get('/stopOtherTime', async (req, res) => {
  */
 app.get('/isTimeRunning/:player', (req, res) => {
   const { player } = req.params
-  console.log(currentTimeRunningPlayer)
-  console.log('\n' + player + ' isTimeRunning: ' + player === currentTimeRunningPlayer)
-    
+  console.log('Current time running player: ' + currentTimeRunningPlayer)
   res.send({ isTimeRunning: player === currentTimeRunningPlayer })
 })
 
