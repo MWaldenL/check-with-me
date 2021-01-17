@@ -96,32 +96,26 @@ export default {
     this.currentGameDoc = gameDoc
     this.currentTimerDoc = timerDoc
 
-    // Set self username
+    // Set own username
     const currentUser = await this.currentUser.data 
     this.selfName = currentUser.username
 
     // Get the enemy username
     await this.aGetEnemyUsername()
 
-    // Run self clock if self white
+    // Run self clock if self is white
     const isSelfWhite = this.isSelfHost && this.isHostWhite 
     const playerIfFirstRun = isSelfWhite ? 'self' : 'enemy'
     const playerIfOngoingGame = this.lastPlayerMoved === auth.currentUser.uid ? 'enemy' : 'self'
-
     const player = this.bIsFirstRun ? playerIfFirstRun : playerIfOngoingGame
-
     this.playerToMove = player
-    if (this.bIsFirstRun && isSelfWhite) {
+    if (this.bIsFirstRun) {
       this.isSelfTimeRunning = isSelfWhite
       this.isEnemyTimeRunning = !isSelfWhite
     }
 
-    console.log(this.isHostWhite)
-    console.log(playerIfOngoingGame)
-    console.log(this.isSelfTimeRunning)
-    console.log(this.isEnemyTimeRunning)
-
     // Start the clock
+    console.log('before running clock')
     this.runClock(player)
   },
 
@@ -169,16 +163,19 @@ export default {
       })
 
     // Listen for timer state changes
-    // This will happen if the enemy's clock is updated
     timersCollection
       .doc('H48woDfI1lwIGZnJh4qz')
       .onSnapshot(async doc => {
         // Sync the other player's timer with the db
         const data = doc.data()
         const remoteEnemyTime = this.isSelfHost ? data.other_timeLeft : data.host_timeLeft
-        this.enemySeconds = remoteEnemyTime // might implement finer conditions but this one for now
+        this.enemySeconds = remoteEnemyTime // might implement finer implementations but this one for now
 
-        console.log(this.enemySeconds)
+        // Determine whose clock to run
+        if (!this.bIsFirstRun) {
+          console.log('determine running clock')
+          this.determineRunningClock()
+        }
 
         // Check if someone has won on time
         const didBlackWinOnTime = 
@@ -194,20 +191,6 @@ export default {
         //   this.aSetWinner('W')
         // }
       })
-  },
-
-  updated() {
-    if (!this.isSelfTimeRunning) {
-      clearInterval(this.currentRunningTimer)
-    }
-
-    if (!this.isOtherTimeRunning) {
-      clearInterval(this.currentRunningTimer)
-    }
-
-    console.log(this.playerToMove)
-
-    this.runClock(this.playerToMove)
   },
 
   data () {
@@ -230,10 +213,10 @@ export default {
     }
   },
 
-  persist: [
-    'selfSeconds', 
-    'enemySeconds'
-  ],
+  // persist: [
+  //   'selfSeconds', 
+  //   'enemySeconds'
+  // ],
 
   computed: {
     ...mapGetters({
@@ -305,13 +288,26 @@ export default {
       // Set the timer states depending on the players
       this.selfSeconds = this.isSelfHost ? hostTime : otherTime
       this.enemySeconds = this.isSelfHost ? otherTime : hostTime
+      console.log('fetch time from db')
+      console.log(this.enemySeconds)
+    },
+
+    determineRunningClock() {
+      if (this.lastPlayerMoved !== auth.currentUser.uid) { // opponent last move
+        console.log('DRC self clock ')
+        this.playerToMove = 'self'
+        this.runClock('self')
+      } else { // self made last move
+        console.log('DRC enemy clock ')
+        this.runClock('enemy')
+      }
     },
 
     async writeUpdatedTimeToDB() {
       console.log('writing time to db')
       const newTimeObj = this.isSelfHost ? 
         { host_timeLeft: this.selfSeconds } : 
-        { other_timeLeft: this.enemySeconds } 
+        { other_timeLeft: this.selfSeconds } 
       await this.currentTimerDoc.update(newTimeObj)   
     },
 
@@ -321,6 +317,10 @@ export default {
         bSourceHasWhiteKing(this.board, this.prevDestSquare) 
 
       this.lastPlayerMoved = (this.isHostWhite ^ isMoveWhite) ? this.otherUserID : this.hostUserID
+      // Write last player moved to db 
+      await this.currentGameDoc.update({ 
+        last_player_moved: this.lastPlayerMoved 
+      })
 
       // Flush leaky states after turns 
       const updatedState = {
@@ -332,13 +332,8 @@ export default {
       this.aFlushStateAfterTurn(updatedState)
 
       // Stop self time and start enemy time
-      this.stopSelfTime()
-      this.startEnemyTime()
-
-      // Write last player moved to db 
-      await this.currentGameDoc.update({ 
-        last_player_moved: this.lastPlayerMoved 
-      })
+      await this.stopSelfTime()
+      await this.startEnemyTime()
 
       // Write the updated self time to db
       this.writeUpdatedTimeToDB() 
@@ -352,6 +347,7 @@ export default {
       // The first move has been made
       if (this.bIsFirstRun) {
         this.bIsFirstRun = false
+        this.currentGameDoc.update({ is_first_run: false })
       }
 
       // End the player's turn if they are not currently capturing
@@ -360,30 +356,43 @@ export default {
       }
     },
 
-    stopSelfTime() {
-      console.log('stopping self time')
+    async stopSelfTime() {
+      // Stop client time
       this.isSelfTimeRunning = false
-      this.playerToMove = 'enemy'
+      clearInterval(this.currentRunningTimer)
+      
+      // Stop server time
+      await axios.get('http://localhost:5000/stopTime')
+
+      console.log('stopping self time')
     },
 
-    startEnemyTime() {
-      console.log('starting enemy time')
+    async startEnemyTime() {
+      // Start time in client
       this.isEnemyTimeRunning = true
+      this.playerToMove = 'enemy'
+
+      // Start time in server
+      await axios.get(`http://localhost:5000/startTime/${this.enemySeconds}`)
+
+      console.log('starting enemy time')
     },
 
     async runClock(playerType) {
-      let timer
-      const isTimeRunning = playerType === 'self' ? 
-        this.isSelfTimeRunning : 
-        this.isEnemyTimeRunning
-
+      const isTimeRunning = playerType === 'self' ? this.isSelfTimeRunning : this.isEnemyTimeRunning
+      const playerTime = playerType === 'self' ? this.selfSeconds : this.enemySeconds  
       const shouldTimeTick = isTimeRunning && this.selfSeconds > 0 
-      
+
       // If time is running and still has time left, tick; else stop the clock
       if (shouldTimeTick) {
-        this.currentRunningTimer = playerType === 'self' ? 
+        // Start server time
+        await axios.get(`http://localhost:5000/startTime/${playerTime}`)
+
+        // Start client time
+        this.currentRunningTimer = playerType === 'self' ?  
           setInterval(() => this.selfSeconds--, 1000) : 
           setInterval(() => this.enemySeconds--, 1000)
+        console.log(this.currentRunningTimer)
       } else {
         clearInterval(this.currentRunningTimer)
       }
