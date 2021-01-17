@@ -130,19 +130,13 @@ export default {
               })
 
               // Once a capture sequence has finished, end the player's turn
-              if (!this.isCapturing && this.prevSourceSquare) {
-                await this.endPlayerTurn(this.prevSourceSquare)
+              if (!this.isCapturing) {
+                await this.endPlayerTurn()
               }
             }
           }
-        } else {  // Ensure that leaky states don't have unnecessary values 
-          const updatedState = {
-            bIsCaptureRequired: false,
-            bStartedCaptureSequence: false,
-            prevDestSquare: null,
-            firstClick: null
-          }
-          this.aFlushStateAfterTurn(updatedState)
+        } else {
+          this.aFlushStateAfterTurn()
         }
       })
 
@@ -315,14 +309,10 @@ export default {
         last_player_moved: this.lastPlayerMoved 
       })
 
-      // Flush leaky states after turns 
-      const updatedState = {
-        bIsCaptureRequired: false,
-        bStartedCaptureSequence: false,
-        prevDestSquare: null,
-        firstClick: null
-      }
-      this.aFlushStateAfterTurn(updatedState)
+      console.log('ending player turn')
+      
+      // Prevent state leaks
+      this.aFlushStateAfterTurn()
 
       // Stop self time and start enemy time
       this.stopSelfTime()
@@ -334,7 +324,6 @@ export default {
 
     async updateLastPlayerMoved(coords) {
       const { nRow, nCol, nDestRow, nDestCol } = coords
-      this.prevSourceSquare = { nRow, nCol }
       this.aSetPrevDestSquare({ nRow: nDestRow, nCol: nDestCol })
 
       // The first move has been made

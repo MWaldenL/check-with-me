@@ -128,12 +128,19 @@ export default {
     },
 
     canSelectedKingCapture() {
+      const isKing = this.hasBlackKing || this.hasWhiteKing 
+      if (!isKing) {
+        return false
+      }
+
       const playerIsWhite = this.selfColor === 'w'
       const possibleCaptures = getPossibleKingCaptures(this.board, this.row, this.col, playerIsWhite)
       if (possibleCaptures.length > 0) {
         const canKingCapture = possibleCaptures.reduce((a, c) => a || c[2], possibleCaptures[0][2])
-        return canKingCapture
-      } return false
+        return canKingCapture === 1
+      } else {
+        return false
+      }
     },
 
     isAttemptingToCaptureOutsideSequence() {
@@ -154,18 +161,31 @@ export default {
       'aSetWinner'
     ]),
 
-    cancelCurrentMove(isCaptureRequired) { 
+    cancelCurrentMove(isCaptureRequired) {
       if (this.bContainsPiece) {
         if (isCaptureRequired) {
           // Check if a capture can be made
           if (!this.isCapturing) {
-            if (this.canSelectedPieceCapture || this.canSelectedKingCapture) {
+            if (this.canSelectedPieceCapture) { // short circuit
               this.aHighlight({
                 nRow: this.row, 
                 nCol: this.col, 
+                bHasBlackChip: this.bHasBlackChip,
+                bHasWhiteChip: this.bHasWhiteChip,
                 bHasBlackKing: this.hasBlackKing,
                 bHasWhiteKing: this.hasWhiteKing 
               })
+            } else if (this.canSelectedKingCapture) {
+              this.aHighlight({
+                nRow: this.row, 
+                nCol: this.col, 
+                bHasBlackChip: this.bHasBlackChip,
+                bHasWhiteChip: this.bHasWhiteChip,
+                bHasBlackKing: this.hasBlackKing,
+                bHasWhiteKing: this.hasWhiteKing 
+              })
+            } else {
+              this.aUnhighlight()
             }
           }
         } else {
@@ -177,8 +197,8 @@ export default {
           })
         }
       } else { // Illegal move
-        if (!isCaptureRequired) {
-          this.aUnhighlight(null)
+        if (!this.isCapturing) {
+          this.aUnhighlight()
         }
       }
     },
@@ -208,29 +228,58 @@ export default {
             let willEmit = true
 
             if (bIsSameSquare) {
-              if (!this.isCaptureRequired) {
-                this.aUnhighlight(null)
+              if (!this.isCapturing) {
+                this.aUnhighlight()
               }
               willEmit = false
             } else if (bIsKingMovement) {
               if (this.isKingMoveAttempt(source, coords)) {
-                this.aKingMovement(payload)
+                if (!this.isCaptureRequired) {
+                  this.aKingMovement(payload)
+                } else {
+                  if (!this.isCapturing) {
+                    this.aUnhighlight()
+                  }
+                }
                 willEmit = this.isLastMoveLegal && !this.isCaptureRequired
               } else if (this.isKingCaptureAttempt(source, coords)) {
-                this.aKingCapturePiece(payload)
-                willEmit = this.isLastMoveLegal
+                if (this.board[coords.nDestRow-1][coords.nDestCol-1].isPossibleMove) {
+                  this.aKingCapturePiece(payload)
+                  willEmit = this.isLastMoveLegal
+                } else {
+                  if (!this.isCapturing) {
+                    this.aUnhighlight()
+                  }
+                  willEmit = false
+                }
               } else {
                 this.cancelCurrentMove(this.isCaptureRequired)
                 willEmit = false
               }
             } else { 
-              if (this.isCaptureAttempt(source)) {  
-                this.aCapturePiece(payload)
-                willEmit = this.isLastMoveLegal
+              if (this.isCaptureAttempt(source)) {
+                if (this.board[coords.nDestRow-1][coords.nDestCol-1].isPossibleMove) {
+                  this.aCapturePiece(payload)
+                  willEmit = this.isLastMoveLegal
+                } else {
+                  if (!this.isCapturing) {
+                    this.aUnhighlight()
+                  }
+                  willEmit = false
+                }
               } else if (this.isMoveForwardAttempt(source)) {
-                this.aMoveForward(payload)
+                console.log(this.isCapturing)
+                if (!this.isCaptureRequired) {
+                  this.aMoveForward(payload)
+                } else {
+                  if (!this.isCapturing) {
+                    console.log('not capturing')
+                    this.aUnhighlight()
+                  }
+                }
                 willEmit = this.isLastMoveLegal && !this.isCaptureRequired
               } else {
+                console.log('else block')
                 this.cancelCurrentMove(this.isCaptureRequired)
                 willEmit = false
               }
@@ -249,7 +298,7 @@ export default {
               }
 
               // Prevent a player from making a non-capturing move when a capture is required  s
-              if (this.isCaptureRequired && !this.canSelectedPieceCapture && !this.canSelectedKingCapture) {
+              if (this.isCaptureRequired && !(this.canSelectedPieceCapture || this.canSelectedKingCapture)) {
                 console.log('piece cannot capture')
                 return
               }
@@ -307,9 +356,7 @@ export default {
 
     isMoveForwardAttempt (source) {
       return (this.row === source.nRow + 1 && this.col === source.nCol + 1) ||
-        (this.row === source.nRow + 1 && this.col === source.nCol - 1) ||
-        (this.row === source.nRow - 1 && this.col === source.nCol + 1) ||
-        (this.row === source.nRow - 1 && this.col === source.nCol - 1) &&
+        (this.row === source.nRow + 1 && this.col === source.nCol - 1) &&
         !(this.hasBlackChip || this.hasWhiteChip || this.hasBlackKing || this.hasWhiteKing)
     },
 

@@ -82,8 +82,11 @@ const helpers = {
 
     // Highlight targets only or possible captures
     if (targetsOnly) {
-      const targetPiece = captureList.filter(arr => arr[2] === 1)[0]
-      boardClone[targetPiece[0]][targetPiece[1]].isPossibleCapture = true
+      for (const array of captureList) {
+        if (array[2] === 1) {
+          boardClone[array[0]][array[1]].isPossibleCapture = true
+        }
+      }
     } else {
       for (const array of captureList) {
         if (array[2] === 0) {
@@ -140,7 +143,9 @@ const mutations = {
     for (let i in boardClone) {
       for (let j in boardClone[i]) {
         boardClone[i][j].isPossibleMove = false
-        boardClone[i][j].isPossibleCapture = false
+        if (!state.bIsCaptureRequired) {
+          boardClone[i][j].isPossibleCapture = false
+        }
         boardClone[i][j].isHighlighted = false
       }
     }
@@ -202,11 +207,6 @@ const mutations = {
   },
 
   mMoveForward: (state, coords) => {
-    if (state.bIsCaptureRequired) {
-      helpers.handleIllegalMove(state, coords)
-      return
-    }
-
     // If the move is within the board's range
     if (coords.nDestCol >= 1 && coords.nDestCol <= 8 && coords.nDestRow >= 1 && coords.nDestRow <= 8) {
       const newCurr = {
@@ -262,11 +262,6 @@ const mutations = {
   },
 
   mKingMovement: (state, coords) => {
-    if (state.bIsCaptureRequired) {
-      helpers.handleIllegalMove(state, coords)
-      return
-    }
-
     // If the move is within the board's range
     if (coords.nDestCol >= 1 && coords.nDestCol <= 8 && coords.nDestRow >= 1 && coords.nDestRow <= 8) {
       const newCurr = {
@@ -327,7 +322,7 @@ const mutations = {
     }
   },
 
-  mCapturePiece: (state, coords) => {
+  mCapturePiece: (state, coords) => {  
     const newCurr = {
       nRow: coords.nRow,
       nCol: coords.nCol,
@@ -471,6 +466,8 @@ const mutations = {
 
       helpers.handleValidMove(state, newCurr, newDest, newTarget)
       state.firstClick = newDest
+    } else {
+      helpers.handleIllegalMove(state, coords)
     }
   },
 
@@ -597,18 +594,11 @@ const mutations = {
     state.prevDestSquare = prevDestSquare
   },
 
-  mFlushStateAfterTurn: (state, updatedState) => {
-    const {
-      bIsCaptureRequired,
-      bStartedCaptureSequence,
-      prevDestSquare,
-      firstClick
-    } = updatedState
-
-    state.bIsCaptureRequired = bIsCaptureRequired
-    state.bStartedCaptureSequence = bStartedCaptureSequence
-    state.prevDestSquare = prevDestSquare
-    state.firstClick = firstClick
+  mFlushStateAfterTurn: (state) => {
+    state.bIsCaptureRequired = false
+    state.bStartedCaptureSequence = false
+    state.prevDestSquare = null
+    state.firstClick = null
   }
 }
 

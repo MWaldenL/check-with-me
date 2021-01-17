@@ -23,8 +23,8 @@ const actions = {
    * Unhighlights the current square
    * @param coords the coordinates of the current square clicked 
    */
-  aUnhighlight({ commit }, coords) {
-    commit('mUnhighlight', coords)
+  aUnhighlight({ commit }) {
+    commit('mUnhighlight')
   },
 
   /**
@@ -135,8 +135,8 @@ const actions = {
     commit('mSetCaptureRequired', isRequired) 
   },
 
-  aFlushStateAfterTurn({ commit }, updatedState) {
-    commit('mFlushStateAfterTurn', updatedState)
+  aFlushStateAfterTurn({ commit }) {
+    commit('mFlushStateAfterTurn')
   }
 }
 
