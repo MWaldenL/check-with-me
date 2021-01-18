@@ -11,7 +11,7 @@ import GameLobby from '../views/GameLobby.vue'
 import Room from '../views/Room.vue'
 import Help from '../views/Help.vue'
 import firebase from  'firebase'
-import { gamesCollection } from '@/firebase'
+import { gamesCollection, usersCollection } from '@/firebase'
 
 Vue.use(VueRouter)
 
@@ -76,37 +76,45 @@ const routes = [
     component: Room,
     meta: { 
       requiresAuth: true,
-      isRoom: true
+      isEnteringRoom: true
     }
   }
 ]
 
-const router = new VueRouter({
-  routes
-})
+const router = new VueRouter({ routes })
+const handleRoomEntering = async (from, currentUser, gameID, next) => {
+  // Fetch host and other users
+  const gameDoc = await gamesCollection.doc(gameID).get()
+  const userDoc = await usersCollection.doc(currentUser.uid).get()
+  
+  const hostUser = gameDoc.data().host_user
+  const otherUser = gameDoc.data().other_user 
+  const userActiveGameID = userDoc.data().active_game
+
+  const isRoomFull = hostUser.id !== 'nil' && otherUser.id !== 'nil'
+  const isEnteringMultipleRooms = userActiveGameID !== gameID
+  if (isRoomFull) {
+    next({ name: 'GameLobby' })
+  } else if (isEnteringMultipleRooms) {
+    next(from)
+  } else {
+    next()
+  } 
+}
 
 router.beforeEach(async (to, from, next) => {
-  const user = await firebase.getCurrentUser()
-  if (to.meta.requiresAuth && !user) {
+  const currentUser = await firebase.getCurrentUser()
+  const { requiresAuth, requiresNotAuth, isEnteringRoom } = to.meta
+  const isGuestEnteringRestrictedPages = requiresAuth && !currentUser
+  const isAuthEnteringGuestPages = requiresNotAuth && currentUser
+  const gameID = to.params.id
+
+  if (isGuestEnteringRestrictedPages) {
     next({ name: 'Login' })
-  } else if (to.meta.requiresNotAuth && user) {
+  } else if (isAuthEnteringGuestPages) {
     next({ name: 'GameLobby' })
-  } else if (to.meta.isRoom) {
-    const gameDoc = await gamesCollection.doc(to.params.id).get()
-    const data = gameDoc.data()
-    const hostUser = data.host_user
-    const otherUser = data.other_user 
-    
-    console.log(hostUser.id)
-    console.log(otherUser.id === 'nil')
-  
-    // Check if host and other player are present
-    const isRoomFull = hostUser.id !== 'nil' && otherUser.id !== 'nil'
-    if (isRoomFull) {
-      next({ name: 'GameLobby' })
-    } else {
-      next()
-    }
+  } else if (isEnteringRoom) {
+    handleRoomEntering(from, currentUser, gameID, next)
   } else {
     next()
   }
