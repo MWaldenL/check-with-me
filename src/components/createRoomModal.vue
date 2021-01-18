@@ -62,7 +62,7 @@
 import firebase from 'firebase'
 import { db } from '@/firebase'
 import { addGameDoc, checkNameUnique } from '@/resources/gameModel.js'
-import { addTimerDoc } from '@/resources/timerModel.js'
+import { addTimerDoc, addGameToTimer } from '@/resources/timerModel.js'
 
 export default {
   name: 'CreateRoomModal',
@@ -88,8 +88,10 @@ export default {
         //console.log("uniqueName: " + uniqueName)
 
         if(uniqueName) {
-          let timer = await addTimerDoc(this.timeInput)
+          let timer = await addTimerDoc(this.timeInput*60)
           let game = await addGameDoc(this.roomNameInput, this.typeInput, timer.id)
+          await addGameToTimer(game.id, timer.id)
+
           this.$router.push({ path: '/room/' + game.id })
 
           this.$emit('close')

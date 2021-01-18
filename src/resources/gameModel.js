@@ -85,7 +85,7 @@ export const getCount = (() => {
 
 export const addGameDoc = ((roomName, roomType, timerID) => {
   return gamesCollection.add({
-    board_state: "",
+    board_state: "[FEN \"O:W1,3,5,7,10,12,14,16,17,19,21,23:B42,44,46,48,49,51,53,55,58,60,62,64\"]",
     host_user: db.doc('users/' + firebase.auth().currentUser.uid),
     other_user:  db.doc('users/' + 'nil'),
     is_host_white: true,
