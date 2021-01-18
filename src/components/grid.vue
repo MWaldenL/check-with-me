@@ -15,21 +15,26 @@
       <h1 id="p1-count" class="pt-3"> Pieces left: {{ otherCount }} </h1>
     </div>
 
-    <!-- Board -->
-    <div id="table">
-      <table>
-        <tr v-for="row in 8" :key="row">
-          <Cell 
-            v-for="col in 8" 
-            :row="9 - row" 
-            :col="col" 
-            :canMakeMove="canMakeMove"
-            :selfColor="selfColor"
-            :key="col" 
-            @makeMove="updateLastPlayerMoved"/>
-        </tr>
-      </table>
-    </div>
+    <b-overlay :show="!activeGame" bg-color="#2d2d2d" blur="0" opacity="0.75">
+      <!-- Board -->
+      <div id="table">
+        <table>
+          <tr v-for="row in 8" :key="row">
+            <Cell 
+              v-for="col in 8" 
+              :row="9 - row" 
+              :col="col" 
+              :canMakeMove="canMakeMove"
+              :selfColor="selfColor"
+              :key="col" 
+              @makeMove="updateLastPlayerMoved"/>
+          </tr>
+        </table>
+      </div>
+      <template #overlay>
+        <ResultOverlay />
+      </template>
+    </b-overlay>
     
     <!-- Self -->
     <div id="p2-details" class="details">
@@ -60,12 +65,14 @@ import { mapGetters, mapActions } from 'vuex'
 import axios from 'axios'
 import Cell from './cell'
 import Sidebar from './sidebar'
+import ResultOverlay from './resultOverlay'
 
 export default {
   name: 'Grid',
   components: {
     Cell,
-    Sidebar
+    Sidebar,
+    ResultOverlay
   },
   
   // Called on refreshes or new loads 
@@ -223,7 +230,9 @@ export default {
       isSelfTimeRunning: false,
       isEnemyTimeRunning: false,
       bIsFirstRun: true,
-      prevSourceSquare: null
+      prevSourceSquare: null,
+
+      toggle: true
     }
   },
 
@@ -241,7 +250,8 @@ export default {
       otherTimeLeft: 'getOtherTimeLeft',
       isCapturing: 'getCaptureSequenceState',
       isCaptureRequired: 'getIsCaptureRequired',
-      prevDestSquare: 'getPrevDestSquare'
+      prevDestSquare: 'getPrevDestSquare',
+      activeGame: 'getActiveGame'
     }),
 
     isSelfHost() {
