@@ -315,8 +315,8 @@ export default {
       this.aFlushStateAfterTurn()
 
       // Stop self time and start enemy time
-      this.stopSelfTime()
-      this.startEnemyTime()
+      await this.stopSelfTime()
+      await this.startEnemyTime()
 
       // Write the updated self time to db
       this.writeUpdatedTimeToDB() 
@@ -407,7 +407,6 @@ export default {
         clearInterval(this.currentRunningTimer)
       } else {
         if (!isEnemyServerTimeRunning) {
-          console.log('chino')
           if (this.enemyPlayerType === 'host') {
             await axios.get(`http://localhost:5000/startHostTime/${this.enemySeconds}`)
           } else {
