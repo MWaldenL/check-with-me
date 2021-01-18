@@ -82,6 +82,9 @@ export default {
     // Set first run and last player moved 
     this.bIsFirstRun = this.currentGameData.is_first_run
     this.lastPlayerMoved = this.currentGameData.last_player_moved
+    
+    // try 
+    this.lastPlayerMoved = timer.data().last_player_moved
 
     // Set usernames
     await this.setSelfUsername()
@@ -279,6 +282,9 @@ export default {
     },
 
     async determineClockToRun() {
+      console.log(this.lastPlayerMoved)
+      console.log(auth.currentUser.uid)
+
       if (this.lastPlayerMoved !== auth.currentUser.uid) { // opponent last move
         console.log('DRC self clock')
         await this.stopEnemyTime()
@@ -304,12 +310,15 @@ export default {
         bSourceHasWhiteKing(this.board, this.prevDestSquare) 
 
       this.lastPlayerMoved = (this.isHostWhite ^ isMoveWhite) ? this.otherUserID : this.hostUserID
-      // Write last player moved to db 
+      // Write last player moved to game doc 
       await this.currentGameDoc.update({ 
         last_player_moved: this.lastPlayerMoved 
       })
 
-      console.log('ending player turn')
+      // Write last player moved to timer doc
+      await this.currentTimerDoc.update({
+        last_player_moved: this.lastPlayerMoved
+      }) 
       
       // Prevent state leaks
       this.aFlushStateAfterTurn()
