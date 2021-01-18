@@ -15,7 +15,7 @@
       <h1 id="p1-count" class="pt-3"> Pieces left: {{ otherCount }} </h1>
     </div>
 
-    <b-overlay :show="!activeGame" bg-color="#2d2d2d" blur="0" opacity="0.75">
+    <b-overlay :show="!activeGame && bShowOverlay" bg-color="#2d2d2d" blur="0" opacity="0.75">
       <!-- Board -->
       <div id="table">
         <table>
@@ -32,7 +32,7 @@
         </table>
       </div>
       <template #overlay>
-        <ResultOverlay />
+        <ResultOverlay @closeOverlay="hideOverlay"/>
       </template>
     </b-overlay>
     
@@ -61,8 +61,10 @@ import {
   usersCollection, 
   timersCollection
 } from '@/firebase'
+import firebase from 'firebase'
 import { mapGetters, mapActions } from 'vuex'
 import axios from 'axios'
+import Elo from 'elo-js'
 import Cell from './cell'
 import Sidebar from './sidebar'
 import ResultOverlay from './resultOverlay'
@@ -86,6 +88,18 @@ export default {
     // Set collections
     this.currentGameDoc = gameDoc
     this.currentTimerDoc = timerDoc
+
+    // Set current scores
+    const hostDoc = usersCollection.doc(this.hostUserID)
+    const otherDoc = usersCollection.doc(this.otherUserID)
+
+    const host = await hostDoc.get()
+    const other = await otherDoc.get()
+    this.hostCurrentScore = host.data().points
+    this.otherCurrentScore = other.data().points
+
+    console.log("HOST SCORE: " + this.hostCurrentScore)
+    console.log("OTHER SCORE: " + this.otherCurrentScore)
 
     // Set first run and last player moved 
     this.bIsFirstRun = this.currentGameData.is_first_run
@@ -147,14 +161,17 @@ export default {
         console.log("black: " + blackStuck + " " + data.black_count + " ")
 
         if (whiteStuck && blackStuck) {
+          this.updateSelfScore('D')
           this.aSetWinner('D')
           this.aSetActiveGame(false)
           return
         } else if (whiteStuck || data.white_count === 0) {
+          this.updateSelfScore('B')
           this.aSetWinner('B')
           this.aSetActiveGame(false)
           return
         } else if (blackStuck || data.black_count === 0) {
+          this.updateSelfScore('W')
           this.aSetWinner('W')
           this.aSetActiveGame(false)
           return
@@ -232,7 +249,9 @@ export default {
       bIsFirstRun: true,
       prevSourceSquare: null,
 
-      toggle: true
+      bShowOverlay: true,
+      hostCurrentScore: 0,
+      otherCurrentScore: 0
     }
   },
 
@@ -324,6 +343,57 @@ export default {
       'aFlushStateAfterTurn',
       'aSetActiveGame'
     ]),
+
+    async updateSelfScore(winner) {
+      const elo = new Elo()
+
+      const selfScore = this.isSelfHost ? this.hostCurrentScore : this.otherCurrentScore
+      const otherScore = this.isSelfHost ? this.otherCurrentScore : this.hostCurrentScore
+
+      let newScore = 0
+      let addWinsWhite = 0
+      let addWinsBlack = 0
+      let addLossWhite = 0
+      let addLossBlack = 0
+      let addDrawWhite = 0
+      let addDrawBlack = 0
+
+      if (winner === 'D') {
+        newScore = elo.ifTies(selfScore, otherScore)
+        if (this.selfColor === 'b')
+          addDrawBlack++
+        else
+          addDrawWhite++
+      } else if (winner === 'B') {
+        if (this.selfColor === 'b') {
+          newScore = elo.ifWins(selfScore, otherScore)
+          addWinsBlack++
+        } else {
+          newScore = elo.ifLoses(selfScore, otherScore)
+          addLossBlack++
+        }
+      } else {
+        if (this.selfColor === 'w') {
+          newScore = elo.ifWins(selfScore, otherScore)
+          addWinsWhite++
+        } else {
+          newScore = elo.ifLoses(selfScore, otherScore)
+          addLossWhite++
+        }
+      }
+
+      await usersCollection
+        .doc(auth.currentUser.uid)
+        .update({
+          points: newScore,
+          wins_black: firebase.firestore.FieldValue.increment(addWinsBlack),
+          wins_white: firebase.firestore.FieldValue.increment(addWinsWhite),
+          loss_black: firebase.firestore.FieldValue.increment(addLossBlack),
+          loss_white: firebase.firestore.FieldValue.increment(addLossWhite),
+          draw_black: firebase.firestore.FieldValue.increment(addDrawBlack),
+          draw_white: firebase.firestore.FieldValue.increment(addDrawWhite),
+        })
+    },
 
     async setSelfUsername() {
       const currentUser = await this.currentUser.data 
@@ -533,6 +603,10 @@ export default {
         const enemyTimeQuery = await axios.get(`http://localhost:5000/currentTimeLeft/${this.enemyPlayerType}`)
         this.enemySeconds = enemyTimeQuery.data.timeLeft
       }
+    },
+
+    hideOverlay() {
+      this.bShowOverlay = false
     }
   }
 }

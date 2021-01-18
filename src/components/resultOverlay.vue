@@ -41,10 +41,10 @@ export default {
     requestRematch () {
       // this.aResetGame()
       this.aSetActiveGame(true)
-      this.$refs['modal'].hide()
+      this.$emit("closeOverlay")
     },
     returnToLobby () {
-      this.$refs['modal'].hide()
+      this.$emit("closeOverlay")
     }
   }
 }
