@@ -321,27 +321,7 @@ export default {
               })
             }
           }
-
-          // Set the game results
-          // this.setGameResults()
         }
-      }
-    },
-  
-    setGameResults() {
-      const isWhite = true
-      let bWhiteStuck = checkIfSelfStuck(this.board, isWhite)
-      let bBlackStuck = checkIfSelfStuck(this.board, !isWhite)
-
-      if (bWhiteStuck && bBlackStuck) {
-        this.aSetActiveGame(false)
-        this.aSetWinner('D')
-      } else if (bWhiteStuck || this.whiteCount === 0) {
-        this.aSetActiveGame(false)
-        this.aSetWinner('B')
-      } else if (bBlackStuck || this.blackCount === 0) {
-        this.aSetActiveGame(false)
-        this.aSetWinner('W')
       }
     },
 

@@ -125,8 +125,19 @@ export default {
           black: data.black_count
         })
 
-        const whiteStuck = checkIfSelfStuck(this.board, true)
-        const blackStuck = checkIfEnemyStuck(this.board, true)
+        let whiteStuck
+        let blackStuck
+
+        if (this.isSelfWhite) {
+          whiteStuck = checkIfSelfStuck(this.board, true)
+          blackStuck = checkIfEnemyStuck(this.board, true)
+        } else {
+          whiteStuck = checkIfEnemyStuck(this.board, false)
+          blackStuck = checkIfSelfStuck(this.board, false)
+        }
+
+        console.log("white: " + whiteStuck + " " + data.white_count + " ")
+        console.log("black: " + blackStuck + " " + data.black_count + " ")
 
         if (whiteStuck && blackStuck) {
           this.aSetWinner('D')
@@ -249,12 +260,6 @@ export default {
 
     isSelfWhite() {
       return this.selfColor === 'w'
-    },
-
-    selfColor() {
-      return (auth.currentUser.uid === this.hostUserID) ?
-        (this.isHostWhite ? 'w' : 'b') : 
-        (this.isHostWhite ? 'b' : 'w')
     },
 
     selfCount() {
