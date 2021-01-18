@@ -8,7 +8,7 @@ import game from './modules/game/index.js'
 Vue.use(Vuex)
 
 export default new Vuex.Store({
-  // plugins: [createPersistedState()],
+  // plugins: [createPersistedState({ paths: ['cells'] })],
   modules: {
     cells,
     auth,

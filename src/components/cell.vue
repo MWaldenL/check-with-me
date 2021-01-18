@@ -310,7 +310,6 @@ export default {
                   return
                 }
               }
-
               // Otherwise, simply highlight the square
               this.aHighlight({ 
                 nRow: this.row, 
