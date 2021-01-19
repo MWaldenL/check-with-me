@@ -55,6 +55,7 @@
 <script>
 import { bSourceHasWhite, bSourceHasWhiteKing } from '@/store/services/moveCaptureService'
 import { checkIfSelfStuck, checkIfEnemyStuck } from '@/store/services/winCheckerService'
+import { getNewScore } from '@/store/services/eloService'
 import { 
   auth, 
   gamesCollection, 
@@ -97,6 +98,15 @@ export default {
     const other = await otherDoc.get()
     this.hostCurrentScore = host.data().points
     this.otherCurrentScore = other.data().points
+
+    const self = this.isSelfHost ? host : other
+
+    this.selfWinsWhite = self.data().wins_white
+    this.selfWinsBlack = self.data().wins_black
+    this.selfLossWhite = self.data().loss_white
+    this.selfLossBlack = self.data().loss_black
+    this.selfDrawWhite = self.data().draw_white
+    this.selfDrawBlack = self.data().draw_black
 
     console.log("HOST SCORE: " + this.hostCurrentScore)
     console.log("OTHER SCORE: " + this.otherCurrentScore)
@@ -161,16 +171,19 @@ export default {
         console.log("black: " + blackStuck + " " + data.black_count + " ")
 
         if (whiteStuck && blackStuck) {
+          console.log("DRAW DRAW DRAW")
           this.updateSelfScore('D')
           this.aSetWinner('D')
           this.aSetActiveGame(false)
           return
         } else if (whiteStuck || data.white_count === 0) {
+          console.log("BLACK BLACK BLACK")
           this.updateSelfScore('B')
           this.aSetWinner('B')
           this.aSetActiveGame(false)
           return
         } else if (blackStuck || data.black_count === 0) {
+          console.log("WHITE WHITE WHITE")
           this.updateSelfScore('W')
           this.aSetWinner('W')
           this.aSetActiveGame(false)
@@ -251,7 +264,14 @@ export default {
 
       bShowOverlay: true,
       hostCurrentScore: 0,
-      otherCurrentScore: 0
+      otherCurrentScore: 0,
+
+      selfWinsWhite: 0,
+      selfWinsBlack: 0,
+      selfLossWhite: 0,
+      selfLossBlack: 0,
+      selfDrawWhite: 0,
+      selfDrawBlack: 0
     }
   },
 
@@ -345,40 +365,36 @@ export default {
     ]),
 
     async updateSelfScore(winner) {
-      const elo = new Elo()
-
       const selfScore = this.isSelfHost ? this.hostCurrentScore : this.otherCurrentScore
       const otherScore = this.isSelfHost ? this.otherCurrentScore : this.hostCurrentScore
 
       let newScore = 0
-      let addWinsWhite = 0
-      let addWinsBlack = 0
-      let addLossWhite = 0
-      let addLossBlack = 0
-      let addDrawWhite = 0
-      let addDrawBlack = 0
 
       if (winner === 'D') {
-        newScore = elo.ifTies(selfScore, otherScore)
+        newScore = getNewScore(selfScore, otherScore, 0.5)
         if (this.selfColor === 'b')
-          addDrawBlack++
+          this.selfDrawBlack++
         else
-          addDrawWhite++
+          this.selfDrawWhite++
       } else if (winner === 'B') {
         if (this.selfColor === 'b') {
-          newScore = elo.ifWins(selfScore, otherScore)
-          addWinsBlack++
+          console.log("BLACK WINS")
+          newScore = getNewScore(selfScore, otherScore, 1)
+          this.selfWinsBlack++
         } else {
-          newScore = elo.ifLoses(selfScore, otherScore)
-          addLossBlack++
+          console.log("WHITE LOSES")
+          newScore = getNewScore(selfScore, otherScore, 0)
+          this.selfLossWhite++
         }
       } else {
         if (this.selfColor === 'w') {
-          newScore = elo.ifWins(selfScore, otherScore)
-          addWinsWhite++
+          console.log("WHITE WINS")
+          newScore = getNewScore(selfScore, otherScore, 1)
+          this.selfWinsWhite++
         } else {
-          newScore = elo.ifLoses(selfScore, otherScore)
-          addLossWhite++
+          console.log("BLACK LOSES")
+          newScore = getNewScore(selfScore, otherScore, 0)
+          this.selfLossBlack++
         }
       }
 
@@ -386,12 +402,12 @@ export default {
         .doc(auth.currentUser.uid)
         .update({
           points: newScore,
-          wins_black: firebase.firestore.FieldValue.increment(addWinsBlack),
-          wins_white: firebase.firestore.FieldValue.increment(addWinsWhite),
-          loss_black: firebase.firestore.FieldValue.increment(addLossBlack),
-          loss_white: firebase.firestore.FieldValue.increment(addLossWhite),
-          draw_black: firebase.firestore.FieldValue.increment(addDrawBlack),
-          draw_white: firebase.firestore.FieldValue.increment(addDrawWhite),
+          wins_black: this.selfWinsBlack,
+          wins_white: this.selfWinsWhite,
+          loss_black: this.selfLossBlack,
+          loss_white: this.selfLossWhite,
+          draw_black: this.selfDrawBlack,
+          draw_white: this.selfDrawWhite,
         })
     },
 
