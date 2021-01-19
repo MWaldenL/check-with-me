@@ -385,7 +385,6 @@ const mutations = {
           mutations.mSetCaptureRequired(state, false)
           mutations.mSetCaptureSequenceState(state, false)
         }
-        mutations.mReducePiece(state, whiteTakes)
       } else if (bBlackCanCapture) {
         // If a capture sequence hasn't been started yet, start it
         if (!state.bStartedCaptureSequence) {
@@ -399,7 +398,6 @@ const mutations = {
           mutations.mSetCaptureRequired(state, false)
           mutations.mSetCaptureSequenceState(state, false)
         }
-        mutations.mReducePiece(state, !whiteTakes)
       }
     }
 
@@ -449,11 +447,9 @@ const mutations = {
       if (bSourceHasWhite(state.cells, coords)) {
         newDest.bHasWhiteChip = true
         newDest.bHasWhiteKing = true
-        mutations.mReducePiece(state, true)
       } else if (bSourceHasBlack(state.cells, coords)) {
         newDest.bHasBlackChip = true
         newDest.bHasBlackKing = true
-        mutations.mReducePiece(state, false)
       }
 
       const newTarget = {
@@ -474,6 +470,11 @@ const mutations = {
   mUpdateBoard: (state, payload) => {
     const { boardState, playerIsBlack } = payload
     state.cells = getBoardFromPDN(boardState, playerIsBlack)
+  },
+
+  mUpdateCount: (state, count) => {
+    state.nWhiteCount = count.white
+    state.nBlackCount = count.black
   },
 
   mReducePiece: (state, whiteTakes) => {

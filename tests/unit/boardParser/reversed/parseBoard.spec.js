@@ -19,7 +19,7 @@ describe('Converting Board to PDN (Reversed)', () => {
       const result = getPDNFromBoard(board, turn, isPlayerBlack)
 
       // Assert
-      expect(result).toEqual(expected)
+      expect(result.PDN).toEqual(expected)
     })
   }),
 
@@ -48,7 +48,7 @@ describe('Converting Board to PDN (Reversed)', () => {
         const result = getPDNFromBoard(board, turn, isPlayerBlack)
         
         // Assert
-        expect(result).toStrictEqual(expected)
+        expect(result.PDN).toStrictEqual(expected)
       })
     }
   }),
@@ -69,7 +69,7 @@ describe('Converting Board to PDN (Reversed)', () => {
         const result = getPDNFromBoard(board, turn, isPlayerBlack)
 
         // Assert
-        expect(result).toStrictEqual(expected)
+        expect(result.PDN).toStrictEqual(expected)
       })
   }
   }),
@@ -90,7 +90,7 @@ describe('Converting Board to PDN (Reversed)', () => {
         const result = getPDNFromBoard(board, turn, isPlayerBlack)
 
         // Assert
-        expect(result).toStrictEqual(expected)
+        expect(result.PDN).toStrictEqual(expected)
       })
     }
   }),
@@ -110,7 +110,7 @@ describe('Converting Board to PDN (Reversed)', () => {
         const result = getPDNFromBoard(board, turn, isPlayerBlack)
 
         // Assert
-        expect(result).toStrictEqual(expected)
+        expect(result.PDN).toStrictEqual(expected)
       })
     }
   }),
@@ -130,7 +130,7 @@ describe('Converting Board to PDN (Reversed)', () => {
         const result = getPDNFromBoard(board, turn, isPlayerBlack)
 
         // Assert
-        expect(result).toStrictEqual(expected)
+        expect(result.PDN).toStrictEqual(expected)
       })
     }
   }),
@@ -153,7 +153,7 @@ describe('Converting Board to PDN (Reversed)', () => {
       const result = getPDNFromBoard(board, turn, isPlayerBlack)
 
       // Assert
-      expect(result).toStrictEqual(expected)
+      expect(result.PDN).toStrictEqual(expected)
     }),
 
     it ('returns a board with the correct piece positions 2', () => {
@@ -174,7 +174,7 @@ describe('Converting Board to PDN (Reversed)', () => {
       const result = getPDNFromBoard(board, turn, isPlayerBlack)
 
       // Assert
-      expect(result).toStrictEqual(expected)
+      expect(result.PDN).toStrictEqual(expected)
     }),
 
     it ('returns a board with the correct piece positions 3', () => {
@@ -195,7 +195,7 @@ describe('Converting Board to PDN (Reversed)', () => {
       const result = getPDNFromBoard(board, turn, isPlayerBlack)
 
       // Assert
-      expect(result).toStrictEqual(expected)
+      expect(result.PDN).toStrictEqual(expected)
     }),
 
     it ('returns a board with the correct piece positions 4', () => {
@@ -215,7 +215,7 @@ describe('Converting Board to PDN (Reversed)', () => {
       const result = getPDNFromBoard(board, turn, isPlayerBlack)
 
       // Assert
-      expect(result).toStrictEqual(expected)
+      expect(result.PDN).toStrictEqual(expected)
     })
   })
 })

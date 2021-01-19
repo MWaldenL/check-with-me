@@ -152,7 +152,7 @@ export default {
         other_user:  db.doc('users/' + user_key)
       })
       .catch(error => {
-        console.log("Error getting documents: ", error);
+        //console.log("Error getting documents: ", error);
       })
     },
 

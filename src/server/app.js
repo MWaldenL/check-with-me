@@ -1,7 +1,7 @@
-import express from 'express'
-import cors from 'cors'
-import serviceAccount from './permissions.json'
-import * as admin from 'firebase-admin'
+let express = require('express')
+let cors = require('cors')
+let serviceAccount = require('./permissions.json')
+let admin = require('firebase-admin')
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
@@ -9,79 +9,124 @@ admin.initializeApp({
 })
 
 const db = admin.firestore()
-const timersCollection = db.collection('timers')
 const app = express();
 
 app.use(express.json())
 app.use(cors())
 app.use(express.urlencoded({ extended: false }))
 
-// Routes
-/**
- * Gets the player's time left from the database
- * @param timerID the timer object's id
- * @param player the player type, which can either be "host" or "other"
- */
-app.get('/timeLeft/:timerID/:playerType', async (req, res) => {
-  const { playerType, timerID } = req.params
-  const timerDoc = await timersCollection.doc(timerID).get()
-  const timeLeft = playerType === 'host' ? 
-    timerDoc.data().host_timeLeft : 
-    timerDoc.data().other_timeLeft
-
-  res.status(200).send({ timeLeft: timeLeft })
-})
-
-let countDown
+let hostCountDown, otherCountDown
+let hostTimeLeft = 420, otherTimeLeft = 420
 let isTimeRunning = false
+let currentTimeRunningPlayer = 'nil'
+
 /**
  * Starts a given player's time given the timer ID
  * @param timerID the timer object's id
  * @param player the player type, which can either be "host" or "other"
  */
-app.get('/startTime/:timerID/:player', async (req, res) => {
-  const { timerID, player } = req.params
-  const timerDoc = await timersCollection.doc(timerID)
+app.get('/startHostTime/:currentTime', async (req, res) => {
+  let { currentTime } = req.params
   
+  // Early exit if another clock is already running
+  if (isTimeRunning) {
+    res.send({ timeStarted: false, msg: 'There is already a timer running!' })
+    return
+  }
+
   isTimeRunning = true
+  hostTimeLeft = currentTime
+  currentTimeRunningPlayer = 'host'
+
+  //console.log('-- Starting host time from server --')
 
   // Perform every second
-  countDown = setInterval(async () => {
-    // Get the current time
-    const timer = await timerDoc.get()
-    const timeLeft = player === 'host' ? 
-      timer.data().host_timeLeft : 
-      timer.data().other_timeLeft
-
-    const timeObj = player === 'host' ?
-      { host_timeLeft: timeLeft - 1 } :
-      { other_timeLeft: timeLeft - 1 }
-
-    // Keep writing the updated time to the database until it becomes 0
-    if (timeLeft > 0) {
-      await timerDoc.update(timeObj)
+  hostCountDown = setInterval(async () => {
+    if (hostTimeLeft > 0) {
+      hostTimeLeft--
+      //console.log('Host time left: ' + hostTimeLeft)
     } else {
-      isTimeRunning = false
-      clearInterval(countDown)
+      currentTimeRunningPlayer = 'nil'
+      clearInterval(hostCountDown)
     }
   }, 1000)
 
-  res.status(200).send("Starting time")
+  res.send({ 
+    timeStarted: true, 
+    msg: 'Starting host player time' 
+  })
+})
+
+app.get('/startOtherTime/:currentTime', async (req, res) => {
+  let { currentTime } = req.params
+
+  // Early exit if another clock is already running
+  if (isTimeRunning) {
+    res.send({ timeStarted: false, msg: 'There is already a timer running!' })
+    return
+  }
+
+  otherTimeLeft = currentTime
+  isTimeRunning = true
+  currentTimeRunningPlayer = 'other'
+
+  //console.log('-- Starting other time from server --')
+
+  // Perform every second
+  otherCountDown = setInterval(async () => {
+    if (otherTimeLeft > 0) {
+      otherTimeLeft--
+      //console.log('Other time left: ' + otherTimeLeft)
+    } else {
+      currentTimeRunningPlayer = 'nil'
+      clearInterval(otherCountDown)
+    }
+  }, 1000) 
+  
+  res.send({ 
+    timeStarted: true, 
+    msg: 'Starting other player time' 
+  })
+})
+
+app.get('/currentTimeLeft/:playerType', async (req, res) => {
+  const { playerType } = req.params
+  const timeLeft = playerType === 'host' ? hostTimeLeft : otherTimeLeft
+  res.status(200).send({ timeLeft })
+})
+ 
+/**
+ * Stops the host player's timer
+ */
+app.get('/stopHostTime', async (req, res) => {
+  //console.log('stopping host time')
+  clearInterval(hostCountDown)
+
+  isTimeRunning = false
+  // currentTimeRunningPlayer = 'nil'
+  res.status(200).send("Stopping host time")
 })
 
 /**
- * Stops the time of the currently running clock 
+ * Stops the other player's timer
  */
-app.get('/stopTime', async (req, res) => {
-  clearInterval(countDown)
-  res.status(200).send("Stopping time")
+app.get('/stopOtherTime', async (req, res) => {
+  //console.log('stopping other time')
+  clearInterval(otherCountDown)
+
+  isTimeRunning = false
+  // currentTimeRunningPlayer = 'nil'
+  res.status(200).send("Stopping other time")
 })
+
 
 /**
  * Checks if a client is running the current clock
  */
-app.get('/isTimeRunning', (req, res) => {
-  res.send({ isTimeRunning })
+app.get('/isTimeRunning/:player', (req, res) => {
+  const { player } = req.params
+  //console.log('Current time running player: ' + currentTimeRunningPlayer)
+  res.send({ isTimeRunning: player === currentTimeRunningPlayer })
 })
 
-app.listen(5000)
+app.listen(5000, () => console.log('Listening on port 5000'))
