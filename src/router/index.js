@@ -94,7 +94,7 @@ router.beforeEach(async (to, from, next) => {
     next({ name: 'Login' })
   } 
   else if (to.meta.requiresNotAuth && user) {
-    console.log('called ')
+    //console.log('called ')
     next({ name: 'Home' })
   } 
   else {

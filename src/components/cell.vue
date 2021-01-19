@@ -268,18 +268,18 @@ export default {
                   willEmit = false
                 }
               } else if (this.isMoveForwardAttempt(source)) {
-                console.log(this.isCapturing)
+                //console.log(this.isCapturing)
                 if (!this.isCaptureRequired) {
                   this.aMoveForward(payload)
                 } else {
                   if (!this.isCapturing) {
-                    console.log('not capturing')
+                    //console.log('not capturing')
                     this.aUnhighlight()
                   }
                 }
                 willEmit = this.isLastMoveLegal && !this.isCaptureRequired
               } else {
-                console.log('else block')
+                //console.log('else block')
                 this.cancelCurrentMove(this.isCaptureRequired)
                 willEmit = false
               }
@@ -293,20 +293,20 @@ export default {
             if (this.bContainsPiece) {
               // Prevent a player from clicking on another player's piece
               if (this.isSelectingEnemyPiece) {
-                console.log('select enemy')
+                //console.log('select enemy')
                 return
               }
 
               // Prevent a player from making a non-capturing move when a capture is required  s
               if (this.isCaptureRequired && !(this.canSelectedPieceCapture || this.canSelectedKingCapture)) {
-                console.log('piece cannot capture')
+                //console.log('piece cannot capture')
                 return
               }
 
               // Prevent a player from making a capture outside the current sequence
               if (this.isCapturing && this.prevDestSquare !== null) {
                 if (this.isAttemptingToCaptureOutsideSequence) {
-                  console.log('capture outside seq')
+                  //console.log('capture outside seq')
                   return
                 }
               }

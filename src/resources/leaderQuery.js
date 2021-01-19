@@ -60,7 +60,7 @@ export default {
     .then(querySnapshot => {
       let docs = querySnapshot.docs
       docs.forEach((doc, index) => {
-        //console.log(doc.id, " => ", doc.data());
+        ////console.log(doc.id, " => ", doc.data());
         let leader = {
           rank: index + 1,
           username: doc.data().username,
@@ -70,7 +70,7 @@ export default {
       })
     })
     .catch(function(error) {
-      console.log("Error getting documents: ", error);
+      //console.log("Error getting documents: ", error);
     })
 
     return leaders
@@ -87,10 +87,10 @@ export default {
       let winRates = []
 
       querySnapshot.forEach(doc => {
-        //console.log(doc.id, " => ", doc.data());
+        ////console.log(doc.id, " => ", doc.data());
         let winRateLeader = doc.data()
 
-        //console.log(!isNaN(winRateLeader.win_rate))
+        ////console.log(!isNaN(winRateLeader.win_rate))
         if(!isNaN(winRateLeader.win_rate))
           winRates.push(winRateLeader)
       })
@@ -113,7 +113,7 @@ export default {
       }
     })
     .catch(function(error) {
-      console.log("Error getting documents: ", error);
+      //console.log("Error getting documents: ", error);
     })
 
     return leaders
@@ -130,10 +130,10 @@ export default {
       let totalWins = []
 
       querySnapshot.forEach(doc => {
-        //console.log(doc.id, " => ", doc.data());
+        ////console.log(doc.id, " => ", doc.data());
         let totalWinsLeader = doc.data()
 
-        //console.log(!isNaN(winRateLeader.win_rate))
+        ////console.log(!isNaN(winRateLeader.win_rate))
         totalWins.push(totalWinsLeader)
       })
 
@@ -155,7 +155,7 @@ export default {
       }
     })
     .catch(function(error) {
-      console.log("Error getting documents: ", error);
+      //console.log("Error getting documents: ", error);
     })
 
     return leaders
@@ -170,7 +170,7 @@ export default {
     .then(querySnapshot => {
       let docs = querySnapshot.docs
       docs.forEach((doc, index) => {
-        //console.log(doc.id, " => ", doc.data());
+        ////console.log(doc.id, " => ", doc.data());
         let leader = {
           rank: index + 1,
           username: doc.data().username,
@@ -180,7 +180,7 @@ export default {
       })
     })
     .catch(function(error) {
-      console.log("Error getting documents: ", error);
+      //console.log("Error getting documents: ", error);
     })
 
     return leaders
@@ -195,7 +195,7 @@ export default {
     .then(querySnapshot => {
       let docs = querySnapshot.docs
       docs.forEach((doc, index) => {
-        //console.log(doc.id, " => ", doc.data());
+        ////console.log(doc.id, " => ", doc.data());
         let leader = {
           rank: index + 1,
           username: doc.data().username,
@@ -205,7 +205,7 @@ export default {
       })
     })
     .catch(function(error) {
-      console.log("Error getting documents: ", error);
+      //console.log("Error getting documents: ", error);
     })
 
     return leaders

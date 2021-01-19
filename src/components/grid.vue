@@ -15,7 +15,7 @@
       <h1 id="p1-count" class="pt-3"> Pieces left: {{ otherCount }} </h1>
     </div>
 
-    <b-overlay :show="!activeGame && bShowOverlay" bg-color="#2d2d2d" blur="0" opacity="0.75">
+    <b-overlay :show="!activeGame" bg-color="#2d2d2d" blur="0" opacity="0.75">
       <!-- Board -->
       <div id="table">
         <table>
@@ -32,7 +32,7 @@
         </table>
       </div>
       <template #overlay>
-        <ResultOverlay @closeOverlay="hideOverlay"/>
+        <ResultOverlay />
       </template>
     </b-overlay>
     
@@ -65,7 +65,6 @@ import {
 import firebase from 'firebase'
 import { mapGetters, mapActions } from 'vuex'
 import axios from 'axios'
-import Elo from 'elo-js'
 import Cell from './cell'
 import Sidebar from './sidebar'
 import ResultOverlay from './resultOverlay'
@@ -90,26 +89,8 @@ export default {
     this.currentGameDoc = gameDoc
     this.currentTimerDoc = timerDoc
 
-    // Set current scores
-    const hostDoc = usersCollection.doc(this.hostUserID)
-    const otherDoc = usersCollection.doc(this.otherUserID)
-
-    const host = await hostDoc.get()
-    const other = await otherDoc.get()
-    this.hostCurrentScore = host.data().points
-    this.otherCurrentScore = other.data().points
-
-    const self = this.isSelfHost ? host : other
-
-    this.selfWinsWhite = self.data().wins_white
-    this.selfWinsBlack = self.data().wins_black
-    this.selfLossWhite = self.data().loss_white
-    this.selfLossBlack = self.data().loss_black
-    this.selfDrawWhite = self.data().draw_white
-    this.selfDrawBlack = self.data().draw_black
-
-    console.log("HOST SCORE: " + this.hostCurrentScore)
-    console.log("OTHER SCORE: " + this.otherCurrentScore)
+    //console.log("HOST SCORE: " + this.hostCurrentScore)
+    //console.log("OTHER SCORE: " + this.otherCurrentScore)
 
     // Set first run and last player moved 
     this.bIsFirstRun = this.currentGameData.is_first_run
@@ -133,7 +114,7 @@ export default {
     this.setPlayerToMove(playerToMove)
     
     // Check if time is already running
-    console.log('Running clock from created()')
+    //console.log('Running clock from created()')
     this.determineClockToRun()
   },
 
@@ -167,23 +148,20 @@ export default {
           blackStuck = checkIfSelfStuck(this.board, false)
         }
 
-        console.log("white: " + whiteStuck + " " + data.white_count + " ")
-        console.log("black: " + blackStuck + " " + data.black_count + " ")
-
         if (whiteStuck && blackStuck) {
-          console.log("DRAW DRAW DRAW")
+          //console.log("DRAW DRAW DRAW")
           this.updateSelfScore('D')
           this.aSetWinner('D')
           this.aSetActiveGame(false)
           return
         } else if (whiteStuck || data.white_count === 0) {
-          console.log("BLACK BLACK BLACK")
+          //console.log("BLACK BLACK BLACK")
           this.updateSelfScore('B')
           this.aSetWinner('B')
           this.aSetActiveGame(false)
           return
         } else if (blackStuck || data.black_count === 0) {
-          console.log("WHITE WHITE WHITE")
+          //console.log("WHITE WHITE WHITE")
           this.updateSelfScore('W')
           this.aSetWinner('W')
           this.aSetActiveGame(false)
@@ -224,7 +202,7 @@ export default {
 
         // Determine whose clock to run
         if (!this.bIsFirstRun) {
-          console.log('snapshot() determine running clock')
+          //console.log('snapshot() determine running clock')
           this.determineClockToRun()
         }
 
@@ -260,18 +238,7 @@ export default {
       isSelfTimeRunning: false,
       isEnemyTimeRunning: false,
       bIsFirstRun: true,
-      prevSourceSquare: null,
-
-      bShowOverlay: true,
-      hostCurrentScore: 0,
-      otherCurrentScore: 0,
-
-      selfWinsWhite: 0,
-      selfWinsBlack: 0,
-      selfLossWhite: 0,
-      selfLossBlack: 0,
-      selfDrawWhite: 0,
-      selfDrawBlack: 0
+      prevSourceSquare: null
     }
   },
 
@@ -365,49 +332,70 @@ export default {
     ]),
 
     async updateSelfScore(winner) {
-      const selfScore = this.isSelfHost ? this.hostCurrentScore : this.otherCurrentScore
-      const otherScore = this.isSelfHost ? this.otherCurrentScore : this.hostCurrentScore
+      const selfDoc = usersCollection.doc(auth.currentUser.uid)
+      const otherDoc = this.isSelfHost ? usersCollection.doc(this.otherUserID) : usersCollection.doc(this.hostUserID)
+
+      const self = await selfDoc.get()
+      const other = await otherDoc.get()
+
+      const selfScore = self.data().points
+      const otherScore = other.data().points
+
+      let selfWinsWhite = self.data().wins_white
+      let selfWinsBlack = self.data().wins_black
+      let selfLossWhite = self.data().loss_white
+      let selfLossBlack = self.data().loss_black
+      let selfDrawWhite = self.data().draw_white
+      let selfDrawBlack = self.data().draw_black
 
       let newScore = 0
 
       if (winner === 'D') {
         newScore = getNewScore(selfScore, otherScore, 0.5)
         if (this.selfColor === 'b')
-          this.selfDrawBlack++
+          selfDrawBlack++
         else
-          this.selfDrawWhite++
+          selfDrawWhite++
       } else if (winner === 'B') {
         if (this.selfColor === 'b') {
-          console.log("BLACK WINS")
+          //console.log("BLACK WINS")
           newScore = getNewScore(selfScore, otherScore, 1)
-          this.selfWinsBlack++
+          selfWinsBlack++
         } else {
-          console.log("WHITE LOSES")
+          //console.log("WHITE LOSES")
           newScore = getNewScore(selfScore, otherScore, 0)
-          this.selfLossWhite++
+          selfLossWhite++
         }
       } else {
         if (this.selfColor === 'w') {
-          console.log("WHITE WINS")
+          //console.log("WHITE WINS")
           newScore = getNewScore(selfScore, otherScore, 1)
-          this.selfWinsWhite++
+          selfWinsWhite++
         } else {
-          console.log("BLACK LOSES")
+          //console.log("BLACK LOSES")
           newScore = getNewScore(selfScore, otherScore, 0)
-          this.selfLossBlack++
+          selfLossBlack++
         }
       }
+
+      console.log(newScore)
+      console.log(selfWinsBlack)
+      console.log(selfWinsWhite)
+      console.log(selfLossBlack)
+      console.log(selfLossWhite)
+      console.log(selfDrawBlack)
+      console.log(selfDrawWhite)
 
       await usersCollection
         .doc(auth.currentUser.uid)
         .update({
           points: newScore,
-          wins_black: this.selfWinsBlack,
-          wins_white: this.selfWinsWhite,
-          loss_black: this.selfLossBlack,
-          loss_white: this.selfLossWhite,
-          draw_black: this.selfDrawBlack,
-          draw_white: this.selfDrawWhite,
+          wins_black: selfWinsBlack,
+          wins_white: selfWinsWhite,
+          loss_black: selfLossBlack,
+          loss_white: selfLossWhite,
+          draw_black: selfDrawBlack,
+          draw_white: selfDrawWhite,
         })
     },
 
@@ -421,22 +409,22 @@ export default {
     },
 
     async determineClockToRun() {
-      console.log(this.lastPlayerMoved)
-      console.log(auth.currentUser.uid)
+      //console.log(this.lastPlayerMoved)
+      //console.log(auth.currentUser.uid)
 
       if (this.lastPlayerMoved !== auth.currentUser.uid) { // opponent last move
-        console.log('DRC self clock')
+        //console.log('DRC self clock')
         await this.stopEnemyTime()
         await this.startSelfTime()
       } else { // self made last move
-        console.log('DRC enemy clock')
+        //console.log('DRC enemy clock')
         await this.stopSelfTime()
         await this.startEnemyTime()
       }
     },
 
     async writeUpdatedTimeToDB() {
-      console.log('writing time to db')
+      //console.log('writing time to db')
       const newTimeObj = this.isSelfHost ? 
         { host_timeLeft: this.selfSeconds } : 
         { other_timeLeft: this.selfSeconds } 
@@ -495,13 +483,13 @@ export default {
       const isSelfServerTimeRunning = selfTimeQuery.data.isTimeRunning
       const shouldTimeTick = this.selfSeconds > 0
 
-      console.log(this.selfSeconds)
-      console.log('self time running: ' + isSelfServerTimeRunning)
+      // //console.log(this.selfSeconds)
+      //console.log('self time running: ' + isSelfServerTimeRunning)
 
       if (!shouldTimeTick) {
         clearInterval(this.currentRunningTimer)
       } else {
-        console.log('start self time: ' + this.selfPlayerType)
+        //console.log('start self time: ' + this.selfPlayerType)
 
         // Start server time
         if (!isSelfServerTimeRunning) {
@@ -516,13 +504,13 @@ export default {
         clearInterval(this.currentRunningTimer)
         this.currentRunningTimer = setInterval(() => {
           this.selfSeconds--
-          console.log(this.selfSeconds)
+          // //console.log(this.selfSeconds)
           if (this.selfSeconds <= 0) {
             clearInterval(this.currentRunningTimer)
           }
         }, 1000)
 
-        console.log('starting self time')
+        //console.log('starting self time')
       }
     },
 
@@ -538,7 +526,7 @@ export default {
         await axios.get('http://localhost:5000/stopOtherTime')
       }
 
-      console.log('stopping self time')
+      //console.log('stopping self time')
     },
 
     async startEnemyTime() {
@@ -584,7 +572,7 @@ export default {
       } else {
         await axios.get(`http://localhost:5000/stopOtherTime`)
       }
-      console.log('stopping enemy time')
+      //console.log('stopping enemy time')
     },
 
     async setSelfTimeFromServerOrDB() {
@@ -601,7 +589,7 @@ export default {
         const selfTimeQuery = await axios.get(`http://localhost:5000/currentTimeLeft/${this.selfPlayerType}`)
         this.selfSeconds = selfTimeQuery.data.timeLeft
 
-        console.log(selfTimeQuery.data)
+        // //console.log(selfTimeQuery.data)
       }
     },
 
@@ -619,10 +607,6 @@ export default {
         const enemyTimeQuery = await axios.get(`http://localhost:5000/currentTimeLeft/${this.enemyPlayerType}`)
         this.enemySeconds = enemyTimeQuery.data.timeLeft
       }
-    },
-
-    hideOverlay() {
-      this.bShowOverlay = false
     }
   }
 }

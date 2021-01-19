@@ -4,7 +4,7 @@
  *
  * Example usage:
  *   browser.customExecute(function() {
- *     console.log('Hello from the browser window')
+ *     //console.log('Hello from the browser window')
  *   });
  *
  * For more information on writing custom commands see:
@@ -29,7 +29,7 @@ exports.command = function command (data) {
 
     function (result) {
       // The "result" object contains the result of what we have sent back from the browser window
-      console.log('custom execute result:', result.value)
+      //console.log('custom execute result:', result.value)
     }
   )
 

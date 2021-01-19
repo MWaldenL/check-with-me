@@ -87,7 +87,7 @@ export default {
     let initGames = getGames(roomQuery)
     initGames
     .then(result => {
-      console.log(result.games)
+      //console.log(result.games)
 
       this.games = result.games
       this.lastVisible = result.lastVisible
@@ -130,7 +130,7 @@ export default {
     },
 
     joinRoom(room_id) {
-      console.log("INSIDE")
+      //console.log("INSIDE")
       let user_key = firebase.auth().currentUser.uid
       
       let room = this.games.find(obj => {
@@ -146,7 +146,7 @@ export default {
         other_user:  db.doc('users/' + user_key)
       })
       .catch(error => {
-        console.log("Error getting documents: ", error);
+        //console.log("Error getting documents: ", error);
       })
     },
 

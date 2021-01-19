@@ -45,7 +45,7 @@ export default {
           this.logoutUser()
           this.$router.push('/login')
         })
-      //console.log(this.$route.name)
+      ////console.log(this.$route.name)
     }
   }
 }

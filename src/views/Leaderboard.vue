@@ -53,7 +53,7 @@ export default {
       .then(querySnapshot => {
         let docs = querySnapshot.docs
         docs.forEach((doc, index) => {
-          //console.log(doc.id, " => ", doc.data());
+          ////console.log(doc.id, " => ", doc.data());
           let leader = {
             rank: index + 1,
             username: doc.data().username,
@@ -63,7 +63,7 @@ export default {
         })
       })
       .catch(function(error) {
-        console.log("Error getting documents: ", error);
+        //console.log("Error getting documents: ", error);
       })
   },
   methods: {

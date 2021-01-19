@@ -38,13 +38,13 @@ app.get('/startHostTime/:currentTime', async (req, res) => {
   hostTimeLeft = currentTime
   currentTimeRunningPlayer = 'host'
 
-  console.log('-- Starting host time from server --')
+  //console.log('-- Starting host time from server --')
 
   // Perform every second
   hostCountDown = setInterval(async () => {
     if (hostTimeLeft > 0) {
       hostTimeLeft--
-      console.log('Host time left: ' + hostTimeLeft)
+      //console.log('Host time left: ' + hostTimeLeft)
     } else {
       currentTimeRunningPlayer = 'nil'
       clearInterval(hostCountDown)
@@ -70,13 +70,13 @@ app.get('/startOtherTime/:currentTime', async (req, res) => {
   isTimeRunning = true
   currentTimeRunningPlayer = 'other'
 
-  console.log('-- Starting other time from server --')
+  //console.log('-- Starting other time from server --')
 
   // Perform every second
   otherCountDown = setInterval(async () => {
     if (otherTimeLeft > 0) {
       otherTimeLeft--
-      console.log('Other time left: ' + otherTimeLeft)
+      //console.log('Other time left: ' + otherTimeLeft)
     } else {
       currentTimeRunningPlayer = 'nil'
       clearInterval(otherCountDown)
@@ -99,7 +99,7 @@ app.get('/currentTimeLeft/:playerType', async (req, res) => {
  * Stops the host player's timer
  */
 app.get('/stopHostTime', async (req, res) => {
-  console.log('stopping host time')
+  //console.log('stopping host time')
   clearInterval(hostCountDown)
 
   isTimeRunning = false
@@ -111,7 +111,7 @@ app.get('/stopHostTime', async (req, res) => {
  * Stops the other player's timer
  */
 app.get('/stopOtherTime', async (req, res) => {
-  console.log('stopping other time')
+  //console.log('stopping other time')
   clearInterval(otherCountDown)
 
   isTimeRunning = false
@@ -125,7 +125,7 @@ app.get('/stopOtherTime', async (req, res) => {
  */
 app.get('/isTimeRunning/:player', (req, res) => {
   const { player } = req.params
-  console.log('Current time running player: ' + currentTimeRunningPlayer)
+  //console.log('Current time running player: ' + currentTimeRunningPlayer)
   res.send({ isTimeRunning: player === currentTimeRunningPlayer })
 })
 

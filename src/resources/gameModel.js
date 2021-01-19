@@ -3,7 +3,7 @@ import { db } from '@/firebase'
 
 class Room {
   constructor (room_id, room_name, host_user, isFull) {
-      //console.log(host_user)
+      ////console.log(host_user)
       this.room_id = room_id
       this.room_name = room_name
       this.host_user = host_user
@@ -25,7 +25,7 @@ var RoomConverter = {
     data.host_user
     .get()
     .then(user => {
-      //console.log(user.id, " => ", user.data())
+      ////console.log(user.id, " => ", user.data())
       userArray.push(user.data().username)
     })
     
@@ -74,7 +74,7 @@ export const getCount = (() => {
     count.push(Math.ceil(docs.length/10))
   })
   .catch(function(error) {
-    console.log("Error getting documents: ", error);
+    //console.log("Error getting documents: ", error);
   })
 
   return count
