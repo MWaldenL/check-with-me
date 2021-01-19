@@ -29,7 +29,7 @@ const filterBlack = board => {
 export const checkIfSelfStuck = (board, isWhite) => {
   let cells = isWhite ? filterWhite(board) : filterBlack(board)
   let bIsBlocked = true
-  let topLeft, topRight, currentSquare, hasEnemyPiece
+  let topLeft, topRight, bottomLeft, bottomRight, currentSquare, hasEnemyPiece
 
   if (cells.length === 0)
     return false
@@ -130,7 +130,7 @@ export const checkIfSelfStuck = (board, isWhite) => {
 export const checkIfEnemyStuck = (board, isWhite) => {
   let cells = isWhite ? filterBlack(board) : filterWhite(board)
   let bIsBlocked = true
-  let bottomLeft, bottomRight, currentSquare, hasEnemyPiece
+  let bottomLeft, bottomRight, topLeft, topRight, currentSquare, hasEnemyPiece
 
   if (cells.length === 0)
     return false
