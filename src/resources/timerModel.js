@@ -20,3 +20,9 @@ export const addGameToTimer = ((gameID, timerID) => {
     game_id: gameID
   })
 })
+
+export const getSingleTimer = (async timerID => {
+  const query = timersCollection.doc(timerID)
+  const doc = await query.get()
+  return doc.data()
+})

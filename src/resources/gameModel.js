@@ -106,3 +106,9 @@ export const checkNameUnique = (async roomName => {
   //console.log(doc)
   return doc.empty
 })
+
+export const getSingleGame = (async roomID => {
+  const query = gamesCollection.doc(roomID)
+  const doc = await query.get()
+  return doc.data()
+})
