@@ -2,10 +2,13 @@
   <div>
     <b-button v-b-toggle.sidebar id="menu"><b-icon-caret-right-fill></b-icon-caret-right-fill></b-button>
     <b-sidebar id="sidebar" title="Check with Me" bg-variant="dark" text-variant="light">
-      <div id="s-contents" class="px-3 py-2">
-        <router-link to="/" id="lobby" class="router-link route-button" tag="button" :disabled="isLobby">
-          <h3 class="cursor-pointer text-white" :class="{disabled:isLobby}">Play</h3>
-        </router-link>
+      <div id="s-contents" class="px-3 py-2"  @click="checkRoute">
+        <button id="lobby" class="router-link route-button" :disabled="isLobby || isWaiting" @click="playCheck">
+          <h3 class="cursor-pointer text-white" :class="{disabled:isLobby || isWaiting}">Play</h3>
+        </button>
+          <!-- <router-link to="/" id="lobby" class="router-link route-button" tag="button" :disabled="isLobby || isWaiting" @click.native="playCheck">
+            <h3 class="cursor-pointer text-white" :class="{disabled:isLobby || isWaiting}">Play</h3>
+          </router-link> -->
           <!-- <router-link to="/gamelobby" class="router-link route-button" tag="button" :disabled="isLobby">
             <h3 class="cursor-pointer text-white">Game Lobby</h3>
           </router-link> -->
@@ -29,12 +32,16 @@
 <script>
 import firebase from 'firebase'
 import { mapGetters, mapActions } from 'vuex'
+import { checkUserGame } from '@/resources/gameModel.js'
 
 export default {
   name: 'Sidebar',
   computed: {
     isLobby() {
         return this.$route.name === "GameLobby"
+    },
+    isWaiting() {
+        return this.$route.name === "WaitingRoom"
     }
   },
   methods: {
@@ -46,6 +53,17 @@ export default {
           this.$router.push('/login')
         })
       ////console.log(this.$route.name)
+    },
+    async playCheck () {
+      const doc = await checkUserGame(firebase.auth().currentUser.uid)
+      if(doc !== false)
+        this.$router.push({ path: '/room/' + doc })
+      else
+        this.$router.push({ path: '/'})
+      //console.log(doc)
+    },
+    checkRoute () {
+      console.log(this.$route.name)
     }
   }
 }

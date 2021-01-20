@@ -1,6 +1,18 @@
 <template>
   <div id = 'waiting-room-page'>
     <Sidebar />
+    <b-modal id="time-modal"  ok-only hide-header>
+      <div id='modal-label'>Change Game Timer</div>
+      <div class="modal-body time-container">
+          <slot name="body">
+            <div v-bind:class="{'box-active': timeInput === 10, 'box-inactive': timeInput !== 10}" @click="putTime(10)">10 min</div>
+            <div v-bind:class="{'box-active': timeInput === 5, 'box-inactive': timeInput !== 5}" @click="putTime(5)">5 min</div>
+            <div v-bind:class="{'box-active': timeInput === 3, 'box-inactive': timeInput !== 3}" @click="putTime(3)">3 min</div>
+            <div v-bind:class="{'box-active': timeInput === 1, 'box-inactive': timeInput !== 1}" @click="putTime(1)">1 min</div>
+          </slot>
+        </div>
+    </b-modal>
+
     <div id = 'waiting-room-proper'>
       <div id="waiting-room-label">Waiting Room</div>
       <div id="room-type">{{room.is_public ? "Public" : "Private"}}</div>
@@ -20,16 +32,16 @@
           </div>
 
           <div id="left-button" v-show="isOwner === 1">
-            <router-link :to="`/`" tag="button" class="red close-button" v-on:click.native="destroyRoom">
+            <button :to="`/`" tag="button" class="red close-button" @click="destroyRoom">
               Close Room
-            </router-link>
+            </button>
           </div>
         </div>
         
         <div id="right-panel" class="column">
           <div id="util-buttons" class="topper">
             <button class="orange" v-show="!room.is_public">copy invite link</button>
-            <button class="orange">{{ (timer.host_timeLeft/60).toFixed(0) }} mins</button>
+            <button v-b-modal.time-modal :disabled="isOwner === 0" class="orange">{{ timeInput }} mins</button>
           </div>
 
           <div v-if="isFull" id="guest-data" class="user-data">
@@ -52,9 +64,9 @@
       </div>
       
       <div id="left-button" v-show="isOwner === 0">
-        <router-link :to="`/`" tag="button" class="red" v-on:click.native="leaveRoom">
+        <button class="red" @click="leaveRoom">
           Leave Room
-        </router-link>
+        </button>
       </div>
       <div v-show="!room.is_public" id="invite-footer">Invite your friend: {{ room.room_link }}</div>
     </div>
@@ -65,7 +77,7 @@
 import firebase from 'firebase'
 import { db } from '@/firebase'
 import Sidebar from '@/components/sidebar.vue'
-import { getSingleGame } from '@/resources/gameModel.js'
+import { getSingleGame, deleteGame, removeGuest } from '@/resources/gameModel.js'
 import { getSingleUser } from '@/resources/userModel.js'
 import { getSingleTimer } from '@/resources/timerModel.js'
 
@@ -76,6 +88,7 @@ export default {
   },
   data() {
     return {
+      roomID: "",
       room: {
         is_public: true,
       },
@@ -90,7 +103,8 @@ export default {
         game_id: "",
         last_player_moved: ""
       },
-      isOwner: -1
+      isOwner: -1,
+      timeInput: 0
     }
   },
   computed: {
@@ -130,6 +144,7 @@ export default {
   },
   async created() {
     const roomID = await this.$route.params.id
+    this.roomID = roomID
     const room = await getSingleGame(roomID)
     this.room = room
     console.log(room)
@@ -144,6 +159,7 @@ export default {
 
     const timer = await getSingleTimer(room.timer_id.id)
     this.timer = timer
+    this.timeInput = (timer.host_timeLeft/60).toFixed(0)
     console.log(timer)
 
     if(room.other_user.id !== "nil") {
@@ -155,14 +171,19 @@ export default {
     
   },
   methods: {
-    destroyRoom () {
+    async destroyRoom () {
+      //console.log(this.roomID)
+      await deleteGame(this.roomID)
 
+      this.$router.push({ path: '/'})
     },
-    leaveRoom () {
+    async leaveRoom () {
+      await removeGuest(this.roomID)
 
+      this.$router.push({ path: '/'})
     },
-    setTimer (time) {
-
+    putTime (time) {
+      this.timeInput = time
     }
   }
 }
@@ -235,7 +256,6 @@ export default {
     margin-left: 10%;
     padding-top: 5%;
     color: #585858;
-    font-size: 2.5em;
   }
   .username {
     color: #000;
@@ -288,4 +308,43 @@ export default {
     font-family: 'Raleway', Arial, Helvetica, sans-serif;
     font-size: 1.2em;
   }
+
+  #modal-label {
+    color: #585858;
+    font-size: 1.5em;
+    text-align: center;
+  }
+  .time-container{
+  margin: 0px 0px 15px 0px;
+  width:100%;
+  height:50%;
+  background-color:#fff;
+  display:grid;
+  grid-template-columns: 46% 46%;
+  grid-row: auto auto;
+  grid-column-gap: 20px;
+  grid-row-gap: 20px;
+}
+.box-active{
+    background-color:#E6912C;
+    padding:8px;
+    border-radius:0px;
+    color:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:1em;
+    font-weight: bold;
+}
+.box-inactive{
+    background-color:#b37f40;
+    padding:8px;
+    border-radius:0px;
+    color:rgb(214, 208, 208);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:1em;
+    font-weight: bold;
+}
 </style>
