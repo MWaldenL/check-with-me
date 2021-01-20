@@ -144,9 +144,13 @@ export default {
           whiteStuck = checkIfSelfStuck(this.board, true)
           blackStuck = checkIfEnemyStuck(this.board, true)
         } else {
+          console.log('black view')
           whiteStuck = checkIfEnemyStuck(this.board, false)
           blackStuck = checkIfSelfStuck(this.board, false)
         }
+
+        console.log(whiteStuck)
+        console.log(blackStuck)
 
         if (whiteStuck && blackStuck) {
           //console.log("DRAW DRAW DRAW")
