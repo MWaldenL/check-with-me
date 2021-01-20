@@ -38,6 +38,10 @@ const actions = {
     commit('mUpdateBoard', payload)
   },
 
+  /**
+   * Updates the piece counts
+   * @param counts object containing current counts for white and black
+   */
   async aUpdateCount ({ commit }, count) {
     commit('mUpdateCount', count)
   },
