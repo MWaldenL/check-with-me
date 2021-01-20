@@ -3,22 +3,22 @@
     <b-button v-b-toggle.sidebar id="menu"><b-icon-caret-right-fill></b-icon-caret-right-fill></b-button>
     <b-sidebar id="sidebar" title="Check with Me" bg-variant="dark" text-variant="light">
       <div id="s-contents" class="px-3 py-2">
-        <router-link to="/" class="router-link route-button" tag="button" :disabled="isLobby">
+        <router-link to="/" id="lobby" class="router-link route-button" tag="button" :disabled="isLobby">
           <h3 class="cursor-pointer text-white" :class="{disabled:isLobby}">Play</h3>
         </router-link>
           <!-- <router-link to="/gamelobby" class="router-link route-button" tag="button" :disabled="isLobby">
             <h3 class="cursor-pointer text-white">Game Lobby</h3>
           </router-link> -->
-        <router-link to="/profile" class="router-link">
+        <router-link to="/profile" id="profile" class="router-link">
           <h3 class="cursor-pointer text-white">Profile</h3>
         </router-link>
-        <router-link to="/leaderboard" class="router-link">
+        <router-link to="/leaderboard" id="leaderboard" class="router-link">
           <h3 class="cursor-pointer text-white">Leaderboard</h3>
         </router-link>
-        <router-link to="/help" class="router-link">
+        <router-link to="/help" id="help" class="router-link">
           <h3 class="cursor-pointer text-white">How to Play</h3>
         </router-link>
-        <router-link to="/login" class="router-link" @click.native="logout">
+        <router-link to="/login" id="logout" class="router-link" @click.native="logout">
           <h3 class="cursor-pointer text-white">Logout</h3>
         </router-link>
       </div>
@@ -45,7 +45,7 @@ export default {
           this.logoutUser()
           this.$router.push('/login')
         })
-      //console.log(this.$route.name)
+      ////console.log(this.$route.name)
     }
   }
 }
