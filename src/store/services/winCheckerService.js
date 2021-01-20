@@ -133,12 +133,17 @@ export const checkIfEnemyStuck = (board, isWhite) => {
   let bottomLeft, bottomRight, topLeft, topRight, currentSquare, hasEnemyPiece
 
   if (cells.length === 0)
-    return false
+    return true
+
+  console.log('after premature return')
 
   for (const cell of cells) {
     const { nRow, nCol } = cell
+
     // Check if bottom right is blocked
-    if (bIsBlocked && nCol < 8 && nRow > 1) {
+    const isBottomRight = nCol < 8 && nRow > 1 && bIsBlocked
+    if (isBottomRight) {
+      console.log('bottom right blocked')
       currentSquare = board[nRow - 2][nCol]
       // check for top right capture
       hasEnemyPiece = isWhite ? 
@@ -160,15 +165,21 @@ export const checkIfEnemyStuck = (board, isWhite) => {
     }
 
     // Check if bottom left is blocked
-    if (bIsBlocked && nCol > 1 && nRow > 1) {
+    const isBottomLeft = nCol > 1 && nRow > 1 && bIsBlocked
+    if (isBottomLeft) {
+      console.log('looking at bottom left')
       currentSquare = board[nRow - 2][nCol - 2]
       hasEnemyPiece = isWhite ? 
-        currentSquare.bHasBlackChip || currentSquare.bHasBlackKing : 
-        currentSquare.bHasWhiteChip || currentSquare.bHasWhiteKing
+        currentSquare.bHasWhiteChip || currentSquare.bHasWhiteKing : 
+        currentSquare.bHasBlackChip || currentSquare.bHasBlackKing
+      // switched be careful
+      console.log(isWhite)
+      console.log(currentSquare.bHasBlackChip)
 
       if (hasEnemyPiece) { 
         if (nCol > 2 && nRow > 2) {
           bottomLeft = board[nRow - 3][nCol - 3]
+          console.log(bottomLeft)
           bIsBlocked = 
             bottomLeft.bHasBlackChip || 
             bottomLeft.bHasBlackKing || 
@@ -176,11 +187,14 @@ export const checkIfEnemyStuck = (board, isWhite) => {
             bottomLeft.bHasWhiteKing
         } 
       } else {
+        console.log('blocked is false')
         bIsBlocked = false
       }
     }
 
+    // Checking for kings
     if (cell.bHasWhiteKing || cell.bHasBlackKing) {
+      console.log('cell has king')
       if (bIsBlocked && nCol < 8 && nRow < 8) {
         currentSquare = board[nRow][nCol]
         hasEnemyPiece = isWhite ? 
