@@ -133,11 +133,11 @@ export const checkUserGame = (async (userID) => {
 })
 
 export const deleteGame = (async roomID => {
-  console.log(roomID)
+  //console.log(roomID)
   const query = timersCollection.where("game_id", "==", roomID)
   const doc = await query.get()
-  const timerID = doc.docs[0].id //doesnt work
-  console.log(timerID)
+  const timerID = doc.docs[0].id
+  //console.log(timerID)
   await timersCollection.doc(timerID).delete()
   await gamesCollection.doc(roomID).delete()
 })
