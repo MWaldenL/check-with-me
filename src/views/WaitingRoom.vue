@@ -1,16 +1,20 @@
 <template>
   <div id = 'waiting-room-page'>
     <Sidebar />
-    <b-modal id="time-modal"  ok-only hide-header>
+    <b-modal id="time-modal" @ok="updateTimer" ok-only hide-header>
       <div id='modal-label'>Change Game Timer</div>
       <div class="modal-body time-container">
           <slot name="body">
-            <div v-bind:class="{'box-active': timeInput === 10, 'box-inactive': timeInput !== 10}" @click="putTime(10)">10 min</div>
-            <div v-bind:class="{'box-active': timeInput === 5, 'box-inactive': timeInput !== 5}" @click="putTime(5)">5 min</div>
-            <div v-bind:class="{'box-active': timeInput === 3, 'box-inactive': timeInput !== 3}" @click="putTime(3)">3 min</div>
-            <div v-bind:class="{'box-active': timeInput === 1, 'box-inactive': timeInput !== 1}" @click="putTime(1)">1 min</div>
+            <div v-bind:class="{'box-active': timeInput === 10*60, 'box-inactive': timeInput !== 10*60}" @click="putTime(10*60)">10 min</div>
+            <div v-bind:class="{'box-active': timeInput === 5*60, 'box-inactive': timeInput !== 5*60}" @click="putTime(5*60)">5 min</div>
+            <div v-bind:class="{'box-active': timeInput === 3*60, 'box-inactive': timeInput !== 3*60}" @click="putTime(3*60)">3 min</div>
+            <div v-bind:class="{'box-active': timeInput === 1*60, 'box-inactive': timeInput !== 1*60}" @click="putTime(1*60)">1 min</div>
           </slot>
         </div>
+    </b-modal>
+
+    <b-modal v-model="isKicked" id="kick-modal" @ok="kickLeave" ok-only hide-header no-close-on-esc no-close-on-backdrop>
+      <div>The room has been closed by the owner. Returning to lobby...</div>
     </b-modal>
 
     <div id = 'waiting-room-proper'>
@@ -28,7 +32,7 @@
             <div class="username">{{ host.username }}</div>
             <div class="stats">total wins: {{ host.wins_black + host.wins_white }}</div>
             <div class="stats">winrate: {{ getHostRate }}</div>
-            <div class="stats">points: {{ host.points }}</div>
+            <div class="stats">points: {{ getHostPoints }}</div>
           </div>
 
           <div id="left-button" v-show="isOwner === 1">
@@ -40,8 +44,8 @@
         
         <div id="right-panel" class="column">
           <div id="util-buttons" class="topper">
-            <button class="orange" v-show="!room.is_public">copy invite link</button>
-            <button v-b-modal.time-modal :disabled="isOwner === 0" class="orange">{{ timeInput }} mins</button>
+            <button id="link-button" class="orange" v-show="!room.is_public && isOwner === 1" ref="linker" @click="copyLink">copy invite link</button>
+            <button id="set-time-button" v-b-modal.time-modal :disabled="isOwner === 0" class="orange">{{ getTimeMins }} mins</button>
           </div>
 
           <div v-if="isFull" id="guest-data" class="user-data">
@@ -49,16 +53,18 @@
             <div class="username">{{ guest.username }}</div>
             <div class="stats">total wins: {{ guest.wins_black + guest.wins_white }}</div>
             <div class="stats">winrate: {{ getGuestRate }}</div>
-            <div class="stats">points: {{ guest.points }}</div>
+            <div class="stats">points: {{ getGuestPoints }}</div>
           </div>
           <div v-if="!isFull" id="guest-waiting">
             <div class="waiting">Waiting</div>
           </div>
 
           <div v-show="isOwner === 1">
-            <router-link :to="`/play`" tag="button" class="green begin-button" v-on:click.native="setTimer(timer.host_timeLeft/60)">
+            <button :to="`/play`" :disabled="!isFull" 
+                    v-bind:class="{'begin-button': isFull, 'begin-disabled': !isFull}"
+                    v-on:click="goToGame">
               Begin
-            </router-link>
+            </button>
           </div>
         </div>
       </div>
@@ -68,18 +74,18 @@
           Leave Room
         </button>
       </div>
-      <div v-show="!room.is_public" id="invite-footer">Invite your friend: {{ room.room_link }}</div>
+      <div v-show="!room.is_public" id="invite-footer">Invite your friend: {{ roomLink }}</div>
     </div>
   </div>
 </template>
 
 <script>
 import firebase from 'firebase'
-import { db } from '@/firebase'
+import { db, gamesCollection, timersCollection } from '@/firebase'
 import Sidebar from '@/components/sidebar.vue'
 import { getSingleGame, deleteGame, removeGuest } from '@/resources/gameModel.js'
 import { getSingleUser } from '@/resources/userModel.js'
-import { getSingleTimer } from '@/resources/timerModel.js'
+import { getSingleTimer, changeTime } from '@/resources/timerModel.js'
 
 export default {
   name: "WaitingRoom",
@@ -88,13 +94,15 @@ export default {
   },
   data() {
     return {
-      roomID: "",
+      roomID: "nil",
+      roomLink: "",
       room: {
         is_public: true,
       },
       host: {
         wins_black: 0,
-        wins_white: 0
+        wins_white: 0,
+        points: 0
       },
       guest: null,
       timer: {
@@ -104,7 +112,10 @@ export default {
         last_player_moved: ""
       },
       isOwner: -1,
-      timeInput: 0
+      timeInput: 0,
+      gameUnsubscribe: null,
+      timeUnsubscribe: null,
+      isKicked: false
     }
   },
   computed: {
@@ -122,7 +133,6 @@ export default {
           return (wins/(wins + draws + losses)*100).toFixed(2) + "%"
       }
     },
-
     getGuestRate: function () {
       if(this.host !== null){
         const wins = this.guest.wins_black + this.guest.wins_white
@@ -137,21 +147,32 @@ export default {
           return (wins/(wins + draws + losses)*100).toFixed(2) + "%"
       }
     },
-
     isFull: function () {
       return this.guest !== null
+    },
+    getTimeMins: function () {
+      return (this.timeInput/60).toFixed(0)
+    },
+    getHostPoints: function () {
+      if(this.host !== null)
+        return (this.host.points).toFixed(0)
+    },
+    getGuestPoints: function () {
+      if(this.guest !== null)
+        return (this.guest.points).toFixed(0)
     }
   },
   async created() {
     const roomID = await this.$route.params.id
     this.roomID = roomID
+    this.roomLink = "http://localhost:8080/#/room/" + roomID
     const room = await getSingleGame(roomID)
     this.room = room
-    console.log(room)
+    //console.log(room)
 
     const host = await getSingleUser(room.host_user.id)
     this.host = host
-    console.log(host)
+    //console.log(host)
     if(firebase.auth().currentUser.uid === room.host_user.id)
       this.isOwner = 1
     else
@@ -159,16 +180,14 @@ export default {
 
     const timer = await getSingleTimer(room.timer_id.id)
     this.timer = timer
-    this.timeInput = (timer.host_timeLeft/60).toFixed(0)
-    console.log(timer)
+    this.timeInput = timer.host_timeLeft
+    //console.log(timer)
 
     if(room.other_user.id !== "nil") {
       const guest = await getSingleUser(room.other_user.id)
       this.guest = guest
-      console.log(guest)
+      //console.log(guest)
     }
-
-    
   },
   methods: {
     async destroyRoom () {
@@ -182,9 +201,60 @@ export default {
 
       this.$router.push({ path: '/'})
     },
-    putTime (time) {
+    putTime(time) {
       this.timeInput = time
+    },
+    goToGame() {
+      //do logic here
+      this.$router.push({ path: '/play'})
+    },
+    copyLink() {
+      const el = document.createElement('textarea');
+      el.value = this.roomLink;
+      el.setAttribute('readonly', '');
+      el.style.position = 'absolute';
+      el.style.left = '-9999px';
+      document.body.appendChild(el);
+      el.select();
+      document.execCommand('copy');
+      document.body.removeChild(el);
+    },
+    async updateTimer() {
+      changeTime(this.timeInput, this.room.timer_id.id)
+    },
+    kickLeave() {
+      this.gameUnsubscribe()
+      this.timeUnsubscribe()
+
+      this.$router.push({ path: '/'})
     }
+  },
+  async mounted() {
+    const roomID = await this.$route.params.id
+    const game = await getSingleGame(roomID)
+    const timerID = game.timer_id.id
+
+    this.gameUnsubscribe = gamesCollection
+    .doc(roomID)
+    .onSnapshot(async doc => {
+      if(doc.exists) {
+        const guest = await getSingleUser(doc.data().other_user.id)
+        this.guest = guest
+        //alert(this.guest.username)
+      } else{
+        if(this.isOwner == 0)
+        {
+          this.isKicked = true
+        }
+      }
+    })
+
+    this.timeUnsubscribe = timersCollection
+    .doc(timerID)
+    .onSnapshot(async doc => {
+      if(doc.exists)
+        this.timeInput = doc.data().host_timeLeft
+    })
   }
 }
 </script>
@@ -214,7 +284,11 @@ export default {
   }
 
   #util-buttons {
-
+    margin-left: 12%;
+    height: 80px;
+    width: 100%;
+    display: flex;
+    place-items: center;
   }
   #room-info {
     text-align: left;
@@ -224,7 +298,7 @@ export default {
     font-weight: bold;
 
     height: 80px;
-    width: 20vw;
+    width: 86%;
   }
 
   .user-data {
@@ -240,13 +314,10 @@ export default {
     height: 50vh;
     margin: 0px 12% 0px 12%;
     font-weight: bold;
-    text-align: center;
     margin-bottom: 5%;
     display: flex;
     place-items: center;
-    padding: 25%;
-  }
-  .waiting {
+    justify-content: center;
     color: #585858;
     font-size: 2.5em;
   }
@@ -275,13 +346,40 @@ export default {
   .begin-button {
     float: left;
     margin-left: 12%;
+    background-color: #779556;
+    color: #FFF;
+    border: 0px solid #779556;
+    border-radius: 5px;
+    height: 30px;
+    width: 20%;
+    font-weight: bold;
+    min-width: 110px;
+  }
+  .begin-disabled {
+    float: left;
+    margin-left: 12%;
+    background-color: #5e7545;
+    color: rgb(204, 204, 204);
+    border: 0px solid #5e7545;
+    border-radius: 5px;
+    height: 30px;
+    width: 20%;
+    font-weight: bold;
+    min-width: 110px;
   }
   .orange {
     background-color: #E6912C;
     color: #FFF;
     border: 0px solid #E6912C;
-    height: 100%;
+    height: 50%;
     font-weight: bold;
+  }
+  #link-button {
+    width: 47%;
+    margin-right: 3%;
+  }
+  #set-time-button {
+    width: 26%;
   }
   .red {
     background-color: #FF4949;
@@ -291,15 +389,7 @@ export default {
     height: 30px;
     width: 20%;
     font-weight: bold;
-  }
-  .green {
-    background-color: #779556;
-    color: #FFF;
-    border: 0px solid #779556;
-    border-radius: 5px;
-    height: 30px;
-    width: 20%;
-    font-weight: bold;
+    min-width: 110px;
   }
 
   #invite-footer {

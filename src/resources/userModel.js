@@ -7,5 +7,8 @@ import {
 export const getSingleUser = (async userID => {
   const query = usersCollection.doc(userID)
   const doc = await query.get()
-  return doc.data()
+  if(doc.exists) {
+    return doc.data()
+  } else
+    return null
 })
