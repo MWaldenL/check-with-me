@@ -6,12 +6,6 @@
         <button id="lobby" class="router-link route-button" :disabled="isLobby || isWaiting" @click="playCheck">
           <h3 class="cursor-pointer text-white" :class="{disabled:isLobby || isWaiting}">Play</h3>
         </button>
-          <!-- <router-link to="/" id="lobby" class="router-link route-button" tag="button" :disabled="isLobby || isWaiting" @click.native="playCheck">
-            <h3 class="cursor-pointer text-white" :class="{disabled:isLobby || isWaiting}">Play</h3>
-          </router-link> -->
-          <!-- <router-link to="/gamelobby" class="router-link route-button" tag="button" :disabled="isLobby">
-            <h3 class="cursor-pointer text-white">Game Lobby</h3>
-          </router-link> -->
         <router-link to="/profile" id="profile" class="router-link">
           <h3 class="cursor-pointer text-white">Profile</h3>
         </router-link>
@@ -55,9 +49,9 @@ export default {
       ////console.log(this.$route.name)
     },
     async playCheck () {
-      const doc = await checkUserGame(firebase.auth().currentUser.uid)
-      if(doc !== false)
-        this.$router.push({ path: '/room/' + doc })
+      const gameID = await checkUserGame(firebase.auth().currentUser.uid)
+      if(gameID !== false)
+        this.$router.push({ path: '/room/' + gameID })
       else
         this.$router.push({ path: '/'})
       //console.log(doc)

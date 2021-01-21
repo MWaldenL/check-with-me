@@ -119,7 +119,7 @@ export default {
     }
   },
   computed: {
-    getHostRate: function () {
+    getHostRate() {
       if(this.host !== null){
         const wins = this.host.wins_black + this.host.wins_white
         const draws = this.host.draw_black + this.host.draw_white
@@ -133,7 +133,7 @@ export default {
           return (wins/(wins + draws + losses)*100).toFixed(2) + "%"
       }
     },
-    getGuestRate: function () {
+    getGuestRate() {
       if(this.host !== null){
         const wins = this.guest.wins_black + this.guest.wins_white
         const draws = this.guest.draw_black + this.guest.draw_white
@@ -147,17 +147,17 @@ export default {
           return (wins/(wins + draws + losses)*100).toFixed(2) + "%"
       }
     },
-    isFull: function () {
+    isFull() {
       return this.guest !== null
     },
-    getTimeMins: function () {
+    getTimeMins() {
       return (this.timeInput/60).toFixed(0)
     },
-    getHostPoints: function () {
+    getHostPoints() {
       if(this.host !== null)
         return (this.host.points).toFixed(0)
     },
-    getGuestPoints: function () {
+    getGuestPoints() {
       if(this.guest !== null)
         return (this.guest.points).toFixed(0)
     }

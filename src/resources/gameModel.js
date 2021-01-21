@@ -93,6 +93,7 @@ export const addGameDoc = ((roomName, roomType, timerID) => {
     other_user:  db.doc('users/' + 'nil'),
     is_host_white: true,
     is_public: roomType === "true",
+    is_first_run: true,
     last_player_moved: "white",
     room_link: "link",
     room_name: roomName,
@@ -135,7 +136,7 @@ export const deleteGame = (async roomID => {
   console.log(roomID)
   const query = timersCollection.where("game_id", "==", roomID)
   const doc = await query.get()
-  const timerID = doc.docs[0].id
+  const timerID = doc.docs[0].id //doesnt work
   console.log(timerID)
   await timersCollection.doc(timerID).delete()
   await gamesCollection.doc(roomID).delete()
