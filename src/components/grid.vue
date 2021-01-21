@@ -137,30 +137,35 @@ export default {
           black: data.black_count
         })
 
+        // Check for stuck states
         let whiteStuck
         let blackStuck
 
-        if (this.isSelfWhite) {
+        if (this.isSelfWhite) { 
           whiteStuck = checkIfSelfStuck(this.board, true)
           blackStuck = checkIfEnemyStuck(this.board, true)
         } else {
+          // console.log('black view')
           whiteStuck = checkIfEnemyStuck(this.board, false)
           blackStuck = checkIfSelfStuck(this.board, false)
         }
 
-        if (whiteStuck && blackStuck) {
+        console.log("white: " + whiteStuck + " " + data.white_count)
+        console.log("black: " + blackStuck + " " + data.black_count)
+
+        if (whiteStuck && blackStuck) { // if both players are stuck, call a draw
           //console.log("DRAW DRAW DRAW")
           this.updateSelfScore('D')
           this.aSetWinner('D')
           this.aSetActiveGame(false)
           return
-        } else if (whiteStuck || data.white_count === 0) {
+        } else if (whiteStuck || data.white_count === 0) { // if only white is stuck or white has no more pieces, black wins
           //console.log("BLACK BLACK BLACK")
           this.updateSelfScore('B')
           this.aSetWinner('B')
           this.aSetActiveGame(false)
           return
-        } else if (blackStuck || data.black_count === 0) {
+        } else if (blackStuck || data.black_count === 0) { // if only black is stuck or black has no more pieces, white wins
           //console.log("WHITE WHITE WHITE")
           this.updateSelfScore('W')
           this.aSetWinner('W')
@@ -332,15 +337,18 @@ export default {
     ]),
 
     async updateSelfScore(winner) {
+      // gets user documents for current player and opponent
       const selfDoc = usersCollection.doc(auth.currentUser.uid)
       const otherDoc = this.isSelfHost ? usersCollection.doc(this.otherUserID) : usersCollection.doc(this.hostUserID)
 
       const self = await selfDoc.get()
       const other = await otherDoc.get()
 
+      // store current points for elo computation
       const selfScore = self.data().points
       const otherScore = other.data().points
 
+      // store current data for later update
       let selfWinsWhite = self.data().wins_white
       let selfWinsBlack = self.data().wins_black
       let selfLossWhite = self.data().loss_white
@@ -348,44 +356,46 @@ export default {
       let selfDrawWhite = self.data().draw_white
       let selfDrawBlack = self.data().draw_black
 
-      let newScore = 0
+      // initialize new score for elo computation
+      let newScore
 
-      if (winner === 'D') {
+      if (winner === 'D') { // if result is a draw, compute new elo ranking with score = 0.5 and add to draw count
         newScore = getNewScore(selfScore, otherScore, 0.5)
         if (this.selfColor === 'b')
           selfDrawBlack++
         else
           selfDrawWhite++
       } else if (winner === 'B') {
-        if (this.selfColor === 'b') {
+        if (this.selfColor === 'b') { // if black wins and self is black, compute new elo ranking with score = 1 and add to black win count
           //console.log("BLACK WINS")
           newScore = getNewScore(selfScore, otherScore, 1)
           selfWinsBlack++
-        } else {
+        } else { // if black wins and self is white, compute new elo ranking with score = 0 and add to white lose count
           //console.log("WHITE LOSES")
           newScore = getNewScore(selfScore, otherScore, 0)
           selfLossWhite++
         }
       } else {
-        if (this.selfColor === 'w') {
+        if (this.selfColor === 'w') { // if white wins and self is white, compute new elo ranking with score = 1 and add to white win count
           //console.log("WHITE WINS")
           newScore = getNewScore(selfScore, otherScore, 1)
           selfWinsWhite++
-        } else {
+        } else { // if white wins and self is black, compute new elo ranking with score = 0 and add to black lose count
           //console.log("BLACK LOSES")
           newScore = getNewScore(selfScore, otherScore, 0)
           selfLossBlack++
         }
       }
 
-      console.log(newScore)
-      console.log(selfWinsBlack)
-      console.log(selfWinsWhite)
-      console.log(selfLossBlack)
-      console.log(selfLossWhite)
-      console.log(selfDrawBlack)
-      console.log(selfDrawWhite)
+      // console.log(newScore)
+      // console.log(selfWinsBlack)
+      // console.log(selfWinsWhite)
+      // console.log(selfLossBlack)
+      // console.log(selfLossWhite)
+      // console.log(selfDrawBlack)
+      // console.log(selfDrawWhite)
 
+      // update self user document with new values
       await usersCollection
         .doc(auth.currentUser.uid)
         .update({

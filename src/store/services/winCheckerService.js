@@ -32,7 +32,7 @@ export const checkIfSelfStuck = (board, isWhite) => {
   let topLeft, topRight, bottomLeft, bottomRight, currentSquare, hasEnemyPiece
 
   if (cells.length === 0)
-    return false
+    return true
 
   for (const cell of cells) {
     const { nRow, nCol } = cell
@@ -61,6 +61,10 @@ export const checkIfSelfStuck = (board, isWhite) => {
     // Check whether top left is blocked
     if (bIsBlocked && nCol > 1 && nRow < 8) {
       currentSquare = board[nRow][nCol - 2]
+      hasEnemyPiece = isWhite ? 
+        currentSquare.bHasBlackChip || currentSquare.bHasBlackKing : 
+        currentSquare.bHasWhiteChip || currentSquare.bHasWhiteKing
+
       if (hasEnemyPiece) { // check for top left capture
         if (nCol > 2 && nRow < 7) {
           topLeft = board[nRow + 1][nCol - 3]
@@ -78,12 +82,11 @@ export const checkIfSelfStuck = (board, isWhite) => {
     if (cell.bHasWhiteKing || cell.bHasBlackKing) {
       if (bIsBlocked && nCol < 8 && nRow > 1) {
         currentSquare = board[nRow - 2][nCol]
-        // check for top right capture
         hasEnemyPiece = isWhite ? 
           currentSquare.bHasBlackChip || currentSquare.bHasBlackKing : 
           currentSquare.bHasWhiteChip || currentSquare.bHasWhiteKing
-  
-        if (hasEnemyPiece) { 
+
+        if (hasEnemyPiece) { // check for top right capture
           if (nCol < 7 && nRow > 2) {
             bottomRight = board[nRow - 3][nCol + 1]
             bIsBlocked = 
@@ -133,19 +136,20 @@ export const checkIfEnemyStuck = (board, isWhite) => {
   let bottomLeft, bottomRight, topLeft, topRight, currentSquare, hasEnemyPiece
 
   if (cells.length === 0)
-    return false
+    return true
 
   for (const cell of cells) {
     const { nRow, nCol } = cell
-    // Check if bottom right is blocked
-    if (bIsBlocked && nCol < 8 && nRow > 1) {
-      currentSquare = board[nRow - 2][nCol]
-      // check for top right capture
-      hasEnemyPiece = isWhite ? 
-        currentSquare.bHasBlackChip || currentSquare.bHasBlackKing : 
-        currentSquare.bHasWhiteChip || currentSquare.bHasWhiteKing
 
-      if (hasEnemyPiece) { 
+    // Check if bottom right is blocked
+    const isBottomRight = nCol < 8 && nRow > 1 && bIsBlocked
+    if (isBottomRight) {
+      currentSquare = board[nRow - 2][nCol]
+      hasEnemyPiece = isWhite ? 
+        currentSquare.bHasWhiteChip || currentSquare.bHasWhiteKing : 
+        currentSquare.bHasBlackChip || currentSquare.bHasBlackKing
+
+      if (hasEnemyPiece) { // check for bottom right capture
         if (nCol < 7 && nRow > 2) {
           bottomRight = board[nRow - 3][nCol + 1]
           bIsBlocked = 
@@ -160,15 +164,17 @@ export const checkIfEnemyStuck = (board, isWhite) => {
     }
 
     // Check if bottom left is blocked
-    if (bIsBlocked && nCol > 1 && nRow > 1) {
+    const isBottomLeft = nCol > 1 && nRow > 1 && bIsBlocked
+    if (isBottomLeft) {
       currentSquare = board[nRow - 2][nCol - 2]
       hasEnemyPiece = isWhite ? 
-        currentSquare.bHasBlackChip || currentSquare.bHasBlackKing : 
-        currentSquare.bHasWhiteChip || currentSquare.bHasWhiteKing
+        currentSquare.bHasWhiteChip || currentSquare.bHasWhiteKing : 
+        currentSquare.bHasBlackChip || currentSquare.bHasBlackKing
 
-      if (hasEnemyPiece) { 
+      if (hasEnemyPiece) { // check for bottom left capture
         if (nCol > 2 && nRow > 2) {
           bottomLeft = board[nRow - 3][nCol - 3]
+          console.log(bottomLeft)
           bIsBlocked = 
             bottomLeft.bHasBlackChip || 
             bottomLeft.bHasBlackKing || 
@@ -180,7 +186,9 @@ export const checkIfEnemyStuck = (board, isWhite) => {
       }
     }
 
+    // Checking for kings
     if (cell.bHasWhiteKing || cell.bHasBlackKing) {
+      // Check whether top right is blocked
       if (bIsBlocked && nCol < 8 && nRow < 8) {
         currentSquare = board[nRow][nCol]
         hasEnemyPiece = isWhite ? 
@@ -200,10 +208,14 @@ export const checkIfEnemyStuck = (board, isWhite) => {
           bIsBlocked = false
         }
       }
-  
+
       // Check whether top left is blocked
       if (bIsBlocked && nCol > 1 && nRow < 8) {
         currentSquare = board[nRow][nCol - 2]
+        hasEnemyPiece = isWhite ? 
+          currentSquare.bHasBlackChip || currentSquare.bHasBlackKing : 
+          currentSquare.bHasWhiteChip || currentSquare.bHasWhiteKing
+
         if (hasEnemyPiece) { // check for top left capture
           if (nCol > 2 && nRow < 7) {
             topLeft = board[nRow + 1][nCol - 3]

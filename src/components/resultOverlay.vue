@@ -7,7 +7,8 @@
   <h5 class="overlay-text mt-5">these are for testing only, remove upon deployment</h5>
   <b-button @click="startNewReg" class="overlay-text overlay-button" variant="success">Start new regular game</b-button>
   <b-button @click="startNewWin" class="overlay-text overlay-button" variant="info">Start new winning game</b-button>
-  <b-button @click="startNewWinNoRes" class="overlay-text overlay-button" variant="info">Start new winning game with no reset</b-button>
+  <b-button @click="startNewWinWhiteStuck" class="overlay-text overlay-button" variant="info">Start new winning game with white stuck</b-button>
+  <b-button @click="resetUserPoints" class="overlay-text overlay-button" variant="danger">Reset user points</b-button>
 </div>
 </template>
 
@@ -66,30 +67,6 @@ export default {
               white_count: 12,
               last_player_moved: "4pSu14srMSelGWQkSgGpRsA2jGf1"
             })
-
-      await usersCollection
-            .doc("4pSu14srMSelGWQkSgGpRsA2jGf1")
-            .update({
-              draw_black: 0,
-              draw_white: 0,
-              wins_black: 0,
-              wins_white: 0,
-              loss_black: 0,
-              loss_white: 0,
-              points: 100
-            })
-
-      await usersCollection
-            .doc("ktreyVNxpqRTE7mQPjreB0iWyFi1")
-            .update({
-              draw_black: 0,
-              draw_white: 0,
-              wins_black: 0,
-              wins_white: 0,
-              loss_black: 0,
-              loss_white: 0,
-              points: 120
-            })
     },
 
     async startNewWin () {
@@ -104,7 +81,23 @@ export default {
               white_count: 1,
               last_player_moved: "4pSu14srMSelGWQkSgGpRsA2jGf1"
             })
+    },
 
+    async startNewWinWhiteStuck () {
+      this.aSetActiveGame(true)
+      this.aSetWinner('N')
+      
+      await gamesCollection
+            .doc("Vc0H4f4EvY6drRKnvsk5")
+            .update({
+              board_state: "[FEN \"X:W32,26:B64,62,60,55,46,42,39,37,K30\"]",
+              black_count: 9,
+              white_count: 2,
+              last_player_moved: "4pSu14srMSelGWQkSgGpRsA2jGf1"
+            })
+    },
+
+    async resetUserPoints () {
       await usersCollection
             .doc("4pSu14srMSelGWQkSgGpRsA2jGf1")
             .update({
@@ -127,20 +120,6 @@ export default {
               loss_black: 0,
               loss_white: 0,
               points: 100
-            })
-    },
-
-    async startNewWinNoRes () {
-      this.aSetActiveGame(true)
-      this.aSetWinner('N')
-      
-      await gamesCollection
-            .doc("Vc0H4f4EvY6drRKnvsk5")
-            .update({
-              board_state: "[FEN \"X:W46:B55,58\"]",
-              black_count: 2,
-              white_count: 1,
-              last_player_moved: "4pSu14srMSelGWQkSgGpRsA2jGf1"
             })
     }
   }
