@@ -1,7 +1,7 @@
 <template>
   <div>
     <b-modal v-model="inGameLogout" id="game-logout-modal" @ok="logoutFromGame" hide-header no-close-on-esc no-close-on-backdrop>
-      <div>Logging out will remove you from this game. Proceed?</div>
+      <div>Logging out will remove you from your current room. Proceed?</div>
     </b-modal>
 
     <b-button v-b-toggle.sidebar id="menu"><b-icon-caret-right-fill></b-icon-caret-right-fill></b-button>
@@ -58,8 +58,12 @@ export default {
         })
       ////console.log(this.$route.name)
     },
-    showLogout() {
-      if(this.$route.name === "WaitingRoom")
+    async showLogout() {
+      const userID = firebase.auth().currentUser.uid
+      const roomID = await checkUserGame(userID)
+      console.log(roomID)
+
+      if(roomID !== false)
         this.inGameLogout = true
       else
         this.logout()
