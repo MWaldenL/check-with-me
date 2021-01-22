@@ -77,7 +77,7 @@ export const getCount = (() => {
   .then(querySnapshot => {
     let docs = querySnapshot.docs
 
-    count.push(Math.ceil(docs.length/10))
+    count.push(docs.length === 0 ? 1 : Math.ceil(docs.length/10))
   })
   .catch(function(error) {
     //console.log("Error getting documents: ", error);
