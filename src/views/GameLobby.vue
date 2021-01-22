@@ -49,9 +49,9 @@ import Sidebar from '@/components/sidebar.vue'
 import CreateRoomModal from '@/components/createRoomModal.vue'
 import {
   getGames,
-  getPrevGames,
   roomQuery,
-  getCount
+  getCount,
+  checkUserGame
 } from '@/resources/gameModel.js'
 
 export default {
@@ -87,8 +87,12 @@ export default {
       }
     }
   },
-  created() {
+  async created() {
     this.lastPageNum = getCount()
+
+    const gameID = await checkUserGame(firebase.auth().currentUser.uid)
+    if(gameID !== false)
+      this.$router.push({ path: '/room/' + gameID })
 
     let initGames = getGames(roomQuery)
     initGames

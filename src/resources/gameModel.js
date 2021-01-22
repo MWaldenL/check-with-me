@@ -1,8 +1,11 @@
 import firebase from 'firebase'
 import { 
   db,
-  gamesCollection
+  gamesCollection,
+  usersCollection,
+  timersCollection
 } from '@/firebase'
+import { BIconNutFill } from 'bootstrap-vue'
 
 class Room {
   constructor (room_id, room_name, host_user, isFull) {
@@ -74,7 +77,7 @@ export const getCount = (() => {
   .then(querySnapshot => {
     let docs = querySnapshot.docs
 
-    count.push(Math.ceil(docs.length/10))
+    count.push(docs.length === 0 ? 1 : Math.ceil(docs.length/10))
   })
   .catch(function(error) {
     //console.log("Error getting documents: ", error);
@@ -90,6 +93,7 @@ export const addGameDoc = ((roomName, roomType, timerID) => {
     other_user:  db.doc('users/' + 'nil'),
     is_host_white: true,
     is_public: roomType === "true",
+    is_first_run: true,
     last_player_moved: "white",
     room_link: "link",
     room_name: roomName,
@@ -105,4 +109,49 @@ export const checkNameUnique = (async roomName => {
   const doc = await query.get()
   //console.log(doc)
   return doc.empty
+})
+
+export const checkUserGame = (async (userID) => {
+  //build reference to user
+  const userDocRef = usersCollection.doc(userID)
+  console.log(userDocRef)
+  const queryHost = gamesCollection.where("host_user", "==", userDocRef)
+  const docHost = await queryHost.get()
+  console.log(docHost)
+  if (docHost.empty) {
+    const queryGuest = gamesCollection.where("other_user", "==", userDocRef)
+    const docGuest = await queryGuest.get()
+
+    if(docGuest.empty) {
+      return false
+    } else {
+      return docGuest.docs[0].id
+    }
+  } else {
+    return docHost.docs[0].id
+  }
+})
+
+export const deleteGame = (async roomID => {
+  //console.log(roomID)
+  const query = timersCollection.where("game_id", "==", roomID)
+  const doc = await query.get()
+  const timerID = doc.docs[0].id
+  //console.log(timerID)
+  await timersCollection.doc(timerID).delete()
+  await gamesCollection.doc(roomID).delete()
+})
+
+export const getSingleGame = (async roomID => {
+  const query = gamesCollection.doc(roomID)
+  const doc = await query.get()
+  return doc.data()
+})
+
+export const removeGuest = (gameID => {
+  gamesCollection
+  .doc(gameID)
+  .update({
+    other_user:  db.doc('users/' + 'nil')
+  })
 })
