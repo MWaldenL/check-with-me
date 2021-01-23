@@ -94,7 +94,7 @@ export const addGameDoc = ((roomName, roomType, timerID) => {
     is_host_white: true,
     is_public: roomType === "true",
     is_first_run: true,
-    last_player_moved: "white",
+    last_player_moved: "",
     room_link: "link",
     room_name: roomName,
     room_name_lc: roomName.toLowerCase(),
@@ -153,5 +153,13 @@ export const removeGuest = (gameID => {
   .doc(gameID)
   .update({
     other_user:  db.doc('users/' + 'nil')
+  })
+})
+
+export const setWhitePlayer = ((gameID, isHostWhite) => {
+  gamesCollection
+  .doc(gameID)
+  .update({
+    is_host_white:  isHostWhite
   })
 })

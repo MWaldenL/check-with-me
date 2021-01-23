@@ -17,7 +17,7 @@ Vue.use(VueRouter)
 
 const routes = [
   {
-    path: '/play',
+    path: '/play/:id',
     name: 'PlayBoard',
     component: Home,
     meta: { requiresAuth: true },
