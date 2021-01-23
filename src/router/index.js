@@ -11,7 +11,6 @@ import GameLobby from '../views/GameLobby.vue'
 import WaitingRoom from '../views/WaitingRoom.vue'
 import Help from '../views/Help.vue'
 import firebase from  'firebase'
-import authStore from '@/store/modules/auth'
 
 Vue.use(VueRouter)
 

@@ -9,11 +9,10 @@ import { BIconNutFill } from 'bootstrap-vue'
 
 class Room {
   constructor (room_id, room_name, host_user, isFull) {
-      ////console.log(host_user)
-      this.room_id = room_id
-      this.room_name = room_name
-      this.host_user = host_user
-      this.isFull = isFull
+    this.room_id = room_id
+    this.room_name = room_name
+    this.host_user = host_user
+    this.isFull = isFull
   }
 }
 
@@ -133,11 +132,10 @@ export const checkUserGame = (async (userID) => {
 })
 
 export const deleteGame = (async roomID => {
-  //console.log(roomID)
   const query = timersCollection.where("game_id", "==", roomID)
   const doc = await query.get()
   const timerID = doc.docs[0].id
-  //console.log(timerID)
+
   await timersCollection.doc(timerID).delete()
   await gamesCollection.doc(roomID).delete()
 })

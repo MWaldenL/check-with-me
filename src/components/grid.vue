@@ -62,7 +62,6 @@ import {
   usersCollection, 
   timersCollection
 } from '@/firebase'
-import firebase from 'firebase'
 import { mapGetters, mapActions } from 'vuex'
 import axios from 'axios'
 import Cell from './cell'
@@ -83,20 +82,24 @@ export default {
     const timerDoc = timersCollection.doc('H48woDfI1lwIGZnJh4qz') // hardcoded
     const game = await gameDoc.get()
     const timer = await timerDoc.get()
+
+    // Set the game data
     this.currentGameData = game.data()
+
+    // Check if someone has won from a logout
+    // The player present in the room will receive a modal, and
+    // the player who logged out will know from their score that they lost
+    this.setWinnerFromLogout()
 
     // Set collections
     this.currentGameDoc = gameDoc
-    this.currentTimerDoc = timerDoc
-
-    //console.log("HOST SCORE: " + this.hostCurrentScore)
-    //console.log("OTHER SCORE: " + this.otherCurrentScore)
+    this.currentTimerDoc = timerDoc 
 
     // Set first run and last player moved 
     this.bIsFirstRun = this.currentGameData.is_first_run
     this.lastPlayerMoved = this.currentGameData.last_player_moved
     
-    // try 
+    // Set the last player moved from the timer document, since this is updated as well
     this.lastPlayerMoved = timer.data().last_player_moved
 
     // Set usernames
@@ -114,7 +117,6 @@ export default {
     this.setPlayerToMove(playerToMove)
     
     // Check if time is already running
-    //console.log('Running clock from created()')
     this.determineClockToRun()
   },
 
@@ -418,30 +420,32 @@ export default {
       this.playerToMove = player
     },
 
-    async determineClockToRun() {
-      //console.log(this.lastPlayerMoved)
-      //console.log(auth.currentUser.uid)
+    setWinnerFromLogout() {
+      const winnerFromLogout = game.data().winner_from_logout
+      if (winnerFromLogout === auth.currentUser.uid) {
+        const winnerColor = this.selfColor.toUpperCase()
+        this.aSetWinner(winnerColor)
+      } 
+    },
 
+    async determineClockToRun() {
       if (this.lastPlayerMoved !== auth.currentUser.uid) { // opponent last move
-        //console.log('DRC self clock')
         await this.stopEnemyTime()
         await this.startSelfTime()
       } else { // self made last move
-        //console.log('DRC enemy clock')
         await this.stopSelfTime()
         await this.startEnemyTime()
       }
     },
 
     async writeUpdatedTimeToDB() {
-      //console.log('writing time to db')
       const newTimeObj = this.isSelfHost ? 
         { host_timeLeft: this.selfSeconds } : 
         { other_timeLeft: this.selfSeconds } 
       await this.currentTimerDoc.update(newTimeObj)   
     },
 
-    async endPlayerTurn(coords) {
+    async endPlayerTurn() {
       const isMoveWhite = 
         bSourceHasWhite(this.board, this.prevDestSquare) || 
         bSourceHasWhiteKing(this.board, this.prevDestSquare) 
@@ -493,14 +497,9 @@ export default {
       const isSelfServerTimeRunning = selfTimeQuery.data.isTimeRunning
       const shouldTimeTick = this.selfSeconds > 0
 
-      // //console.log(this.selfSeconds)
-      //console.log('self time running: ' + isSelfServerTimeRunning)
-
       if (!shouldTimeTick) {
         clearInterval(this.currentRunningTimer)
       } else {
-        //console.log('start self time: ' + this.selfPlayerType)
-
         // Start server time
         if (!isSelfServerTimeRunning) {
           if (this.selfPlayerType === 'host') {
@@ -514,13 +513,10 @@ export default {
         clearInterval(this.currentRunningTimer)
         this.currentRunningTimer = setInterval(() => {
           this.selfSeconds--
-          // //console.log(this.selfSeconds)
           if (this.selfSeconds <= 0) {
             clearInterval(this.currentRunningTimer)
           }
         }, 1000)
-
-        //console.log('starting self time')
       }
     },
 
@@ -535,8 +531,6 @@ export default {
       } else {
         await axios.get('http://localhost:5000/stopOtherTime')
       }
-
-      //console.log('stopping self time')
     },
 
     async startEnemyTime() {
@@ -582,7 +576,6 @@ export default {
       } else {
         await axios.get(`http://localhost:5000/stopOtherTime`)
       }
-      //console.log('stopping enemy time')
     },
 
     async setSelfTimeFromServerOrDB() {
@@ -598,8 +591,6 @@ export default {
       } else { // Otherwise, sync with server
         const selfTimeQuery = await axios.get(`http://localhost:5000/currentTimeLeft/${this.selfPlayerType}`)
         this.selfSeconds = selfTimeQuery.data.timeLeft
-
-        // //console.log(selfTimeQuery.data)
       }
     },
 
