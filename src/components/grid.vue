@@ -53,6 +53,7 @@
 </template>
 
 <script>
+import axios from 'axios'
 import { bSourceHasWhite, bSourceHasWhiteKing } from '@/store/services/moveCaptureService'
 import { checkIfSelfStuck, checkIfEnemyStuck } from '@/store/services/winCheckerService'
 import { getNewScore } from '@/store/services/eloService'
@@ -63,7 +64,6 @@ import {
   timersCollection
 } from '@/firebase'
 import { mapGetters, mapActions } from 'vuex'
-import axios from 'axios'
 import Cell from './cell'
 import Sidebar from './sidebar'
 import ResultOverlay from './resultOverlay'
@@ -89,7 +89,7 @@ export default {
     // Check if someone has won from a logout
     // The player present in the room will receive a modal, and
     // the player who logged out will know from their score that they lost
-    this.setWinnerFromLogout()
+    this.setWinnerFromLogout(game.data())
 
     // Set collections
     this.currentGameDoc = gameDoc
@@ -129,6 +129,9 @@ export default {
         const boardState = data.board_state
         const playerIsWhite = this.selfColor === 'w'
         const playerIsBlack = this.selfColor === 'b'
+
+        // Check if someone has logged out in game
+        this.setWinnerFromLogout(data)
 
         // Update the last player moved and the position
         this.bIsFirstRun = data.is_first_run
@@ -420,11 +423,15 @@ export default {
       this.playerToMove = player
     },
 
-    setWinnerFromLogout() {
-      const winnerFromLogout = game.data().winner_from_logout
+    setWinnerFromLogout(gameData) {
+      console.log(gameData)
+      const winnerFromLogout = gameData.winner_from_logout
+      console.log(auth.currentUser.uid)
       if (winnerFromLogout === auth.currentUser.uid) {
         const winnerColor = this.selfColor.toUpperCase()
+        this.updateSelfScore(winnerColor)
         this.aSetWinner(winnerColor)
+        this.aSetActiveGame(false)
       } 
     },
 

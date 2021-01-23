@@ -70,15 +70,17 @@ export default {
     async showLogout() {
       const userID = firebase.auth().currentUser.uid
       const roomID = await checkUserGame(userID)
-
-      if (roomID) {
-        this.inGameLogout = true
-      } else {
+      
+      if (this.$route.name !== 'PlayBoard') {
         this.logout()
+      } else if (roomID) {
+        this.inGameLogout = true
       }
     },
 
     async logoutFromGame() {
+      console.log(this.inGameLogout)
+
       const userID = firebase.auth().currentUser.uid
       const roomID = await checkUserGame(userID)
       const room = await getSingleGame(roomID)
@@ -87,23 +89,26 @@ export default {
         await deleteGame(roomID)
         this.logout()
       } else {
-        await this.setWinnerFromLogout(rom.host_user.id)
+        console.log('other logged out')
+        await this.setWinnerFromLogout(roomID, room.host_user.id)
         await removeGuest(roomID)
         this.logout()
       }
     },
 
-    async playCheck () {
+    async playCheck() {
       const gameID = await checkUserGame(firebase.auth().currentUser.uid)
       if (gameID) {
-        this.$router.push({ path: '/room/' + gameID })
+        this.$router.push({ path: `/room/${gameID}` })
       } else {
-        this.$router.push({ path: '/'})
+        this.$router.push({ path: '/' })
       }
     },
 
-    async setWinnerFromLogout(player) {
-      await gamesCollection.update({ winner_from_logout: player })
+    async setWinnerFromLogout(gameID, player) {
+      await gamesCollection
+        .doc(gameID)
+        .update({ winner_from_logout: player })
     },
 
     checkRoute() {
