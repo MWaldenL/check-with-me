@@ -155,3 +155,13 @@ export const removeGuest = (gameID => {
     other_user:  db.doc('users/' + 'nil')
   })
 })
+
+export const checkValidRoom = (async roomID => {
+  const query = gamesCollection.doc(roomID)
+  const doc = await query.get()
+
+  if(doc.exists && doc.data().other_user.id === "nil")
+    return true
+  else
+    return false
+})
