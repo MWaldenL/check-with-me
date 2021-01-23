@@ -59,6 +59,7 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex'
 import firebase from 'firebase'
 import { db } from '@/firebase'
 import errorMessages from  '@/resources/errorMessages'
@@ -76,6 +77,10 @@ export default {
   },
 
   computed: {
+    ...mapGetters({
+      currentGameID: 'getCurrentGame'
+    }),
+
     areFieldsComplete () {
       return this.username !== '' && this.password !== ''
     }
@@ -106,7 +111,14 @@ export default {
               .signInWithEmailAndPassword(email, this.password)
               .then(user => {
                 // Proceed to the main page
-                this.$router.push('/')
+                if (this.currentGameID === '') {
+                  this.$router.push('/')
+                } else {
+                  // If coming from a private room link invite
+                  const privateRoomLink = `/room/${this.currentGameID}`
+                  console.log(privateRoomLink)
+                  this.$router.push(privateRoomLink)
+                }
               })
               .catch(error => {
                 if (error.code === 'auth/wrong-password') {

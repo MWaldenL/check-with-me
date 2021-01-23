@@ -3,6 +3,7 @@ import VueRouter from 'vue-router'
 import firebase from  'firebase'
 import { routes } from './routes'
 import { db, auth, gamesCollection, usersCollection } from '@/firebase'
+import store from '@/store'
 
 Vue.use(VueRouter)
 const router = new VueRouter({ routes })
@@ -19,36 +20,57 @@ router.beforeEach(async (to, from, next) => {
   const isInsideGameRoom = from.name === 'PlayBoard'
   const isEnteringRoom = to.name === 'WaitingRoom'
 
+  console.log(user)
+
   // Handle routing
   if (isAuthAccessingGuestRoute) { // Prioritize
     next({ name: 'GameLobby' })
   } else if (isGuestAccessingAuthRoute) {
+    console.log('guest to auth')
     next({ name: 'Login' })
   } else if (isInsideGameRoom) {
     next({ name: from.name })
   } else if (isEnteringRoom) { // can happen on first load or joining new room
     console.log('entering room')
-    const roomExists = await doesRoomExist(roomID)
+
+    // Set the current game id in the state
+    store.commit('mSetCurrentGame', roomID)
+
+    // Check if user is authenticated
+    const thisUser = auth.currentUser
+    if (!thisUser) {
+      console.log('not logged in')
+      next({ name: 'Login' })
+      return
+    }
+    console.log('logged in')
+
     // Redirect to Game Lobby if room does not exist
+    const roomExists = await doesRoomExist(roomID)
     if (!roomExists) {
+      // Clear the room state if the room doesn't exist
+      store.commit('mSetCurrentGame', '')
       next({ name: 'GameLobby' })
       return 
     }
 
+    // Check if a room can be joined 
     const isFull = await isRoomFull(roomID) 
-    const inGivenRoom = await isInGivenRoom(roomID) 
+    let inGivenRoom = await isInGivenRoom(roomID) 
     const alreadyInRoom = await isAlreadyInRoom()
-
-    // Join the room if the room isn't already full
     const canJoinRoom = !isFull && !inGivenRoom && !alreadyInRoom
+
     if (canJoinRoom) {
       await joinRoomFromLink(roomID)
     } 
-    
-    // Only access a room if already inside
+
+    // Only access a room if player is already inside
+    inGivenRoom = await isInGivenRoom(roomID) 
     if (inGivenRoom) {
       next()
     } else {
+      // Clear the room state
+      store.commit('mSetCurrentGame', '')
       next(from)
     }
   } else {
@@ -94,9 +116,6 @@ const isAlreadyInRoom = async () => {
   const otherQuery = await gamesCollection.where('other_user', '==', userDoc)
   const hostDoc = await hostQuery.get()
   const otherDoc = await otherQuery.get()
-  
-  console.log(hostDoc)
-  console.log(otherDoc)
 
   // Check if there are rooms the player is a part of
   return !hostDoc.empty || !otherDoc.empty
