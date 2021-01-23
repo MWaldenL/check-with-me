@@ -28,6 +28,13 @@ router.beforeEach(async (to, from, next) => {
     next({ name: from.name })
   } else if (isEnteringRoom) { // can happen on first load or joining new room
     console.log('entering room')
+    const roomExists = await doesRoomExist(roomID)
+    // Redirect to Game Lobby if room does not exist
+    if (!roomExists) {
+      next({ name: 'GameLobby' })
+      return 
+    }
+
     const isFull = await isRoomFull(roomID) 
     const inGivenRoom = await isInGivenRoom(roomID) 
     const alreadyInRoom = await isAlreadyInRoom()
@@ -93,6 +100,11 @@ const isAlreadyInRoom = async () => {
 
   // Check if there are rooms the player is a part of
   return !hostDoc.empty || !otherDoc.empty
+}
+
+const doesRoomExist = async (roomID) => {
+  const gameDoc = await gamesCollection.doc(roomID).get()
+  return gameDoc.exists
 }
 
 export default router
