@@ -78,8 +78,8 @@ export default {
   
   // Called on refreshes or new loads 
   async created() {
-    const gameDoc = gamesCollection.doc('Vc0H4f4EvY6drRKnvsk5')   // hardcoded
-    const timerDoc = timersCollection.doc('H48woDfI1lwIGZnJh4qz') // hardcoded
+    const gameDoc = gamesCollection.doc('ntkvzPpwZkGU3qpoTZJb')   // hardcoded
+    const timerDoc = timersCollection.doc('ybuBEahXfM94JanZar4s') // hardcoded
     const game = await gameDoc.get()
     const timer = await timerDoc.get()
 
@@ -98,7 +98,7 @@ export default {
     // Set first run and last player moved 
     this.bIsFirstRun = this.currentGameData.is_first_run
     this.lastPlayerMoved = this.currentGameData.last_player_moved
-    
+
     // Set the last player moved from the timer document, since this is updated as well
     this.lastPlayerMoved = timer.data().last_player_moved
 
@@ -123,7 +123,7 @@ export default {
   async mounted() {
     // Listen for board state changes
     gamesCollection
-      .doc('Vc0H4f4EvY6drRKnvsk5') // Obtain from state in the future when rooms are implemented
+      .doc('ntkvzPpwZkGU3qpoTZJb') // Obtain from state in the future when rooms are implemented
       .onSnapshot(async doc => {
         const data = doc.data()
         const boardState = data.board_state
@@ -203,7 +203,7 @@ export default {
 
     // Listen for timer state changes
     timersCollection
-      .doc('H48woDfI1lwIGZnJh4qz')
+      .doc('ybuBEahXfM94JanZar4s')
       .onSnapshot(async doc => {
         // Sync the other player's timer with the db
         const data = doc.data()
@@ -343,8 +343,10 @@ export default {
 
     async updateSelfScore(winner) {
       // gets user documents for current player and opponent
+      console.log(auth.currentUser)
       const selfDoc = usersCollection.doc(auth.currentUser.uid)
       const otherDoc = this.isSelfHost ? usersCollection.doc(this.otherUserID) : usersCollection.doc(this.hostUserID)
+      console.log(otherDoc)
 
       const self = await selfDoc.get()
       const other = await otherDoc.get()
@@ -499,8 +501,8 @@ export default {
       this.isSelfTimeRunning = true
       this.setPlayerToMove('self')
 
-      const selfTimeQuery = await axios.get(`http://localhost:5000/isTimeRunning/${this.selfPlayerType}`)
-      const selfTimeLeftQuery = await axios.get(`http://localhost:5000/currentTimeLeft/${this.selfPlayerType}`)
+      const selfTimeQuery = await axios.get(`https://us-central1-check-with-me.cloudfunctions.net/clock/isTimeRunning/${this.selfPlayerType}`)
+      const selfTimeLeftQuery = await axios.get(`https://us-central1-check-with-me.cloudfunctions.net/clock/currentTimeLeft/${this.selfPlayerType}`)
       const isSelfServerTimeRunning = selfTimeQuery.data.isTimeRunning
       const shouldTimeTick = this.selfSeconds > 0
 
@@ -510,9 +512,9 @@ export default {
         // Start server time
         if (!isSelfServerTimeRunning) {
           if (this.selfPlayerType === 'host') {
-            await axios.get(`http://localhost:5000/startHostTime/${this.selfSeconds}`)
+            await axios.get(`https://us-central1-check-with-me.cloudfunctions.net/clock/startHostTime/${this.selfSeconds}`)
           } else if (this.selfPlayerType === 'other') {
-            await axios.get(`http://localhost:5000/startOtherTime/${this.selfSeconds}`)
+            await axios.get(`https://us-central1-check-with-me.cloudfunctions.net/clock/startOtherTime/${this.selfSeconds}`)
           }
         }
 
@@ -534,9 +536,9 @@ export default {
       
       // Stop server time
       if (this.selfPlayerType === 'host') {
-        await axios.get('http://localhost:5000/stopHostTime')
+        await axios.get('https://us-central1-check-with-me.cloudfunctions.net/clock/stopHostTime')
       } else {
-        await axios.get('http://localhost:5000/stopOtherTime')
+        await axios.get('https://us-central1-check-with-me.cloudfunctions.net/clock/stopOtherTime')
       }
     },
 
@@ -546,7 +548,7 @@ export default {
       this.setPlayerToMove('enemy')
 
       // Start time in server
-      const enemyTimeQuery = await axios.get(`http://localhost:5000/isTimeRunning/${this.enemyPlayerType}`)
+      const enemyTimeQuery = await axios.get(`https://us-central1-check-with-me.cloudfunctions.net/clock/isTimeRunning/${this.enemyPlayerType}`)
       const isEnemyServerTimeRunning = enemyTimeQuery.data.isTimeRunning
       const shouldTimeTick = this.enemySeconds > 0
 
@@ -555,9 +557,9 @@ export default {
       } else {
         if (!isEnemyServerTimeRunning) {
           if (this.enemyPlayerType === 'host') {
-            await axios.get(`http://localhost:5000/startHostTime/${this.enemySeconds}`)
+            await axios.get(`https://us-central1-check-with-me.cloudfunctions.net/clock/startHostTime/${this.enemySeconds}`)
           } else {
-            await axios.get(`http://localhost:5000/startOtherTime/${this.enemySeconds}`)
+            await axios.get(`https://us-central1-check-with-me.cloudfunctions.net/clock/startOtherTime/${this.enemySeconds}`)
           }
         }
       
@@ -579,15 +581,15 @@ export default {
 
       // Start time in server
       if (this.enemyPlayerType === 'host') {
-        await axios.get(`http://localhost:5000/stopHostTime`)
+        await axios.get(`https://us-central1-check-with-me.cloudfunctions.net/clock/stopHostTime`)
       } else {
-        await axios.get(`http://localhost:5000/stopOtherTime`)
+        await axios.get(`https://us-central1-check-with-me.cloudfunctions.net/clock/stopOtherTime`)
       }
     },
 
     async setSelfTimeFromServerOrDB() {
       const timerDB = await this.currentTimerDoc.get()
-      const timeRunningQuery = await axios.get(`http://localhost:5000/isTimeRunning/${this.selfPlayerType}`)
+      const timeRunningQuery = await axios.get(`https://us-central1-check-with-me.cloudfunctions.net/clock/isTimeRunning/${this.selfPlayerType}`)
       this.isSelfTimeRunning = timeRunningQuery.data.isTimeRunning
 
       // If player's time is not running, sync with db
@@ -596,14 +598,14 @@ export default {
           timerDB.data().host_timeLeft : 
           timerDB.data().other_timeLeft
       } else { // Otherwise, sync with server
-        const selfTimeQuery = await axios.get(`http://localhost:5000/currentTimeLeft/${this.selfPlayerType}`)
+        const selfTimeQuery = await axios.get(`https://us-central1-check-with-me.cloudfunctions.net/clock/currentTimeLeft/${this.selfPlayerType}`)
         this.selfSeconds = selfTimeQuery.data.timeLeft
       }
     },
 
     async setEnemyTimeFromServerOrDB() {
       const timerDB = await this.currentTimerDoc.get()
-      const timeQuery = await axios.get(`http://localhost:5000/isTimeRunning/${this.enemyPlayerType}`)
+      const timeQuery = await axios.get(`https://us-central1-check-with-me.cloudfunctions.net/clock/isTimeRunning/${this.enemyPlayerType}`)
       this.isEnemyTimeRunning = timeQuery.data.isTimeRunning
 
       // If player's time is not running, sync with db
@@ -612,7 +614,7 @@ export default {
           timerDB.data().other_timeLeft :        
           timerDB.data().host_timeLeft 
       } else { // Otherwise, sync with server
-        const enemyTimeQuery = await axios.get(`http://localhost:5000/currentTimeLeft/${this.enemyPlayerType}`)
+        const enemyTimeQuery = await axios.get(`https://us-central1-check-with-me.cloudfunctions.net/clock/currentTimeLeft/${this.enemyPlayerType}`)
         this.enemySeconds = enemyTimeQuery.data.timeLeft
       }
     }
