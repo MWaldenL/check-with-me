@@ -39,16 +39,13 @@ router.beforeEach(async (to, from, next) => {
     // Check if user is authenticated
     const thisUser = auth.currentUser
     if (!thisUser) {
-      console.log('not logged in')
       next({ name: 'Login' })
       return
     }
-    console.log('logged in')
 
     // Redirect to Game Lobby if room does not exist
     const roomExists = await doesRoomExist(roomID)
     if (!roomExists) {
-      // Clear the room state if the room doesn't exist
       store.commit('mSetCurrentGame', '')
       next({ name: 'GameLobby' })
       return 
@@ -64,13 +61,13 @@ router.beforeEach(async (to, from, next) => {
       await joinRoomFromLink(roomID)
     } 
 
-    // Only access a room if player is already inside
+    // Only access a room if the given player is already inside
     inGivenRoom = await isInGivenRoom(roomID) 
     if (inGivenRoom) {
       next()
     } else {
-      // Clear the room state
       store.commit('mSetCurrentGame', '')
+      alert('This room is already full! Please select a vacant room.')
       next(from)
     }
   } else {
@@ -79,7 +76,6 @@ router.beforeEach(async (to, from, next) => {
 })
 
 const joinRoomFromLink = async (roomID) => {
-  console.log('join room ' + roomID)
   const userID = auth.currentUser.uid
   const gameDoc = gamesCollection.doc(roomID)
   const game = await gameDoc.get()
