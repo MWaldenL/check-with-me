@@ -58,19 +58,11 @@ export default {
   methods: {
     ...mapActions(['logoutUser']),
 
-    logout() {
-      console.log("in logout")
-      firebase.auth().signOut()
-        .then(() => {
-          this.logoutUser()
-          this.$router.push('/login')
-        })
-    },
-
     async showLogout() {
       const userID = firebase.auth().currentUser.uid
       const roomID = await checkUserGame(userID)
       
+      // If coming from game room, show modal, else simply logout
       if (this.$route.name !== 'PlayBoard') {
         this.logout()
       } else if (roomID) {
@@ -79,21 +71,25 @@ export default {
     },
 
     async logoutFromGame() {
-      console.log(this.inGameLogout)
-
       const userID = firebase.auth().currentUser.uid
       const roomID = await checkUserGame(userID)
       const room = await getSingleGame(roomID)
-
-      if (room.host_user.id === userID){
+      const winnerFromLogout = 
+        room.host_user.id === userID ? 
+        room.other_user.id : 
+        room.host_user.id
+      
+      await this.setWinnerFromLogout(roomID, winnerFromLogout)
+      
+      // If host user logs out, delete the game, else simply remove the guest
+      if (room.host_user.id === userID) {
         await deleteGame(roomID)
-        this.logout()
       } else {
-        console.log('other logged out')
-        await this.setWinnerFromLogout(roomID, room.host_user.id)
         await removeGuest(roomID)
-        this.logout()
       }
+
+      // Logout after processing
+      this.logout()
     },
 
     async playCheck() {
@@ -113,6 +109,15 @@ export default {
 
     checkRoute() {
       console.log(this.$route.name)
+    },
+
+    logout() {
+      console.log("in logout")
+      firebase.auth().signOut()
+        .then(() => {
+          this.logoutUser()
+          this.$router.push('/login')
+        })
     }
   }
 }
