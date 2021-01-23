@@ -55,7 +55,7 @@ module.exports = {
    */
   /*
   before(cb) {
-    //console.log('global before')
+    ////console.log('global before')
     cb();
   },
   */
@@ -65,7 +65,7 @@ module.exports = {
    */
   /*
   beforeEach(browser, cb) {
-    //console.log('global beforeEach')
+    ////console.log('global beforeEach')
     cb();
   },
   */
@@ -76,7 +76,7 @@ module.exports = {
   /*
   afterEach(browser, cb) {
     browser.perform(function() {
-      //console.log('global afterEach')
+      ////console.log('global afterEach')
       cb();
     });
   },
@@ -87,7 +87,7 @@ module.exports = {
    */
   /*
   after(cb) {
-    //console.log('global after')
+    ////console.log('global after')
     cb();
   },
   */

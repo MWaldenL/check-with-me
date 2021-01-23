@@ -178,10 +178,10 @@ export default {
 
     async register () {
       if (this.isValidRegistration) {
-        console.log('Registering')
+        //console.log('Registering')
         this.handleDBUserRegistration()
       } else {
-        console.log('Invalid fields')
+        //console.log('Invalid fields')
         this.clearErrors()
         this.handleInvalidFields()
       }
@@ -220,14 +220,14 @@ export default {
               .catch(error => {
                 // Handle duplicate emails
                 if (error.code === 'auth/email-already-in-use') {
-                  console.log('Email already in use')
+                  //console.log('Email already in use')
                   this.clearErrors()
                   this.errors.emailExists = errorMessages.register.EMAIL_EXISTS
                 } 
-                console.log(error)
+                //console.log(error)
               })
           } else { // That username is in use
-            console.log('Username already in use')
+            //console.log('Username already in use')
             this.clearErrors()
             this.errors.usernameExists = errorMessages.register.USERNAME_EXISTS
           }

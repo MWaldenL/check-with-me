@@ -1,6 +1,8 @@
 <template>
   <div id = 'GameLobbyPage'>
     <Sidebar />
+    <CreateRoomModal v-show="showModal" @close="showModal = false" />
+    <!-- <CreateRoomModal v-bind:showModal="showModal" @close="showModal = false" /> -->
     <div id = 'GameLobbyProper'>
       <div id="GameLobbyPageLabel">Game Lobby</div>
       <hr id="GameLobbyRule">
@@ -44,17 +46,19 @@
 import firebase from 'firebase'
 import { db } from '@/firebase'
 import Sidebar from '@/components/sidebar.vue'
+import CreateRoomModal from '@/components/createRoomModal.vue'
 import {
   getGames,
-  getPrevGames,
   roomQuery,
-  getCount
+  getCount,
+  checkUserGame
 } from '@/resources/gameModel.js'
 
 export default {
   name: 'GameLobby',
   components: {
-    Sidebar
+    Sidebar,
+    CreateRoomModal
   },
   data () {
     return{
@@ -65,7 +69,9 @@ export default {
       prevStart: [],
       games: [],
       lobbyNextQuery: roomQuery,
-      lobbyPrevQuery: roomQuery
+      lobbyPrevQuery: roomQuery,
+
+      showModal: false
     }
   },
   computed: {
@@ -81,13 +87,17 @@ export default {
       }
     }
   },
-  created() {
+  async created() {
     this.lastPageNum = getCount()
+
+    const gameID = await checkUserGame(firebase.auth().currentUser.uid)
+    if(gameID !== false)
+      this.$router.push({ path: '/room/' + gameID })
 
     let initGames = getGames(roomQuery)
     initGames
     .then(result => {
-      console.log(result.games)
+      //console.log(result.games)
 
       this.games = result.games
       this.lastVisible = result.lastVisible
@@ -130,7 +140,7 @@ export default {
     },
 
     joinRoom(room_id) {
-      console.log("INSIDE")
+      //console.log("INSIDE")
       let user_key = firebase.auth().currentUser.uid
       
       let room = this.games.find(obj => {
@@ -146,12 +156,12 @@ export default {
         other_user:  db.doc('users/' + user_key)
       })
       .catch(error => {
-        console.log("Error getting documents: ", error);
+        //console.log("Error getting documents: ", error);
       })
     },
 
     createRoom() {
-      alert("Hello! I am create room (next ticket)!!");
+      this.showModal = true
     }
   }
 }

@@ -119,9 +119,15 @@ export const getBoardFromPDN = (pdn, playerIsBlack) => {
  * @param isPlayerBlack if the player is black
  */
 export const getPDNFromBoard = (board, turn, isPlayerBlack) => {
-  let res = `[FEN "${turn}:`
+  // let res = `[FEN "${turn}:`
   let white = ''
   let black = ''
+
+  let res = {
+    PDN: `[FEN "${turn}:`,
+    whiteCount: 0,
+    blackCount: 0
+  }
 
   // Fill in the piece values
   for (let r = 0; r < 8; r++) {
@@ -136,25 +142,28 @@ export const getPDNFromBoard = (board, turn, isPlayerBlack) => {
         } else {
           white = white.concat(`${square},`)
         }
+        res.whiteCount++
       } else if (board[r][c].bHasBlackChip) {
         if (board[r][c].bHasBlackKing) {
           black = black.concat(`K${square},`)
         } else {
           black = black.concat(`${square},`)
         }
+        res.blackCount++
       }
     }
   }
 
   // Create the string from the arrays
   if (white.length > 0) {
-    res = res.concat(`W${white}`)
+    res.PDN = res.PDN.concat(`W${white}`)
   }
   
   if (black.length > 0) {
-    res = res.slice(0, res.length-1).concat(`:B${black}`)
+    res.PDN = res.PDN.slice(0, res.PDN.length-1).concat(`:B${black}`)
   }
 
-  res = res.slice(0, res.length-1).concat(`"]`)
+  res.PDN = res.PDN.slice(0, res.PDN.length-1).concat(`"]`)
+
   return res
 }

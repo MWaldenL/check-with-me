@@ -3,10 +3,13 @@ import { getPDNFromBoard } from '../../services/boardParsingService'
 
 
 const writeBoardToDB = async (cells, isPlayerBlack) => {
+  const dataFromBoard = getPDNFromBoard(cells, 'X', isPlayerBlack)
   await gamesCollection
     .doc('Vc0H4f4EvY6drRKnvsk5')
     .update({ 
-      board_state: getPDNFromBoard(cells, 'X', isPlayerBlack) 
+      board_state: dataFromBoard.PDN,
+      white_count: dataFromBoard.whiteCount,
+      black_count: dataFromBoard.blackCount
     })
 }
 
@@ -33,6 +36,14 @@ const actions = {
    */
   async aUpdateBoard({ commit }, payload) {
     commit('mUpdateBoard', payload)
+  },
+
+  /**
+   * Updates the piece counts
+   * @param counts object containing current counts for white and black
+   */
+  async aUpdateCount ({ commit }, count) {
+    commit('mUpdateCount', count)
   },
 
   /**

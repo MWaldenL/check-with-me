@@ -1,7 +1,8 @@
-let express = require('express')
-let cors = require('cors')
-let serviceAccount = require('./permissions.json')
-let admin = require('firebase-admin')
+const functions = require('firebase-functions');
+const express = require('express')
+const cors = require('cors')
+const serviceAccount = require('./permissions.json')
+const admin = require('firebase-admin')
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
@@ -130,3 +131,4 @@ app.get('/isTimeRunning/:player', (req, res) => {
 })
 
 app.listen(5000, () => console.log('Listening on port 5000'))
+exports.clock = functions.https.onRequest(app)

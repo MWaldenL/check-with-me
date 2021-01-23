@@ -12,28 +12,33 @@
           </span>
         </keep-alive>
       </h1> 
-      <h1 id="p1-count" class="pt-3"> Pieces left: {{ blackCount }} </h1>
+      <h1 id="p1-count" class="pt-3"> Pieces left: {{ otherCount }} </h1>
     </div>
 
-    <!-- Board -->
-    <div id="table">
-      <table>
-        <tr v-for="row in 8" :key="row">
-          <Cell 
-            v-for="col in 8" 
-            :row="9 - row" 
-            :col="col" 
-            :canMakeMove="canMakeMove"
-            :selfColor="selfColor"
-            :key="col" 
-            @makeMove="updateLastPlayerMoved"/>
-        </tr>
-      </table>
-    </div>
+    <b-overlay :show="!activeGame" bg-color="#2d2d2d" blur="0" opacity="0.75">
+      <!-- Board -->
+      <div id="table">
+        <table>
+          <tr v-for="row in 8" :key="row">
+            <Cell 
+              v-for="col in 8" 
+              :row="9 - row" 
+              :col="col" 
+              :canMakeMove="canMakeMove"
+              :selfColor="selfColor"
+              :key="col" 
+              @makeMove="updateLastPlayerMoved"/>
+          </tr>
+        </table>
+      </div>
+      <template #overlay>
+        <ResultOverlay />
+      </template>
+    </b-overlay>
     
     <!-- Self -->
     <div id="p2-details" class="details">
-      <h1 id="p2-count" class="pb-4"> Pieces left: {{ whiteCount }} </h1>
+      <h1 id="p2-count" class="pb-4"> Pieces left: {{ selfCount }} </h1>
       <h1>
         <keep-alive>
           <span class="time text-white" id="selfTime">
@@ -48,7 +53,10 @@
 </template>
 
 <script>
+import axios from 'axios'
 import { bSourceHasWhite, bSourceHasWhiteKing } from '@/store/services/moveCaptureService'
+import { checkIfSelfStuck, checkIfEnemyStuck } from '@/store/services/winCheckerService'
+import { getNewScore } from '@/store/services/eloService'
 import { 
   auth, 
   gamesCollection, 
@@ -56,48 +64,63 @@ import {
   timersCollection
 } from '@/firebase'
 import { mapGetters, mapActions } from 'vuex'
-import axios from 'axios'
 import Cell from './cell'
 import Sidebar from './sidebar'
+import ResultOverlay from './resultOverlay'
 
 export default {
   name: 'Grid',
   components: {
     Cell,
-    Sidebar
+    Sidebar,
+    ResultOverlay
   },
   
+  // Called on refreshes or new loads 
   async created() {
-    const gameDoc = await gamesCollection.doc('Vc0H4f4EvY6drRKnvsk5')
+    const gameDoc = gamesCollection.doc('Vc0H4f4EvY6drRKnvsk5')   // hardcoded
+    const timerDoc = timersCollection.doc('H48woDfI1lwIGZnJh4qz') // hardcoded
     const game = await gameDoc.get()
-    this.lastPlayerMoved = game.data().last_player_moved // change to local var if fail
-    const player = this.lastPlayerMoved === game.data().host_user ? 'other' : 'host'
+    const timer = await timerDoc.get()
 
-    // Set the current game
-    this.currentGame = gameDoc
+    // Set the game data
+    this.currentGameData = game.data()
 
-    // Get the enemy username
+    // Check if someone has won from a logout
+    // The player present in the room will receive a modal, and
+    // the player who logged out will know from their score that they lost
+    this.setWinnerFromLogout(game.data())
+
+    // Set collections
+    this.currentGameDoc = gameDoc
+    this.currentTimerDoc = timerDoc 
+
+    // Set first run and last player moved 
+    this.bIsFirstRun = this.currentGameData.is_first_run
+    this.lastPlayerMoved = this.currentGameData.last_player_moved
+    
+    // Set the last player moved from the timer document, since this is updated as well
+    this.lastPlayerMoved = timer.data().last_player_moved
+
+    // Set usernames
+    await this.setSelfUsername()
     await this.aGetEnemyUsername()
 
-    // Set the player's username
-    const currentUser = await this.currentUser.data 
-    this.selfName = currentUser.username
+    // Set timer data
+    // If player time is not running, fetch from db else fetch from server
+    // Handles cases where a player opens their side of the game when their time is already running
+    await this.setSelfTimeFromServerOrDB()
+    await this.setEnemyTimeFromServerOrDB()
 
-    // Check first if the time is running
-    const timerState = await axios.get(`http://localhost:5000/isTimeRunning`)
-
-    // Only start the clock if no one else is running the clock
-    if (!timerState.data.isTimeRunning) {
-      await axios.get(`http://localhost:5000/startTime/H48woDfI1lwIGZnJh4qz/${player}`)
-    }
-
-    // Put back in mounted hook if it fails
-    await this.aSetHostTimeLeft() 
-    await this.aSetOtherTimeLeft()
+    // Set the initial player to move
+    const playerToMove = this.bIsFirstRun ? this.playerIfFirstRun : this.playerIfOngoingGame // if async playerIfOngoingGame bug make local again 
+    this.setPlayerToMove(playerToMove)
+    
+    // Check if time is already running
+    this.determineClockToRun()
   },
 
   async mounted() {
-    // Set up db listeners
     // Listen for board state changes
     gamesCollection
       .doc('Vc0H4f4EvY6drRKnvsk5') // Obtain from state in the future when rooms are implemented
@@ -107,9 +130,53 @@ export default {
         const playerIsWhite = this.selfColor === 'w'
         const playerIsBlack = this.selfColor === 'b'
 
+        // Check if someone has logged out in game
+        this.setWinnerFromLogout(data)
+
         // Update the last player moved and the position
+        this.bIsFirstRun = data.is_first_run
         this.lastPlayerMoved = data.last_player_moved
         this.aUpdateBoard({ boardState, playerIsBlack })
+        this.aUpdateCount({ 
+          white: data.white_count, 
+          black: data.black_count
+        })
+
+        // Check for stuck states
+        let whiteStuck
+        let blackStuck
+
+        if (this.isSelfWhite) { 
+          whiteStuck = checkIfSelfStuck(this.board, true)
+          blackStuck = checkIfEnemyStuck(this.board, true)
+        } else {
+          // console.log('black view')
+          whiteStuck = checkIfEnemyStuck(this.board, false)
+          blackStuck = checkIfSelfStuck(this.board, false)
+        }
+
+        console.log("white: " + whiteStuck + " " + data.white_count)
+        console.log("black: " + blackStuck + " " + data.black_count)
+
+        if (whiteStuck && blackStuck) { // if both players are stuck, call a draw
+          //console.log("DRAW DRAW DRAW")
+          this.updateSelfScore('D')
+          this.aSetWinner('D')
+          this.aSetActiveGame(false)
+          return
+        } else if (whiteStuck || data.white_count === 0) { // if only white is stuck or white has no more pieces, black wins
+          //console.log("BLACK BLACK BLACK")
+          this.updateSelfScore('B')
+          this.aSetWinner('B')
+          this.aSetActiveGame(false)
+          return
+        } else if (blackStuck || data.black_count === 0) { // if only black is stuck or black has no more pieces, white wins
+          //console.log("WHITE WHITE WHITE")
+          this.updateSelfScore('W')
+          this.aSetWinner('W')
+          this.aSetActiveGame(false)
+          return
+        }
 
         // Highlight all possible captures when player is not in a capture sequence
         if (this.lastPlayerMoved !== auth.currentUser.uid) {
@@ -134,20 +201,29 @@ export default {
         }
       })
 
-    // Listen for timer ticks
+    // Listen for timer state changes
     timersCollection
       .doc('H48woDfI1lwIGZnJh4qz')
-      .onSnapshot(doc => {
-        // Set the timer of the next player to move
-        if (this.lastPlayerMoved === this.hostUserID) {
-          this.aSetOtherTimeLeft()
-        } else {
-          this.aSetHostTimeLeft()
+      .onSnapshot(async doc => {
+        // Sync the other player's timer with the db
+        const data = doc.data()
+        const remoteEnemyTime = this.isSelfHost ? data.other_timeLeft : data.host_timeLeft
+        this.enemySeconds = remoteEnemyTime // might implement finer implementations but this one for now
+
+        // Determine whose clock to run
+        if (!this.bIsFirstRun) {
+          //console.log('snapshot() determine running clock')
+          this.determineClockToRun()
         }
-        
+
         // Check if someone has won on time
-        const didBlackWin = (this.hostTimeLeft === 0 && this.isHostWhite) || (this.otherTimeLeft === 0 && !this.isHostWhite)
-        const didWhiteWin = (this.otherTimeLeft === 0 && this.isHostWhite) || (this.hostTimeLeft === 0 && !this.isHostWhite)
+        const didBlackWinOnTime = 
+          (this.hostTimeLeft === 0 && this.isHostWhite) || 
+          (this.otherTimeLeft === 0 && !this.isHostWhite)
+        const didWhiteWinOnTime = 
+          (this.otherTimeLeft === 0 && this.isHostWhite) || 
+          (this.hostTimeLeft === 0 && !this.isHostWhite)
+  
         // if (didBlackWin) {
         //   this.aSetWinner('B')
         // } else if (didWhiteWin) {
@@ -159,11 +235,20 @@ export default {
   data () {
     return {
       selfName: '',
-      enemyName: '',
-      currentGame: null,
+      currentGameDoc: null,
+      currentGameData: null,
+      currentTimerDoc: null,
+      currentRunningTimer: null,
+
+      playerToMove: null,
       lastPlayerMoved: null,
-      bHostRunning: true,
-      bOtherRunning: false
+      selfSeconds: 0,      
+      enemySeconds: 0,
+
+      isSelfTimeRunning: false,
+      isEnemyTimeRunning: false,
+      bIsFirstRun: true,
+      prevSourceSquare: null
     }
   },
 
@@ -181,29 +266,50 @@ export default {
       otherTimeLeft: 'getOtherTimeLeft',
       isCapturing: 'getCaptureSequenceState',
       isCaptureRequired: 'getIsCaptureRequired',
-      prevDestSquare: 'getPrevDestSquare'
+      prevDestSquare: 'getPrevDestSquare',
+      activeGame: 'getActiveGame'
     }),
+
+    isSelfHost() {
+      return auth.currentUser.uid === this.hostUserID
+    },
 
     canMakeMove() {
       return this.lastPlayerMoved !== auth.currentUser.uid
-    },
-
-    selfSeconds() {
-      return (auth.currentUser.uid === this.hostUserID) ?
-        this.hostTimeLeft :
-        this.otherTimeLeft
-    },
-
-    enemySeconds() {
-      return (auth.currentUser.uid === this.hostUserID) ?
-        this.otherTimeLeft :
-        this.hostTimeLeft
     },
 
     selfColor() {
       return (auth.currentUser.uid === this.hostUserID) ?
         (this.isHostWhite ? 'w' : 'b') : 
         (this.isHostWhite ? 'b' : 'w')
+    },
+
+    isSelfWhite() {
+      return this.selfColor === 'w'
+    },
+
+    selfCount() {
+      return (this.selfColor === 'w') ? this.whiteCount : this.blackCount
+    },
+
+    otherCount() {
+      return (this.selfColor === 'w') ? this.blackCount : this.whiteCount
+    },
+    
+    selfPlayerType() {
+      return this.isSelfHost ? 'host' : 'other'
+    },
+
+    enemyPlayerType() {
+      return this.isSelfHost ? 'other' : 'host'
+    },
+
+    playerIfFirstRun() {
+      return this.isSelfWhite ? 'self' : 'enemy'
+    },
+
+    playerIfOngoingGame() {
+      return this.lastPlayerMoved === auth.currentUser.uid ? 'enemy' : 'self'
     }
   },
 
@@ -223,17 +329,128 @@ export default {
   
   methods: {
     ...mapActions([
-      'aSetHostTimeLeft',
-      'aSetOtherTimeLeft',
       'aSetWinner',
       'aUpdateBoard',
+      'aUpdateCount',
       'aGetEnemyUsername',
       'aHighlightBoardCaptures',
       'aHighlightCaptureFromSequence',
       'aSetPrevDestSquare',
       'aSetCaptureRequired',
-      'aFlushStateAfterTurn'
+      'aFlushStateAfterTurn',
+      'aSetActiveGame'
     ]),
+
+    async updateSelfScore(winner) {
+      // gets user documents for current player and opponent
+      const selfDoc = usersCollection.doc(auth.currentUser.uid)
+      const otherDoc = this.isSelfHost ? usersCollection.doc(this.otherUserID) : usersCollection.doc(this.hostUserID)
+
+      const self = await selfDoc.get()
+      const other = await otherDoc.get()
+
+      // store current points for elo computation
+      const selfScore = self.data().points
+      const otherScore = other.data().points
+
+      // store current data for later update
+      let selfWinsWhite = self.data().wins_white
+      let selfWinsBlack = self.data().wins_black
+      let selfLossWhite = self.data().loss_white
+      let selfLossBlack = self.data().loss_black
+      let selfDrawWhite = self.data().draw_white
+      let selfDrawBlack = self.data().draw_black
+
+      // initialize new score for elo computation
+      let newScore
+
+      if (winner === 'D') { // if result is a draw, compute new elo ranking with score = 0.5 and add to draw count
+        newScore = getNewScore(selfScore, otherScore, 0.5)
+        if (this.selfColor === 'b')
+          selfDrawBlack++
+        else
+          selfDrawWhite++
+      } else if (winner === 'B') {
+        if (this.selfColor === 'b') { // if black wins and self is black, compute new elo ranking with score = 1 and add to black win count
+          //console.log("BLACK WINS")
+          newScore = getNewScore(selfScore, otherScore, 1)
+          selfWinsBlack++
+        } else { // if black wins and self is white, compute new elo ranking with score = 0 and add to white lose count
+          //console.log("WHITE LOSES")
+          newScore = getNewScore(selfScore, otherScore, 0)
+          selfLossWhite++
+        }
+      } else {
+        if (this.selfColor === 'w') { // if white wins and self is white, compute new elo ranking with score = 1 and add to white win count
+          //console.log("WHITE WINS")
+          newScore = getNewScore(selfScore, otherScore, 1)
+          selfWinsWhite++
+        } else { // if white wins and self is black, compute new elo ranking with score = 0 and add to black lose count
+          //console.log("BLACK LOSES")
+          newScore = getNewScore(selfScore, otherScore, 0)
+          selfLossBlack++
+        }
+      }
+
+      // console.log(newScore)
+      // console.log(selfWinsBlack)
+      // console.log(selfWinsWhite)
+      // console.log(selfLossBlack)
+      // console.log(selfLossWhite)
+      // console.log(selfDrawBlack)
+      // console.log(selfDrawWhite)
+
+      // update self user document with new values
+      await usersCollection
+        .doc(auth.currentUser.uid)
+        .update({
+          points: newScore,
+          wins_black: selfWinsBlack,
+          wins_white: selfWinsWhite,
+          loss_black: selfLossBlack,
+          loss_white: selfLossWhite,
+          draw_black: selfDrawBlack,
+          draw_white: selfDrawWhite,
+        })
+    },
+
+    async setSelfUsername() {
+      const currentUser = await this.currentUser.data 
+      this.selfName = currentUser.username
+    },
+
+    setPlayerToMove(player) {
+      this.playerToMove = player
+    },
+
+    setWinnerFromLogout(gameData) {
+      console.log(gameData)
+      const winnerFromLogout = gameData.winner_from_logout
+      console.log(auth.currentUser.uid)
+      if (winnerFromLogout === auth.currentUser.uid) {
+        const winnerColor = this.selfColor.toUpperCase()
+        this.updateSelfScore(winnerColor)
+        this.aSetWinner(winnerColor)
+        this.aSetActiveGame(false)
+      } 
+    },
+
+    async determineClockToRun() {
+      if (this.lastPlayerMoved !== auth.currentUser.uid) { // opponent last move
+        await this.stopEnemyTime()
+        await this.startSelfTime()
+      } else { // self made last move
+        await this.stopSelfTime()
+        await this.startEnemyTime()
+      }
+    },
+
+    async writeUpdatedTimeToDB() {
+      const newTimeObj = this.isSelfHost ? 
+        { host_timeLeft: this.selfSeconds } : 
+        { other_timeLeft: this.selfSeconds } 
+      await this.currentTimerDoc.update(newTimeObj)   
+    },
 
     async endPlayerTurn() {
       const isMoveWhite = 
@@ -241,29 +458,162 @@ export default {
         bSourceHasWhiteKing(this.board, this.prevDestSquare) 
 
       this.lastPlayerMoved = (this.isHostWhite ^ isMoveWhite) ? this.otherUserID : this.hostUserID
+      // Write last player moved to game doc 
+      await this.currentGameDoc.update({ 
+        last_player_moved: this.lastPlayerMoved 
+      })
 
-      console.log('ending player turn')
+      // Write last player moved to timer doc
+      await this.currentTimerDoc.update({
+        last_player_moved: this.lastPlayerMoved
+      }) 
       
       // Prevent state leaks
       this.aFlushStateAfterTurn()
 
-      // Write last player moved to db 
-      await this.currentGame.update({ last_player_moved: this.lastPlayerMoved })
+      // Stop self time and start enemy time
+      await this.stopSelfTime()
+      await this.startEnemyTime()
 
-      // Stop the last player's clock
-      await axios.get('http://localhost:5000/stopTime')
-
-      // Start the other player's clock
-      const player = this.lastPlayerMoved === this.hostUserID ? 'other' : 'host'
-      await axios.get(`http://localhost:5000/startTime/${player}`)
+      // Write the updated self time to db
+      this.writeUpdatedTimeToDB() 
     },
 
-    updateLastPlayerMoved(coords) {
+    async updateLastPlayerMoved(coords) {
       const { nRow, nCol, nDestRow, nDestCol } = coords
       this.aSetPrevDestSquare({ nRow: nDestRow, nCol: nDestCol })
 
+      // The first move has been made
+      if (this.bIsFirstRun) {
+        this.bIsFirstRun = false
+        this.currentGameDoc.update({ is_first_run: false })
+      }
+
+      // End the player's turn if they are not currently capturing
       if (!this.isCapturing) {
-        this.endPlayerTurn()
+        await this.endPlayerTurn(this.prevSourceSquare)
+      }
+    },
+
+    async startSelfTime() {
+      this.isSelfTimeRunning = true
+      this.setPlayerToMove('self')
+
+      const selfTimeQuery = await axios.get(`http://localhost:5000/isTimeRunning/${this.selfPlayerType}`)
+      const selfTimeLeftQuery = await axios.get(`http://localhost:5000/currentTimeLeft/${this.selfPlayerType}`)
+      const isSelfServerTimeRunning = selfTimeQuery.data.isTimeRunning
+      const shouldTimeTick = this.selfSeconds > 0
+
+      if (!shouldTimeTick) {
+        clearInterval(this.currentRunningTimer)
+      } else {
+        // Start server time
+        if (!isSelfServerTimeRunning) {
+          if (this.selfPlayerType === 'host') {
+            await axios.get(`http://localhost:5000/startHostTime/${this.selfSeconds}`)
+          } else if (this.selfPlayerType === 'other') {
+            await axios.get(`http://localhost:5000/startOtherTime/${this.selfSeconds}`)
+          }
+        }
+
+        // Flush then start client time
+        clearInterval(this.currentRunningTimer)
+        this.currentRunningTimer = setInterval(() => {
+          this.selfSeconds--
+          if (this.selfSeconds <= 0) {
+            clearInterval(this.currentRunningTimer)
+          }
+        }, 1000)
+      }
+    },
+
+    async stopSelfTime() {
+      // Stop client time
+      this.isSelfTimeRunning = false
+      clearInterval(this.currentRunningTimer)
+      
+      // Stop server time
+      if (this.selfPlayerType === 'host') {
+        await axios.get('http://localhost:5000/stopHostTime')
+      } else {
+        await axios.get('http://localhost:5000/stopOtherTime')
+      }
+    },
+
+    async startEnemyTime() {
+      // Set flags in client
+      // this.isEnemyTimeRunning = true
+      this.setPlayerToMove('enemy')
+
+      // Start time in server
+      const enemyTimeQuery = await axios.get(`http://localhost:5000/isTimeRunning/${this.enemyPlayerType}`)
+      const isEnemyServerTimeRunning = enemyTimeQuery.data.isTimeRunning
+      const shouldTimeTick = this.enemySeconds > 0
+
+      if (!shouldTimeTick) {
+        clearInterval(this.currentRunningTimer)
+      } else {
+        if (!isEnemyServerTimeRunning) {
+          if (this.enemyPlayerType === 'host') {
+            await axios.get(`http://localhost:5000/startHostTime/${this.enemySeconds}`)
+          } else {
+            await axios.get(`http://localhost:5000/startOtherTime/${this.enemySeconds}`)
+          }
+        }
+      
+        // Start client time
+        clearInterval(this.currentRunningTimer)
+        this.currentRunningTimer = setInterval(() => {
+          this.enemySeconds--
+          if (this.enemySeconds <= 0) {
+            clearInterval(this.currentRunningTimer)
+          }
+        }, 1000)
+      } 
+    },
+
+    async stopEnemyTime() {
+      // Stop the enemy client's timer
+      this.isEnemyTimeRunning = false
+      clearInterval(this.currentRunningTimer)
+
+      // Start time in server
+      if (this.enemyPlayerType === 'host') {
+        await axios.get(`http://localhost:5000/stopHostTime`)
+      } else {
+        await axios.get(`http://localhost:5000/stopOtherTime`)
+      }
+    },
+
+    async setSelfTimeFromServerOrDB() {
+      const timerDB = await this.currentTimerDoc.get()
+      const timeRunningQuery = await axios.get(`http://localhost:5000/isTimeRunning/${this.selfPlayerType}`)
+      this.isSelfTimeRunning = timeRunningQuery.data.isTimeRunning
+
+      // If player's time is not running, sync with db
+      if (!this.isSelfTimeRunning) {
+        this.selfSeconds = this.isSelfHost ? 
+          timerDB.data().host_timeLeft : 
+          timerDB.data().other_timeLeft
+      } else { // Otherwise, sync with server
+        const selfTimeQuery = await axios.get(`http://localhost:5000/currentTimeLeft/${this.selfPlayerType}`)
+        this.selfSeconds = selfTimeQuery.data.timeLeft
+      }
+    },
+
+    async setEnemyTimeFromServerOrDB() {
+      const timerDB = await this.currentTimerDoc.get()
+      const timeQuery = await axios.get(`http://localhost:5000/isTimeRunning/${this.enemyPlayerType}`)
+      this.isEnemyTimeRunning = timeQuery.data.isTimeRunning
+
+      // If player's time is not running, sync with db
+      if (!this.isEnemyTimeRunning) {
+        this.enemySeconds = this.isSelfHost ? 
+          timerDB.data().other_timeLeft :        
+          timerDB.data().host_timeLeft 
+      } else { // Otherwise, sync with server
+        const enemyTimeQuery = await axios.get(`http://localhost:5000/currentTimeLeft/${this.enemyPlayerType}`)
+        this.enemySeconds = enemyTimeQuery.data.timeLeft
       }
     }
   }

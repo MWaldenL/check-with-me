@@ -1,29 +1,29 @@
 const mutations = {
-  setCurrentGame(state, gameID) {
+  mSetCurrentGame(state, gameID) {
     state.currentGameID = gameID
   },
 
-  setHostUser(state, uid) {
+  mSetHostUser(state, uid) {
     state.hostUser = uid
   },
 
-  setOtherUser(state, uid) {
+  mSetOtherUser(state, uid) {
     state.otherUser = uid
   },
   
-  setEnemyUsername(state, username) {
+  mSetEnemyUsername(state, username) {
     state.enemyUsername = username
   },
 
-  setHostTimeLeft(state, time) {
+  mSetHostTimeLeft(state, time) {
     state.hostTimeLeft = time
   },
 
-  setOtherTimeLeft(state, time) {
+  mSetOtherTimeLeft(state, time) {
     state.otherTimeLeft = time
   },
   
-  setHostIsWhite(state, isWhite) {
+  mSetHostIsWhite(state, isWhite) {
     state.isHostWhite = isWhite
   }
 }

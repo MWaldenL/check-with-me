@@ -7,7 +7,6 @@ const getters = {
   getIsCaptureRequired: state => state.bIsCaptureRequired,
   getCaptureSequenceState: state => state.bStartedCaptureSequence,
   getActiveGame: state => state.bActiveGame,
-  getInactiveGame: state => !state.bActiveGame,
   getPrevDestSquare: state => state.prevDestSquare,
   getWinner: state => state.cWinner
 }
