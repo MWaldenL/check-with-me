@@ -5,7 +5,8 @@ const mutations = {
       host_user,
       other_user,
       timer_id,
-      is_host_white
+      is_host_white,
+      last_player_moved
     } = gameDetails
 
     state.boardState = '[FEN "O:W1,3,5,7,10,12,14,16,17,19,21,23:B42,44,46,48,49,51,53,55,58,60,62,64"]'
@@ -14,6 +15,7 @@ const mutations = {
     state.hostUser = host_user
     state.otherUser = other_user
     state.isHostWhite = is_host_white
+    state.lastPlayerMoved = last_player_moved.id
   },
 
   mSetCurrentGame(state, gameID) {
