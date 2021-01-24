@@ -3,7 +3,7 @@
   <Sidebar />
   <h1 id="title">How to Play</h1>
   <b-nav tabs justified v-b-scrollspy:instructions-box class="instructions">
-    <b-nav-item class="nav-item" href="#what-is-checkers" @click="scrollIntoView">What is Checkers</b-nav-item>
+    <b-nav-item class="nav-item" href="#what-is-checkers" @click="scrollIntoView">What is Checkers?</b-nav-item>
     <b-nav-item class="nav-item" href="#prep-objective" @click="scrollIntoView">Preparation and Objectives</b-nav-item>
     <b-nav-item class="nav-item" href="#mechanics" @click="scrollIntoView">Game Mechanics</b-nav-item>
     <b-nav-item class="nav-item" href="#how-to-win" @click="scrollIntoView">How to Win</b-nav-item>
