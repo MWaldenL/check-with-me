@@ -48,6 +48,11 @@
         {{ selfName }}
       </h1>
     </div>
+    
+    <!-- Buttons -->
+    <b-button id="draw" class="btn-info" @click="offerDraw" v-if="isBoardEligibleForDraw">Draw</b-button>
+    <DrawModal @acceptDraw="endGameInDraw" @rejectDraw="beginDrawCounter" />
+
     <!-- <b-button id="resign" class="btn-danger">Resign</b-button> -->
   </div>
 </template>
@@ -67,13 +72,15 @@ import { mapGetters, mapActions } from 'vuex'
 import Cell from './cell'
 import Sidebar from './sidebar'
 import ResultOverlay from './resultOverlay'
+import DrawModal from './drawModal'
 
 export default {
   name: 'Grid',
   components: {
     Cell,
     Sidebar,
-    ResultOverlay
+    ResultOverlay,
+    DrawModal
   },
   
   // Called on refreshes or new loads 
@@ -127,10 +134,11 @@ export default {
       .onSnapshot(async doc => {
         const data = doc.data()
         const boardState = data.board_state
+        const drawOfferedBy = data.draw_offered_by
         const playerIsWhite = this.selfColor === 'w'
         const playerIsBlack = this.selfColor === 'b'
 
-        // Check if someone has logged out in game
+        // Check if someone has logged out while in game
         this.setWinnerFromLogout(data)
 
         // Update the last player moved and the position
@@ -141,6 +149,12 @@ export default {
           white: data.white_count, 
           black: data.black_count
         })
+
+        // If a player has declined a draw, count the player's moves
+       
+
+        // Listen for and handle draw offers
+        this.handleDrawOffer(drawOfferedBy)
 
         // Check for stuck states
         let whiteStuck
@@ -248,7 +262,11 @@ export default {
       isSelfTimeRunning: false,
       isEnemyTimeRunning: false,
       bIsFirstRun: true,
-      prevSourceSquare: null
+      prevSourceSquare: null,
+
+      showingDrawModal: false,
+      isCountingMovesForDraw: false,
+      drawCounter: 0
     }
   },
 
@@ -310,6 +328,10 @@ export default {
 
     playerIfOngoingGame() {
       return this.lastPlayerMoved === auth.currentUser.uid ? 'enemy' : 'self'
+    },
+
+    isBoardEligibleForDraw() {
+      return this.selfCount <= 3 && this.otherCount <= 3
     }
   },
 
@@ -341,6 +363,14 @@ export default {
       'aSetActiveGame'
     ]),
 
+    async setSelfUsername() {
+      const currentUser = await this.currentUser.data 
+      this.selfName = currentUser.username
+    },
+
+    /**
+     * Post-game methods
+     */
     async updateSelfScore(winner) {
       // gets user documents for current player and opponent
       const selfDoc = usersCollection.doc(auth.currentUser.uid)
@@ -413,14 +443,57 @@ export default {
           draw_white: selfDrawWhite,
         })
     },
-
-    async setSelfUsername() {
-      const currentUser = await this.currentUser.data 
-      this.selfName = currentUser.username
+    
+    async offerDraw() {
+      await this.currentGameDoc.update({ 
+        draw_offered_by: this.selfColor
+      })
     },
 
-    setPlayerToMove(player) {
-      this.playerToMove = player
+    handleDrawOffer(drawOfferedBy) {
+      this.showingDrawModal = drawOfferedBy !== this.selfColor
+    },
+
+    endGameInDraw() {
+      this.updateSelfScore('D')
+      this.aSetWinner('D')
+      this.aSetActiveGame(false)
+    },
+
+    handleDrawCount() {
+      // If last move was a capture, reset draw counter
+      if (isLastMoveCapture) {
+        this.resetDrawCounter()
+        return 
+      }
+
+      // Only increment when someone has declined a draw offer, 
+      // when the current player has moved,
+      // and if the last move was not a capture
+      const willIncrementDrawCounter = 
+        this.isCountingMovesForDraw && 
+        this.lastPlayerMoved === auth.currentUer.uid
+
+      if (willIncrementDrawCounter) {
+        this.incrementDrawCounter()
+      } 
+
+      // End the game after 20 moves if a player has failed to make a capture2
+      if (this.drawCounter === 20) {
+        this.endGameInDraw()
+      }
+    },
+
+    beginDrawCounter() {
+      this.isCountingMovesForDraw = true
+    },
+
+    incrementDrawCounter() {
+      this.drawCounter++
+    },
+
+    resetDrawCounter() {
+      this.drawCounter = 0
     },
 
     setWinnerFromLogout(gameData) {
@@ -435,21 +508,12 @@ export default {
       } 
     },
 
-    async determineClockToRun() {
-      if (this.lastPlayerMoved !== auth.currentUser.uid) { // opponent last move
-        await this.stopEnemyTime()
-        await this.startSelfTime()
-      } else { // self made last move
-        await this.stopSelfTime()
-        await this.startEnemyTime()
-      }
-    },
 
-    async writeUpdatedTimeToDB() {
-      const newTimeObj = this.isSelfHost ? 
-        { host_timeLeft: this.selfSeconds } : 
-        { other_timeLeft: this.selfSeconds } 
-      await this.currentTimerDoc.update(newTimeObj)   
+    /**
+     * Turn methods
+     */
+    setPlayerToMove(player) {
+      this.playerToMove = player
     },
 
     async endPlayerTurn() {
@@ -495,6 +559,10 @@ export default {
       }
     },
 
+
+    /**
+     * Timer methods
+     */
     async startSelfTime() {
       this.isSelfTimeRunning = true
       this.setPlayerToMove('self')
@@ -615,6 +683,23 @@ export default {
         const enemyTimeQuery = await axios.get(`http://localhost:5000/currentTimeLeft/${this.enemyPlayerType}`)
         this.enemySeconds = enemyTimeQuery.data.timeLeft
       }
+    },
+
+    async determineClockToRun() {
+      if (this.lastPlayerMoved !== auth.currentUser.uid) { // opponent last move
+        await this.stopEnemyTime()
+        await this.startSelfTime()
+      } else { // self made last move
+        await this.stopSelfTime()
+        await this.startEnemyTime()
+      }
+    },
+
+    async writeUpdatedTimeToDB() {
+      const newTimeObj = this.isSelfHost ? 
+        { host_timeLeft: this.selfSeconds } : 
+        { other_timeLeft: this.selfSeconds } 
+      await this.currentTimerDoc.update(newTimeObj)   
     }
   }
 }
