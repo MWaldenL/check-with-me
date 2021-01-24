@@ -5,11 +5,11 @@
   <b-button @click="requestRematch" class="overlay-text overlay-button" id="request-rematch">New Game</b-button>
   <b-button @click="returnToLobby" class="overlay-text overlay-button" id="return-to-lobby">Return to Lobby</b-button>
 
-  <h5 class="overlay-text mt-5">these are for testing only, remove upon deployment</h5>
+  <!-- <h5 class="overlay-text mt-5">these are for testing only, remove upon deployment</h5>
   <b-button @click="startNewReg" class="overlay-text overlay-button" variant="success">Start new regular game</b-button>
   <b-button @click="startNewWin" class="overlay-text overlay-button" variant="info">Start new winning game</b-button>
   <b-button @click="startNewWinWhiteStuck" class="overlay-text overlay-button" variant="info">Start new winning game with white stuck</b-button>
-  <b-button @click="resetUserPoints" class="overlay-text overlay-button" variant="danger">Reset user points</b-button>
+  <b-button @click="resetUserPoints" class="overlay-text overlay-button" variant="danger">Reset user points</b-button> -->
 </div>
 </template>
 
@@ -26,7 +26,9 @@ export default {
   name: 'ResultOverlay',
   computed: {
     ...mapGetters({
-      winner: 'getWinner'
+      winner: 'getWinner',
+      hostUserID: 'getHostUser',
+      currentGame: 'getCurrentGame'
     }), 
 
     winnerMessage () {
@@ -48,6 +50,10 @@ export default {
       else
         return ''
     },
+
+    isSelfHost() {
+      return auth.currentUser.uid === this.hostUserID
+    }
   },
   methods: {
     ...mapActions([
@@ -55,10 +61,27 @@ export default {
       'aResetGame',
       'aSetWinner'
     ]),
-    requestRematch () {
+    async requestRematch () {
       // this.aResetGame()
-      this.aSetActiveGame(true)
+      // this.aSetActiveGame(true)
       // this.$emit("closeOverlay")
+      const gameDoc = await gamesCollection.doc(this.currentGame).get()
+      const bRematchIsRequested = gameDoc.data().rematch_requested !== "none"
+      
+      const rematchRequestedBy = this.isSelfHost ? "host" : "other"
+
+      console.log(rematchRequestedBy)
+
+      if (bRematchIsRequested) {
+        return
+      } else {
+        await gamesCollection
+          .doc(this.currentGame)
+          .update({
+            rematch_requested: rematchRequestedBy
+          })
+      }
+
     },
     returnToLobby () {
       // this.$emit("closeOverlay")

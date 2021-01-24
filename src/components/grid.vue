@@ -50,6 +50,8 @@
     </div>
     <b-button id="resign" class="btn-danger" v-b-modal.resign-modal>Resign</b-button>
     <ResignModal />
+    <RematchRequesteeModal />
+    <RematchRequestorModal />
   </div>
 </template>
 
@@ -70,6 +72,8 @@ import Cell from './cell'
 import Sidebar from './sidebar'
 import ResultOverlay from './resultOverlay'
 import ResignModal from './resignModal'
+import RematchRequesteeModal from './rematchRequesteeModal'
+import RematchRequestorModal from './rematchRequestorModal'
 
 export default {
   name: 'Grid',
@@ -77,7 +81,9 @@ export default {
     Cell,
     Sidebar,
     ResultOverlay,
-    ResignModal
+    ResignModal,
+    RematchRequesteeModal,
+    RematchRequestorModal
   },
   
   // Called on refreshes or new loads 
@@ -140,6 +146,34 @@ export default {
           black: data.black_count
         })
 
+        // Check for rematch 
+        if (!this.activeGame) {
+
+          // Check for request
+          if (data.rematch_requested === "host" && this.isSelfHost ||
+              data.rematch_requested === "other" && !this.isSelfHost) {
+
+            this.$bvModal.show('rematch-requestor-modal')
+
+          } else if (data.rematch_requested === "host" && !this.isSelfHost ||
+                     data.rematch_requested === "other" && this.isSelfHost) {
+
+            this.$bvModal.show('rematch-requestee-modal')
+
+          }
+
+          // Check for accept
+          if (data.rematch_accepted === 1 && this.isSelfHost) {
+
+            this.$bvModal.show('rematch-requestor-modal')
+
+          } else if (data.rematch_accepted === 1 && this.isSelfHost) {
+
+            this.$bvModal.show('rematch-requestee-modal')
+
+          }
+        }
+
         // Check for win
         // Check for stuck states
         let whiteStuck
@@ -154,8 +188,8 @@ export default {
           blackStuck = checkIfSelfStuck(this.board, false)
         }
 
-        console.log("white: " + whiteStuck + " " + data.white_count)
-        console.log("black: " + blackStuck + " " + data.black_count)
+        // console.log("white: " + whiteStuck + " " + data.white_count)
+        // console.log("black: " + blackStuck + " " + data.black_count)
 
         if (whiteStuck && blackStuck) { // if both players are stuck, call a draw
           //console.log("DRAW DRAW DRAW")

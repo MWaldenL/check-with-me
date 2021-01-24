@@ -496,6 +496,10 @@ const mutations = {
     state.firstClick = null
     state.bActiveGame = true
     state.cWinner = 'N'
+    state.bLastMoveLegal = true
+    state.bIsCaptureRequired = false
+    state.bStartedCaptureSequence = false
+    state.prevDestSquare = null
   },
 
   mSetWinner: (state, winner) => {
