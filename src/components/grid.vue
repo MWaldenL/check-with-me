@@ -52,6 +52,9 @@
     <ResignModal />
     <RematchRequesteeModal />
     <RematchRequestorModal />
+    <ChooseNewTimeModal />
+    <WaitForTimeModal />
+    <StartGameModal />
   </div>
 </template>
 
@@ -74,6 +77,9 @@ import ResultOverlay from './resultOverlay'
 import ResignModal from './resignModal'
 import RematchRequesteeModal from './rematchRequesteeModal'
 import RematchRequestorModal from './rematchRequestorModal'
+import ChooseNewTimeModal from './chooseNewTimeModal'
+import WaitForTimeModal from './waitForTimeModal'
+import StartGameModal from './startGameModal'
 
 export default {
   name: 'Grid',
@@ -83,7 +89,10 @@ export default {
     ResultOverlay,
     ResignModal,
     RematchRequesteeModal,
-    RematchRequestorModal
+    RematchRequestorModal,
+    ChooseNewTimeModal,
+    WaitForTimeModal,
+    StartGameModal
   },
   
   // Called on refreshes or new loads 
@@ -164,12 +173,23 @@ export default {
 
           // Check for accept
           if (data.rematch_accepted === 1 && this.isSelfHost) {
+            this.$bvModal.hide('rematch-requestor-modal')
+            this.$bvModal.hide('rematch-requestee-modal')
+            this.$bvModal.show('choose-new-time-modal')
+          } else if (data.rematch_accepted === 1 && !this.isSelfHost) {
+            this.$bvModal.hide('rematch-requestor-modal')
+            this.$bvModal.hide('rematch-requestee-modal')
+            this.$bvModal.show('wait-for-time-modal')
+          }
 
-            this.$bvModal.show('rematch-requestor-modal')
+          if (data.rematch_time_selected && !this.isSelfHost) {
 
-          } else if (data.rematch_accepted === 1 && this.isSelfHost) {
-
-            this.$bvModal.show('rematch-requestee-modal')
+            this.$bvModal.hide('wait-for-time-modal')
+            this.$bvModal.show('start-game-modal')
+            
+            doc.update({
+              rematch_time_selected: false
+            })
 
           }
         }
@@ -385,7 +405,8 @@ export default {
       'aSetPrevDestSquare',
       'aSetCaptureRequired',
       'aFlushStateAfterTurn',
-      'aSetActiveGame'
+      'aSetActiveGame',
+      'aResetGame'
     ]),
 
     async updateSelfScore(winner) {

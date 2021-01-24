@@ -26,12 +26,6 @@ import {
 } from '@/firebase'
 export default {
   name: 'RematchRequesteeModal',
-  data() {
-    return {
-      bJustRequested: true,
-      bAcceptedAndOther: false
-    }
-  },
   computed: {
     ...mapGetters({
       currentGame: 'getCurrentGame',

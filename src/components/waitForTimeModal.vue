@@ -1,10 +1,10 @@
 <template>
-<b-modal hide-footer hide-header no-close-on-backdrop no-close-on-esc centered no-stacking size="sm" id="rematch-requestor-modal">
+<b-modal hide-footer hide-header no-close-on-backdrop no-close-on-esc centered no-stacking id="wait-for-time-modal">
   <template #default="{ }">
     <div id="modal-body">
-      <h4 class="modal-head" id="modal-header">Rematch Requested!</h4> <br>
+      <h4 class="modal-head" id="modal-header">Rematch Accepted!</h4> <br>
       <h5 class="modal-head" id="modal-subheader">
-        Waiting for {{ enemyUsername }} to accept. <br>
+        Waiting for the host, {{ enemyUsername }}, to select the new time contol. <br>
       </h5>
       <b-icon icon="circle-fill" animation="throb" font-scale="4" class="mt-5" id="waiting"></b-icon>
     </div>
@@ -15,7 +15,7 @@
 <script>
 import { mapGetters } from 'vuex'
 export default {
-  name: 'RematchRequestorModal',
+  name: 'WaitForTimeModal',
   computed: {
     ...mapGetters({
       enemyUsername: 'getEnemyUsername',

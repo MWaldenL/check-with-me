@@ -62,9 +62,6 @@ export default {
       'aSetWinner'
     ]),
     async requestRematch () {
-      // this.aResetGame()
-      // this.aSetActiveGame(true)
-      // this.$emit("closeOverlay")
       const gameDoc = await gamesCollection.doc(this.currentGame).get()
       const bRematchIsRequested = gameDoc.data().rematch_requested !== "none"
       
@@ -82,9 +79,6 @@ export default {
           })
       }
 
-    },
-    returnToLobby () {
-      // this.$emit("closeOverlay")
     },
 
     // TODO: remove this upon deployment
