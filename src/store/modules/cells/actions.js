@@ -2,10 +2,10 @@ import { gamesCollection } from '@/firebase'
 import { getPDNFromBoard } from '../../services/boardParsingService'
 
 
-const writeBoardToDB = async (cells, isPlayerBlack) => {
+const writeBoardToDB = async (gameID, cells, isPlayerBlack) => {
   const dataFromBoard = getPDNFromBoard(cells, 'X', isPlayerBlack)
   await gamesCollection
-    .doc('Vc0H4f4EvY6drRKnvsk5')
+    .doc(gameID)
     .update({ 
       board_state: dataFromBoard.PDN,
       white_count: dataFromBoard.whiteCount,
@@ -56,7 +56,7 @@ const actions = {
   async aMoveForward({ commit, state }, payload) {
     const { coords, isPlayerBlack } = payload
     commit('mMoveForward', coords)
-    writeBoardToDB(state.cells, isPlayerBlack)
+    writeBoardToDB(state.currentGameID, state.cells, isPlayerBlack)
   },
 
   /**
@@ -69,7 +69,7 @@ const actions = {
   aKingMovement({ commit, state }, payload) {
     const { coords, isPlayerBlack } = payload
     commit('mKingMovement', coords)
-    writeBoardToDB(state.cells, isPlayerBlack)
+    writeBoardToDB(state.currentGameID, state.cells, isPlayerBlack)
   },
 
   /**
@@ -80,7 +80,7 @@ const actions = {
   aCapturePiece({ commit, state }, payload) {
     const { coords, isPlayerBlack } = payload
     commit('mCapturePiece', coords)
-    writeBoardToDB(state.cells, isPlayerBlack)
+    writeBoardToDB(state.currentGameID, state.cells, isPlayerBlack)
   },
 
   /**
@@ -91,7 +91,7 @@ const actions = {
   aKingCapturePiece({ commit, state }, payload) {
     const { coords, isPlayerBlack } = payload
     commit('mKingCapturePiece', coords)
-    writeBoardToDB(state.cells, isPlayerBlack)
+    writeBoardToDB(state.currentGameID, state.cells, isPlayerBlack)
   },
 
   /**

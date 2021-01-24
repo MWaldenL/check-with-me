@@ -1,5 +1,6 @@
 const getters = {
   getCurrentGame: state => state.currentGameID,
+  getCurrentTimer: state => state.currentTimerID,
   getHostUser: state => state.hostUser,
   getOtherUser: state => state.otherUser,
   getEnemyUsername: state => state.enemyUsername,

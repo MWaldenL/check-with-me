@@ -25,7 +25,11 @@ export default {
   name: 'ResultOverlay',
   computed: {
     ...mapGetters({
-      winner: 'getWinner'
+      winner: 'getWinner',
+      currentGameID: 'getCurrentGame',
+      hostUser: 'getHostUser',
+      otherUser: 'getOtherUser',
+      isHostWhite: 'getIsHostWhite'
     }), 
 
     winnerMessage () {
@@ -59,14 +63,16 @@ export default {
       this.aSetActiveGame(true)
       this.aSetWinner('N')
       
+      const lastPlayerMoved = this.isHostWhite ? this.otherUser : this.hostUser 
+
       await gamesCollection
-            .doc("Vc0H4f4EvY6drRKnvsk5")
-            .update({
-              board_state: "[FEN \"O:W1,3,5,7,10,12,14,16,17,19,21,23:B42,44,46,48,49,51,53,55,58,60,62,64\"]",
-              black_count: 12,
-              white_count: 12,
-              last_player_moved: "4pSu14srMSelGWQkSgGpRsA2jGf1"
-            })
+        .doc(currentGameID)
+        .update({
+          board_state: "[FEN \"O:W1,3,5,7,10,12,14,16,17,19,21,23:B42,44,46,48,49,51,53,55,58,60,62,64\"]",
+          black_count: 12,
+          white_count: 12,
+          last_player_moved: lastPlayerMoved
+        })
     },
 
     async startNewWin () {
@@ -74,7 +80,7 @@ export default {
       this.aSetWinner('N')
       
       await gamesCollection
-            .doc("Vc0H4f4EvY6drRKnvsk5")
+            .doc(currentGameID)
             .update({
               board_state: "[FEN \"X:W46:B55,58\"]",
               black_count: 2,
@@ -88,7 +94,7 @@ export default {
       this.aSetWinner('N')
       
       await gamesCollection
-            .doc("Vc0H4f4EvY6drRKnvsk5")
+            .doc(currentGameID)
             .update({
               board_state: "[FEN \"X:W32,26:B64,62,60,55,46,42,39,37,K30\"]",
               black_count: 9,

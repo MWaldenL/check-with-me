@@ -78,8 +78,8 @@ export default {
   
   // Called on refreshes or new loads 
   async created() {
-    const gameDoc = gamesCollection.doc('ntkvzPpwZkGU3qpoTZJb')   // hardcoded
-    const timerDoc = timersCollection.doc('ybuBEahXfM94JanZar4s') // hardcoded
+    const gameDoc = gamesCollection.doc(this.currentGameID)   // hardcoded
+    const timerDoc = timersCollection.doc(this.currentTimerID) // hardcoded
     const game = await gameDoc.get()
     const timer = await timerDoc.get()
 
@@ -123,7 +123,7 @@ export default {
   async mounted() {
     // Listen for board state changes
     gamesCollection
-      .doc('ntkvzPpwZkGU3qpoTZJb') // Obtain from state in the future when rooms are implemented
+      .doc(this.currentGameID) // Obtain from state in the future when rooms are implemented
       .onSnapshot(async doc => {
         const data = doc.data()
         const boardState = data.board_state
@@ -203,7 +203,7 @@ export default {
 
     // Listen for timer state changes
     timersCollection
-      .doc('ybuBEahXfM94JanZar4s')
+      .doc(this.currentTimerID)
       .onSnapshot(async doc => {
         // Sync the other player's timer with the db
         const data = doc.data()
@@ -258,6 +258,8 @@ export default {
       whiteCount: 'getWhiteCount',
       blackCount: 'getBlackCount',
       currentUser: 'getCurrentUser',
+      currentGameID: 'getCurrentGame',
+      currentTimerID: 'getCurrentTimer',
       hostUserID: 'getHostUser',
       otherUserID: 'getOtherUser',
       enemyUsername: 'getEnemyUsername',
@@ -502,7 +504,7 @@ export default {
       this.setPlayerToMove('self')
 
       const selfTimeQuery = await axios.get(`https://us-central1-check-with-me.cloudfunctions.net/clock/isTimeRunning/${this.selfPlayerType}`)
-      const selfTimeLeftQuery = await axios.get(`https://us-central1-check-with-me.cloudfunctions.net/clock/currentTimeLeft/${this.selfPlayerType}`)
+      // const selfTimeLeftQuery = await axios.get(`https://us-central1-check-with-me.cloudfunctions.net/clock/currentTimeLeft/${this.selfPlayerType}`)
       const isSelfServerTimeRunning = selfTimeQuery.data.isTimeRunning
       const shouldTimeTick = this.selfSeconds > 0
 

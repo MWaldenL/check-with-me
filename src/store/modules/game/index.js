@@ -4,9 +4,10 @@ import mutations from './mutations'
 
 const state = {
   currentGameID: '',
+  currentTimerID: '',
   boardState: '',
-  hostUser: 'ktreyVNxpqRTE7mQPjreB0iWyFi1',
-  otherUser: '4pSu14srMSelGWQkSgGpRsA2jGf1',
+  hostUser: '',
+  otherUser: '',
   enemyUsername: '',
   hostTimeLeft: 0,
   otherTimeLeft: 0,
