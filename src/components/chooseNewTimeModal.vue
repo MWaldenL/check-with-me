@@ -86,6 +86,8 @@ export default {
       else if (this.toggle5)   { time = 300 }
       else if (this.toggle10)  { time = 600 }
 
+      this.toggle1 = this.toggle3 = this.toggle5 = this.toggle10 = false
+
       await gamesCollection
             .doc("H7UDBzSpM2FeKmXWkHUN")
             .update({

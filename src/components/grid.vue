@@ -187,10 +187,6 @@ export default {
             this.$bvModal.hide('wait-for-time-modal')
             this.$bvModal.show('start-game-modal')
             
-            doc.update({
-              rematch_time_selected: false
-            })
-
           }
         }
 
@@ -213,18 +209,21 @@ export default {
 
         if (whiteStuck && blackStuck) { // if both players are stuck, call a draw
           //console.log("DRAW DRAW DRAW")
+          this.prepareForRematchRequest()
           this.updateSelfScore('D')
           this.aSetWinner('D')
           this.aSetActiveGame(false)
           return
         } else if (whiteStuck || data.white_count === 0) { // if only white is stuck or white has no more pieces, black wins
           //console.log("BLACK BLACK BLACK")
+          this.prepareForRematchRequest()
           this.updateSelfScore('B')
           this.aSetWinner('B')
           this.aSetActiveGame(false)
           return
         } else if (blackStuck || data.black_count === 0) { // if only black is stuck or black has no more pieces, white wins
           //console.log("WHITE WHITE WHITE")
+          this.prepareForRematchRequest()
           this.updateSelfScore('W')
           this.aSetWinner('W')
           this.aSetActiveGame(false)
@@ -233,11 +232,13 @@ export default {
 
         // Check for player resignation
         if (data.resign === "b") {
+          this.prepareForRematchRequest()
           this.updateSelfScore('W')
           this.aSetWinner('WR')
           this.aSetActiveGame(false)
           return
         } else if (data.resign === "w") {
+          this.prepareForRematchRequest()
           this.updateSelfScore('B')
           this.aSetWinner('BR')
           this.aSetActiveGame(false)
@@ -408,6 +409,14 @@ export default {
       'aSetActiveGame',
       'aResetGame'
     ]),
+
+    prepareForRematchRequest() {
+      gamesCollection
+        .doc("H7UDBzSpM2FeKmXWkHUN")
+        .update({
+          rematch_time_selected: false
+        })
+    },
 
     async updateSelfScore(winner) {
       // gets user documents for current player and opponent

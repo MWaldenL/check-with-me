@@ -17,21 +17,37 @@
 
 <script>
 import { mapActions, mapGetters } from 'vuex'
+import { auth } from '@/firebase'
 export default {
   name: 'StartGameModal',
   computed: {
     ...mapGetters({
-      enemyUsername: "getEnemyUsername"
-    })
+      enemyUsername: "getEnemyUsername",
+      hostUserID: 'getHostUser',
+      isHostWhite: 'getIsHostWhite',
+    }),
+
+    selfColor() {
+      return (auth.currentUser.uid === this.hostUserID) ?
+        (this.isHostWhite ? 'w' : 'b') : 
+        (this.isHostWhite ? 'b' : 'w')
+    },
   },
   methods: {
     ...mapActions([
-      "aResetGame"
+      "aResetGame",
+      "aUpdateBoard"
     ]),
+
     handleStart() {
       // handle state reset for non-host player
       this.aResetGame()
       this.$bvModal.hide('start-game-modal')
+
+      let PDN = "[FEN \"O:W1,3,5,7,10,12,14,16,17,19,21,23:B42,44,46,48,49,51,53,55,58,60,62,64\"]"
+      let isSelfBlack = this.selfColor === 'b'
+
+      this.aUpdateBoard({ PDN, isSelfBlack })
     }
   }
 }
