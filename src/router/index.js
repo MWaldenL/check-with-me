@@ -62,19 +62,19 @@ const routes = [
     path: '/leaderboard',
     name: 'Leaderboard',
     component: Leaderboard,
-    meta: { requiresNotAuth: false }
+    meta: { requiresAuth: true }
   },
   {
     path: '/',
     name: 'GameLobby',
     component: GameLobby,
-    meta: { requiresNotAuth: false }
+    meta: { requiresAuth: true }
   },
   {
     path: '/room/:id',
     name: 'WaitingRoom',
     component: WaitingRoom,
-    meta: { requiresNotAuth: false }
+    meta: { requiresAuth: true }
   },
   {
     path: '/matts',
