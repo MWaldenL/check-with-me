@@ -40,19 +40,21 @@ export default {
   },
   methods: {
     async handleResignConfirm () {
-      // let userResigned = this.isSelfHost ? 
-      //   (this.isSelfWhite ? "w" : "b") :
-      //   (this.isSelfWhite ? "b" : "w")
+      const gameDoc = await gamesCollection.doc(this.currentGame).get()
+      const bResignActive = gameDoc.data().resign !== "none"
 
       console.log(`${this.selfColor} resigns`)
 
-      await gamesCollection
-        .doc(this.currentGame)
-        .update({
-          resign: this.selfColor
-        })
-
-      this.$bvModal.hide('resign-modal')
+      if (bResignActive) {
+        this.$bvModal.hide('resign-modal')
+      } else {
+        await gamesCollection
+          .doc(this.currentGame)
+          .update({
+            resign: this.selfColor
+          })
+        this.$bvModal.hide('resign-modal')
+      }
     }
   }
 }
