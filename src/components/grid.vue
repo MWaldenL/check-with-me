@@ -145,7 +145,6 @@ export default {
         const boardState = data.board_state
         const draw = data.draw
         const winnerFromLogout = data.winner_from_logout
-        const drawOfferedBy = data.draw_offered_by
         const playerIsWhite = this.selfColor === 'w'
         const playerIsBlack = this.selfColor === 'b'
 
@@ -162,11 +161,10 @@ export default {
           return 
         }
 
-        console.log(data)
-
         // Update the last player moved and the position
         this.bIsFirstRun = data.is_first_run
         this.lastPlayerMoved = data.last_player_moved
+        this.drawOfferedBy = data.draw_offered_by
         this.aUpdateBoard({ boardState, playerIsBlack })
         this.aUpdateCount({ 
           white: data.white_count, 
@@ -174,7 +172,7 @@ export default {
         })
 
         // Listen for and handle draw offers
-        this.handleDrawOffer(drawOfferedBy)
+        this.handleDrawOffer(this.drawOfferedBy)
 
         // Check for stuck states
         let whiteStuck
@@ -184,25 +182,21 @@ export default {
           whiteStuck = checkIfSelfStuck(this.board, true)
           blackStuck = checkIfEnemyStuck(this.board, true)
         } else {
-          // console.log('black view')
           whiteStuck = checkIfEnemyStuck(this.board, false)
           blackStuck = checkIfSelfStuck(this.board, false)
         }
 
         if (whiteStuck && blackStuck) { // if both players are stuck, call a draw
-          //console.log("DRAW DRAW DRAW")
           this.updateSelfScore('D')
           this.aSetWinner('D')
           this.aSetActiveGame(false)
           return
         } else if (whiteStuck || data.white_count === 0) { // if only white is stuck or white has no more pieces, black wins
-          //console.log("BLACK BLACK BLACK")
           this.updateSelfScore('B')
           this.aSetWinner('B')
           this.aSetActiveGame(false)
           return
         } else if (blackStuck || data.black_count === 0) { // if only black is stuck or black has no more pieces, white wins
-          //console.log("WHITE WHITE WHITE")
           this.updateSelfScore('W')
           this.aSetWinner('W')
           this.aSetActiveGame(false)
@@ -284,7 +278,9 @@ export default {
       showingDrawModal: false,
       isLastMoveCapture: false,
       isCountingMovesForDraw: false,
-      drawCounter: 0
+      drawCounter: 0,
+      drawOfferedBy: '',
+      burdenedColor: ''
     }
   },
 
@@ -294,6 +290,7 @@ export default {
       whiteCount: 'getWhiteCount',
       blackCount: 'getBlackCount',
       currentUser: 'getCurrentUser',
+      currentGame: 'getCurrentGame',
       hostUserID: 'getHostUser',
       otherUserID: 'getOtherUser',
       enemyUsername: 'getEnemyUsername',
@@ -349,8 +346,6 @@ export default {
     },
 
     isBoardEligibleForDraw() {
-      console.log(this.selfCount)
-      console.log(this.otherCount)
       return this.selfCount <= 3 && this.otherCount <= 3
     }
   },
@@ -422,21 +417,17 @@ export default {
           selfDrawWhite++
       } else if (winner === 'B') {
         if (this.selfColor === 'b') { // if black wins and self is black, compute new elo ranking with score = 1 and add to black win count
-          //console.log("BLACK WINS")
           newScore = getNewScore(selfScore, otherScore, 1)
           selfWinsBlack++
         } else { // if black wins and self is white, compute new elo ranking with score = 0 and add to white lose count
-          //console.log("WHITE LOSES")
           newScore = getNewScore(selfScore, otherScore, 0)
           selfLossWhite++
         }
       } else {
         if (this.selfColor === 'w') { // if white wins and self is white, compute new elo ranking with score = 1 and add to white win count
-          //console.log("WHITE WINS")
           newScore = getNewScore(selfScore, otherScore, 1)
           selfWinsWhite++
         } else { // if white wins and self is black, compute new elo ranking with score = 0 and add to black lose count
-          //console.log("BLACK LOSES")
           newScore = getNewScore(selfScore, otherScore, 0)
           selfLossBlack++
         }
@@ -457,6 +448,8 @@ export default {
     },
     
     async offerDraw() {
+      this.resetDrawCounter()
+      this.burdenedColor = this.selfColor === 'w' ? 'b' : 'w'
       await this.currentGameDoc.update({ 
         draw_offered_by: this.selfColor
       })
@@ -479,14 +472,16 @@ export default {
       this.isLastMoveCapture = value
     },
 
-    handleDrawOffer(drawOfferedBy) {
-      const didEnemyOfferDraw = drawOfferedBy !== this.selfColor 
-      const isDrawCounterFull = this.drawCounter === 3 // TODO: Temp 3 moves for fast testing
+    handleDrawOffer() {
+      const didEnemyOfferDraw = this.drawOfferedBy !== this.selfColor 
       const willResetDrawCounter = !didEnemyOfferDraw || this.isLastMoveCapture
-      const willIncrementDrawCounter = this.isCountingMovesForDraw && this.lastPlayerMoved === auth.currentUser.uid
+      const willIncrementDrawCounter = 
+        this.isCountingMovesForDraw && 
+        this.burdenedColor === this.selfColor &&
+        this.lastPlayerMoved === auth.currentUser.uid
 
       // Show the draw modal prompt
-      if (drawOfferedBy !== '' && didEnemyOfferDraw) {
+      if (this.drawOfferedBy !== '' && didEnemyOfferDraw) {
         this.$bvModal.show("draw-modal")
       }
 
@@ -499,17 +494,26 @@ export default {
       // Only increment when someone has declined a draw offer, 
       // when the current player has moved,
       if (willIncrementDrawCounter) {
-        console.log('incrementing ' + this.drawCounter)
         this.incrementDrawCounter()
+        console.log(this.drawCounter)
       } 
 
-      // End the game after 20 moves if a player has failed to make a capture2
+      // End the game after 20 moves if a player has failed to make a capture
+      const isDrawCounterFull = this.drawCounter === 3  // TODO: Temp 5 moves for fast testing
       if (isDrawCounterFull) {
         this.endGameInDraw()
       }
     },
 
     async handleDrawReject() {
+      // Magic
+      if (this.lastPlayerMoved === auth.currentUser.uid) {
+        this.drawCounter -= 2
+      }
+    
+      // Set the player who rejected the draw and needs to win in <= 20 moves
+      this.burdenedColor = this.selfColor
+
       // Start the draw counter
       this.isCountingMovesForDraw = true
 
