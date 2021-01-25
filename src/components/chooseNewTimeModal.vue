@@ -63,7 +63,9 @@ export default {
   methods: {
     ...mapActions([
       "aResetGame",
-      "aSetHostIsWhite"
+      "aSetHostIsWhite",
+      "aSetHostTimeLeft",
+      "aSetOtherTimeLeft"
     ]),
     handleTimeToggle10() {
       this.toggle1 = this.toggle3 = this.toggle5 = false
@@ -82,6 +84,8 @@ export default {
       // handle state reset for host player, handle db reset
       this.aResetGame()
       this.aSetHostIsWhite(true)
+      this.aSetHostTimeLeft()
+      this.aSetOtherTimeLeft()
       this.$bvModal.hide('choose-new-time-modal')
       
       let time
@@ -120,6 +124,8 @@ export default {
       // handle state reset for host player, handle db reset
       this.aResetGame()
       this.aSetHostIsWhite(false)
+      this.aSetHostTimeLeft()
+      this.aSetOtherTimeLeft()
       this.$bvModal.hide('choose-new-time-modal')
       
       let time
@@ -161,6 +167,8 @@ export default {
 
       this.aResetGame()
       this.aSetHostIsWhite(color)
+      this.aSetHostTimeLeft()
+      this.aSetOtherTimeLeft()
       this.$bvModal.hide('choose-new-time-modal')
       
       let time
@@ -178,7 +186,7 @@ export default {
               board_state: "[FEN \"O:W1,3,5,7,10,12,14,16,17,19,21,23:B42,44,46,48,49,51,53,55,58,60,62,64\"]",
               black_count: 12,
               white_count: 12,
-              last_player_moved: "LLyi0mw1IuaFX1AZeCYP0NcWdL83",
+              last_player_moved: last,
               resign: "none",
               is_host_white: color,
               rematch_accepted: 0,
@@ -191,7 +199,7 @@ export default {
             .update({
               host_timeLeft: time,
               other_timeLeft: time,
-              last_player_moved: "LLyi0mw1IuaFX1AZeCYP0NcWdL83"
+              last_player_moved: last
             })
     }
   }

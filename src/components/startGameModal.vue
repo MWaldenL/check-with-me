@@ -17,31 +17,37 @@
 
 <script>
 import { mapActions, mapGetters } from 'vuex'
-import { auth } from '@/firebase'
+import { gamesCollection } from '@/firebase'
 export default {
   name: 'StartGameModal',
   computed: {
     ...mapGetters({
-      enemyUsername: "getEnemyUsername",
-      hostUserID: 'getHostUser',
-      isHostWhite: 'getIsHostWhite',
-    }),
-
-    selfColor() {
-      return (auth.currentUser.uid === this.hostUserID) ?
-        (this.isHostWhite ? 'w' : 'b') : 
-        (this.isHostWhite ? 'b' : 'w')
-    },
+      enemyUsername: "getEnemyUsername"
+    })
   },
   methods: {
     ...mapActions([
       "aResetGame",
+      "aSetHostIsWhite",
+      "aSetHostTimeLeft",
+      "aSetOtherTimeLeft",
       "aUpdateBoard"
     ]),
 
-    handleStart() {
+    async handleStart() {
       // handle state reset for non-host player
+      let gameDoc = gamesCollection.doc("H7UDBzSpM2FeKmXWkHUN")
+      let game = await gameDoc.get()
+      let isHostWhite = game.data().is_host_white
+
+      let boardState = "[FEN \"O:W1,3,5,7,10,12,14,16,17,19,21,23:B42,44,46,48,49,51,53,55,58,60,62,64\"]"
+      let playerIsBlack = isHostWhite
+
       this.aResetGame()
+      this.aSetHostIsWhite(isHostWhite)
+      this.aSetHostTimeLeft()
+      this.aSetOtherTimeLeft()
+      this.aUpdateBoard({ boardState, playerIsBlack })
       this.$bvModal.hide('start-game-modal')
     }
   }
