@@ -248,6 +248,8 @@ export default {
         if(this.isOwner == 0)
         {
           this.isKicked = true
+        } else{
+          this.$router.push({ path: '/'})
         }
       }
     })

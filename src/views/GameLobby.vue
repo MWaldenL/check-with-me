@@ -9,8 +9,8 @@
       <div>You are already in a room.</div>
       <div>Redirecting to room...</div>
     </b-modal>
+    <CreateRoomModal v-show="showModal" @close="showModal = false" @badUser="isBadUserJoin = true"/>
 
-    <CreateRoomModal v-show="showModal" @close="showModal = false" />
     <!-- <CreateRoomModal v-bind:showModal="showModal" @close="showModal = false" /> -->
     <div id = 'GameLobbyProper'>
       <div id="GameLobbyPageLabel">Game Lobby</div>
