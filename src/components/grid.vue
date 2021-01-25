@@ -27,7 +27,8 @@
               :canMakeMove="canMakeMove"
               :selfColor="selfColor"
               :key="col" 
-              @makeMove="updateLastPlayerMoved"/>
+              @makeMove="updateLastPlayerMoved"
+              @isLastMoveCapture="setLastMoveCapture"/>
           </tr>
         </table>
       </div>
@@ -50,8 +51,16 @@
     </div>
     
     <!-- Buttons -->
-    <b-button id="draw" class="btn-info" @click="offerDraw" v-if="isBoardEligibleForDraw">Draw</b-button>
-    <DrawModal @acceptDraw="endGameInDraw" @rejectDraw="beginDrawCounter" />
+    <b-button 
+      id="draw" 
+      class="btn-info" 
+      v-if="isBoardEligibleForDraw"
+      @click="offerDraw"> 
+      Draw</b-button>
+      
+    <DrawModal 
+      @acceptDraw="endGameInDraw" 
+      @rejectDraw="beginDrawCounter" />
 
     <!-- <b-button id="resign" class="btn-danger">Resign</b-button> -->
   </div>
@@ -85,8 +94,8 @@ export default {
   
   // Called on refreshes or new loads 
   async created() {
-    const gameDoc = gamesCollection.doc('Vc0H4f4EvY6drRKnvsk5')   // hardcoded
-    const timerDoc = timersCollection.doc('H48woDfI1lwIGZnJh4qz') // hardcoded
+    const gameDoc = gamesCollection.doc('VUqGnWBLmgulz3X5O13h')   // hardcoded
+    const timerDoc = timersCollection.doc('t3HwE1ES1HAJy9c0lnoc') // hardcoded
     const game = await gameDoc.get()
     const timer = await timerDoc.get()
 
@@ -130,7 +139,7 @@ export default {
   async mounted() {
     // Listen for board state changes
     gamesCollection
-      .doc('Vc0H4f4EvY6drRKnvsk5') // Obtain from state in the future when rooms are implemented
+      .doc('VUqGnWBLmgulz3X5O13h') // Obtain from state in the future when rooms are implemented
       .onSnapshot(async doc => {
         const data = doc.data()
         const boardState = data.board_state
@@ -149,9 +158,6 @@ export default {
           white: data.white_count, 
           black: data.black_count
         })
-
-        // If a player has declined a draw, count the player's moves
-       
 
         // Listen for and handle draw offers
         this.handleDrawOffer(drawOfferedBy)
@@ -217,7 +223,7 @@ export default {
 
     // Listen for timer state changes
     timersCollection
-      .doc('H48woDfI1lwIGZnJh4qz')
+      .doc('t3HwE1ES1HAJy9c0lnoc')
       .onSnapshot(async doc => {
         // Sync the other player's timer with the db
         const data = doc.data()
@@ -265,6 +271,7 @@ export default {
       prevSourceSquare: null,
 
       showingDrawModal: false,
+      isLastMoveCapture: false,
       isCountingMovesForDraw: false,
       drawCounter: 0
     }
@@ -331,6 +338,8 @@ export default {
     },
 
     isBoardEligibleForDraw() {
+      console.log(this.selfCount)
+      console.log(this.otherCount)
       return this.selfCount <= 3 && this.otherCount <= 3
     }
   },
@@ -448,10 +457,8 @@ export default {
       await this.currentGameDoc.update({ 
         draw_offered_by: this.selfColor
       })
-    },
 
-    handleDrawOffer(drawOfferedBy) {
-      this.showingDrawModal = drawOfferedBy !== this.selfColor
+
     },
 
     endGameInDraw() {
@@ -460,20 +467,35 @@ export default {
       this.aSetActiveGame(false)
     },
 
-    handleDrawCount() {
-      // If last move was a capture, reset draw counter
-      if (isLastMoveCapture) {
-        this.resetDrawCounter()
-        return 
-      }
+    setLastMoveCapture(value) {
+      this.isLastMoveCapture = value
+    },
 
-      // Only increment when someone has declined a draw offer, 
-      // when the current player has moved,
-      // and if the last move was not a capture
+    handleDrawOffer(drawOfferedBy) {
+      const didEnemyOfferDraw = drawOfferedBy !== this.selfColor 
+      const willResetDrawCounter = !didEnemyOfferDraw || this.isLastMoveCapture
       const willIncrementDrawCounter = 
         this.isCountingMovesForDraw && 
         this.lastPlayerMoved === auth.currentUer.uid
 
+
+      // Show the draw modal prompt
+      console.log(drawOfferedBy)
+      console.log(this.selfColor)
+      console.log(didEnemyOfferDraw)
+      if (didEnemyOfferDraw) {
+
+        this.$bvModal.show("draw-modal")
+      }
+
+      // If self offers a draw or a capture is made, reset to 0
+      if (willResetDrawCounter) {
+        this.resetDrawCounter()
+        return
+      }
+
+      // Only increment when someone has declined a draw offer, 
+      // when the current player has moved,
       if (willIncrementDrawCounter) {
         this.incrementDrawCounter()
       } 
@@ -763,7 +785,7 @@ table {
   padding: 10px 30px;
   background-color: #424242;
 }
-#resign {
+#draw {
   font-family: 'Roboto', Helvetica, Arial, sans-serif;
   font-weight: 100;
   font-size: 20px;
@@ -771,7 +793,7 @@ table {
 
   position: absolute;
   right: 300px;
-  bottom: 40vh;
+  bottom: 50vh;
 }
 #box {
   position: relative;

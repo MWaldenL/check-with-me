@@ -10,7 +10,7 @@
       <br>
       <br>
       <b-button block variant="success" @click="handleDrawReject">No. I want to win!</b-button>
-      <b-button block variant="danger" @click="handleDrawConfirm">Yes. Let's end in a draw.</b-button>
+      <b-button block variant="link" @click="handleDrawConfirm">Yes. Let's end in a draw.</b-button>
     </div>
   </template>
 </b-modal>  
@@ -37,7 +37,6 @@ export default {
         (this.isHostWhite ? 'w' : 'b') : 
         (this.isHostWhite ? 'b' : 'w')
     },
-
   },
   methods: {
     async handleDrawConfirm() {
@@ -49,9 +48,13 @@ export default {
       this.$emit('acceptDraw')
       await gamesCollection
         .doc(this.currentGame)
-        .update({ resign: this.selfColor })
+        // .update({ resign: this.selfColor })
 
-      this.$bvModal.hide('resign-modal')
+      this.$bvModal.hide('draw-modal')
+    },
+
+    handleDrawReject() {
+      console.log('Draw rejected')
     }
   }
 }
@@ -60,7 +63,7 @@ export default {
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Raleway:wght@700&family=Roboto&display=swap');
 
-#resign-body {
+#draw-body {
   text-align: center;
   padding: 20px
 }

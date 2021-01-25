@@ -60,7 +60,7 @@ export default {
       this.aSetWinner('N')
       
       await gamesCollection
-            .doc("Vc0H4f4EvY6drRKnvsk5")
+            .doc("VUqGnWBLmgulz3X5O13h")
             .update({
               board_state: "[FEN \"O:W1,3,5,7,10,12,14,16,17,19,21,23:B42,44,46,48,49,51,53,55,58,60,62,64\"]",
               black_count: 12,
@@ -74,7 +74,7 @@ export default {
       this.aSetWinner('N')
       
       await gamesCollection
-            .doc("Vc0H4f4EvY6drRKnvsk5")
+            .doc("VUqGnWBLmgulz3X5O13h")
             .update({
               board_state: "[FEN \"X:W46:B55,58\"]",
               black_count: 2,
@@ -88,7 +88,7 @@ export default {
       this.aSetWinner('N')
       
       await gamesCollection
-            .doc("Vc0H4f4EvY6drRKnvsk5")
+            .doc("VUqGnWBLmgulz3X5O13h")
             .update({
               board_state: "[FEN \"X:W32,26:B64,62,60,55,46,42,39,37,K30\"]",
               black_count: 9,
