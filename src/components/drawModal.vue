@@ -17,11 +17,8 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
-import { 
-  auth,
-  gamesCollection
-} from '@/firebase'
+import { mapGetters, mapActions } from 'vuex'
+import { auth } from '@/firebase'
 
 export default {
   name: 'DrawModal',
@@ -39,22 +36,21 @@ export default {
     },
   },
   methods: {
+    ...mapActions([
+      'aSetWinner',
+      'aSetActiveGame'
+    ]),
+
     async handleDrawConfirm() {
-      console.log(`draw`)
-
-      this.aSetWinner('D')
-      this.aSetActiveGame(false)
-
+      console.log(`draw confirmed`)
       this.$emit('acceptDraw')
-      await gamesCollection
-        .doc(this.currentGame)
-        // .update({ resign: this.selfColor })
-
       this.$bvModal.hide('draw-modal')
     },
 
     handleDrawReject() {
       console.log('Draw rejected')
+      this.$emit('rejectDraw')
+      this.$bvModal.hide('draw-modal')
     }
   }
 }

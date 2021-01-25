@@ -60,7 +60,7 @@
       
     <DrawModal 
       @acceptDraw="endGameInDraw" 
-      @rejectDraw="beginDrawCounter" />
+      @rejectDraw="handleDrawReject" />
 
     <!-- <b-button id="resign" class="btn-danger">Resign</b-button> -->
   </div>
@@ -141,14 +141,28 @@ export default {
     gamesCollection
       .doc('VUqGnWBLmgulz3X5O13h') // Obtain from state in the future when rooms are implemented
       .onSnapshot(async doc => {
-        const data = doc.data()
+        const data = await doc.data()
         const boardState = data.board_state
+        const draw = data.draw
+        const winnerFromLogout = data.winner_from_logout
         const drawOfferedBy = data.draw_offered_by
         const playerIsWhite = this.selfColor === 'w'
         const playerIsBlack = this.selfColor === 'b'
 
+        // Early returns 
         // Check if someone has logged out while in game
-        this.setWinnerFromLogout(data)
+        // if (winnerFromLogout !== '') {
+        //   this.setWinnerFromLogout(data)
+        //   return
+        // }
+
+        // Check if the game has ended in a draw
+        if (draw) {
+          this.endGameInDraw()
+          return 
+        }
+
+        console.log(data)
 
         // Update the last player moved and the position
         this.bIsFirstRun = data.is_first_run
@@ -174,9 +188,6 @@ export default {
           whiteStuck = checkIfEnemyStuck(this.board, false)
           blackStuck = checkIfSelfStuck(this.board, false)
         }
-
-        console.log("white: " + whiteStuck + " " + data.white_count)
-        console.log("black: " + blackStuck + " " + data.black_count)
 
         if (whiteStuck && blackStuck) { // if both players are stuck, call a draw
           //console.log("DRAW DRAW DRAW")
@@ -431,15 +442,7 @@ export default {
         }
       }
 
-      // console.log(newScore)
-      // console.log(selfWinsBlack)
-      // console.log(selfWinsWhite)
-      // console.log(selfLossBlack)
-      // console.log(selfLossWhite)
-      // console.log(selfDrawBlack)
-      // console.log(selfDrawWhite)
-
-      // update self user document with new values
+      // Update self user document with new values
       await usersCollection
         .doc(auth.currentUser.uid)
         .update({
@@ -457,14 +460,19 @@ export default {
       await this.currentGameDoc.update({ 
         draw_offered_by: this.selfColor
       })
-
-
     },
 
-    endGameInDraw() {
+    async endGameInDraw() {
+      // Handle game result states
       this.updateSelfScore('D')
       this.aSetWinner('D')
       this.aSetActiveGame(false)
+      this.$bvModal.hide("draw-modal")
+
+      // Update database
+      await gamesCollection
+        .doc(this.currentGame)
+        .update({ draw: true })
     },
 
     setLastMoveCapture(value) {
@@ -473,18 +481,12 @@ export default {
 
     handleDrawOffer(drawOfferedBy) {
       const didEnemyOfferDraw = drawOfferedBy !== this.selfColor 
+      const isDrawCounterFull = this.drawCounter === 3 // TODO: Temp 3 moves for fast testing
       const willResetDrawCounter = !didEnemyOfferDraw || this.isLastMoveCapture
-      const willIncrementDrawCounter = 
-        this.isCountingMovesForDraw && 
-        this.lastPlayerMoved === auth.currentUer.uid
-
+      const willIncrementDrawCounter = this.isCountingMovesForDraw && this.lastPlayerMoved === auth.currentUser.uid
 
       // Show the draw modal prompt
-      console.log(drawOfferedBy)
-      console.log(this.selfColor)
-      console.log(didEnemyOfferDraw)
-      if (didEnemyOfferDraw) {
-
+      if (drawOfferedBy !== '' && didEnemyOfferDraw) {
         this.$bvModal.show("draw-modal")
       }
 
@@ -497,17 +499,22 @@ export default {
       // Only increment when someone has declined a draw offer, 
       // when the current player has moved,
       if (willIncrementDrawCounter) {
+        console.log('incrementing ' + this.drawCounter)
         this.incrementDrawCounter()
       } 
 
       // End the game after 20 moves if a player has failed to make a capture2
-      if (this.drawCounter === 20) {
+      if (isDrawCounterFull) {
         this.endGameInDraw()
       }
     },
 
-    beginDrawCounter() {
+    async handleDrawReject() {
+      // Start the draw counter
       this.isCountingMovesForDraw = true
+
+      // If a player has rejected a draw, clear the draw offer
+      await this.currentGameDoc.update({ draw_offered_by: '' })
     },
 
     incrementDrawCounter() {
@@ -519,9 +526,7 @@ export default {
     },
 
     setWinnerFromLogout(gameData) {
-      console.log(gameData)
       const winnerFromLogout = gameData.winner_from_logout
-      console.log(auth.currentUser.uid)
       if (winnerFromLogout === auth.currentUser.uid) {
         const winnerColor = this.selfColor.toUpperCase()
         this.updateSelfScore(winnerColor)
@@ -529,7 +534,6 @@ export default {
         this.aSetActiveGame(false)
       } 
     },
-
 
     /**
      * Turn methods
