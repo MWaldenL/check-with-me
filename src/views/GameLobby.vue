@@ -1,9 +1,13 @@
 <template>
   <div id = 'GameLobbyPage'>
     <Sidebar />
-    <b-modal v-model="isBadJoin" id="bad-join-modal" @ok="refresh" ok-only hide-header no-close-on-esc no-close-on-backdrop>
+    <b-modal v-model="isBadRoomJoin" id="bad-join-modal" @ok="refresh" ok-only hide-header no-close-on-esc no-close-on-backdrop>
       <div>The room you are trying to join is full or deleted.</div>
       <div>Refreshing the page...</div>
+    </b-modal>
+    <b-modal v-model="isBadUserJoin" id="bad-join-modal" @ok="refresh" ok-only hide-header no-close-on-esc no-close-on-backdrop>
+      <div>You are already in a room.</div>
+      <div>Redirecting to room...</div>
     </b-modal>
 
     <CreateRoomModal v-show="showModal" @close="showModal = false" />
@@ -78,7 +82,8 @@ export default {
       lobbyPrevQuery: roomQuery,
 
       showModal: false,
-      isBadJoin: false
+      isBadRoomJoin: false,
+      isBadUserJoin: false
     }
   },
   computed: {
@@ -165,8 +170,10 @@ export default {
         .catch(error => {
           //console.log("Error getting documents: ", error);
         })
+      } else if (!validUser){
+        this.isBadUserJoin = true
       } else{
-        this.isBadJoin = true
+        this.isBadRoomJoin = true
       }
     },
 
@@ -174,8 +181,16 @@ export default {
       this.$router.go()
     },
 
-    createRoom() {
-      this.showModal = true
+    async createRoom() {
+      let user_key = firebase.auth().currentUser.uid
+      let validUser = await checkUserGame(user_key)
+      validUser = validUser === false
+      
+      console.log(validUser)
+      if(validUser)
+        this.showModal = true
+      else
+        this.isBadUserJoin = true
     }
   }
 }
