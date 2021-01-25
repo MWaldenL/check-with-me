@@ -57,7 +57,7 @@ export default {
       await gamesCollection
           .doc(this.currentGame)
           .update({
-            rematch_accepted: -1
+            enemy_left: auth.currentUser.uid
           })
     }
   }

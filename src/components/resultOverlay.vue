@@ -61,13 +61,12 @@ export default {
       'aResetGame',
       'aSetWinner'
     ]),
+
     async requestRematch () {
       const gameDoc = await gamesCollection.doc(this.currentGame).get()
       const bRematchIsRequested = gameDoc.data().rematch_requested !== "none"
       
       const rematchRequestedBy = this.isSelfHost ? "host" : "other"
-
-      console.log(rematchRequestedBy)
 
       if (bRematchIsRequested) {
         return
@@ -79,6 +78,21 @@ export default {
           })
       }
 
+    },
+
+    async returnToLobby () {
+      const gameDoc = await gamesCollection.doc(this.currentGame).get()
+      const enemyLeft = gameDoc.data().enemy_left !== "none" || gameDoc.data().enemy_left_confirmed
+
+      if (enemyLeft) {
+        return
+      } else {
+        await gamesCollection
+          .doc(this.currentGame)
+          .update({
+            enemy_left: auth.currentUser.uid
+          })
+      }
     },
 
     // TODO: remove this upon deployment

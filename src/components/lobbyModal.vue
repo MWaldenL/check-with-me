@@ -1,0 +1,74 @@
+<template>
+<b-modal hide-footer hide-header no-close-on-backdrop no-close-on-esc centered size="sm" id="lobby-modal">
+  <template #default="{  }">
+    <div id="modal-body">
+      <h4 class="modal-head" id="modal-header">Room Closed</h4> <br>
+      <h5 class="modal-head" id="modal-subheader">
+        Someone left the room. Click the button below to return to the lobby.
+      </h5>
+      <br>
+      <br>
+
+      <b-button block variant="success" @click="backToLobby">Back to Lobby</b-button>
+    </div>
+  </template>
+</b-modal>  
+</template>
+
+<script>
+import { mapGetters } from 'vuex'
+import { 
+  auth,
+  gamesCollection,
+  timersCollection
+} from '@/firebase'
+export default {
+  name: 'LobbyModal',
+  computed: {
+    ...mapGetters({
+      hostUserID: "getHostUser",
+      otherUserID: "getOtherUser",
+      enemyUsername: "getEnemyUsername",
+      currentGame: "getCurrentGame"
+    }),
+
+    isSelfHost() {
+      return auth.currentUser.uid === this.hostUserID
+    }
+  },
+  methods: {
+    backToLobby() {
+      this.$router.push("/")
+
+      // TODO: delete game / timer docs here
+      // let gameDoc = gamesCollection.doc(this.currentGame)
+      // let game = await gameDoc.get()
+      // let timerID = game.data().timer_id
+
+    }
+  }
+}
+</script>
+
+<style scoped>
+@import url('https://fonts.googleapis.com/css2?family=Raleway:wght@700&family=Roboto&display=swap');
+
+#modal-body {
+  text-align: center;
+  padding: 20px
+}
+
+.modal-head {
+  font-family: 'Raleway', Arial, Helvetica, sans-serif;
+  color: #000000;
+}
+
+#modal-header {
+  font-weight: 700;
+  font-size: 25px;
+}
+
+#modal-subheader {
+  font-size: 17px;
+}
+</style>

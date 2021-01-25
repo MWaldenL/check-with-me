@@ -55,6 +55,8 @@
     <ChooseNewTimeModal />
     <WaitForTimeModal />
     <StartGameModal />
+    <ConfirmLeaveModal />
+    <LobbyModal />
   </div>
 </template>
 
@@ -80,6 +82,8 @@ import RematchRequestorModal from './rematchRequestorModal'
 import ChooseNewTimeModal from './chooseNewTimeModal'
 import WaitForTimeModal from './waitForTimeModal'
 import StartGameModal from './startGameModal'
+import ConfirmLeaveModal from './confirmLeaveModal'
+import LobbyModal from './lobbyModal'
 
 export default {
   name: 'Grid',
@@ -92,7 +96,9 @@ export default {
     RematchRequestorModal,
     ChooseNewTimeModal,
     WaitForTimeModal,
-    StartGameModal
+    StartGameModal,
+    ConfirmLeaveModal,
+    LobbyModal
   },
   
   // Called on refreshes or new loads 
@@ -182,11 +188,19 @@ export default {
             this.$bvModal.show('wait-for-time-modal')
           }
 
+          // Check if new time has been selected already
           if (data.rematch_time_selected && !this.isSelfHost) {
-
             this.$bvModal.hide('wait-for-time-modal')
             this.$bvModal.show('start-game-modal')
-            
+          }
+
+          if (data.enemy_left === auth.currentUser.uid) {
+            this.$bvModal.show('confirm-leave-modal')
+          } 
+
+          if (data.enemy_left_confirmed) {
+            this.$bvModal.hide('confirm-leave-modal')
+            this.$bvModal.show('lobby-modal')
           }
         }
 
