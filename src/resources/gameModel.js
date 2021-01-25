@@ -162,4 +162,12 @@ export const setWhitePlayer = ((gameID, isHostWhite) => {
   .update({
     is_host_white:  isHostWhite
   })
+export const checkValidRoom = (async roomID => {
+  const query = gamesCollection.doc(roomID)
+  const doc = await query.get()
+
+  if(doc.exists && doc.data().other_user.id === "nil")
+    return true
+  else
+    return false
 })
