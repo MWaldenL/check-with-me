@@ -28,7 +28,7 @@
               <div id="pickWhite" class="chip white-chip">
               </div>
             </div>
-            <div v-bind:class="{'font-weight-bold': hostColor === 'w'}">
+            <div v-bind:class="{'box-active': hostColor === 'w', 'box-inactive': hostColor !== 'w'}">
               White
             </div>
           </div>
@@ -37,7 +37,7 @@
               <div id="pickBlack" class="chip black-chip">
               </div>
             </div>
-            <div v-bind:class="{'font-weight-bold': hostColor === 'b'}">
+            <div v-bind:class="{'box-active': hostColor === 'b', 'box-inactive': hostColor !== 'b'}">
               Black
             </div>
           </div>
@@ -47,7 +47,7 @@
                 <img class="questionMark" src="../../public/assets/question.png"/>
               </div>
             </div>
-            <div v-bind:class="{'font-weight-bold': hostColor === 'r'}">
+            <div v-bind:class="{'box-active': hostColor === 'r', 'box-inactive': hostColor !== 'r'}">
             Random
             </div>
           </div>
@@ -195,11 +195,11 @@ export default {
     },
     getHostPoints() {
       if(this.host !== null)
-        return (this.host.points).toFixed(0)
+        return (this.host.points).toFixed(2)
     },
     getGuestPoints() {
       if(this.guest !== null)
-        return (this.guest.points).toFixed(0)
+        return (this.guest.points).toFixed(2)
     }
   },
   async created() {
@@ -523,6 +523,7 @@ export default {
   width: 80px;
   margin: 0;
   padding: 0;
+  margin-bottom: 10px;
 }
 .chip {
   z-index: 2;
