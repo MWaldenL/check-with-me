@@ -25,6 +25,19 @@ const mutations = {
   
   mSetHostIsWhite(state, isWhite) {
     state.isHostWhite = isWhite
+  },
+
+  mClearGameState(state) {
+    state.currentGameID = '',
+    state.boardState = '',
+    state.hostUser = '',
+    state.otherUser = '',
+    state.enemyUsername = '',
+    state.hostTimeLeft = 0,
+    state.otherTimeLeft = 0,
+    state.isHostWhite = true,
+    state.lastPlayerMoved = '',
+    state.drawCounter = 0
   }
 }
 

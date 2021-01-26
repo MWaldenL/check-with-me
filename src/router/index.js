@@ -22,14 +22,7 @@ router.beforeEach(async (to, from, next) => {
   // Handle routing
   if (isAuthAccessingGuestRoute) { // Prioritize
     next({ name: 'GameLobby' })
-  } else if (isGuestAccessingAuthRoute) {
-    console.log('guest to auth')
-    next({ name: 'Login' })
-  } else if (isInsideGameRoom) {
-    next({ name: from.name })
   } else if (isEnteringRoom) { // can happen on first load or joining new room
-    console.log('entering room')
-
     // Set the current game id in the state
     store.commit('mSetCurrentGame', roomID)
 
@@ -65,8 +58,13 @@ router.beforeEach(async (to, from, next) => {
     } else {
       store.commit('mSetCurrentGame', '')
       alert('This room is already full! Please select a vacant room.')
-      next(from)
+      next({ name: 'GameLobby' })
     }
+  } else if (isGuestAccessingAuthRoute) {
+    console.log('guest to auth')
+    next({ name: 'Login' })
+  } else if (isInsideGameRoom) {
+    next({ name: from.name })
   } else {
     next()
   }
