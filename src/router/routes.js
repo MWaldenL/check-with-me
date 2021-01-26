@@ -26,7 +26,10 @@ const gameRoutes = [
     path: '/room/:id',
     name: 'WaitingRoom',
     component: WaitingRoom,
-    meta: { requiresNotAuth: false }
+    meta: { 
+      requiresAuth: true,
+      requiresNotAuth: false 
+    }
   },
   {
     path: '/help',
@@ -38,7 +41,7 @@ const gameRoutes = [
     path: '/leaderboard',
     name: 'Leaderboard',
     component: Leaderboard,
-    meta: { requiresNotAuth: false }
+    meta: { requiresAuth: true }
   },
 ]
 
