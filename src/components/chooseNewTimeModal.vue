@@ -59,7 +59,8 @@ export default {
       "aResetGame",
       "aSetHostIsWhite",
       "aSetHostTimeLeft",
-      "aSetOtherTimeLeft"
+      "aSetOtherTimeLeft",
+      "aUpdateBoard"
     ]),
 
     // toggle time control options to allow only one choice
@@ -94,11 +95,14 @@ export default {
       // reset time control selection for next rematch
       this.toggle1 = this.toggle3 = this.toggle5 = this.toggle10 = false
 
+      const boardState = "[FEN \"O:W1,3,5,7,10,12,14,16,17,19,21,23:B42,44,46,48,49,51,53,55,58,60,62,64\"]"
+      const playerIsBlack = !isHostWhite
+
       // update current game doc with new params
       await gamesCollection
             .doc(this.currentGame)
             .update({
-              board_state: "[FEN \"O:W1,3,5,7,10,12,14,16,17,19,21,23:B42,44,46,48,49,51,53,55,58,60,62,64\"]",
+              board_state: boardState,
               black_count: 12,
               white_count: 12,
               last_player_moved: lastPlayerMoved,
@@ -122,6 +126,11 @@ export default {
       this.aSetHostIsWhite(isHostWhite)
       this.aSetHostTimeLeft()
       this.aSetOtherTimeLeft()
+      
+      if (!isHostWhite) {
+        this.aUpdateBoard({ boardState, playerIsBlack })
+      }
+
       this.$bvModal.hide('choose-new-time-modal')
     },
 
