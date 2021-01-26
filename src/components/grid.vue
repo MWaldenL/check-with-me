@@ -27,7 +27,8 @@
               :canMakeMove="canMakeMove"
               :selfColor="selfColor"
               :key="col" 
-              @makeMove="updateLastPlayerMoved"/>
+              @makeMove="updateLastPlayerMoved"
+              @isLastMoveCapture="setLastMoveCapture"/>
           </tr>
         </table>
       </div>
@@ -48,7 +49,24 @@
         {{ selfName }}
       </h1>
     </div>
-    <b-button id="resign" class="btn-danger" v-b-modal.resign-modal>Resign</b-button>
+    
+    <!-- Buttons -->
+    <b-button 
+      id="draw" 
+      class="btn-info" 
+      v-if="isBoardEligibleForDraw"
+      @click="offerDraw"> 
+      Draw</b-button>
+      
+    <DrawModal 
+      @acceptDraw="endGameInDraw" 
+      @rejectDraw="handleDrawReject" />
+
+    <b-button 
+      id="resign" 
+      class="btn-danger" 
+      v-b-modal.resign-modal>
+      Resign</b-button>
     <ResignModal />
   </div>
 </template>
@@ -68,6 +86,7 @@ import { mapGetters, mapActions } from 'vuex'
 import Cell from './cell'
 import Sidebar from './sidebar'
 import ResultOverlay from './resultOverlay'
+import DrawModal from './drawModal'
 import ResignModal from './resignModal'
 
 export default {
@@ -76,6 +95,7 @@ export default {
     Cell,
     Sidebar,
     ResultOverlay,
+    DrawModal,
     ResignModal
   },
   
@@ -128,22 +148,38 @@ export default {
     gamesCollection
       .doc(this.currentGameID) // Obtain from state in the future when rooms are implemented
       .onSnapshot(async doc => {
-        const data = doc.data()
+        const data = await doc.data()
         const boardState = data.board_state
+        const draw = data.draw
+        const winnerFromLogout = data.winner_from_logout
         const playerIsWhite = this.selfColor === 'w'
         const playerIsBlack = this.selfColor === 'b'
 
-        // Check if someone has logged out in game
-        // this.setWinnerFromLogout(data)
+        // Early returns 
+        // Check if someone has logged out while in game
+        // if (winnerFromLogout !== '') {
+        //   this.setWinnerFromLogout(data)
+        //   return
+        // }
+
+        // Check if the game has ended in a draw
+        if (draw) {
+          this.endGameInDraw()
+          return 
+        }
 
         // Update the last player moved and the position
         this.bIsFirstRun = data.is_first_run
         this.lastPlayerMoved = data.last_player_moved
+        this.drawOfferedBy = data.draw_offered_by
         this.aUpdateBoard({ boardState, playerIsBlack })
         this.aUpdateCount({ 
           white: data.white_count, 
           black: data.black_count
         })
+
+        // Listen for and handle draw offers
+        this.handleDrawOffer(this.drawOfferedBy)
 
         // Check for win
         // Check for stuck states
@@ -154,28 +190,21 @@ export default {
           whiteStuck = checkIfSelfStuck(this.board, true)
           blackStuck = checkIfEnemyStuck(this.board, true)
         } else {
-          // console.log('black view')
           whiteStuck = checkIfEnemyStuck(this.board, false)
           blackStuck = checkIfSelfStuck(this.board, false)
         }
 
-        console.log("white: " + whiteStuck + " " + data.white_count)
-        console.log("black: " + blackStuck + " " + data.black_count)
-
         if (whiteStuck && blackStuck) { // if both players are stuck, call a draw
-          //console.log("DRAW DRAW DRAW")
           this.updateSelfScore('D')
           this.aSetWinner('D')
           this.aSetActiveGame(false)
           return
         } else if (whiteStuck || data.white_count === 0) { // if only white is stuck or white has no more pieces, black wins
-          //console.log("BLACK BLACK BLACK")
           this.updateSelfScore('B')
           this.aSetWinner('B')
           this.aSetActiveGame(false)
           return
         } else if (blackStuck || data.black_count === 0) { // if only black is stuck or black has no more pieces, white wins
-          //console.log("WHITE WHITE WHITE")
           this.updateSelfScore('W')
           this.aSetWinner('W')
           this.aSetActiveGame(false)
@@ -266,7 +295,14 @@ export default {
       isSelfTimeRunning: false,
       isEnemyTimeRunning: false,
       bIsFirstRun: true,
-      prevSourceSquare: null
+      prevSourceSquare: null,
+
+      showingDrawModal: false,
+      isLastMoveCapture: false,
+      isCountingMovesForDraw: false,
+      drawCounter: 0,
+      drawOfferedBy: '',
+      burdenedColor: ''
     }
   },
 
@@ -331,6 +367,10 @@ export default {
 
     playerIfOngoingGame() {
       return this.lastPlayerMoved === auth.currentUser.uid ? 'enemy' : 'self'
+    },
+
+    isBoardEligibleForDraw() {
+      return this.selfCount <= 3 && this.otherCount <= 3
     }
   },
 
@@ -362,6 +402,14 @@ export default {
       'aSetActiveGame'
     ]),
 
+    async setSelfUsername() {
+      const currentUser = await this.currentUser.data 
+      this.selfName = currentUser.username
+    },
+
+    /**
+     * Post-game methods
+     */
     async updateSelfScore(winner) {
       // gets user documents for current player and opponent
       console.log(auth.currentUser)
@@ -395,35 +443,23 @@ export default {
           selfDrawWhite++
       } else if (winner === 'B') {
         if (this.selfColor === 'b') { // if black wins and self is black, compute new elo ranking with score = 1 and add to black win count
-          //console.log("BLACK WINS")
           newScore = getNewScore(selfScore, otherScore, 1)
           selfWinsBlack++
         } else { // if black wins and self is white, compute new elo ranking with score = 0 and add to white lose count
-          //console.log("WHITE LOSES")
           newScore = getNewScore(selfScore, otherScore, 0)
           selfLossWhite++
         }
       } else {
         if (this.selfColor === 'w') { // if white wins and self is white, compute new elo ranking with score = 1 and add to white win count
-          //console.log("WHITE WINS")
           newScore = getNewScore(selfScore, otherScore, 1)
           selfWinsWhite++
         } else { // if white wins and self is black, compute new elo ranking with score = 0 and add to black lose count
-          //console.log("BLACK LOSES")
           newScore = getNewScore(selfScore, otherScore, 0)
           selfLossBlack++
         }
       }
 
-      // console.log(newScore)
-      // console.log(selfWinsBlack)
-      // console.log(selfWinsWhite)
-      // console.log(selfLossBlack)
-      // console.log(selfLossWhite)
-      // console.log(selfDrawBlack)
-      // console.log(selfDrawWhite)
-
-      // update self user document with new values
+      // Update self user document with new values
       await usersCollection
         .doc(auth.currentUser.uid)
         .update({
@@ -436,20 +472,91 @@ export default {
           draw_white: selfDrawWhite,
         })
     },
-
-    async setSelfUsername() {
-      const currentUser = await this.currentUser.data 
-      this.selfName = currentUser.username
+    
+    async offerDraw() {
+      this.resetDrawCounter()
+      this.burdenedColor = this.selfColor === 'w' ? 'b' : 'w'
+      await this.currentGameDoc.update({ 
+        draw_offered_by: this.selfColor
+      })
     },
 
-    setPlayerToMove(player) {
-      this.playerToMove = player
+    async endGameInDraw() {
+      // Handle game result states
+      this.updateSelfScore('D')
+      this.aSetWinner('D')
+      this.aSetActiveGame(false)
+      this.$bvModal.hide("draw-modal")
+
+      // Update database
+      await gamesCollection
+        .doc(this.currentGame)
+        .update({ draw: true })
+    },
+
+    setLastMoveCapture(value) {
+      this.isLastMoveCapture = value
+    },
+
+    handleDrawOffer() {
+      const didEnemyOfferDraw = this.drawOfferedBy !== this.selfColor 
+      const willResetDrawCounter = !didEnemyOfferDraw || this.isLastMoveCapture
+      const willIncrementDrawCounter = 
+        this.isCountingMovesForDraw && 
+        this.burdenedColor === this.selfColor &&
+        this.lastPlayerMoved === auth.currentUser.uid
+
+      // Show the draw modal prompt
+      if (this.drawOfferedBy !== '' && didEnemyOfferDraw) {
+        this.$bvModal.show("draw-modal")
+      }
+
+      // If self offers a draw or a capture is made, reset to 0
+      if (willResetDrawCounter) {
+        this.resetDrawCounter()
+        return
+      }
+
+      // Only increment when someone has declined a draw offer, 
+      // when the current player has moved,
+      if (willIncrementDrawCounter) {
+        this.incrementDrawCounter()
+        console.log(this.drawCounter)
+      } 
+
+      // End the game after 20 moves/39 ply if a player has failed to make a capture
+      const isDrawCounterFull = this.drawCounter === 39  
+      if (isDrawCounterFull) {
+        this.endGameInDraw()
+      }
+    },
+
+    async handleDrawReject() {
+      // Magic
+      if (this.lastPlayerMoved === auth.currentUser.uid) {
+        this.drawCounter -= 2
+      }
+    
+      // Set the player who rejected the draw and needs to win in <= 20 moves
+      this.burdenedColor = this.selfColor
+
+      // Start the draw counter
+      this.isCountingMovesForDraw = true
+
+      // If a player has rejected a draw, clear the draw offer
+      await this.currentGameDoc.update({ draw_offered_by: '' })
+    },
+
+    incrementDrawCounter() {
+      this.drawCounter++
+    },
+
+    resetDrawCounter() {
+      this.drawCounter = 0
     },
 
     setWinnerFromLogout(gameData) {
-      console.log(gameData)
       const winnerFromLogout = gameData.winner_from_logout
-      console.log(auth.currentUser.uid)
       if (winnerFromLogout === auth.currentUser.uid) {
         const winnerColor = this.selfColor.toUpperCase()
         this.updateSelfScore(winnerColor)
@@ -477,6 +584,13 @@ export default {
         { host_timeLeft: this.selfSeconds } : 
         { other_timeLeft: this.selfSeconds } 
       await this.currentTimerDoc.update(newTimeObj)   
+    },
+
+    /**
+     * Turn methods
+     */
+    setPlayerToMove(player) {
+      this.playerToMove = player
     },
 
     async endPlayerTurn() {
@@ -648,6 +762,23 @@ export default {
         const enemyTimeQuery = await axios.get(`${this.SERVER_URL}/currentTimeLeft/${this.enemyPlayerType}`)
         this.enemySeconds = enemyTimeQuery.data.timeLeft
       }
+    },
+
+    async determineClockToRun() {
+      if (this.lastPlayerMoved !== auth.currentUser.uid) { // opponent last move
+        await this.stopEnemyTime()
+        await this.startSelfTime()
+      } else { // self made last move
+        await this.stopSelfTime()
+        await this.startEnemyTime()
+      }
+    },
+
+    async writeUpdatedTimeToDB() {
+      const newTimeObj = this.isSelfHost ? 
+        { host_timeLeft: this.selfSeconds } : 
+        { other_timeLeft: this.selfSeconds } 
+      await this.currentTimerDoc.update(newTimeObj)   
     }
   }
 }
@@ -711,7 +842,7 @@ table {
   padding: 10px 30px;
   background-color: #424242;
 }
-#resign {
+#draw {
   font-family: 'Roboto', Helvetica, Arial, sans-serif;
   font-weight: 100;
   font-size: 20px;

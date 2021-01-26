@@ -93,6 +93,13 @@ const actions = {
     const username = userDoc.data().username  
 
     commit('mSetEnemyUsername', username)
+  },
+
+  /**
+   * Resets the game state. Happens during logout to prevent undefined behavior
+   */
+  aClearGameState({ commit }) {
+    commit('mClearGameState') 
   }
 }
 

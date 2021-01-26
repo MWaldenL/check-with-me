@@ -126,15 +126,14 @@ export default {
       if (this.host !== null) {
         const wins = this.host.wins_black + this.host.wins_white
         const draws = this.host.draw_black + this.host.draw_white
-        const losses = this.host.loss_black + this.host.loss_black
+        const losses = this.host.loss_white + this.host.loss_black
 
         if (draws+losses === 0 && wins === 0) {
           return "no games"
         } else if (draws+losses === 0) {
           return "perfect"
-        } else {
-          return (wins/(wins + draws + losses)*100).toFixed(2) + "%"
-        }
+        else
+          return (wins/(wins + losses)*100).toFixed(2) + "%"
       }
     },
 
@@ -142,15 +141,14 @@ export default {
       if (this.host !== null) {
         const wins = this.guest.wins_black + this.guest.wins_white
         const draws = this.guest.draw_black + this.guest.draw_white
-        const losses = this.guest.loss_black + this.guest.loss_black
+        const losses = this.guest.loss_white + this.guest.loss_black
 
         if (draws+losses === 0 && wins === 0) {
           return "no games"
         } else if (draws+losses === 0) {
           return "perfect"
-        } else { 
-          return (wins/(wins + draws + losses)*100).toFixed(2) + "%"
-        }
+        else
+          return (wins/(wins + losses)*100).toFixed(2) + "%"
       }
     },
 
@@ -163,15 +161,13 @@ export default {
     },
 
     getHostPoints() {
-      if (this.host !== null) { 
-        return (this.host.points).toFixed(0)
-      }
+      if(this.host !== null)
+        return (this.host.points).toFixed(2)
     },
 
     getGuestPoints() {
-      if (this.guest !== null) {
-        return (this.guest.points).toFixed(0)
-      }
+      if(this.guest !== null)
+        return (this.guest.points).toFixed(2)
     }
   },
 

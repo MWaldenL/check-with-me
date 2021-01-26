@@ -56,7 +56,10 @@ export default {
   },
 
   methods: {
-    ...mapActions(['logoutUser']),
+    ...mapActions([
+      'logoutUser',
+      'aClearGameState'
+    ]),
 
     async showLogout() {
       const userID = firebase.auth().currentUser.uid
@@ -113,6 +116,7 @@ export default {
 
     logout() {
       console.log("in logout")
+      this.aClearGameState()
       firebase.auth().signOut()
         .then(() => {
           this.logoutUser()
