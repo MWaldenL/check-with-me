@@ -1,7 +1,16 @@
 <template>
   <div id = 'GameLobbyPage'>
     <Sidebar />
-    <CreateRoomModal v-show="showModal" @close="showModal = false" />
+    <b-modal v-model="isBadRoomJoin" id="bad-join-modal" @ok="refresh" ok-only hide-header no-close-on-esc no-close-on-backdrop>
+      <div>The room you are trying to join is full or deleted.</div>
+      <div>Refreshing the page...</div>
+    </b-modal>
+    <b-modal v-model="isBadUserJoin" id="bad-join-modal" @ok="refresh" ok-only hide-header no-close-on-esc no-close-on-backdrop>
+      <div>You are already in a room.</div>
+      <div>Redirecting to room...</div>
+    </b-modal>
+    <CreateRoomModal v-show="showModal" @close="showModal = false" @badUser="isBadUserJoin = true"/>
+
     <!-- <CreateRoomModal v-bind:showModal="showModal" @close="showModal = false" /> -->
     <div id = 'GameLobbyProper'>
       <div id="GameLobbyPageLabel">Game Lobby</div>
@@ -23,9 +32,9 @@
             <td class = "gameName">{{ game.room_name }}</td>
             <td class = "gameHost">{{ game.host_user[0] }}</td>
             <td class = "gameButton">
-              <router-link :to="`/room/${ game.room_id }`" tag="button" :disabled="game.isFull" v-bind:class="{active: !game.isFull,'greenButton': !game.isFull,'redButton': game.isFull}" v-on:click.native="joinRoom(game.room_id)">
+              <button :disabled="game.isFull" v-bind:class="{active: !game.isFull,'greenButton': !game.isFull,'redButton': game.isFull}" v-on:click="joinRoom(game.room_id)">
                 {{game.isFull ? 'Full' : 'Join Room'}}
-              </router-link>
+              </button>
               <!-- <button :disabled="game.isFull" v-bind:class="{active: !game.isFull,'greenButton': !game.isFull,'redButton': game.isFull}" @click="[$event.target.classList.add('redButton'), joinRoom(game.room_id)]">
                 {{game.isFull ? 'Full' : 'Join Room'}}
               </button> -->
@@ -51,7 +60,8 @@ import {
   getGames,
   roomQuery,
   getCount,
-  checkUserGame
+  checkUserGame,
+  checkValidRoom
 } from '@/resources/gameModel.js'
 
 export default {
@@ -71,7 +81,9 @@ export default {
       lobbyNextQuery: roomQuery,
       lobbyPrevQuery: roomQuery,
 
-      showModal: false
+      showModal: false,
+      isBadRoomJoin: false,
+      isBadUserJoin: false
     }
   },
   computed: {
@@ -139,29 +151,46 @@ export default {
       }
     },
 
-    joinRoom(room_id) {
+    async joinRoom(room_id) {
       //console.log("INSIDE")
       let user_key = firebase.auth().currentUser.uid
-      
-      let room = this.games.find(obj => {
-        return obj.room_id === room_id
-      })
-      let copy = this.games
-      copy[this.games.indexOf(room)].isFull = true
-      this.games = copy
 
-      db.collection("games")
-      .doc(room_id)
-      .update({
-        other_user:  db.doc('users/' + user_key)
-      })
-      .catch(error => {
-        //console.log("Error getting documents: ", error);
-      })
+      let validRoom = await checkValidRoom(room_id)
+      let validUser = await checkUserGame(user_key)
+      validUser = validUser === false
+
+      if(validRoom && validUser) {
+        this.$router.push({ path: `/room/${ room_id }`})
+
+        db.collection("games")
+        .doc(room_id)
+        .update({
+          other_user:  db.doc('users/' + user_key)
+        })
+        .catch(error => {
+          //console.log("Error getting documents: ", error);
+        })
+      } else if (!validUser){
+        this.isBadUserJoin = true
+      } else{
+        this.isBadRoomJoin = true
+      }
     },
 
-    createRoom() {
-      this.showModal = true
+    refresh() {
+      this.$router.go()
+    },
+
+    async createRoom() {
+      let user_key = firebase.auth().currentUser.uid
+      let validUser = await checkUserGame(user_key)
+      validUser = validUser === false
+      
+      console.log(validUser)
+      if(validUser)
+        this.showModal = true
+      else
+        this.isBadUserJoin = true
     }
   }
 }

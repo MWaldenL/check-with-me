@@ -3,7 +3,7 @@ export default {
   register: {
     NAME: 'Name must contain letters only. If your name has spaces, use only one space.',
     USERNAME: `Username must contain letters and/or numbers only, 
-              and must be 8-20 characters long`,
+              and must be 8-20 characters long.`,
     EMAIL: 'Please enter a valid email.',
     PASSWORD: `Password must contain at least 8 characters, 
               1 uppercase letter, 

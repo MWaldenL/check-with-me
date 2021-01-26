@@ -62,7 +62,12 @@
       @acceptDraw="endGameInDraw" 
       @rejectDraw="handleDrawReject" />
 
-    <!-- <b-button id="resign" class="btn-danger">Resign</b-button> -->
+    <b-button 
+      id="resign" 
+      class="btn-danger" 
+      v-b-modal.resign-modal>
+      Resign</b-button>
+    <ResignModal />
   </div>
 </template>
 
@@ -82,6 +87,7 @@ import Cell from './cell'
 import Sidebar from './sidebar'
 import ResultOverlay from './resultOverlay'
 import DrawModal from './drawModal'
+import ResignModal from './resignModal'
 
 export default {
   name: 'Grid',
@@ -89,7 +95,8 @@ export default {
     Cell,
     Sidebar,
     ResultOverlay,
-    DrawModal
+    DrawModal,
+    ResignModal
   },
   
   // Called on refreshes or new loads 
@@ -174,6 +181,7 @@ export default {
         // Listen for and handle draw offers
         this.handleDrawOffer(this.drawOfferedBy)
 
+        // Check for win
         // Check for stuck states
         let whiteStuck
         let blackStuck
@@ -199,6 +207,19 @@ export default {
         } else if (blackStuck || data.black_count === 0) { // if only black is stuck or black has no more pieces, white wins
           this.updateSelfScore('W')
           this.aSetWinner('W')
+          this.aSetActiveGame(false)
+          return
+        }
+
+        // Check for player resignation
+        if (data.resign === "b") {
+          this.updateSelfScore('W')
+          this.aSetWinner('WR')
+          this.aSetActiveGame(false)
+          return
+        } else if (data.resign === "w") {
+          this.updateSelfScore('B')
+          this.aSetWinner('BR')
           this.aSetActiveGame(false)
           return
         }
@@ -300,7 +321,8 @@ export default {
       isCapturing: 'getCaptureSequenceState',
       isCaptureRequired: 'getIsCaptureRequired',
       prevDestSquare: 'getPrevDestSquare',
-      activeGame: 'getActiveGame'
+      activeGame: 'getActiveGame',
+      currentGame: 'getCurrentGame'
     }),
 
     isSelfHost() {
@@ -498,8 +520,8 @@ export default {
         console.log(this.drawCounter)
       } 
 
-      // End the game after 20 moves if a player has failed to make a capture
-      const isDrawCounterFull = this.drawCounter === 3  // TODO: Temp 5 moves for fast testing
+      // End the game after 20 moves/39 ply if a player has failed to make a capture
+      const isDrawCounterFull = this.drawCounter === 39  
       if (isDrawCounterFull) {
         this.endGameInDraw()
       }
@@ -800,8 +822,8 @@ table {
   padding: 10px 40px;
 
   position: absolute;
-  right: 300px;
-  bottom: 50vh;
+  right: 3vw;
+  bottom: 40vh;
 }
 #box {
   position: relative;

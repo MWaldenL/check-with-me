@@ -1,4 +1,3 @@
-import axios from 'axios'
 import { auth, usersCollection, gamesCollection, timersCollection } from '@/firebase'
 
 const actions = {
@@ -61,6 +60,9 @@ const actions = {
     commit('mSetOtherTimeLeft', data.other_timeLeft)
   },
 
+  /**
+   * Gets the enemy username from the database
+   */
   async aGetEnemyUsername({ commit, state }) {
     const uid = auth.currentUser.uid === state.hostUser ? 
       state.otherUser : 

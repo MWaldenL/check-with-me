@@ -4,6 +4,11 @@
     <div id="LeaderboardProper">
       <div id="LeaderboardPageLabel">Leaderboard</div>
       <hr id="LeaderboardRule">
+      <div id="CriteriaSelect">
+        <div class="triangle-left" @click="moveCriteriaLeft()"></div>
+        <div id="criteriaLabel">{{ criteriaList[criteriaIndex] }}</div>
+        <div class="triangle-right" @click="moveCriteriaRight()"></div>
+      </div>
       <table id="LeaderboardTable">
         <thead id='ColumnNames'>
           <tr>
@@ -20,11 +25,6 @@
           </tr>
         </tbody>
       </table>
-      <div id="CriteriaSelect">
-        <div class="triangle-left" @click="moveCriteriaLeft()"></div>
-        <div id="criteriaLabel">{{ criteriaList[criteriaIndex] }}</div>
-        <div class="triangle-right" @click="moveCriteriaRight()"></div>
-      </div>
     </div>
   </div>
 </template>

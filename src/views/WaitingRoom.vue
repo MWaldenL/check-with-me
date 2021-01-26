@@ -238,13 +238,18 @@ export default {
     .doc(roomID)
     .onSnapshot(async doc => {
       if(doc.exists) {
-        const guest = await getSingleUser(doc.data().other_user.id)
-        this.guest = guest
-        //alert(this.guest.username)
+        if(this.isOwner == 0 && doc.data().other_user.id === "nil"){
+          this.$router.push({ path: '/'})
+        } else {
+          const guest = await getSingleUser(doc.data().other_user.id)
+          this.guest = guest
+        }
       } else{
         if(this.isOwner == 0)
         {
           this.isKicked = true
+        } else{
+          this.$router.push({ path: '/'})
         }
       }
     })
