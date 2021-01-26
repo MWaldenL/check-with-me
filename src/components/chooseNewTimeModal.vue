@@ -24,7 +24,6 @@
 <script>
 import { mapActions, mapGetters } from 'vuex'
 import { 
-  auth,
   gamesCollection,
   timersCollection
 } from '@/firebase'
@@ -52,17 +51,7 @@ export default {
 
     isTimeSelected() {
       return !(this.toggle1 || this.toggle3 || this.toggle5 || this.toggle10)
-    },
-
-    selfColor() {
-      return (auth.currentUser.uid === this.hostUserID) ?
-        (this.isHostWhite ? 'w' : 'b') : 
-        (this.isHostWhite ? 'b' : 'w')
-    },
-
-    isSelfHost() {
-      return auth.currentUser.uid === this.hostUserID
-    },
+    }
   },
 
   methods: {
@@ -72,6 +61,8 @@ export default {
       "aSetHostTimeLeft",
       "aSetOtherTimeLeft"
     ]),
+
+    // toggle time control options to allow only one choice
     handleTimeToggle10() {
       this.toggle1 = this.toggle3 = this.toggle5 = false
     },
@@ -85,14 +76,14 @@ export default {
       this.toggle3 = this.toggle5 = this.toggle10 = false
     },
 
-    async handleStartRematchWhite() {
-      // handle state reset for host player, handle db reset
-      this.aResetGame()
-      this.aSetHostIsWhite(true)
-      this.aSetHostTimeLeft()
-      this.aSetOtherTimeLeft()
-      this.$bvModal.hide('choose-new-time-modal')
-      
+    /**
+     * updates the cloud firestore and the vuex state for the newly selected options for the rematch
+     * 
+     * @param lastPlayerMoved - user id of the player whose been set as the black player
+     * @param isHostWhite - boolean var indicating if the host will play as white
+     */
+    async updateDBAndState(lastPlayerMoved, isHostWhite) {
+      // get time control selected
       let time
 
       if (this.toggle1)        { time = 60 } 
@@ -100,112 +91,57 @@ export default {
       else if (this.toggle5)   { time = 300 }
       else if (this.toggle10)  { time = 600 }
 
+      // reset time control selection for next rematch
       this.toggle1 = this.toggle3 = this.toggle5 = this.toggle10 = false
 
+      // update current game doc with new params
       await gamesCollection
             .doc(this.currentGame)
             .update({
               board_state: "[FEN \"O:W1,3,5,7,10,12,14,16,17,19,21,23:B42,44,46,48,49,51,53,55,58,60,62,64\"]",
               black_count: 12,
               white_count: 12,
-              last_player_moved: this.otherUserID,
+              last_player_moved: lastPlayerMoved,
               resign: "none",
-              is_host_white: true,
+              is_host_white: isHostWhite,
               rematch_accepted: false,
               rematch_requested: "none",
               rematch_time_selected: true
             })
       
+      // update current time doc with new params
       await timersCollection
             .doc(this.currentTimer)
             .update({
               host_timeLeft: time,
               other_timeLeft: time,
-              last_player_moved: this.otherUserID
+              last_player_moved: lastPlayerMoved
             })
+      
+      this.aResetGame()
+      this.aSetHostIsWhite(isHostWhite)
+      this.aSetHostTimeLeft()
+      this.aSetOtherTimeLeft()
+      this.$bvModal.hide('choose-new-time-modal')
+    },
+
+    async handleStartRematchWhite() {
+      // handle state, db reset with host as white
+      this.updateDBAndState(this.otherUserID, true)
     },
 
     async handleStartRematchBlack() {
-      // handle state reset for host player, handle db reset
-      this.aResetGame()
-      this.aSetHostIsWhite(false)
-      this.aSetHostTimeLeft()
-      this.aSetOtherTimeLeft()
-      this.$bvModal.hide('choose-new-time-modal')
-      
-      let time
-
-      if (this.toggle1)        { time = 60 } 
-      else if (this.toggle3)   { time = 180 }
-      else if (this.toggle5)   { time = 300 }
-      else if (this.toggle10)  { time = 600 }
-
-      this.toggle1 = this.toggle3 = this.toggle5 = this.toggle10 = false
-
-      await gamesCollection
-            .doc(this.currentGame)
-            .update({
-              board_state: "[FEN \"O:W1,3,5,7,10,12,14,16,17,19,21,23:B42,44,46,48,49,51,53,55,58,60,62,64\"]",
-              black_count: 12,
-              white_count: 12,
-              last_player_moved: this.hostUserID,
-              resign: "none",
-              is_host_white: false,
-              rematch_accepted: false,
-              rematch_requested: "none",
-              rematch_time_selected: true
-            })
-      
-      await timersCollection
-            .doc(this.currentTimer)
-            .update({
-              host_timeLeft: time,
-              other_timeLeft: time,
-              last_player_moved: this.hostUserID
-            })
+      // handle state, db reset with host as white
+      this.updateDBAndState(this.hostUserID, false)
     },
 
     async handleStartRematchRandom() {
-      // handle state reset for host player, handle db reset
+      // handle state, db reset with host as random color
+      // random num even ? host is white : host is black
       let color = Math.floor((Math.random() * 100) + 1) % 2 === 0
       let last = color ? this.otherUserID : this.hostUserID
 
-      this.aResetGame()
-      this.aSetHostIsWhite(color)
-      this.aSetHostTimeLeft()
-      this.aSetOtherTimeLeft()
-      this.$bvModal.hide('choose-new-time-modal')
-      
-      let time
-
-      if (this.toggle1)        { time = 60 } 
-      else if (this.toggle3)   { time = 180 }
-      else if (this.toggle5)   { time = 300 }
-      else if (this.toggle10)  { time = 600 }
-
-      this.toggle1 = this.toggle3 = this.toggle5 = this.toggle10 = false
-
-      await gamesCollection
-            .doc(this.currentGame)
-            .update({
-              board_state: "[FEN \"O:W1,3,5,7,10,12,14,16,17,19,21,23:B42,44,46,48,49,51,53,55,58,60,62,64\"]",
-              black_count: 12,
-              white_count: 12,
-              last_player_moved: last,
-              resign: "none",
-              is_host_white: color,
-              rematch_accepted: false,
-              rematch_requested: "none",
-              rematch_time_selected: true
-            })
-      
-      await timersCollection
-            .doc(this.currentTimer)
-            .update({
-              host_timeLeft: time,
-              other_timeLeft: time,
-              last_player_moved: last
-            })
+      this.updateDBAndState(last, color)
     }
   }
 }
