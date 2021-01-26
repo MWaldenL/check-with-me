@@ -9,11 +9,10 @@ import { BIconNutFill } from 'bootstrap-vue'
 
 class Room {
   constructor (room_id, room_name, host_user, isFull) {
-      ////console.log(host_user)
-      this.room_id = room_id
-      this.room_name = room_name
-      this.host_user = host_user
-      this.isFull = isFull
+    this.room_id = room_id
+    this.room_name = room_name
+    this.host_user = host_user
+    this.isFull = isFull
   }
 }
 
@@ -22,7 +21,7 @@ var RoomConverter = {
     const data = snapshot.data(options)
     
     let isFull = true
-    if(data.other_user.id === "nil")
+    if (data.other_user.id === "nil")
       isFull = false
     else
       isFull = true
@@ -71,17 +70,17 @@ export const getCount = (() => {
   let count = []
 
   gamesCollection
-  .where("is_public", "==", true)
-  .orderBy("room_name_lc", "asc")
-  .get()
-  .then(querySnapshot => {
-    let docs = querySnapshot.docs
+    .where("is_public", "==", true)
+    .orderBy("room_name_lc", "asc")
+    .get()
+    .then(querySnapshot => {
+      let docs = querySnapshot.docs
 
-    count.push(docs.length === 0 ? 1 : Math.ceil(docs.length/10))
-  })
-  .catch(function(error) {
-    //console.log("Error getting documents: ", error);
-  })
+      count.push(docs.length === 0 ? 1 : Math.ceil(docs.length/10))
+    })
+    .catch(function(error) {
+      //console.log("Error getting documents: ", error);
+    })
 
   return count
 })
@@ -133,11 +132,13 @@ export const checkUserGame = (async (userID) => {
 })
 
 export const deleteGame = (async roomID => {
-  //console.log(roomID)
+  console.log(roomID)
   const query = timersCollection.where("game_id", "==", roomID)
   const doc = await query.get()
+  console.log(doc)
   const timerID = doc.docs[0].id
-  //console.log(timerID)
+
+
   await timersCollection.doc(timerID).delete()
   await gamesCollection.doc(roomID).delete()
 })

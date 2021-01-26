@@ -54,6 +54,7 @@
 </template>
 
 <script>
+import axios from 'axios'
 import { bSourceHasWhite, bSourceHasWhiteKing } from '@/store/services/moveCaptureService'
 import { checkIfSelfStuck, checkIfEnemyStuck } from '@/store/services/winCheckerService'
 import { getNewScore } from '@/store/services/eloService'
@@ -63,9 +64,7 @@ import {
   usersCollection, 
   timersCollection
 } from '@/firebase'
-import firebase from 'firebase'
 import { mapGetters, mapActions } from 'vuex'
-import axios from 'axios'
 import Cell from './cell'
 import Sidebar from './sidebar'
 import ResultOverlay from './resultOverlay'
@@ -86,20 +85,24 @@ export default {
     const timerDoc = timersCollection.doc('SoqVgC6sMT9Tdmh4keTE') // hardcoded
     const game = await gameDoc.get()
     const timer = await timerDoc.get()
+
+    // Set the game data
     this.currentGameData = game.data()
+
+    // Check if someone has won from a logout
+    // The player present in the room will receive a modal, and
+    // the player who logged out will know from their score that they lost
+    this.setWinnerFromLogout(game.data())
 
     // Set collections
     this.currentGameDoc = gameDoc
-    this.currentTimerDoc = timerDoc
-
-    //console.log("HOST SCORE: " + this.hostCurrentScore)
-    //console.log("OTHER SCORE: " + this.otherCurrentScore)
+    this.currentTimerDoc = timerDoc 
 
     // Set first run and last player moved 
     this.bIsFirstRun = this.currentGameData.is_first_run
     this.lastPlayerMoved = this.currentGameData.last_player_moved
     
-    // try 
+    // Set the last player moved from the timer document, since this is updated as well
     this.lastPlayerMoved = timer.data().last_player_moved
 
     // Set usernames
@@ -117,7 +120,6 @@ export default {
     this.setPlayerToMove(playerToMove)
     
     // Check if time is already running
-    //console.log('Running clock from created()')
     this.determineClockToRun()
   },
 
@@ -130,6 +132,9 @@ export default {
         const boardState = data.board_state
         const playerIsWhite = this.selfColor === 'w'
         const playerIsBlack = this.selfColor === 'b'
+
+        // Check if someone has logged out in game
+        this.setWinnerFromLogout(data)
 
         // Update the last player moved and the position
         this.bIsFirstRun = data.is_first_run
@@ -436,30 +441,36 @@ export default {
       this.playerToMove = player
     },
 
-    async determineClockToRun() {
-      //console.log(this.lastPlayerMoved)
-      //console.log(auth.currentUser.uid)
+    setWinnerFromLogout(gameData) {
+      console.log(gameData)
+      const winnerFromLogout = gameData.winner_from_logout
+      console.log(auth.currentUser.uid)
+      if (winnerFromLogout === auth.currentUser.uid) {
+        const winnerColor = this.selfColor.toUpperCase()
+        this.updateSelfScore(winnerColor)
+        this.aSetWinner(winnerColor)
+        this.aSetActiveGame(false)
+      } 
+    },
 
+    async determineClockToRun() {
       if (this.lastPlayerMoved !== auth.currentUser.uid) { // opponent last move
-        //console.log('DRC self clock')
         await this.stopEnemyTime()
         await this.startSelfTime()
       } else { // self made last move
-        //console.log('DRC enemy clock')
         await this.stopSelfTime()
         await this.startEnemyTime()
       }
     },
 
     async writeUpdatedTimeToDB() {
-      //console.log('writing time to db')
       const newTimeObj = this.isSelfHost ? 
         { host_timeLeft: this.selfSeconds } : 
         { other_timeLeft: this.selfSeconds } 
       await this.currentTimerDoc.update(newTimeObj)   
     },
 
-    async endPlayerTurn(coords) {
+    async endPlayerTurn() {
       const isMoveWhite = 
         bSourceHasWhite(this.board, this.prevDestSquare) || 
         bSourceHasWhiteKing(this.board, this.prevDestSquare) 
@@ -511,14 +522,9 @@ export default {
       const isSelfServerTimeRunning = selfTimeQuery.data.isTimeRunning
       const shouldTimeTick = this.selfSeconds > 0
 
-      // //console.log(this.selfSeconds)
-      //console.log('self time running: ' + isSelfServerTimeRunning)
-
       if (!shouldTimeTick) {
         clearInterval(this.currentRunningTimer)
       } else {
-        //console.log('start self time: ' + this.selfPlayerType)
-
         // Start server time
         if (!isSelfServerTimeRunning) {
           if (this.selfPlayerType === 'host') {
@@ -532,13 +538,10 @@ export default {
         clearInterval(this.currentRunningTimer)
         this.currentRunningTimer = setInterval(() => {
           this.selfSeconds--
-          // //console.log(this.selfSeconds)
           if (this.selfSeconds <= 0) {
             clearInterval(this.currentRunningTimer)
           }
         }, 1000)
-
-        //console.log('starting self time')
       }
     },
 
@@ -553,8 +556,6 @@ export default {
       } else {
         await axios.get('http://localhost:5000/stopOtherTime')
       }
-
-      //console.log('stopping self time')
     },
 
     async startEnemyTime() {
@@ -600,7 +601,6 @@ export default {
       } else {
         await axios.get(`http://localhost:5000/stopOtherTime`)
       }
-      //console.log('stopping enemy time')
     },
 
     async setSelfTimeFromServerOrDB() {
@@ -616,8 +616,6 @@ export default {
       } else { // Otherwise, sync with server
         const selfTimeQuery = await axios.get(`http://localhost:5000/currentTimeLeft/${this.selfPlayerType}`)
         this.selfSeconds = selfTimeQuery.data.timeLeft
-
-        // //console.log(selfTimeQuery.data)
       }
     },
 

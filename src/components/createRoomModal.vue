@@ -37,10 +37,10 @@
 
         <div class="modal-body time-container">
           <slot name="body">
-            <div id="minutes-10" v-bind:class="{'box-active': timeInput === 10, 'box-inactive': timeInput !== 10}" @click="putTime(10)">10 min</div>
-            <div id="minutes-5" v-bind:class="{'box-active': timeInput === 5, 'box-inactive': timeInput !== 5}" @click="putTime(5)">5 min</div>
-            <div id="minutes-3" v-bind:class="{'box-active': timeInput === 3, 'box-inactive': timeInput !== 3}" @click="putTime(3)">3 min</div>
-            <div id="minutes-1" v-bind:class="{'box-active': timeInput === 1, 'box-inactive': timeInput !== 1}" @click="putTime(1)">1 min</div>
+            <div id="minutes-10" class="cursor-pointer" :class="{'box-active': timeInput === 10, 'box-inactive': timeInput !== 10}" @click="putTime(10)">10 min</div>
+            <div id="minutes-5" class="cursor-pointer" :class="{'box-active': timeInput === 5, 'box-inactive': timeInput !== 5}" @click="putTime(5)">5 min</div>
+            <div id="minutes-3" class="cursor-pointer" :class="{'box-active': timeInput === 3, 'box-inactive': timeInput !== 3}" @click="putTime(3)">3 min</div>
+            <div id="minutes-1" class="cursor-pointer" :class="{'box-active': timeInput === 1, 'box-inactive': timeInput !== 1}" @click="putTime(1)">1 min</div>
           </slot>
         </div>
 
@@ -119,7 +119,7 @@ export default {
 </script>
 
 <style scoped>
-  .modal-mask {
+.modal-mask {
   position: fixed;
   z-index: 9998;
   top: 0;
