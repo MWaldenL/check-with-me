@@ -155,11 +155,11 @@ export default {
     },
     getHostPoints() {
       if(this.host !== null)
-        return (this.host.points).toFixed(0)
+        return (this.host.points).toFixed(2)
     },
     getGuestPoints() {
       if(this.guest !== null)
-        return (this.guest.points).toFixed(0)
+        return (this.guest.points).toFixed(2)
     }
   },
   async created() {
