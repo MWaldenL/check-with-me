@@ -1,6 +1,6 @@
 <template>
 <b-modal hide-footer hide-header no-close-on-backdrop no-close-on-esc centered size="sm" id="confirm-leave-modal">
-  <template #default="{ close }">
+  <template #default="{  }">
     <div id="modal-body">
       <h4 class="modal-head" id="modal-header">Leaving Already?</h4> <br>
       <h5 class="modal-head" id="modal-subheader">
@@ -11,7 +11,7 @@
       <br>
 
       <b-button class="mr-2 w-25" variant="danger" @click="handleConfirm">Yes</b-button>
-      <b-button class="ml-2 w-25" variant="success" @click="close">No</b-button>
+      <b-button class="ml-2 w-25" variant="success" @click="handleNo">No</b-button>
     </div>
   </template>
 </b-modal>  
@@ -36,6 +36,16 @@ export default {
           .update({
             enemy_left_confirmed: true
           })
+    },
+
+    async handleNo () {
+      await gamesCollection
+          .doc(this.currentGame)
+          .update({
+            enemy_left: "none"
+          })
+      
+      this.$bvModal.hide("confirm-leave-modal")
     }
   }
 }
