@@ -39,7 +39,7 @@ const actions = {
    * @param val if the game is being run for the first time
    */
   async aSetFirstRun({ commit }, value) {
-    const gameDoc = await gamesCollection.doc('Vc0H4f4EvY6drRKnvsk5')
+    const gameDoc = await gamesCollection.doc('H7UDBzSpM2FeKmXWkHUN')
     gameDoc.update({ is_first_run: value })
   },
 
@@ -47,7 +47,7 @@ const actions = {
    * Sets the host's time left from the database
    */
   async aSetHostTimeLeft({ commit }) {      
-    const timerDoc = await timersCollection.doc('H48woDfI1lwIGZnJh4qz').get()
+    const timerDoc = await timersCollection.doc('SoqVgC6sMT9Tdmh4keTE').get()
     const data = timerDoc.data()
     commit('mSetHostTimeLeft', data.host_timeLeft)
   },
@@ -56,7 +56,7 @@ const actions = {
    * Sets the other player's time left from the database
    */
   async aSetOtherTimeLeft({ commit }) {
-    const timerDoc = await timersCollection.doc('H48woDfI1lwIGZnJh4qz').get()
+    const timerDoc = await timersCollection.doc('SoqVgC6sMT9Tdmh4keTE').get()
     const data = timerDoc.data()
     commit('mSetOtherTimeLeft', data.other_timeLeft)
   },
