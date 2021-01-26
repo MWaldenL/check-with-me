@@ -6,8 +6,8 @@ import { getBoard } from '../board'
 
 const state = {
   cells: getBoard(),
-  nWhiteCount: 12,
-  nBlackCount: 12,
+  nWhiteCount: 3,
+  nBlackCount: 3,
   firstClick: null,
   bActiveGame: true,
   bLastMoveLegal: true,
