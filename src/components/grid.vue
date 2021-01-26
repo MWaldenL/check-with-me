@@ -134,7 +134,9 @@ export default {
         const playerIsBlack = this.selfColor === 'b'
 
         // Check if someone has logged out in game
-        this.setWinnerFromLogout(data)
+        // this.setWinnerFromLogout(data)
+
+        console.log(this.currentGameDoc)
 
         // Update the last player moved and the position
         this.bIsFirstRun = data.is_first_run
