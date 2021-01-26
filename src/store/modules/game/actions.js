@@ -88,7 +88,7 @@ const actions = {
     const uid = auth.currentUser.uid === state.hostUser ? 
       state.otherUser : 
       state.hostUser // TODO: Temporary for testing
-      
+
     const userDoc = await usersCollection.doc(uid).get()
     const username = userDoc.data().username  
 

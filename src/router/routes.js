@@ -9,7 +9,7 @@ import GameLobby from '../views/GameLobby.vue'
 import WaitingRoom from '../views/WaitingRoom.vue'
 import Help from '../views/Help.vue'
 
-export const routes = [
+const gameRoutes = [
   {
     path: '/play',
     name: 'PlayBoard',
@@ -17,11 +17,35 @@ export const routes = [
     meta: { requiresAuth: true },
   },
   {
-    path: '/profile',
-    name: 'Profile',
-    component: Profile,
+    path: '/',
+    name: 'GameLobby',
+    component: GameLobby,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/room/:id',
+    name: 'WaitingRoom',
+    component: WaitingRoom,
+    meta: { 
+      requiresAuth: true,
+      requiresNotAuth: false 
+    }
+  },
+  {
+    path: '/help',
+    name: 'Help',
+    component: Help,
     meta: { requiresAuth: true },
   },
+  {
+    path: '/leaderboard',
+    name: 'Leaderboard',
+    component: Leaderboard,
+    meta: { requiresAuth: true }
+  },
+]
+
+const userRoutes = [
   {
     path: '/change-password',
     name: 'ChangePassword',
@@ -35,11 +59,14 @@ export const routes = [
     meta: { requiresAuth: true },
   },
   {
-    path: '/help',
-    name: 'Help',
-    component: Help,
+    path: '/profile',
+    name: 'Profile',
+    component: Profile,
     meta: { requiresAuth: true },
-  },
+  }
+]
+
+const authRoutes = [
   {
     path: '/register',
     name: 'Register', 
@@ -52,22 +79,10 @@ export const routes = [
     component: Login,
     meta: { requiresNotAuth: true }
   },
-  {
-    path: '/leaderboard',
-    name: 'Leaderboard',
-    component: Leaderboard,
-    meta: { requiresNotAuth: false }
-  },
-  {
-    path: '/',
-    name: 'GameLobby',
-    component: GameLobby,
-    meta: { requiresAuth: true }
-  },
-  {
-    path: '/room/:id',
-    name: 'WaitingRoom',
-    component: WaitingRoom,
-    meta: { requiresNotAuth: false }
-  }
+]
+
+export const routes = [
+  ...gameRoutes,
+  ...userRoutes,
+  ...authRoutes
 ]

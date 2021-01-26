@@ -8,7 +8,6 @@ import store from '@/store'
 Vue.use(VueRouter)
 const router = new VueRouter({ routes })
 
-// Handle routes here
 router.beforeEach(async (to, from, next) => {
   const user = await firebase.getCurrentUser()
   const { requiresAuth, requiresNotAuth } = to.meta
@@ -19,8 +18,6 @@ router.beforeEach(async (to, from, next) => {
   const isAuthAccessingGuestRoute = requiresNotAuth && user && isDifferentRoute
   const isInsideGameRoom = from.name === 'PlayBoard'
   const isEnteringRoom = to.name === 'WaitingRoom'
-
-  console.log(user)
 
   // Handle routing
   if (isAuthAccessingGuestRoute) { // Prioritize

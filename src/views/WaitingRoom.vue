@@ -266,17 +266,23 @@ export default {
     const timerID = game.timer_id.id
 
     this.gameUnsubscribe = gamesCollection
-      .doc(roomID)
-      .onSnapshot(async doc => {
-        if (doc.exists) {
+    .doc(roomID)
+    .onSnapshot(async doc => {
+      if (doc.exists) {
+        if (this.isOwner == 0 && doc.data().other_user.id === "nil"){
+          this.$router.push({ path: '/'})
+        } else {
           const guest = await getSingleUser(doc.data().other_user.id)
           this.guest = guest
-        } else{
-          if (this.isOwner === 0) {
-            this.isKicked = true
-          }
         }
-      })
+      } else {
+        if (this.isOwner == 0) {
+          this.isKicked = true
+        } else {
+          this.$router.push({ path: '/'})
+        }
+      }
+    })
 
     this.timeUnsubscribe = timersCollection
       .doc(timerID)

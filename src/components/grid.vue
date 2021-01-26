@@ -48,7 +48,8 @@
         {{ selfName }}
       </h1>
     </div>
-    <!-- <b-button id="resign" class="btn-danger">Resign</b-button> -->
+    <b-button id="resign" class="btn-danger" v-b-modal.resign-modal>Resign</b-button>
+    <ResignModal />
   </div>
 </template>
 
@@ -67,13 +68,15 @@ import { mapGetters, mapActions } from 'vuex'
 import Cell from './cell'
 import Sidebar from './sidebar'
 import ResultOverlay from './resultOverlay'
+import ResignModal from './resignModal'
 
 export default {
   name: 'Grid',
   components: {
     Cell,
     Sidebar,
-    ResultOverlay
+    ResultOverlay,
+    ResignModal
   },
   
   // Called on refreshes or new loads 
@@ -142,6 +145,7 @@ export default {
           black: data.black_count
         })
 
+        // Check for win
         // Check for stuck states
         let whiteStuck
         let blackStuck
@@ -174,6 +178,19 @@ export default {
           //console.log("WHITE WHITE WHITE")
           this.updateSelfScore('W')
           this.aSetWinner('W')
+          this.aSetActiveGame(false)
+          return
+        }
+
+        // Check for player resignation
+        if (data.resign === "b") {
+          this.updateSelfScore('W')
+          this.aSetWinner('WR')
+          this.aSetActiveGame(false)
+          return
+        } else if (data.resign === "w") {
+          this.updateSelfScore('B')
+          this.aSetWinner('BR')
           this.aSetActiveGame(false)
           return
         }
@@ -269,7 +286,8 @@ export default {
       isCapturing: 'getCaptureSequenceState',
       isCaptureRequired: 'getIsCaptureRequired',
       prevDestSquare: 'getPrevDestSquare',
-      activeGame: 'getActiveGame'
+      activeGame: 'getActiveGame',
+      currentGame: 'getCurrentGame'
     }),
 
     isSelfHost() {
@@ -689,7 +707,7 @@ table {
   padding: 10px 40px;
 
   position: absolute;
-  right: 300px;
+  right: 3vw;
   bottom: 40vh;
 }
 #box {
