@@ -132,8 +132,9 @@ export default {
           return "no games"
         } else if (draws+losses === 0) {
           return "perfect"
-        else
+        } else {
           return (wins/(wins + losses)*100).toFixed(2) + "%"
+        }
       }
     },
 
@@ -147,8 +148,9 @@ export default {
           return "no games"
         } else if (draws+losses === 0) {
           return "perfect"
-        else
+        } else {
           return (wins/(wins + losses)*100).toFixed(2) + "%"
+        }
       }
     },
 
