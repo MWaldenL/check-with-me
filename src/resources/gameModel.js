@@ -100,7 +100,13 @@ export const addGameDoc = ((roomName, roomType, timerID) => {
     room_name_lc: roomName.toLowerCase(),
     timer_id: db.doc('timers/' + timerID),
     white_count: 12,
-    black_count: 12
+    black_count: 12,
+    enemy_left: "none",
+    enemy_left_confirmed: false,
+    rematch_accepted: false,
+    rematch_requested: "none",
+    rematch_time_selected: false,
+    resign: "none"
   })
 })
 
@@ -114,10 +120,10 @@ export const checkNameUnique = (async roomName => {
 export const checkUserGame = (async (userID) => {
   //build reference to user
   const userDocRef = usersCollection.doc(userID)
-  console.log(userDocRef)
+  // console.log(userDocRef)
   const queryHost = gamesCollection.where("host_user", "==", userDocRef)
   const docHost = await queryHost.get()
-  console.log(docHost)
+  // console.log(docHost)
   if (docHost.empty) {
     const queryGuest = gamesCollection.where("other_user", "==", userDocRef)
     const docGuest = await queryGuest.get()

@@ -49,7 +49,7 @@ export default {
       await gamesCollection
           .doc(this.currentGame)
           .update({
-            rematch_accepted: 1
+            rematch_accepted: true
           })
     },
 

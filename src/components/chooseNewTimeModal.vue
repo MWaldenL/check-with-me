@@ -111,7 +111,7 @@ export default {
               last_player_moved: this.otherUserID,
               resign: "none",
               is_host_white: true,
-              rematch_accepted: 0,
+              rematch_accepted: false,
               rematch_requested: "none",
               rematch_time_selected: true
             })
@@ -151,7 +151,7 @@ export default {
               last_player_moved: this.hostUserID,
               resign: "none",
               is_host_white: false,
-              rematch_accepted: 0,
+              rematch_accepted: false,
               rematch_requested: "none",
               rematch_time_selected: true
             })
@@ -194,7 +194,7 @@ export default {
               last_player_moved: last,
               resign: "none",
               is_host_white: color,
-              rematch_accepted: 0,
+              rematch_accepted: false,
               rematch_requested: "none",
               rematch_time_selected: true
             })

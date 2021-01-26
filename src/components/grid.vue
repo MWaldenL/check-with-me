@@ -179,11 +179,11 @@ export default {
           }
 
           // Check for accept
-          if (data.rematch_accepted === 1 && this.isSelfHost) {
+          if (data.rematch_accepted && this.isSelfHost) {
             this.$bvModal.hide('rematch-requestor-modal')
             this.$bvModal.hide('rematch-requestee-modal')
             this.$bvModal.show('choose-new-time-modal')
-          } else if (data.rematch_accepted === 1 && !this.isSelfHost) {
+          } else if (data.rematch_accepted && !this.isSelfHost) {
             this.$bvModal.hide('rematch-requestor-modal')
             this.$bvModal.hide('rematch-requestee-modal')
             this.$bvModal.show('wait-for-time-modal')
