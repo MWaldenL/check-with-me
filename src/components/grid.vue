@@ -48,7 +48,8 @@
         {{ selfName }}
       </h1>
     </div>
-    <!-- <b-button id="resign" class="btn-danger">Resign</b-button> -->
+    <b-button id="resign" class="btn-danger" v-b-modal.resign-modal>Resign</b-button>
+    <ResignModal />
   </div>
 </template>
 
@@ -67,19 +68,21 @@ import { mapGetters, mapActions } from 'vuex'
 import Cell from './cell'
 import Sidebar from './sidebar'
 import ResultOverlay from './resultOverlay'
+import ResignModal from './resignModal'
 
 export default {
   name: 'Grid',
   components: {
     Cell,
     Sidebar,
-    ResultOverlay
+    ResultOverlay,
+    ResignModal
   },
   
   // Called on refreshes or new loads 
   async created() {
-    const gameDoc = gamesCollection.doc('Vc0H4f4EvY6drRKnvsk5')   // hardcoded
-    const timerDoc = timersCollection.doc('H48woDfI1lwIGZnJh4qz') // hardcoded
+    const gameDoc = gamesCollection.doc('H7UDBzSpM2FeKmXWkHUN')   // hardcoded
+    const timerDoc = timersCollection.doc('SoqVgC6sMT9Tdmh4keTE') // hardcoded
     const game = await gameDoc.get()
     const timer = await timerDoc.get()
 
@@ -123,7 +126,7 @@ export default {
   async mounted() {
     // Listen for board state changes
     gamesCollection
-      .doc('Vc0H4f4EvY6drRKnvsk5') // Obtain from state in the future when rooms are implemented
+      .doc('H7UDBzSpM2FeKmXWkHUN') // Obtain from state in the future when rooms are implemented
       .onSnapshot(async doc => {
         const data = doc.data()
         const boardState = data.board_state
@@ -142,6 +145,7 @@ export default {
           black: data.black_count
         })
 
+        // Check for win
         // Check for stuck states
         let whiteStuck
         let blackStuck
@@ -178,6 +182,19 @@ export default {
           return
         }
 
+        // Check for player resignation
+        if (data.resign === "b") {
+          this.updateSelfScore('W')
+          this.aSetWinner('WR')
+          this.aSetActiveGame(false)
+          return
+        } else if (data.resign === "w") {
+          this.updateSelfScore('B')
+          this.aSetWinner('BR')
+          this.aSetActiveGame(false)
+          return
+        }
+
         // Highlight all possible captures when player is not in a capture sequence
         if (this.lastPlayerMoved !== auth.currentUser.uid) {
           if (!this.isCapturing) {
@@ -203,7 +220,7 @@ export default {
 
     // Listen for timer state changes
     timersCollection
-      .doc('H48woDfI1lwIGZnJh4qz')
+      .doc('SoqVgC6sMT9Tdmh4keTE')
       .onSnapshot(async doc => {
         // Sync the other player's timer with the db
         const data = doc.data()
@@ -267,7 +284,8 @@ export default {
       isCapturing: 'getCaptureSequenceState',
       isCaptureRequired: 'getIsCaptureRequired',
       prevDestSquare: 'getPrevDestSquare',
-      activeGame: 'getActiveGame'
+      activeGame: 'getActiveGame',
+      currentGame: 'getCurrentGame'
     }),
 
     isSelfHost() {
@@ -685,7 +703,7 @@ table {
   padding: 10px 40px;
 
   position: absolute;
-  right: 300px;
+  right: 3vw;
   bottom: 40vh;
 }
 #box {
