@@ -103,10 +103,11 @@ export default {
   
   // Called on refreshes or new loads 
   async created() {
-    const gameDoc = gamesCollection.doc('H7UDBzSpM2FeKmXWkHUN')   // hardcoded
-    const timerDoc = timersCollection.doc('SoqVgC6sMT9Tdmh4keTE') // hardcoded
+    const gameDoc = gamesCollection.doc(this.currentGame)   // hardcoded
     const game = await gameDoc.get()
+    const timerDoc = timersCollection.doc(this.currentTimer) // hardcoded
     const timer = await timerDoc.get()
+    
     this.currentGameData = game.data()
 
     // Set collections
@@ -145,7 +146,7 @@ export default {
   async mounted() {
     // Listen for board state changes
     gamesCollection
-      .doc('H7UDBzSpM2FeKmXWkHUN') // Obtain from state in the future when rooms are implemented
+      .doc(this.currentGame) // Obtain from state in the future when rooms are implemented
       .onSnapshot(async doc => {
         const data = doc.data()
         const boardState = data.board_state
@@ -284,7 +285,7 @@ export default {
 
     // Listen for timer state changes
     timersCollection
-      .doc('SoqVgC6sMT9Tdmh4keTE')
+      .doc(this.currentTimer)
       .onSnapshot(async doc => {
         // Sync the other player's timer with the db
         const data = doc.data()
@@ -349,7 +350,8 @@ export default {
       isCaptureRequired: 'getIsCaptureRequired',
       prevDestSquare: 'getPrevDestSquare',
       activeGame: 'getActiveGame',
-      currentGame: 'getCurrentGame'
+      currentGame: 'getCurrentGame',
+      currentTimer: 'getCurrentTimer'
     }),
 
     isSelfHost() {
@@ -426,7 +428,7 @@ export default {
 
     prepareForRematchRequest() {
       gamesCollection
-        .doc("H7UDBzSpM2FeKmXWkHUN")
+        .doc(this.currentGame)
         .update({
           rematch_time_selected: false
         })

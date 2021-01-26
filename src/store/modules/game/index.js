@@ -3,7 +3,7 @@ import actions from './actions'
 import mutations from './mutations'
 
 const state = {
-  currentGameID: 'H7UDBzSpM2FeKmXWkHUN',
+  currentGameID: '7Z5i6fF4IgKNfzjxIT5w',
   boardState: '',
   hostUser: 'nkR8RnJ4GqSJHCaTY89HLrywpt13',
   otherUser: 'LLyi0mw1IuaFX1AZeCYP0NcWdL83',
@@ -11,7 +11,8 @@ const state = {
   hostTimeLeft: 0,
   otherTimeLeft: 0,
   isHostWhite: true,
-  lastPlayerMoved: ''
+  lastPlayerMoved: '',
+  currentTimerID: 'MqLnzN7nT1tO4khNvV1n'
 }
 
 export default {

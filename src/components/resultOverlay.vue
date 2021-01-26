@@ -17,9 +17,7 @@
 import { mapGetters, mapActions } from 'vuex'
 import { 
   auth, 
-  gamesCollection, 
-  usersCollection, 
-  timersCollection
+  gamesCollection
 } from '@/firebase'
 
 export default {
@@ -93,78 +91,6 @@ export default {
             enemy_left: auth.currentUser.uid
           })
       }
-    },
-
-    // TODO: remove this upon deployment
-    async startNewReg () {
-      this.aSetActiveGame(true)
-      this.aSetWinner('N')
-      
-      await gamesCollection
-            .doc("H7UDBzSpM2FeKmXWkHUN")
-            .update({
-              board_state: "[FEN \"O:W1,3,5,7,10,12,14,16,17,19,21,23:B42,44,46,48,49,51,53,55,58,60,62,64\"]",
-              black_count: 12,
-              white_count: 12,
-              last_player_moved: "LLyi0mw1IuaFX1AZeCYP0NcWdL83",
-              resign: "none"
-            })
-    },
-
-    async startNewWin () {
-      this.aSetActiveGame(true)
-      this.aSetWinner('N')
-      
-      await gamesCollection
-            .doc("H7UDBzSpM2FeKmXWkHUN")
-            .update({
-              board_state: "[FEN \"X:W46:B55,58\"]",
-              black_count: 2,
-              white_count: 1,
-              last_player_moved: "LLyi0mw1IuaFX1AZeCYP0NcWdL83",
-              resign: "none"
-            })
-    },
-
-    async startNewWinWhiteStuck () {
-      this.aSetActiveGame(true)
-      this.aSetWinner('N')
-      
-      await gamesCollection
-            .doc("H7UDBzSpM2FeKmXWkHUN")
-            .update({
-              board_state: "[FEN \"X:W32,26:B64,62,60,55,46,42,39,37,K30\"]",
-              black_count: 9,
-              white_count: 2,
-              last_player_moved: "LLyi0mw1IuaFX1AZeCYP0NcWdL83",
-              resign: "none"
-            })
-    },
-
-    async resetUserPoints () {
-      await usersCollection
-            .doc("LLyi0mw1IuaFX1AZeCYP0NcWdL83")
-            .update({
-              draw_black: 0,
-              draw_white: 0,
-              wins_black: 0,
-              wins_white: 0,
-              loss_black: 0,
-              loss_white: 0,
-              points: 120
-            })
-
-      await usersCollection
-            .doc("nkR8RnJ4GqSJHCaTY89HLrywpt13")
-            .update({
-              draw_black: 0,
-              draw_white: 0,
-              wins_black: 0,
-              wins_white: 0,
-              loss_black: 0,
-              loss_white: 0,
-              points: 100
-            })
     }
   }
 }

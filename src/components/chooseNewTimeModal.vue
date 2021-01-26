@@ -30,18 +30,22 @@ import {
 } from '@/firebase'
 export default {
   name: 'ChooseNewTimeModal',
+
   data() {
     return {
       toggle1: false,
       toggle3: false,
       toggle5: false,
-      toggle10: false
+      toggle10: false,
     }
   },
+
   computed: {
     ...mapGetters({
       currentGame: 'getCurrentGame',
+      currentTimer: 'getCurrentTimer',
       hostUserID: 'getHostUser',
+      otherUserID: 'getOtherUser',
       isHostWhite: 'getIsHostWhite',
       enemyUsername: 'getEnemyUsername',
     }),
@@ -60,6 +64,7 @@ export default {
       return auth.currentUser.uid === this.hostUserID
     },
   },
+
   methods: {
     ...mapActions([
       "aResetGame",
@@ -98,12 +103,12 @@ export default {
       this.toggle1 = this.toggle3 = this.toggle5 = this.toggle10 = false
 
       await gamesCollection
-            .doc("H7UDBzSpM2FeKmXWkHUN")
+            .doc(this.currentGame)
             .update({
               board_state: "[FEN \"O:W1,3,5,7,10,12,14,16,17,19,21,23:B42,44,46,48,49,51,53,55,58,60,62,64\"]",
               black_count: 12,
               white_count: 12,
-              last_player_moved: "LLyi0mw1IuaFX1AZeCYP0NcWdL83",
+              last_player_moved: this.otherUserID,
               resign: "none",
               is_host_white: true,
               rematch_accepted: 0,
@@ -112,11 +117,11 @@ export default {
             })
       
       await timersCollection
-            .doc("SoqVgC6sMT9Tdmh4keTE")
+            .doc(this.currentTimer)
             .update({
               host_timeLeft: time,
               other_timeLeft: time,
-              last_player_moved: "LLyi0mw1IuaFX1AZeCYP0NcWdL83"
+              last_player_moved: this.otherUserID
             })
     },
 
@@ -138,12 +143,12 @@ export default {
       this.toggle1 = this.toggle3 = this.toggle5 = this.toggle10 = false
 
       await gamesCollection
-            .doc("H7UDBzSpM2FeKmXWkHUN")
+            .doc(this.currentGame)
             .update({
               board_state: "[FEN \"O:W1,3,5,7,10,12,14,16,17,19,21,23:B42,44,46,48,49,51,53,55,58,60,62,64\"]",
               black_count: 12,
               white_count: 12,
-              last_player_moved: "nkR8RnJ4GqSJHCaTY89HLrywpt13",
+              last_player_moved: this.hostUserID,
               resign: "none",
               is_host_white: false,
               rematch_accepted: 0,
@@ -152,18 +157,18 @@ export default {
             })
       
       await timersCollection
-            .doc("SoqVgC6sMT9Tdmh4keTE")
+            .doc(this.currentTimer)
             .update({
               host_timeLeft: time,
               other_timeLeft: time,
-              last_player_moved: "nkR8RnJ4GqSJHCaTY89HLrywpt13"
+              last_player_moved: this.hostUserID
             })
     },
 
     async handleStartRematchRandom() {
       // handle state reset for host player, handle db reset
       let color = Math.floor((Math.random() * 100) + 1) % 2 === 0
-      let last = color ? "LLyi0mw1IuaFX1AZeCYP0NcWdL83" : "nkR8RnJ4GqSJHCaTY89HLrywpt13"
+      let last = color ? this.otherUserID : this.hostUserID
 
       this.aResetGame()
       this.aSetHostIsWhite(color)
@@ -181,7 +186,7 @@ export default {
       this.toggle1 = this.toggle3 = this.toggle5 = this.toggle10 = false
 
       await gamesCollection
-            .doc("H7UDBzSpM2FeKmXWkHUN")
+            .doc(this.currentGame)
             .update({
               board_state: "[FEN \"O:W1,3,5,7,10,12,14,16,17,19,21,23:B42,44,46,48,49,51,53,55,58,60,62,64\"]",
               black_count: 12,
@@ -195,7 +200,7 @@ export default {
             })
       
       await timersCollection
-            .doc("SoqVgC6sMT9Tdmh4keTE")
+            .doc(this.currentTimer)
             .update({
               host_timeLeft: time,
               other_timeLeft: time,

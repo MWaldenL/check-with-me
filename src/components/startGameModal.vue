@@ -22,7 +22,8 @@ export default {
   name: 'StartGameModal',
   computed: {
     ...mapGetters({
-      enemyUsername: "getEnemyUsername"
+      enemyUsername: "getEnemyUsername",
+      currentGame: "getCurrentGame"
     })
   },
   methods: {
@@ -36,9 +37,8 @@ export default {
 
     async handleStart() {
       // handle state reset for non-host player
-      let gameDoc = gamesCollection.doc("H7UDBzSpM2FeKmXWkHUN")
-      let game = await gameDoc.get()
-      let isHostWhite = game.data().is_host_white
+      let gameDoc = await gamesCollection.doc(this.currentGame).get()
+      let isHostWhite = gameDoc.data().is_host_white
 
       let boardState = "[FEN \"O:W1,3,5,7,10,12,14,16,17,19,21,23:B42,44,46,48,49,51,53,55,58,60,62,64\"]"
       let playerIsBlack = isHostWhite
