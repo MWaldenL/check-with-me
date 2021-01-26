@@ -18,7 +18,6 @@
 <script>
 import { mapGetters } from 'vuex'
 import { 
-  auth,
   gamesCollection,
   timersCollection
 } from '@/firebase'
@@ -26,25 +25,32 @@ export default {
   name: 'LobbyModal',
   computed: {
     ...mapGetters({
-      hostUserID: "getHostUser",
-      otherUserID: "getOtherUser",
-      enemyUsername: "getEnemyUsername",
-      currentGame: "getCurrentGame"
+      currentGame: "getCurrentGame",
+      currentTimer: "getCurrentTimer"
     }),
-
-    isSelfHost() {
-      return auth.currentUser.uid === this.hostUserID
-    }
   },
   methods: {
     backToLobby() {
       this.$router.push("/")
 
-      // TODO: delete game / timer docs here
-      // let gameDoc = gamesCollection.doc(this.currentGame)
-      // let game = await gameDoc.get()
-      // let timerID = game.data().timer_id
+      // delete game document
+      gamesCollection
+        .doc(this.currentGame)
+        .delete()
+        .then(() => {
+          console.log("Game " + this.currentGame + " successfully deleted")
+        }).catch(error => {
+          console.log(error)
+        })
 
+      timersCollection
+        .doc(this.currentTimer)
+        .delete()
+        .then(() => {
+          console.log("Timer " + this.currentTimer + " successfully deleted")
+        }).catch(error => {
+          console.log(error)
+        })
     }
   }
 }
