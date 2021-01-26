@@ -33,24 +33,24 @@ export default {
     backToLobby() {
       this.$router.push("/")
 
-      // delete game document
-      gamesCollection
-        .doc(this.currentGame)
-        .delete()
-        .then(() => {
-          console.log("Game " + this.currentGame + " successfully deleted")
-        }).catch(error => {
-          console.log(error)
-        })
+      // delete game document, uncomment for deployment
+      // gamesCollection
+      //   .doc(this.currentGame)
+      //   .delete()
+      //   .then(() => {
+      //     console.log("Game " + this.currentGame + " successfully deleted")
+      //   }).catch(error => {
+      //     console.log(error)
+      //   })
 
-      timersCollection
-        .doc(this.currentTimer)
-        .delete()
-        .then(() => {
-          console.log("Timer " + this.currentTimer + " successfully deleted")
-        }).catch(error => {
-          console.log(error)
-        })
+      // timersCollection
+      //   .doc(this.currentTimer)
+      //   .delete()
+      //   .then(() => {
+      //     console.log("Timer " + this.currentTimer + " successfully deleted")
+      //   }).catch(error => {
+      //     console.log(error)
+      //   })
     }
   }
 }
