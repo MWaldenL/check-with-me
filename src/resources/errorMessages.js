@@ -22,7 +22,7 @@ export default {
 
   changePassword: {
     EMAIL: 'The email you entered is incorrect.',
-    PASSWORD: 'The password you entered is incorrect'
+    PASSWORD: 'The password you entered is incorrect.'
   },
 
   changePasswordConfirm: {
@@ -32,6 +32,6 @@ export default {
               1 number, and
               1 special character.`,
     CONFIRM_PASSWORD: `Passwords don't match.`,
-    SAME_PASSWORD: `New password can't be the same as the old password`,
+    SAME_PASSWORD: `New password can't be the same as the old password.`,
   }
 }
