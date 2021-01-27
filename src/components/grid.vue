@@ -88,6 +88,9 @@ import Sidebar from './sidebar'
 import ResultOverlay from './resultOverlay'
 import DrawModal from './drawModal'
 import ResignModal from './resignModal'
+import { getSingleGame } from '@/resources/gameModel.js'
+import { getSingleTimer } from '@/resources/timerModel.js'
+import firebase from 'firebase'
 
 export default {
   name: 'Grid',
@@ -101,16 +104,16 @@ export default {
   
   // Called on refreshes or new loads 
   async created() {
-    //const gameDoc = gamesCollection.doc('Vc0H4f4EvY6drRKnvsk5')   // hardcoded
-    //const timerDoc = timersCollection.doc('H48woDfI1lwIGZnJh4qz') // hardcoded
     const gameID = await this.$route.params.id
     const gameDoc = gamesCollection.doc(gameID)
-
-    const timerID = await getSingleTimer(gameDoc.timer_id.id)
-    const timerDoc = timersCollection.doc(timerID)
-
     const game = await gameDoc.get()
+    console.log(game.data())
+
+    const gameData = game.data()
+    const timerID = gameData.timer_id.id
+    const timerDoc = timersCollection.doc(timerID)
     const timer = await timerDoc.get()
+    console.log(timer.data())
 
     // Set the game data
     this.currentGameData = game.data()
@@ -153,6 +156,7 @@ export default {
     const gameID = await this.$route.params.id
     const game = await getSingleGame(gameID)
     const timerID = game.timer_id.id
+    console.log(timerID)
 
     // Listen for board state changes
     gamesCollection
@@ -262,6 +266,8 @@ export default {
       .doc(timerID)
       .onSnapshot(async doc => {
         // Sync the other player's timer with the db
+        console.log(doc.data())
+
         const data = doc.data()
         const remoteEnemyTime = this.isSelfHost ? data.other_timeLeft : data.host_timeLeft
         this.enemySeconds = remoteEnemyTime // might implement finer implementations but this one for now

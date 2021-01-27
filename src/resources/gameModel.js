@@ -99,7 +99,8 @@ export const addGameDoc = ((roomName, roomType, timerID) => {
     room_name_lc: roomName.toLowerCase(),
     timer_id: db.doc('timers/' + timerID),
     white_count: 12,
-    black_count: 12
+    black_count: 12,
+    game_started: false
   })
 })
 
@@ -157,11 +158,27 @@ export const removeGuest = (gameID => {
   })
 })
 
-export const setWhitePlayer = ((gameID, isHostWhite) => {
+export const setWhitePlayer = (async (gameID, isHostWhite) => {
+  const game = await getSingleGame(gameID)
+  let lastPlayerMoved
+  if(isHostWhite)
+    lastPlayerMoved = game.other_user.id
+  else
+    lastPlayerMoved = game.host_user.id
+
   gamesCollection
   .doc(gameID)
   .update({
-    is_host_white:  isHostWhite
+    is_host_white: isHostWhite,
+    last_player_moved: lastPlayerMoved
+  })
+})
+
+export const setGameStarted = ((gameID, gameStarted) => {
+  gamesCollection
+  .doc(gameID)
+  .update({
+    game_started: gameStarted
   })
 })
 

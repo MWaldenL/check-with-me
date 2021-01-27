@@ -121,9 +121,10 @@
 import firebase from 'firebase'
 import { db, gamesCollection, timersCollection } from '@/firebase'
 import Sidebar from '@/components/sidebar.vue'
-import { getSingleGame, deleteGame, removeGuest, setWhitePlayer } from '@/resources/gameModel.js'
+import { getSingleGame, deleteGame, removeGuest, setWhitePlayer, setGameStarted } from '@/resources/gameModel.js'
 import { getSingleUser } from '@/resources/userModel.js'
 import { getSingleTimer, changeTime } from '@/resources/timerModel.js'
+import { mapActions } from 'vuex'
 
 export default {
   name: "WaitingRoom",
@@ -230,6 +231,9 @@ export default {
     }
   },
   methods: {
+    ...mapActions([
+      'aInitGame'
+    ]),
     async destroyRoom () {
       //console.log(this.roomID)
       await deleteGame(this.roomID)
@@ -247,8 +251,7 @@ export default {
     async goToGame() {
       let room_id = this.roomID
 
-      let isHostWhite = true
-
+      let isHostWhite
       if(this.hostColor === 'w')
         isHostWhite = true
       else if(this.hostColor === 'b')
@@ -260,7 +263,8 @@ export default {
       }
 
       await setWhitePlayer(room_id, isHostWhite)
-
+      await this.aInitGame(room_id)
+      await setGameStarted(room_id, true)
       this.$router.push({ path: `/play/${ room_id }`})
     },
     copyLink() {
@@ -295,6 +299,9 @@ export default {
       if(doc.exists) {
         if(this.isOwner == 0 && doc.data().other_user.id === "nil"){
           this.$router.push({ path: '/'})
+        } else if (this.isOwner === 0 && doc.data().game_started) {
+          await this.aInitGame(roomID)
+          this.$router.push({ path: `/play/${ roomID }`})
         } else {
           const guest = await getSingleUser(doc.data().other_user.id)
           this.guest = guest
