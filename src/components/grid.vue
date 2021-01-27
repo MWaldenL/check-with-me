@@ -79,8 +79,14 @@ export default {
   
   // Called on refreshes or new loads 
   async created() {
-    const gameDoc = gamesCollection.doc('Vc0H4f4EvY6drRKnvsk5')   // hardcoded
-    const timerDoc = timersCollection.doc('H48woDfI1lwIGZnJh4qz') // hardcoded
+    //const gameDoc = gamesCollection.doc('Vc0H4f4EvY6drRKnvsk5')   // hardcoded
+    //const timerDoc = timersCollection.doc('H48woDfI1lwIGZnJh4qz') // hardcoded
+    const gameID = await this.$route.params.id
+    const gameDoc = gamesCollection.doc(gameID)
+
+    const timerID = await getSingleTimer(gameDoc.timer_id.id)
+    const timerDoc = timersCollection.doc(timerID)
+
     const game = await gameDoc.get()
     const timer = await timerDoc.get()
     this.currentGameData = game.data()
@@ -119,9 +125,13 @@ export default {
   },
 
   async mounted() {
+    const gameID = await this.$route.params.id
+    const game = await getSingleGame(gameID)
+    const timerID = game.timer_id.id
+
     // Listen for board state changes
     gamesCollection
-      .doc('Vc0H4f4EvY6drRKnvsk5') // Obtain from state in the future when rooms are implemented
+      .doc(gameID) // Obtain from state in the future when rooms are implemented
       .onSnapshot(async doc => {
         const data = doc.data()
         const boardState = data.board_state
@@ -198,7 +208,7 @@ export default {
 
     // Listen for timer state changes
     timersCollection
-      .doc('H48woDfI1lwIGZnJh4qz')
+      .doc(timerID)
       .onSnapshot(async doc => {
         // Sync the other player's timer with the db
         const data = doc.data()
