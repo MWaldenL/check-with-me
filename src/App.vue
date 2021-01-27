@@ -38,4 +38,8 @@
 .text-white {
   color: #FFFFFF
 }
+
+.cursor-pointer {
+  cursor: pointer
+}
 </style>

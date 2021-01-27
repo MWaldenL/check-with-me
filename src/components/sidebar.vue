@@ -29,69 +29,99 @@
 
 <script>
 import firebase from 'firebase'
+import { gamesCollection } from '@/firebase'
 import { mapGetters, mapActions } from 'vuex'
-import { checkUserGame, getSingleGame, removeGuest, deleteGame } from '@/resources/gameModel.js'
+import { 
+  checkUserGame, 
+  getSingleGame, 
+  removeGuest, 
+  deleteGame 
+} from '@/resources/gameModel.js'
 
 export default {
   name: 'Sidebar',
   computed: {
     isLobby() {
-        return this.$route.name === "GameLobby"
+      return this.$route.name === "GameLobby"
     },
     isWaiting() {
-        return this.$route.name === "WaitingRoom"
+      return this.$route.name === "WaitingRoom"
     }
   },
+  
   data() {
     return {
       inGameLogout: false
     }
   },
+
   methods: {
-    ...mapActions(['logoutUser']),
-    logout () {
+    ...mapActions([
+      'logoutUser',
+      'aClearGameState'
+    ]),
+
+    async showLogout() {
+      const userID = firebase.auth().currentUser.uid
+      const roomID = await checkUserGame(userID)
+      
+      // If coming from game room, show modal, else simply logout
+      if (this.$route.name !== 'PlayBoard') {
+        this.logout()
+      } else if (roomID) {
+        this.inGameLogout = true
+      }
+    },
+
+    async logoutFromGame() {
+      const userID = firebase.auth().currentUser.uid
+      const roomID = await checkUserGame(userID)
+      const room = await getSingleGame(roomID)
+      const winnerFromLogout = 
+        room.host_user.id === userID ? 
+        room.other_user.id : 
+        room.host_user.id
+      
+      await this.setWinnerFromLogout(roomID, winnerFromLogout)
+      
+      // If host user logs out, delete the game, else simply remove the guest
+      if (room.host_user.id === userID) {
+        await deleteGame(roomID)
+      } else {
+        await removeGuest(roomID)
+      }
+
+      // Logout after processing
+      this.logout()
+    },
+
+    async playCheck() {
+      const gameID = await checkUserGame(firebase.auth().currentUser.uid)
+      if (gameID) {
+        this.$router.push({ path: `/room/${gameID}` })
+      } else {
+        this.$router.push({ path: '/' })
+      }
+    },
+
+    async setWinnerFromLogout(gameID, player) {
+      await gamesCollection
+        .doc(gameID)
+        .update({ winner_from_logout: player })
+    },
+
+    checkRoute() {
+      console.log(this.$route.name)
+    },
+
+    logout() {
       console.log("in logout")
+      this.aClearGameState()
       firebase.auth().signOut()
         .then(() => {
           this.logoutUser()
           this.$router.push('/login')
         })
-      ////console.log(this.$route.name)
-    },
-    async showLogout() {
-      const userID = firebase.auth().currentUser.uid
-      const roomID = await checkUserGame(userID)
-      console.log(roomID)
-
-      if(roomID !== false)
-        this.inGameLogout = true
-      else
-        this.logout()
-    },
-    async logoutFromGame() {
-      const userID = firebase.auth().currentUser.uid
-      const roomID = await checkUserGame(userID)
-      //console.log(gameID)
-      const room = await getSingleGame(roomID)
-      if(room.host_user.id === userID){
-        await deleteGame(roomID)
-        this.logout()
-      }
-      else{
-        await removeGuest(roomID)
-        this.logout()
-      }
-    },
-    async playCheck () {
-      const gameID = await checkUserGame(firebase.auth().currentUser.uid)
-      if(gameID !== false)
-        this.$router.push({ path: '/room/' + gameID })
-      else
-        this.$router.push({ path: '/'})
-      //console.log(doc)
-    },
-    checkRoute () {
-      console.log(this.$route.name)
     }
   }
 }

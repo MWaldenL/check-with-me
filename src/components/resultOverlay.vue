@@ -1,5 +1,6 @@
 <template>
 <div>
+  <h1 class="overlay-text" id="win-resign-message"> {{ winnerResignMessage }} </h1>
   <h1 class="overlay-text" id="win-message"> {{ winnerMessage }} </h1>
   <b-button @click="requestRematch" class="overlay-text overlay-button" id="request-rematch">New Game</b-button>
   <b-button @click="returnToLobby" class="overlay-text overlay-button" id="return-to-lobby">Return to Lobby</b-button>
@@ -31,12 +32,21 @@ export default {
     winnerMessage () {
       if (this.winner === 'D')
         return 'Draw!'
-      else if (this.winner === 'W')
+      else if (this.winner === 'W' || this.winner === "WR")
         return 'White Wins!'
-      else if (this.winner === 'B')
+      else if (this.winner === 'B' || this.winner === "BR")
         return 'Black Wins!'
       else
         return 'ERROR'
+    },
+
+    winnerResignMessage () {
+      if (this.winner === "WR")
+        return 'Black Resigned!'
+      else if (this.winner === "BR")
+        return 'White Resigned!'
+      else
+        return ''
     },
   },
   methods: {
@@ -60,12 +70,13 @@ export default {
       this.aSetWinner('N')
       
       await gamesCollection
-            .doc("Vc0H4f4EvY6drRKnvsk5")
+            .doc("VUqGnWBLmgulz3X5O13h")
             .update({
               board_state: "[FEN \"O:W1,3,5,7,10,12,14,16,17,19,21,23:B42,44,46,48,49,51,53,55,58,60,62,64\"]",
               black_count: 12,
               white_count: 12,
-              last_player_moved: "4pSu14srMSelGWQkSgGpRsA2jGf1"
+              last_player_moved: "LLyi0mw1IuaFX1AZeCYP0NcWdL83",
+              resign: "none"
             })
     },
 
@@ -74,12 +85,13 @@ export default {
       this.aSetWinner('N')
       
       await gamesCollection
-            .doc("Vc0H4f4EvY6drRKnvsk5")
+            .doc("VUqGnWBLmgulz3X5O13h")
             .update({
               board_state: "[FEN \"X:W46:B55,58\"]",
               black_count: 2,
               white_count: 1,
-              last_player_moved: "4pSu14srMSelGWQkSgGpRsA2jGf1"
+              last_player_moved: "LLyi0mw1IuaFX1AZeCYP0NcWdL83",
+              resign: "none"
             })
     },
 
@@ -88,18 +100,19 @@ export default {
       this.aSetWinner('N')
       
       await gamesCollection
-            .doc("Vc0H4f4EvY6drRKnvsk5")
+            .doc("VUqGnWBLmgulz3X5O13h")
             .update({
               board_state: "[FEN \"X:W32,26:B64,62,60,55,46,42,39,37,K30\"]",
               black_count: 9,
               white_count: 2,
-              last_player_moved: "4pSu14srMSelGWQkSgGpRsA2jGf1"
+              last_player_moved: "LLyi0mw1IuaFX1AZeCYP0NcWdL83",
+              resign: "none"
             })
     },
 
     async resetUserPoints () {
       await usersCollection
-            .doc("4pSu14srMSelGWQkSgGpRsA2jGf1")
+            .doc("LLyi0mw1IuaFX1AZeCYP0NcWdL83")
             .update({
               draw_black: 0,
               draw_white: 0,
@@ -111,7 +124,7 @@ export default {
             })
 
       await usersCollection
-            .doc("ktreyVNxpqRTE7mQPjreB0iWyFi1")
+            .doc("nkR8RnJ4GqSJHCaTY89HLrywpt13")
             .update({
               draw_black: 0,
               draw_white: 0,
@@ -140,6 +153,10 @@ export default {
 #win-message {
   font-size: 64px;
   margin-bottom: 25px;
+}
+#win-resign-message {
+  font-size: 32px;
+  text-decoration: underline;
 }
 #request-rematch {
   background-color: #e8912c;

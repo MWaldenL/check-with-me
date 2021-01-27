@@ -1,4 +1,3 @@
-import axios from 'axios'
 import { auth, usersCollection, gamesCollection, timersCollection } from '@/firebase'
 
 const actions = {
@@ -39,7 +38,7 @@ const actions = {
    * @param val if the game is being run for the first time
    */
   async aSetFirstRun({ commit }, value) {
-    const gameDoc = await gamesCollection.doc('Vc0H4f4EvY6drRKnvsk5')
+    const gameDoc = await gamesCollection.doc('VUqGnWBLmgulz3X5O13h')
     gameDoc.update({ is_first_run: value })
   },
 
@@ -47,7 +46,7 @@ const actions = {
    * Sets the host's time left from the database
    */
   async aSetHostTimeLeft({ commit }) {      
-    const timerDoc = await timersCollection.doc('H48woDfI1lwIGZnJh4qz').get()
+    const timerDoc = await timersCollection.doc('t3HwE1ES1HAJy9c0lnoc').get()
     const data = timerDoc.data()
     commit('mSetHostTimeLeft', data.host_timeLeft)
   },
@@ -56,11 +55,14 @@ const actions = {
    * Sets the other player's time left from the database
    */
   async aSetOtherTimeLeft({ commit }) {
-    const timerDoc = await timersCollection.doc('H48woDfI1lwIGZnJh4qz').get()
+    const timerDoc = await timersCollection.doc('t3HwE1ES1HAJy9c0lnoc').get()
     const data = timerDoc.data()
     commit('mSetOtherTimeLeft', data.other_timeLeft)
   },
 
+  /**
+   * Gets the enemy username from the database
+   */
   async aGetEnemyUsername({ commit, state }) {
     const uid = auth.currentUser.uid === state.hostUser ? 
       state.otherUser : 
@@ -69,6 +71,13 @@ const actions = {
     const username = userDoc.data().username  
 
     commit('mSetEnemyUsername', username)
+  },
+
+  /**
+   * Resets the game state. Happens during logout to prevent undefined behavior
+   */
+  aClearGameState({ commit }) {
+    commit('mClearGameState') 
   }
 }
 

@@ -9,7 +9,7 @@ export default {
                   with each player having 12 starting pieces. The board is positioned with a light colored square \
                   on the bottom right corner, while the checkers are set up on dark colored squares. ',
     OBJECTIVE: 'The objective of the game is to capture all opponent’s checker pieces or to trap the opponent so \
-                that no move can be made. In the pictures below, black has capture all white pieces (left) and black \
+                that no move can be made. In the pictures below, black has captured all white pieces (left) and black \
                 has cornered all white pieces (right).'
   },
   mechanics: {
@@ -26,7 +26,7 @@ export default {
                     arrives at the far edge of the board.',
     REG_CAPTURE_4: 'A normal checker piece can only capture / jump forward (towards the opponent), and cannot capture / jump backwards.',
     KING_UPGRADE: 'If a player’s checker piece reaches the farthest row or the other side of the board, that checker piece is crowned King. ',
-    KING_MOVEMENT: 'King pieces are “flying kings”, which means that a King checker piece can move multiple spaces diagonally forward or \
+    KING_MOVEMENT: 'King pieces are “flying kings”, which means that a king checker piece can move multiple spaces diagonally forward or \
                     backward on the same diagonal. ',
     KING_CAPTURE_1: 'A king checker piece can capture the opponent’s checker piece forward and backward diagonally. A capture can only be \
                     made if all three of these conditions are met:',
