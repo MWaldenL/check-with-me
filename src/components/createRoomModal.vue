@@ -37,10 +37,10 @@
 
         <div class="modal-body time-container">
           <slot name="body">
-            <div id="minutes-10" v-bind:class="{'box-active': timeInput === 10, 'box-inactive': timeInput !== 10}" @click="putTime(10)">10 min</div>
-            <div id="minutes-5" v-bind:class="{'box-active': timeInput === 5, 'box-inactive': timeInput !== 5}" @click="putTime(5)">5 min</div>
-            <div id="minutes-3" v-bind:class="{'box-active': timeInput === 3, 'box-inactive': timeInput !== 3}" @click="putTime(3)">3 min</div>
-            <div id="minutes-1" v-bind:class="{'box-active': timeInput === 1, 'box-inactive': timeInput !== 1}" @click="putTime(1)">1 min</div>
+            <div id="minutes-10" class="cursor-pointer" :class="{'box-active': timeInput === 10, 'box-inactive': timeInput !== 10}" @click="putTime(10)">10 min</div>
+            <div id="minutes-5" class="cursor-pointer" :class="{'box-active': timeInput === 5, 'box-inactive': timeInput !== 5}" @click="putTime(5)">5 min</div>
+            <div id="minutes-3" class="cursor-pointer" :class="{'box-active': timeInput === 3, 'box-inactive': timeInput !== 3}" @click="putTime(3)">3 min</div>
+            <div id="minutes-1" class="cursor-pointer" :class="{'box-active': timeInput === 1, 'box-inactive': timeInput !== 1}" @click="putTime(1)">1 min</div>
           </slot>
         </div>
 
@@ -61,7 +61,7 @@
 <script>
 import firebase from 'firebase'
 import { db } from '@/firebase'
-import { addGameDoc, checkNameUnique } from '@/resources/gameModel.js'
+import { addGameDoc, checkNameUnique, checkUserGame } from '@/resources/gameModel.js'
 import { addTimerDoc, addGameToTimer } from '@/resources/timerModel.js'
 
 export default {
@@ -82,23 +82,32 @@ export default {
   },
   methods: {
     async createRoom() {
-      if(this.valid)
-      {
-        let uniqueName = await checkNameUnique(this.roomNameInput);
-        //console.log("uniqueName: " + uniqueName)
+      let user_key = firebase.auth().currentUser.uid
+      let validUser = await checkUserGame(user_key)
+      validUser = validUser === false
+      if(validUser){
+        if(this.valid)
+        {
+          let uniqueName = await checkNameUnique(this.roomNameInput);
+          //console.log("uniqueName: " + uniqueName)
 
-        if(uniqueName) {
-          let timer = await addTimerDoc(this.timeInput*60)
-          let game = await addGameDoc(this.roomNameInput, this.typeInput, timer.id)
-          await addGameToTimer(game.id, timer.id)
+          if(uniqueName) {
+            let timer = await addTimerDoc(this.timeInput*60)
+            let game = await addGameDoc(this.roomNameInput, this.typeInput, timer.id)
+            await addGameToTimer(game.id, timer.id)
 
-          this.$router.push({ path: '/room/' + game.id })
+            this.$router.push({ path: '/room/' + game.id })
 
-          this.$emit('close')
-        } else {
-          this.nameTaken = true
-          //this.roomNameInput = ""
+            this.$emit('close')
+          } else {
+            this.nameTaken = true
+            //this.roomNameInput = ""
+          }
         }
+      } else{
+        this.$emit('badUser')
+        this.$emit('close')
+        
       }
     },
 
@@ -110,7 +119,7 @@ export default {
 </script>
 
 <style scoped>
-  .modal-mask {
+.modal-mask {
   position: fixed;
   z-index: 9998;
   top: 0;

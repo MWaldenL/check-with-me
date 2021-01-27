@@ -1,4 +1,3 @@
-import axios from 'axios'
 import { auth, usersCollection, gamesCollection, timersCollection } from '@/firebase'
 
 const actions = {
@@ -49,7 +48,6 @@ const actions = {
   async aSetHostTimeLeft({ commit, state }) {      
     const gameDoc = await gamesCollection.doc(state.currentGameID).get()
     const timerID = gameDoc.data().timer_id.id
-
     const timerDoc = await timersCollection.doc(timerID).get()
     const data = timerDoc.data()
     commit('mSetHostTimeLeft', data.host_timeLeft)
@@ -61,12 +59,14 @@ const actions = {
   async aSetOtherTimeLeft({ commit, state }) {
     const gameDoc = await gamesCollection.doc(state.currentGameID).get()
     const timerID = gameDoc.data().timer_id.id
-
     const timerDoc = await timersCollection.doc(timerID).get()
     const data = timerDoc.data()
     commit('mSetOtherTimeLeft', data.other_timeLeft)
   },
 
+  /**
+   * Gets the enemy username from the database
+   */
   async aGetEnemyUsername({ commit, state }) {
     const uid = auth.currentUser.uid === state.hostUser ? 
       state.otherUser : 
@@ -75,6 +75,13 @@ const actions = {
     const username = userDoc.data().username  
 
     commit('mSetEnemyUsername', username)
+  },
+
+  /**
+   * Resets the game state. Happens during logout to prevent undefined behavior
+   */
+  aClearGameState({ commit }) {
+    commit('mClearGameState') 
   }
 }
 

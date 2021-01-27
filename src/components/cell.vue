@@ -225,8 +225,9 @@ export default {
               coords, 
               isPlayerBlack: this.selfColor === 'b'
             }
+            
             let willEmit = true
-
+            let willEmitLastMoveCapture = false
             if (bIsSameSquare) {
               if (!this.isCapturing) {
                 this.aUnhighlight()
@@ -246,6 +247,7 @@ export default {
                 if (this.board[coords.nDestRow-1][coords.nDestCol-1].isPossibleMove) {
                   this.aKingCapturePiece(payload)
                   willEmit = this.isLastMoveLegal
+                  willEmitLastMoveCapture = true
                 } else {
                   if (!this.isCapturing) {
                     this.aUnhighlight()
@@ -261,6 +263,7 @@ export default {
                 if (this.board[coords.nDestRow-1][coords.nDestCol-1].isPossibleMove) {
                   this.aCapturePiece(payload)
                   willEmit = this.isLastMoveLegal
+                  willEmitLastMoveCapture = true
                 } else {
                   if (!this.isCapturing) {
                     this.aUnhighlight()
@@ -287,7 +290,8 @@ export default {
 
             // Signal the game instance that a move has been made
             if (willEmit) {
-              this.$emit("makeMove", coords)
+              this.$emit('makeMove', coords)
+              this.$emit('isLastMoveCapture', willEmitLastMoveCapture)
             }
           } else {
             if (this.bContainsPiece) {

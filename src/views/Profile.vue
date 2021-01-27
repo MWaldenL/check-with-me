@@ -91,11 +91,7 @@ export default {
     },
 
     getPoints () {
-      const nWins = (this.user.data.wins_white + this.user.data.wins_black) * 1
-      const nDraw = (this.user.data.draw_white + this.user.data.draw_black) * 0.5
-      const nLoss = (this.user.data.loss_white + this.user.data.loss_black) * -0.5
-
-      return nWins + nDraw + nLoss
+      return this.user.data.points.toFixed(2)
     }
   }
 }
