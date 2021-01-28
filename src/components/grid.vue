@@ -128,22 +128,18 @@ export default {
     const gameID = await this.$route.params.id
     const gameDoc = gamesCollection.doc(gameID)
     const game = await gameDoc.get()
-    console.log(game.data())
-
     const gameData = game.data()
     const timerID = gameData.timer_id.id
     const timerDoc = timersCollection.doc(timerID)
     const timer = await timerDoc.get()
-    console.log(timer.data())
-
-
+    
     // Set the game data
-    this.currentGameData = game.data()
+    this.currentGameData = gameData
 
     // Check if someone has won from a logout
     // The player present in the room will receive a modal, and
     // the player who logged out will know from their score that they lost
-    this.setWinnerFromLogout(game.data())
+    this.setWinnerFromLogout(gameData)
 
     // Set collections
     this.currentGameDoc = gameDoc
@@ -158,7 +154,6 @@ export default {
 
     // Set usernames
     await this.setSelfUsername()
-    await this.aGetEnemyUsername()
 
     // Set timer data
     // If player time is not running, fetch from db else fetch from server
@@ -178,7 +173,6 @@ export default {
     const gameID = await this.$route.params.id
     const game = await getSingleGame(gameID)
     const timerID = game.timer_id.id
-    console.log(timerID)
 
     // Listen for board state changes
     gamesCollection
@@ -723,8 +717,8 @@ export default {
       this.aFlushStateAfterTurn()
 
       // Stop self time and start enemy time
-      this.stopSelfClientTime()
       this.startEnemyClientTime()
+      this.stopSelfClientTime()
       await this.stopSelfServerTime()
       await this.startEnemyServerTime()
 
@@ -863,6 +857,8 @@ export default {
       const timeQuery = await axios.get(`${this.SERVER_URL}/isTimeRunning/${this.enemyPlayerType}`)
       this.isEnemyTimeRunning = timeQuery.data.isTimeRunning
 
+      console.log(this.isEnemyTimeRunning)
+
       // If player's time is not running, sync with db
       if (!this.isEnemyTimeRunning) {
         this.enemySeconds = this.isSelfHost ? 
@@ -872,23 +868,6 @@ export default {
         const enemyTimeQuery = await axios.get(`${this.SERVER_URL}/currentTimeLeft/${this.enemyPlayerType}`)
         this.enemySeconds = enemyTimeQuery.data.timeLeft
       }
-    },
-
-    async determineClockToRun() {
-      if (this.lastPlayerMoved !== auth.currentUser.uid) { // opponent last move
-        await this.stopEnemyTime()
-        await this.startSelfTime()
-      } else { // self made last move
-        await this.stopSelfTime()
-        await this.startEnemyTime()
-      }
-    },
-
-    async writeUpdatedTimeToDB() {
-      const newTimeObj = this.isSelfHost ? 
-        { host_timeLeft: this.selfSeconds } : 
-        { other_timeLeft: this.selfSeconds } 
-      await this.currentTimerDoc.update(newTimeObj)   
     }
   }
 }

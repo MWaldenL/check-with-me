@@ -84,12 +84,9 @@ const actions = {
    * Gets the enemy username from the database
    */
   async aGetEnemyUsername({ commit, state }) {
-    // const uid = auth.currentUser.uid === state.hostUser.id ? 
-    //   state.otherUser.id : 
-    //   state.hostUser.id
     const uid = auth.currentUser.uid === state.hostUser ? 
       state.otherUser : 
-      state.hostUser // TODO: Temporary for testing
+      state.hostUser
 
     const userDoc = await usersCollection.doc(uid).get()
     const username = userDoc.data().username  

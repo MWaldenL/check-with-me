@@ -68,7 +68,7 @@ router.beforeEach(async (to, from, next) => {
     console.log('guest to auth')
     next({ name: 'Login' })
   } else if (isInsideGameRoom) {
-    // next({ name: from.name })
+    next({ name: from.name })
     // console.log('inside game room')
   } else {
     next()
@@ -83,7 +83,7 @@ const joinRoom = async (roomID) => {
   const isHostWhite = game.data().is_host_white
 
   // Let the other player join the room
-  if (userID !== game.data().host_user.id) {
+  if (thisUserID !== game.data().host_user.id) {
     const hostUser = db.doc(`/users/${hostUserID}`)
     const otherUser = db.doc(`/users/${thisUserID}`)  
     const lastPlayerMoved = isHostWhite ? otherUser : hostUser // Set to black player
