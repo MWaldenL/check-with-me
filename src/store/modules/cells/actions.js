@@ -3,11 +3,7 @@ import { getPDNFromBoard } from '../../services/boardParsingService'
 
 
 const writeBoardToDB = async (gameID, cells, isPlayerBlack) => {
-<<<<<<< HEAD
   console.log("WRITE " + gameID)
-=======
-  console.log('writing board to db: ' + gameID)
->>>>>>> feature/cloudfunctions
   const dataFromBoard = getPDNFromBoard(cells, 'X', isPlayerBlack)
   await gamesCollection
     .doc(gameID)
@@ -58,18 +54,10 @@ const actions = {
    * @param nDestRow - 1-based row of empty destination cell
    * @param nDestCol - 1-based column of empty destination cell
    */
-<<<<<<< HEAD
   async aMoveForward({ state, commit, rootState }, payload) {
     console.log(rootState.currentGameID)
     const { coords, isPlayerBlack } = payload
     commit('mMoveForward', coords)
-=======
-  async aMoveForward({ commit, rootState, state }, payload) {
-    const { coords, isPlayerBlack } = payload
-    commit('mMoveForward', coords)
-    console.log('mov forward')
-    console.log(rootState)
->>>>>>> feature/cloudfunctions
     writeBoardToDB(rootState.game.currentGameID, state.cells, isPlayerBlack)
   },
 
@@ -80,11 +68,7 @@ const actions = {
    * @param nDestRow - 1-based row of empty destination cell
    * @param nDestCol - 1-based column of empty destination cell
    */
-<<<<<<< HEAD
   aKingMovement({ state, commit, rootState }, payload) {
-=======
-  aKingMovement({ commit, rootState, state }, payload) {
->>>>>>> feature/cloudfunctions
     const { coords, isPlayerBlack } = payload
     commit('mKingMovement', coords)
     writeBoardToDB(rootState.game.currentGameID, state.cells, isPlayerBlack)
@@ -95,11 +79,7 @@ const actions = {
    * diagonally adjacent from it.
    * @param coords - an object containing the source and destination coordinates
    */
-<<<<<<< HEAD
   aCapturePiece({ state, commit, rootState }, payload) {
-=======
-  aCapturePiece({ commit, rootState, state }, payload) {
->>>>>>> feature/cloudfunctions
     const { coords, isPlayerBlack } = payload
     commit('mCapturePiece', coords)
     writeBoardToDB(rootState.game.currentGameID, state.cells, isPlayerBlack)
@@ -110,11 +90,7 @@ const actions = {
    * in its diagonal
    * @param coords - an object containing the source and destination coordinates
    */
-<<<<<<< HEAD
   aKingCapturePiece({ state, commit, rootState }, payload) {
-=======
-  aKingCapturePiece({ commit, rootState, state }, payload) {
->>>>>>> feature/cloudfunctions
     const { coords, isPlayerBlack } = payload
     commit('mKingCapturePiece', coords)
     writeBoardToDB(rootState.game.currentGameID, state.cells, isPlayerBlack)
@@ -168,10 +144,17 @@ const actions = {
     commit('mSetPrevDestSquare', prevDestSquare)
   },
 
+  /**
+   * Requires the player to make a capture when there is an available capture
+   * @param isRequired 
+   */
   aSetCaptureRequired({ commit }, isRequired) {
     commit('mSetCaptureRequired', isRequired) 
   },
 
+  /**
+   * Resets capture and highlight-related states after a player's turn 
+   */
   aFlushStateAfterTurn({ commit }) {
     commit('mFlushStateAfterTurn')
   }
