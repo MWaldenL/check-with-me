@@ -10,14 +10,14 @@
         <button id="lobby" class="router-link route-button" :disabled="isLobby || isWaiting" @click="playCheck">
           <h3 class="cursor-pointer text-white" :class="{disabled:isLobby || isWaiting}">Play</h3>
         </button>
-        <router-link to="/profile" id="profile" class="router-link">
-          <h3 class="cursor-pointer text-white">Profile</h3>
+        <router-link to="/profile" id="profile" class="router-link" :disabled="disableInGame">
+          <h3 class="cursor-pointer text-white" :class="{ disabled: disableInGame }">Profile</h3>
         </router-link>
-        <router-link to="/leaderboard" id="leaderboard" class="router-link">
-          <h3 class="cursor-pointer text-white">Leaderboard</h3>
+        <router-link to="/leaderboard" id="leaderboard" class="router-link" :disabled="disableInGame">
+          <h3 class="cursor-pointer text-white" :class="{ disabled: disableInGame }">Leaderboard</h3>
         </router-link>
-        <router-link to="/help" id="help" class="router-link">
-          <h3 class="cursor-pointer text-white">How to Play</h3>
+        <router-link to="/help" id="help" class="router-link" :disabled="disableInGame">
+          <h3 class="cursor-pointer text-white" :class="{ disabled: disableInGame }">How to Play</h3>
         </router-link>
         <button id="logout" class="router-link route-button" @click="showLogout">
           <h3 class="cursor-pointer text-white">Logout</h3>
@@ -41,11 +41,24 @@ import {
 export default {
   name: 'Sidebar',
   computed: {
+    ...mapGetters({
+      activeGame: "getActiveGame",
+      currentGame: "getCurrentGame"
+    }),
     isLobby() {
       return this.$route.name === "GameLobby"
     },
     isWaiting() {
       return this.$route.name === "WaitingRoom"
+    }
+  },
+
+  asyncComputed: {
+    async disableInGame () {
+      const userID = firebase.auth().currentUser.uid
+      const roomID = await checkUserGame(userID)
+
+      return roomID && this.$route.name === "PlayBoard"
     }
   },
   
@@ -74,21 +87,30 @@ export default {
     },
 
     async logoutFromGame() {
-      const userID = firebase.auth().currentUser.uid
-      const roomID = await checkUserGame(userID)
-      const room = await getSingleGame(roomID)
-      const winnerFromLogout = 
-        room.host_user.id === userID ? 
-        room.other_user.id : 
-        room.host_user.id
-      
-      await this.setWinnerFromLogout(roomID, winnerFromLogout)
-      
-      // If host user logs out, delete the game, else simply remove the guest
-      if (room.host_user.id === userID) {
-        await deleteGame(roomID)
+      if (!this.activeGame) {
+        // logout handling during post-game
+        await gamesCollection
+          .doc(this.currentGame)
+          .update({
+            enemy_left_confirmed: true
+          })
       } else {
-        await removeGuest(roomID)
+        const userID = firebase.auth().currentUser.uid
+        const roomID = await checkUserGame(userID)
+        const room = await getSingleGame(roomID)
+        const winnerFromLogout = 
+          room.host_user.id === userID ? 
+          room.other_user.id : 
+          room.host_user.id
+        
+        await this.setWinnerFromLogout(roomID, winnerFromLogout)
+        
+        // If host user logs out, delete the game, else simply remove the guest
+        if (room.host_user.id === userID) {
+          await deleteGame(roomID)
+        } else {
+          await removeGuest(roomID)
+        }
       }
 
       // Logout after processing

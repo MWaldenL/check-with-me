@@ -110,7 +110,10 @@ export default {
               is_host_white: isHostWhite,
               rematch_accepted: false,
               rematch_requested: "none",
-              rematch_time_selected: true
+              rematch_time_selected: true,
+              draw: false,
+              draw_offered_by: "",
+              is_first_run: true
             })
       
       // update current time doc with new params

@@ -16,7 +16,7 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
+import { mapActions, mapGetters } from 'vuex'
 import { 
   gamesCollection,
   timersCollection
@@ -30,8 +30,13 @@ export default {
     }),
   },
   methods: {
+    ...mapActions([
+      'aClearGameState'
+    ]),
+
     backToLobby() {
       this.$router.push("/")
+      this.aClearGameState()
 
       // delete game document, uncomment for deployment
       // gamesCollection
