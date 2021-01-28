@@ -266,7 +266,6 @@ export default {
         //Listen for and handle draw offers
         this.handleDrawOffer(this.drawOfferedBy)
 
-
         // Check for win
         // Check for stuck states
         let whiteStuck
@@ -359,18 +358,7 @@ export default {
         }
 
         // Check if someone has won on time
-        const didBlackWinOnTime = 
-          (this.hostTimeLeft === 0 && this.isHostWhite) || 
-          (this.otherTimeLeft === 0 && !this.isHostWhite)
-        const didWhiteWinOnTime = 
-          (this.otherTimeLeft === 0 && this.isHostWhite) || 
-          (this.hostTimeLeft === 0 && !this.isHostWhite)
-  
-        // if (didBlackWin) {
-        //   this.aSetWinner('B')
-        // } else if (didWhiteWin) {
-        //   this.aSetWinner('W')
-        // }
+        this.setWinnerFromTime()
       })
   },
 
@@ -466,6 +454,16 @@ export default {
 
     isBoardEligibleForDraw() {
       return this.selfCount <= 3 && this.otherCount <= 3
+    },
+
+    didWhiteWinOnTime() {
+      return (this.otherTimeLeft === 0 && this.isHostWhite) || 
+          (this.hostTimeLeft === 0 && !this.isHostWhite)
+    },
+
+    didBlackWinOnTime() {
+      return (this.hostTimeLeft === 0 && this.isHostWhite) || 
+          (this.otherTimeLeft === 0 && !this.isHostWhite)
     }
   },
 
@@ -497,15 +495,13 @@ export default {
       'aSetActiveGame',
       'aResetGame'
     ]),
-
-    prepareForRematchRequest() {
-      gamesCollection
-        .doc(this.currentGame)
-        .update({
-          rematch_time_selected: false
-        })
+    
+    async endGameWithWinner(winner) {
+      this.updateSelfScore(winner)
+      this.aSetWinner(winner)
+      this.aSetActiveGame(false)
     },
-
+  
     async setSelfUsername() {
       const currentUser = await this.currentUser.data 
       this.selfName = currentUser.username
@@ -574,7 +570,26 @@ export default {
           draw_white: selfDrawWhite,
         })
     },
+
+    async setWinnerFromTime() {
+      if (this.didBlackWinOnTime) {
+        this.endGameWithWinner('B')
+      } else if (this.didWhiteWinOnTime) {
+        this.endGameWithWinner('W')
+      }
+    },
+
+    prepareForRematchRequest() {
+      gamesCollection
+        .doc(this.currentGame)
+        .update({
+          rematch_time_selected: false
+        })
+    },
     
+    /**
+     * Draw methods
+     */
     async offerDraw() {
       this.resetDrawCounter()
       this.burdenedColor = this.selfColor === 'w' ? 'b' : 'w'
@@ -585,9 +600,7 @@ export default {
 
     async endGameInDraw() {
       // Handle game result states
-      this.updateSelfScore('D')
-      this.aSetWinner('D')
-      this.aSetActiveGame(false)
+      this.endGameWithWinner('D')
       this.$bvModal.hide("draw-modal")
 
       // Update database
