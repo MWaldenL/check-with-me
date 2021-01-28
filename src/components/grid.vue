@@ -95,6 +95,9 @@ import Sidebar from './sidebar'
 import ResultOverlay from './resultOverlay'
 import DrawModal from './drawModal'
 import ResignModal from './resignModal'
+import { getSingleGame } from '@/resources/gameModel.js'
+import { getSingleTimer } from '@/resources/timerModel.js'
+import firebase from 'firebase'
 import RematchRequesteeModal from './rematchRequesteeModal'
 import RematchRequestorModal from './rematchRequestorModal'
 import ChooseNewTimeModal from './chooseNewTimeModal'
@@ -122,10 +125,16 @@ export default {
   
   // Called on refreshes or new loads 
   async created() {
-    const gameDoc = gamesCollection.doc(this.currentGame)   // hardcoded
+    const gameID = await this.$route.params.id
+    const gameDoc = gamesCollection.doc(gameID)
     const game = await gameDoc.get()
-    const timerDoc = timersCollection.doc(this.currentTimer) // hardcoded
+    console.log(game.data())
+
+    const gameData = game.data()
+    const timerID = gameData.timer_id.id
+    const timerDoc = timersCollection.doc(timerID)
     const timer = await timerDoc.get()
+    console.log(timer.data())
 
 
     // Set the game data
@@ -166,9 +175,14 @@ export default {
   },
 
   async mounted() {
+    const gameID = await this.$route.params.id
+    const game = await getSingleGame(gameID)
+    const timerID = game.timer_id.id
+    console.log(timerID)
+
     // Listen for board state changes
     gamesCollection
-      .doc(this.currentGame) // Obtain from state in the future when rooms are implemented
+      .doc(gameID) // Obtain from state in the future when rooms are implemented
       .onSnapshot(async doc => {
         const data = await doc.data()
         const boardState = data.board_state
@@ -329,9 +343,11 @@ export default {
 
     // Listen for timer state changes
     timersCollection
-      .doc(this.currentTimer)
+      .doc(timerID)
       .onSnapshot(async doc => {
         // Sync the other player's timer with the db
+        console.log(doc.data())
+
         const data = doc.data()
         const remoteEnemyTime = this.isSelfHost ? data.other_timeLeft : data.host_timeLeft
         this.enemySeconds = remoteEnemyTime // might implement finer implementations but this one for now

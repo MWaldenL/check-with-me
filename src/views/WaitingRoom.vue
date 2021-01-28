@@ -17,6 +17,44 @@
       <div>The room has been closed by the owner. Returning to lobby...</div>
     </b-modal>
 
+    <b-modal v-model="isBeginning" id="begin-modal" @ok="goToGame" hide-header>
+      <div class="text-center">
+        <div class="font-weight-bold">
+          Select color for Host:
+        </div>
+        <div class = "begin-modal-row">
+          <div class = "begin-modal-column" @click="hostColor = 'w'">
+            <div class = "square">
+              <div id="pickWhite" class="chip white-chip">
+              </div>
+            </div>
+            <div v-bind:class="{'box-active': hostColor === 'w', 'box-inactive': hostColor !== 'w'}">
+              White
+            </div>
+          </div>
+          <div class = "begin-modal-column" @click="hostColor = 'b'">
+            <div class = "square">
+              <div id="pickBlack" class="chip black-chip">
+              </div>
+            </div>
+            <div v-bind:class="{'box-active': hostColor === 'b', 'box-inactive': hostColor !== 'b'}">
+              Black
+            </div>
+          </div>
+          <div class = "begin-modal-column" @click="hostColor = 'r'">
+            <div class = "square">
+              <div id="pickRand" class="chip rand-chip">
+                <img class="questionMark" src="../../public/assets/question.png"/>
+              </div>
+            </div>
+            <div v-bind:class="{'box-active': hostColor === 'r', 'box-inactive': hostColor !== 'r'}">
+            Random
+            </div>
+          </div>
+      `</div>
+      </div>
+    </b-modal>
+
     <div id = 'waiting-room-proper'>
       <div id="waiting-room-label">Waiting Room</div>
       <div id="room-type">{{room.is_public ? "Public" : "Private"}}</div>
@@ -62,7 +100,7 @@
           <div v-show="isOwner === 1">
             <button :to="`/play`" :disabled="!isFull" 
                     v-bind:class="{'begin-button': isFull, 'begin-disabled': !isFull}"
-                    v-on:click="goToGame">
+                    v-on:click="isBeginning = true">
               Begin
             </button>
           </div>
@@ -83,9 +121,10 @@
 import firebase from 'firebase'
 import { db, gamesCollection, timersCollection } from '@/firebase'
 import Sidebar from '@/components/sidebar.vue'
-import { getSingleGame, deleteGame, removeGuest } from '@/resources/gameModel.js'
+import { getSingleGame, deleteGame, removeGuest, setWhitePlayer, setGameStarted } from '@/resources/gameModel.js'
 import { getSingleUser } from '@/resources/userModel.js'
 import { getSingleTimer, changeTime } from '@/resources/timerModel.js'
+import { mapActions } from 'vuex'
 
 export default {
   name: "WaitingRoom",
@@ -115,7 +154,9 @@ export default {
       timeInput: 0,
       gameUnsubscribe: null,
       timeUnsubscribe: null,
-      isKicked: false
+      isKicked: false,
+      isBeginning: false,
+      hostColor: "w"
     }
   },
   computed: {
@@ -190,6 +231,9 @@ export default {
     }
   },
   methods: {
+    ...mapActions([
+      'aInitGame'
+    ]),
     async destroyRoom () {
       //console.log(this.roomID)
       await deleteGame(this.roomID)
@@ -204,9 +248,24 @@ export default {
     putTime(time) {
       this.timeInput = time
     },
-    goToGame() {
-      //do logic here
-      this.$router.push({ path: '/play'})
+    async goToGame() {
+      let room_id = this.roomID
+
+      let isHostWhite
+      if(this.hostColor === 'w')
+        isHostWhite = true
+      else if(this.hostColor === 'b')
+        isHostWhite = false
+      else{
+        let rand = Math.random() < 0.5
+        //console.log(rand)
+        isHostWhite = rand
+      }
+
+      await setWhitePlayer(room_id, isHostWhite)
+      await this.aInitGame(room_id)
+      await setGameStarted(room_id, true)
+      this.$router.push({ path: `/play/${ room_id }`})
     },
     copyLink() {
       const el = document.createElement('textarea');
@@ -240,6 +299,9 @@ export default {
       if(doc.exists) {
         if(this.isOwner == 0 && doc.data().other_user.id === "nil"){
           this.$router.push({ path: '/'})
+        } else if (this.isOwner === 0 && doc.data().game_started) {
+          await this.aInitGame(roomID)
+          this.$router.push({ path: `/play/${ roomID }`})
         } else {
           const guest = await getSingleUser(doc.data().other_user.id)
           this.guest = guest
@@ -441,5 +503,60 @@ export default {
     justify-content:center;
     font-size:1em;
     font-weight: bold;
+}
+
+.begin-modal-row{
+  display: flex;
+  place-items: center;
+  justify-content: center;
+  display: flex;
+  place-items: center;
+  justify-content: center;
+  flex-direction: row;
+}
+.begin-modal-column{
+  display: flex;
+  place-items: center;
+  justify-content: center;
+  display: flex;
+  place-items: center;
+  justify-content: center;
+  flex-direction: column;
+  margin: 20px;
+  text-align: center;
+}
+.square {
+  height: 80px;
+  width: 80px;
+  margin: 0;
+  padding: 0;
+  margin-bottom: 10px;
+}
+.chip {
+  z-index: 2;
+  border-radius: 50%;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  opacity: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.black-chip {
+  background: radial-gradient(50% 50% at 50% 50%, rgba(48, 48, 48, 0.74) 0%, #424242 100%);
+  border: 10px solid #3A3A3A;
+}
+.white-chip {
+  background: radial-gradient(50% 50% at 50% 50%, rgba(255, 255, 255, 0.74) 0%, #D0D0D0 100%);
+  border: 12px solid #EDEDED;
+}
+.rand-chip {
+  background: radial-gradient(50% 50% at 50% 50%, #979797 0%, #979797 100%);
+  border: 12px solid #979797;
+}
+.questionMark {
+  height: 100%;
+  width: 100%;
 }
 </style>

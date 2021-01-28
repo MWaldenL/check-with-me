@@ -3,6 +3,7 @@ import { getPDNFromBoard } from '../../services/boardParsingService'
 
 
 const writeBoardToDB = async (gameID, cells, isPlayerBlack) => {
+  console.log("WRITE " + gameID)
   const dataFromBoard = getPDNFromBoard(cells, 'X', isPlayerBlack)
   await gamesCollection
     .doc(gameID)
@@ -53,7 +54,8 @@ const actions = {
    * @param nDestRow - 1-based row of empty destination cell
    * @param nDestCol - 1-based column of empty destination cell
    */
-  async aMoveForward({ commit, rootState, state }, payload) {
+  async aMoveForward({ state, commit, rootState }, payload) {
+    console.log(rootState.currentGameID)
     const { coords, isPlayerBlack } = payload
     commit('mMoveForward', coords)
     writeBoardToDB(rootState.game.currentGameID, state.cells, isPlayerBlack)
@@ -66,7 +68,7 @@ const actions = {
    * @param nDestRow - 1-based row of empty destination cell
    * @param nDestCol - 1-based column of empty destination cell
    */
-  aKingMovement({ commit, rootState, state }, payload) {
+  aKingMovement({ state, commit, rootState }, payload) {
     const { coords, isPlayerBlack } = payload
     commit('mKingMovement', coords)
     writeBoardToDB(rootState.game.currentGameID, state.cells, isPlayerBlack)
@@ -77,7 +79,7 @@ const actions = {
    * diagonally adjacent from it.
    * @param coords - an object containing the source and destination coordinates
    */
-  aCapturePiece({ commit, rootState, state }, payload) {
+  aCapturePiece({ state, commit, rootState }, payload) {
     const { coords, isPlayerBlack } = payload
     commit('mCapturePiece', coords)
     writeBoardToDB(rootState.game.currentGameID, state.cells, isPlayerBlack)
@@ -88,7 +90,7 @@ const actions = {
    * in its diagonal
    * @param coords - an object containing the source and destination coordinates
    */
-  aKingCapturePiece({ commit, rootState, state }, payload) {
+  aKingCapturePiece({ state, commit, rootState }, payload) {
     const { coords, isPlayerBlack } = payload
     commit('mKingCapturePiece', coords)
     writeBoardToDB(rootState.game.currentGameID, state.cells, isPlayerBlack)

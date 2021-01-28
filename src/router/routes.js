@@ -11,7 +11,7 @@ import Help from '../views/Help.vue'
 
 const gameRoutes = [
   {
-    path: '/play',
+    path: '/play/:id',
     name: 'PlayBoard',
     component: Play,
     meta: { requiresAuth: true },
