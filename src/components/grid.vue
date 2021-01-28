@@ -109,6 +109,7 @@ export default {
     Cell,
     Sidebar,
     ResultOverlay,
+    DrawModal,
     ResignModal,
     RematchRequesteeModal,
     RematchRequestorModal,
@@ -192,7 +193,7 @@ export default {
         // Update the last player moved and the position
         this.bIsFirstRun = data.is_first_run
         this.lastPlayerMoved = data.last_player_moved
-        this.drawOfferedBy = data.draw_offered_by
+        // this.drawOfferedBy = data.draw_offered_by
         this.aUpdateBoard({ boardState, playerIsBlack })
         this.aUpdateCount({ 
           white: data.white_count, 
@@ -244,7 +245,7 @@ export default {
         }
 
         // ||| TODO: Check ||| Listen for and handle draw offers
-        this.handleDrawOffer(this.drawOfferedBy)
+        // this.handleDrawOffer(this.drawOfferedBy)
 
 
         // Check for win
