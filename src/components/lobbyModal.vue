@@ -26,7 +26,7 @@ export default {
   computed: {
     ...mapGetters({
       currentGame: "getCurrentGame",
-      currentTimer: "getCurrentTimer"
+      currentTimer: "getTimer"
     }),
   },
   methods: {

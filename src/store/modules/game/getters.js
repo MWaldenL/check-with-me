@@ -6,8 +6,7 @@ const getters = {
   getEnemyUsername: state => state.enemyUsername,
   getHostTimeLeft: state => state.hostTimeLeft,
   getOtherTimeLeft: state => state.otherTimeLeft,
-  getIsHostWhite: state => state.isHostWhite,
-  getCurrentTimer: state => state.currentTimerID
+  getIsHostWhite: state => state.isHostWhite
 }
 
 export default getters

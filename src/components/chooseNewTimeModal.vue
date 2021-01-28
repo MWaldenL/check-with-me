@@ -42,7 +42,7 @@ export default {
   computed: {
     ...mapGetters({
       currentGame: 'getCurrentGame',
-      currentTimer: 'getCurrentTimer',
+      currentTimer: 'getTimer',
       hostUserID: 'getHostUser',
       otherUserID: 'getOtherUser',
       isHostWhite: 'getIsHostWhite',

@@ -338,10 +338,11 @@ export default {
       .onSnapshot(async doc => {
         const data = doc.data()
         const remoteEnemyTime = this.isSelfHost ? data.other_timeLeft : data.host_timeLeft
-        this.enemySeconds = 
-          this.enemySeconds === remoteEnemyTime ? 
-          this.enemySeconds :
-          remoteEnemyTime
+
+        // Prevent undefined setting of times in the middle of the game
+        if (this.bIsFirstRun) {
+          this.enemySeconds = remoteEnemyTime
+        }
 
         // Determine whose clock to run
         if (!this.bIsFirstRun) {
@@ -349,7 +350,6 @@ export default {
         }
 
         // Check if someone has won on time
-        console.log('timers collection')
         this.checkIfWonOnTime()
       })
   },
@@ -393,7 +393,6 @@ export default {
       blackCount: 'getBlackCount',
       currentUser: 'getCurrentUser',
       currentGameID: 'getCurrentGame',
-      currentTimerID: 'getCurrentTimer',
       hostUserID: 'getHostUser',
       otherUserID: 'getOtherUser',
       enemyUsername: 'getEnemyUsername',
@@ -404,8 +403,7 @@ export default {
       isCaptureRequired: 'getIsCaptureRequired',
       prevDestSquare: 'getPrevDestSquare',
       activeGame: 'getActiveGame',
-      currentGame: 'getCurrentGame',
-      currentTimer: 'getCurrentTimer'
+      currentGame: 'getCurrentGame'
     }),
 
     isSelfHost() {
@@ -669,9 +667,9 @@ export default {
       this.drawCounter = 0
     },
 
-    setWinnerFromLogout(gameData) { // TODO: Update
-      const winnerFromLogout = gameData.winner_from_logout
-      if (winnerFromLogout === auth.currentUser.uid) {
+    setWinnerFromLogout(gameData) {
+      const enemyLeftConfirmed = gameData.enemy_left_confirmed
+      if (enemyLeftConfirmed === auth.currentUser.uid) {
         const winnerColor = this.selfColor.toUpperCase()
         this.updateSelfScore(winnerColor)
         this.aSetWinner(winnerColor)
@@ -727,8 +725,8 @@ export default {
       this.aFlushStateAfterTurn()
 
       // Stop self time and start enemy time
-      this.startEnemyClientTime()
       this.stopSelfClientTime() // switch them back if weird
+      this.startEnemyClientTime()
       await this.stopSelfServerTime()
       await this.startEnemyServerTime()
 
@@ -807,6 +805,7 @@ export default {
       this.setPlayerToMove('enemy')
 
       // Start client time
+      console.log('starting enemy client time')
       clearInterval(this.currentRunningTimer)
       this.currentRunningTimer = setInterval(() => {
         this.enemySeconds--
@@ -817,6 +816,7 @@ export default {
     },
 
     async startEnemyServerTime() {
+      console.log('start enemy server')
       const enemyTimeQuery = await axios.get(`${this.SERVER_URL}/isTimeRunning/${this.enemyPlayerType}`)
       const isEnemyServerTimeRunning = enemyTimeQuery.data.isTimeRunning
 
