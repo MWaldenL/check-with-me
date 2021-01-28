@@ -96,8 +96,6 @@ import ResultOverlay from './resultOverlay'
 import DrawModal from './drawModal'
 import ResignModal from './resignModal'
 import { getSingleGame } from '@/resources/gameModel.js'
-import { getSingleTimer } from '@/resources/timerModel.js'
-import firebase from 'firebase'
 import RematchRequesteeModal from './rematchRequesteeModal'
 import RematchRequestorModal from './rematchRequestorModal'
 import ChooseNewTimeModal from './chooseNewTimeModal'
@@ -337,14 +335,23 @@ export default {
     timersCollection
       .doc(timerID)
       .onSnapshot(async doc => {
+        const data = doc.data()
+        const remoteEnemyTime = this.isSelfHost ? data.other_timeLeft : data.host_timeLeft
+        this.enemySeconds = remoteEnemyTime
+
         // Determine whose clock to run
         if (!this.bIsFirstRun) {
           this.determineClockToRun()
         }
 
         // Check if someone has won on time
+        console.log('timers collection')
         this.checkIfWonOnTime()
       })
+  },
+
+  updated() {
+    this.checkIfWonOnTime()
   },
 
   data () {
@@ -358,8 +365,8 @@ export default {
 
       playerToMove: null,
       lastPlayerMoved: null,
-      selfSeconds: 0,      
-      enemySeconds: 0,
+      selfSeconds: 1,      
+      enemySeconds: 1,
 
       isSelfTimeRunning: false,
       isEnemyTimeRunning: false,
@@ -444,13 +451,13 @@ export default {
     },
 
     didWhiteWinOnTime() {
-      return (this.otherTimeLeft === 0 && this.isHostWhite) || 
-          (this.hostTimeLeft === 0 && !this.isHostWhite)
+      return this.enemySeconds === 0 && this.selfColor === 'w' ||
+        this.selfSeconds === 0 && this.selfColor === 'b'
     },
 
     didBlackWinOnTime() {
-      return (this.hostTimeLeft === 0 && this.isHostWhite) || 
-          (this.otherTimeLeft === 0 && !this.isHostWhite)
+      return this.enemySeconds === 0 && this.selfColor === 'b' ||
+        this.selfSeconds === 0 && this.selfColor === 'w'
     }
   },
 
@@ -625,7 +632,6 @@ export default {
       // when the current player has moved,
       if (willIncrementDrawCounter) {
         this.incrementDrawCounter()
-        console.log(this.drawCounter)
       } 
 
       // End the game after 20 moves/39 ply if a player has failed to make a capture
@@ -718,7 +724,7 @@ export default {
 
       // Stop self time and start enemy time
       this.startEnemyClientTime()
-      this.stopSelfClientTime()
+      this.stopSelfClientTime() // switch them back if weird
       await this.stopSelfServerTime()
       await this.startEnemyServerTime()
 
