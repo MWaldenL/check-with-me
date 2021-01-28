@@ -44,6 +44,8 @@ export default {
   async created() {
     // Check if user is in game and disable links as needed
     const userID = firebase.auth().currentUser.uid
+      console.log('sidebarcreated')
+
     const roomID = await checkUserGame(userID)
     this.isInGame = roomID && this.$route.name === "PlayBoard"
   },
@@ -79,14 +81,6 @@ export default {
       }
     }
   },
-
-  asyncComputed: {
-    async disableInGame () {
-      const userID = firebase.auth().currentUser.uid
-      const roomID = await checkUserGame(userID)
-      return roomID && this.$route.name === "PlayBoard"
-    }
-  },
   
   data() {
     return {
@@ -103,6 +97,8 @@ export default {
 
     async showLogout() {
       const userID = firebase.auth().currentUser.uid
+      console.log('showlogout')
+      
       const roomID = await checkUserGame(userID)
       
       // If coming from game room, show modal, else simply logout
@@ -123,6 +119,8 @@ export default {
           })
       } else {
         const userID = firebase.auth().currentUser.uid
+      console.log('logoutfromgame')
+
         const roomID = await checkUserGame(userID)
         const room = await getSingleGame(roomID)
         const winnerFromLogout = 
@@ -145,11 +143,14 @@ export default {
     },
 
     async playCheck() {
+      console.log('playCheck')
       const gameID = await checkUserGame(firebase.auth().currentUser.uid)
+      console.log(gameID)
       if (gameID) {
         this.$router.push({ path: `/room/${gameID}` })
       } else {
-        this.$router.push({ path: '/' })
+        console.log('ahu')
+        this.$router.push({ name: 'GameLobby' })
       }
     },
 

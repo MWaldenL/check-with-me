@@ -120,6 +120,8 @@ export const checkNameUnique = (async roomName => {
 })
 
 export const checkUserGame = (async (userID) => {
+  console.log('checkUserGame')
+
   //build reference to user
   const userDocRef = usersCollection.doc(userID)
   // console.log(userDocRef)

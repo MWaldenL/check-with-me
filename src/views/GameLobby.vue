@@ -101,9 +101,11 @@ export default {
   },
   async created() {
     this.lastPageNum = getCount()
+    console.log('gamelobby created')
 
     const gameID = await checkUserGame(firebase.auth().currentUser.uid)
-    if(gameID !== false)
+
+    if (gameID !== false)
       this.$router.push({ path: '/room/' + gameID })
 
     let initGames = getGames(roomQuery)
@@ -156,6 +158,8 @@ export default {
       let user_key = firebase.auth().currentUser.uid
 
       let validRoom = await checkValidRoom(room_id)
+      console.log('joinroom')
+
       let validUser = await checkUserGame(user_key)
       validUser = validUser === false
 
@@ -183,6 +187,7 @@ export default {
 
     async createRoom() {
       let user_key = firebase.auth().currentUser.uid
+      console.log('createroom')
       let validUser = await checkUserGame(user_key)
       validUser = validUser === false
       
