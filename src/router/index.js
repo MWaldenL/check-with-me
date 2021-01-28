@@ -52,7 +52,7 @@ router.beforeEach(async (to, from, next) => {
     const canJoinRoom = !isFull && !inGivenRoom && !alreadyInRoom
 
     if (canJoinRoom) {
-      await joinRoomFromLink(roomID)
+      await joinRoom(roomID)
     } 
 
     // Only access a room if the given player is already inside
@@ -75,13 +75,23 @@ router.beforeEach(async (to, from, next) => {
   }
 })
 
-const joinRoomFromLink = async (roomID) => {
-  const userID = auth.currentUser.uid
+const joinRoom = async (roomID) => {
   const gameDoc = gamesCollection.doc(roomID)
   const game = await gameDoc.get()
+  const thisUserID = auth.currentUser.uid
+  const hostUserID = game.data().host_user
+  const isHostWhite = game.data().is_host_white
 
-  if (userID !== game.data().host_user.id) {  
-    await gameDoc.update({ other_user: db.doc(`/users/${userID}`) })
+  // Let the other player join the room
+  if (userID !== game.data().host_user.id) {
+    const hostUser = db.doc(`/users/${hostUserID}`)
+    const otherUser = db.doc(`/users/${thisUserID}`)  
+    const lastPlayerMoved = isHostWhite ? otherUser : hostUser // Set to black player
+    
+    await gameDoc.update({ 
+      other_user: otherUser,
+      last_player_moved: lastPlayerMoved
+    })
   }
 }
 

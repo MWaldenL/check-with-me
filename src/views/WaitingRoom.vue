@@ -119,7 +119,7 @@
 
 <script>
 import firebase from 'firebase'
-import { db, gamesCollection, timersCollection } from '@/firebase'
+import { gamesCollection, timersCollection } from '@/firebase'
 import Sidebar from '@/components/sidebar.vue'
 import { getSingleGame, deleteGame, removeGuest, setWhitePlayer, setGameStarted } from '@/resources/gameModel.js'
 import { getSingleUser } from '@/resources/userModel.js'
@@ -131,6 +131,7 @@ export default {
   components: {
     Sidebar
   },
+
   data() {
     return {
       roomID: "nil",
@@ -159,92 +160,99 @@ export default {
       hostColor: "w"
     }
   },
+
   computed: {
     getHostRate() {
-      if(this.host !== null){
+      if (this.host !== null) {
         const wins = this.host.wins_black + this.host.wins_white
         const draws = this.host.draw_black + this.host.draw_white
         const losses = this.host.loss_white + this.host.loss_black
 
-        if(draws+losses === 0 && wins === 0)
+        if (draws+losses === 0 && wins === 0) {
           return "no games"
-        else if(draws+losses === 0)
+        } else if (draws+losses === 0) {
           return "perfect"
-        else
+        } else {
           return (wins/(wins + losses)*100).toFixed(2) + "%"
+        }
       }
     },
+
     getGuestRate() {
-      if(this.host !== null){
+      if (this.host !== null) {
         const wins = this.guest.wins_black + this.guest.wins_white
         const draws = this.guest.draw_black + this.guest.draw_white
         const losses = this.guest.loss_white + this.guest.loss_black
 
-        if(draws+losses === 0 && wins === 0)
+        if (draws+losses === 0 && wins === 0) {
           return "no games"
-        else if(draws+losses === 0)
+        } else if (draws+losses === 0) {
           return "perfect"
-        else
+        } else {
           return (wins/(wins + losses)*100).toFixed(2) + "%"
+        }
       }
     },
+
     isFull() {
       return this.guest !== null
     },
+
     getTimeMins() {
-      return (this.timeInput/60).toFixed(0)
+      return (this.timeInput / 60).toFixed(0)
     },
+
     getHostPoints() {
       if(this.host !== null)
         return (this.host.points).toFixed(2)
     },
+
     getGuestPoints() {
       if(this.guest !== null)
         return (this.guest.points).toFixed(2)
     }
   },
+
   async created() {
     const roomID = await this.$route.params.id
     this.roomID = roomID
     this.roomLink = "http://localhost:8080/#/room/" + roomID
     const room = await getSingleGame(roomID)
     this.room = room
-    //console.log(room)
 
     const host = await getSingleUser(room.host_user.id)
     this.host = host
-    //console.log(host)
-    if(firebase.auth().currentUser.uid === room.host_user.id)
+
+    if (firebase.auth().currentUser.uid === room.host_user.id) {
       this.isOwner = 1
-    else
+    } else {
       this.isOwner = 0
+    }
 
     const timer = await getSingleTimer(room.timer_id.id)
     this.timer = timer
     this.timeInput = timer.host_timeLeft
-    //console.log(timer)
 
-    if(room.other_user.id !== "nil") {
+    if (room.other_user.id !== "nil") {
       const guest = await getSingleUser(room.other_user.id)
       this.guest = guest
-      //console.log(guest)
     }
   },
   methods: {
     ...mapActions([
       'aInitGame'
     ]),
-    async destroyRoom () {
-      //console.log(this.roomID)
+
+    async destroyRoom() {
       await deleteGame(this.roomID)
-
       this.$router.push({ path: '/'})
     },
-    async leaveRoom () {
+
+    async leaveRoom() {
       await removeGuest(this.roomID)
-
       this.$router.push({ path: '/'})
     },
+
     putTime(time) {
       this.timeInput = time
     },
@@ -267,6 +275,7 @@ export default {
       await setGameStarted(room_id, true)
       this.$router.push({ path: `/play/${ room_id }`})
     },
+
     copyLink() {
       const el = document.createElement('textarea');
       el.value = this.roomLink;
@@ -278,16 +287,18 @@ export default {
       document.execCommand('copy');
       document.body.removeChild(el);
     },
+
     async updateTimer() {
       changeTime(this.timeInput, this.room.timer_id.id)
     },
+
     kickLeave() {
       this.gameUnsubscribe()
       this.timeUnsubscribe()
-
       this.$router.push({ path: '/'})
     }
   },
+
   async mounted() {
     const roomID = await this.$route.params.id
     const game = await getSingleGame(roomID)
@@ -296,8 +307,8 @@ export default {
     this.gameUnsubscribe = gamesCollection
     .doc(roomID)
     .onSnapshot(async doc => {
-      if(doc.exists) {
-        if(this.isOwner == 0 && doc.data().other_user.id === "nil"){
+      if (doc.exists) {
+        if (this.isOwner == 0 && doc.data().other_user.id === "nil"){
           this.$router.push({ path: '/'})
         } else if (this.isOwner === 0 && doc.data().game_started) {
           await this.aInitGame(roomID)
@@ -306,22 +317,22 @@ export default {
           const guest = await getSingleUser(doc.data().other_user.id)
           this.guest = guest
         }
-      } else{
-        if(this.isOwner == 0)
-        {
+      } else {
+        if (this.isOwner == 0) {
           this.isKicked = true
-        } else{
+        } else {
           this.$router.push({ path: '/'})
         }
       }
     })
 
     this.timeUnsubscribe = timersCollection
-    .doc(timerID)
-    .onSnapshot(async doc => {
-      if(doc.exists)
-        this.timeInput = doc.data().host_timeLeft
-    })
+      .doc(timerID)
+      .onSnapshot(async doc => {
+        if (doc.exists) {
+          this.timeInput = doc.data().host_timeLeft
+        }
+      })
   }
 }
 </script>
