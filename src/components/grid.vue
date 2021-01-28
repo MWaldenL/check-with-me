@@ -249,8 +249,8 @@ export default {
           }
         }
 
-        // ||| TODO: Check ||| Listen for and handle draw offers
-        // this.handleDrawOffer(this.drawOfferedBy)
+        //Listen for and handle draw offers
+        this.handleDrawOffer(this.drawOfferedBy)
 
 
         // Check for win
