@@ -16,7 +16,7 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
+import { mapActions, mapGetters } from 'vuex'
 import { 
   gamesCollection,
   timersCollection
@@ -30,27 +30,32 @@ export default {
     }),
   },
   methods: {
-    backToLobby() {
+    ...mapActions([
+      'aClearGameState'
+    ]),
+
+    async backToLobby() {
       this.$router.push("/")
+      this.aClearGameState()
 
       // delete game document, uncomment for deployment
-      // gamesCollection
-      //   .doc(this.currentGame)
-      //   .delete()
-      //   .then(() => {
-      //     console.log("Game " + this.currentGame + " successfully deleted")
-      //   }).catch(error => {
-      //     console.log(error)
-      //   })
+      await gamesCollection
+        .doc(this.currentGame)
+        .delete()
+        .then(() => {
+          console.log("Game " + this.currentGame + " successfully deleted")
+        }).catch(error => {
+          console.log(error)
+        })
 
-      // timersCollection
-      //   .doc(this.currentTimer)
-      //   .delete()
-      //   .then(() => {
-      //     console.log("Timer " + this.currentTimer + " successfully deleted")
-      //   }).catch(error => {
-      //     console.log(error)
-      //   })
+      await timersCollection
+        .doc(this.currentTimer)
+        .delete()
+        .then(() => {
+          console.log("Timer " + this.currentTimer + " successfully deleted")
+        }).catch(error => {
+          console.log(error)
+        })
     }
   }
 }
