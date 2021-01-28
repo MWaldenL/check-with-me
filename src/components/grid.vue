@@ -338,7 +338,7 @@ export default {
       .onSnapshot(async doc => {
         const data = doc.data()
         const remoteEnemyTime = this.isSelfHost ? data.other_timeLeft : data.host_timeLeft
-
+        
         // Prevent undefined setting of times in the middle of the game
         if (this.bIsFirstRun) {
           this.enemySeconds = remoteEnemyTime
@@ -369,8 +369,8 @@ export default {
 
       playerToMove: null,
       lastPlayerMoved: null,
-      selfSeconds: 1,      
-      enemySeconds: 1,
+      selfSeconds: 600,      
+      enemySeconds: 600,
 
       isSelfTimeRunning: false,
       isEnemyTimeRunning: false,
@@ -847,12 +847,12 @@ export default {
 
 
     async setSelfTimeFromServerOrDB() {
-      const timerDB = await this.currentTimerDoc.get()
       const timeRunningQuery = await axios.get(`${this.SERVER_URL}/isTimeRunning/${this.selfPlayerType}`)
       this.isSelfTimeRunning = timeRunningQuery.data.isTimeRunning
 
       // If player's time is not running, sync with db
       if (!this.isSelfTimeRunning) {
+        const timerDB = await this.currentTimerDoc.get()
         this.selfSeconds = this.isSelfHost ? 
           timerDB.data().host_timeLeft : 
           timerDB.data().other_timeLeft
@@ -863,14 +863,12 @@ export default {
     },
 
     async setEnemyTimeFromServerOrDB() {
-      const timerDB = await this.currentTimerDoc.get()
       const timeQuery = await axios.get(`${this.SERVER_URL}/isTimeRunning/${this.enemyPlayerType}`)
       this.isEnemyTimeRunning = timeQuery.data.isTimeRunning
 
-      console.log(this.isEnemyTimeRunning)
-
       // If player's time is not running, sync with db
       if (!this.isEnemyTimeRunning) {
+        const timerDB = await this.currentTimerDoc.get()
         this.enemySeconds = this.isSelfHost ? 
           timerDB.data().other_timeLeft :        
           timerDB.data().host_timeLeft 

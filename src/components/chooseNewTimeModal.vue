@@ -143,7 +143,7 @@ export default {
     },
 
     async handleStartRematchBlack() {
-      // handle state, db reset with host as white
+      // handle state, db reset with other player as white
       this.updateDBAndState(this.hostUserID, false)
     },
 
