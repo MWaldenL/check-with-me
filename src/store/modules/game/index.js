@@ -12,8 +12,7 @@ const state = {
   hostTimeLeft: 0,
   otherTimeLeft: 0,
   isHostWhite: true,
-  lastPlayerMoved: '',
-  drawCounter: 0
+  lastPlayerMoved: ''
 }
 
 export default {

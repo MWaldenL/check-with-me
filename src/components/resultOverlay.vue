@@ -5,11 +5,11 @@
   <b-button @click="requestRematch" class="overlay-text overlay-button" id="request-rematch">New Game</b-button>
   <b-button @click="returnToLobby" class="overlay-text overlay-button" id="return-to-lobby">Return to Lobby</b-button>
 
-  <h5 class="overlay-text mt-5">these are for testing only, remove upon deployment</h5>
+  <!-- <h5 class="overlay-text mt-5">these are for testing only, remove upon deployment</h5>
   <b-button @click="startNewReg" class="overlay-text overlay-button" variant="success">Start new regular game</b-button>
   <b-button @click="startNewWin" class="overlay-text overlay-button" variant="info">Start new winning game</b-button>
   <b-button @click="startNewWinWhiteStuck" class="overlay-text overlay-button" variant="info">Start new winning game with white stuck</b-button>
-  <b-button @click="resetUserPoints" class="overlay-text overlay-button" variant="danger">Reset user points</b-button>
+  <b-button @click="resetUserPoints" class="overlay-text overlay-button" variant="danger">Reset user points</b-button> -->
 </div>
 </template>
 
@@ -17,16 +17,16 @@
 import { mapGetters, mapActions } from 'vuex'
 import { 
   auth, 
-  gamesCollection, 
-  usersCollection, 
-  timersCollection
+  gamesCollection
 } from '@/firebase'
 
 export default {
   name: 'ResultOverlay',
   computed: {
     ...mapGetters({
-      winner: 'getWinner'
+      winner: 'getWinner',
+      hostUserID: 'getHostUser',
+      currentGame: 'getCurrentGame'
     }), 
 
     winnerMessage () {
@@ -48,6 +48,10 @@ export default {
       else
         return ''
     },
+
+    isSelfHost() {
+      return auth.currentUser.uid === this.hostUserID
+    }
   },
   methods: {
     ...mapActions([
@@ -55,20 +59,23 @@ export default {
       'aResetGame',
       'aSetWinner'
     ]),
-    requestRematch () {
-      // this.aResetGame()
-      this.aSetActiveGame(true)
-      // this.$emit("closeOverlay")
-    },
-    returnToLobby () {
-      // this.$emit("closeOverlay")
-    },
 
-    // TODO: remove this upon deployment
-    async startNewReg () {
-      this.aSetActiveGame(true)
-      this.aSetWinner('N')
+    async requestRematch () {
+      const gameDoc = await gamesCollection.doc(this.currentGame).get()
+      const bRematchIsRequested = gameDoc.data().rematch_requested !== "none"
       
+      const rematchRequestedBy = this.isSelfHost ? "host" : "other"
+
+      if (bRematchIsRequested) {
+        return
+      } else {
+        await gamesCollection
+          .doc(this.currentGame)
+          .update({
+            rematch_requested: rematchRequestedBy
+          })
+      }
+
       await gamesCollection
             .doc("VUqGnWBLmgulz3X5O13h")
             .update({
@@ -110,30 +117,19 @@ export default {
             })
     },
 
-    async resetUserPoints () {
-      await usersCollection
-            .doc("LLyi0mw1IuaFX1AZeCYP0NcWdL83")
-            .update({
-              draw_black: 0,
-              draw_white: 0,
-              wins_black: 0,
-              wins_white: 0,
-              loss_black: 0,
-              loss_white: 0,
-              points: 120
-            })
+    async returnToLobby () {
+      const gameDoc = await gamesCollection.doc(this.currentGame).get()
+      const enemyLeft = gameDoc.data().enemy_left !== "none" || gameDoc.data().enemy_left_confirmed
 
-      await usersCollection
-            .doc("nkR8RnJ4GqSJHCaTY89HLrywpt13")
-            .update({
-              draw_black: 0,
-              draw_white: 0,
-              wins_black: 0,
-              wins_white: 0,
-              loss_black: 0,
-              loss_white: 0,
-              points: 100
-            })
+      if (enemyLeft) {
+        return
+      } else {
+        await gamesCollection
+          .doc(this.currentGame)
+          .update({
+            enemy_left: auth.currentUser.uid
+          })
+      }
     }
   }
 }

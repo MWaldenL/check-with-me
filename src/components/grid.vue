@@ -68,6 +68,13 @@
       v-b-modal.resign-modal>
       Resign</b-button>
     <ResignModal />
+    <RematchRequesteeModal />
+    <RematchRequestorModal />
+    <ChooseNewTimeModal />
+    <WaitForTimeModal />
+    <StartGameModal />
+    <ConfirmLeaveModal />
+    <LobbyModal />
   </div>
 </template>
 
@@ -91,6 +98,13 @@ import ResignModal from './resignModal'
 import { getSingleGame } from '@/resources/gameModel.js'
 import { getSingleTimer } from '@/resources/timerModel.js'
 import firebase from 'firebase'
+import RematchRequesteeModal from './rematchRequesteeModal'
+import RematchRequestorModal from './rematchRequestorModal'
+import ChooseNewTimeModal from './chooseNewTimeModal'
+import WaitForTimeModal from './waitForTimeModal'
+import StartGameModal from './startGameModal'
+import ConfirmLeaveModal from './confirmLeaveModal'
+import LobbyModal from './lobbyModal'
 
 export default {
   name: 'Grid',
@@ -99,7 +113,14 @@ export default {
     Sidebar,
     ResultOverlay,
     DrawModal,
-    ResignModal
+    ResignModal,
+    RematchRequesteeModal,
+    RematchRequestorModal,
+    ChooseNewTimeModal,
+    WaitForTimeModal,
+    StartGameModal,
+    ConfirmLeaveModal,
+    LobbyModal
   },
   
   // Called on refreshes or new loads 
@@ -114,6 +135,7 @@ export default {
     const timerDoc = timersCollection.doc(timerID)
     const timer = await timerDoc.get()
     console.log(timer.data())
+
 
     // Set the game data
     this.currentGameData = game.data()
@@ -185,15 +207,60 @@ export default {
         // Update the last player moved and the position
         this.bIsFirstRun = data.is_first_run
         this.lastPlayerMoved = data.last_player_moved
-        this.drawOfferedBy = data.draw_offered_by
+        // this.drawOfferedBy = data.draw_offered_by
         this.aUpdateBoard({ boardState, playerIsBlack })
         this.aUpdateCount({ 
           white: data.white_count, 
           black: data.black_count
         })
 
-        // Listen for and handle draw offers
-        this.handleDrawOffer(this.drawOfferedBy)
+
+        // Check for rematch 
+        if (!this.activeGame) {
+
+          // Check for request
+          if (data.rematch_requested === "host" && this.isSelfHost ||
+              data.rematch_requested === "other" && !this.isSelfHost) {
+
+            this.$bvModal.show('rematch-requestor-modal')
+
+          } else if (data.rematch_requested === "host" && !this.isSelfHost ||
+                     data.rematch_requested === "other" && this.isSelfHost) {
+
+            this.$bvModal.show('rematch-requestee-modal')
+
+          }
+
+          // Check for accept
+          if (data.rematch_accepted && this.isSelfHost) {
+            this.$bvModal.hide('rematch-requestor-modal')
+            this.$bvModal.hide('rematch-requestee-modal')
+            this.$bvModal.show('choose-new-time-modal')
+          } else if (data.rematch_accepted && !this.isSelfHost) {
+            this.$bvModal.hide('rematch-requestor-modal')
+            this.$bvModal.hide('rematch-requestee-modal')
+            this.$bvModal.show('wait-for-time-modal')
+          }
+
+          // Check if new time has been selected already
+          if (data.rematch_time_selected && !this.isSelfHost) {
+            this.$bvModal.hide('wait-for-time-modal')
+            this.$bvModal.show('start-game-modal')
+          }
+
+          if (data.enemy_left === auth.currentUser.uid) {
+            this.$bvModal.show('confirm-leave-modal')
+          } 
+
+          if (data.enemy_left_confirmed) {
+            this.$bvModal.hide('confirm-leave-modal')
+            this.$bvModal.show('lobby-modal')
+          }
+        }
+
+        // ||| TODO: Check ||| Listen for and handle draw offers
+        // this.handleDrawOffer(this.drawOfferedBy)
+
 
         // Check for win
         // Check for stuck states
@@ -207,18 +274,24 @@ export default {
           whiteStuck = checkIfEnemyStuck(this.board, false)
           blackStuck = checkIfSelfStuck(this.board, false)
         }
-
+        
         if (whiteStuck && blackStuck) { // if both players are stuck, call a draw
+          //console.log("DRAW DRAW DRAW")
+          this.prepareForRematchRequest()
           this.updateSelfScore('D')
           this.aSetWinner('D')
           this.aSetActiveGame(false)
           return
         } else if (whiteStuck || data.white_count === 0) { // if only white is stuck or white has no more pieces, black wins
+          //console.log("BLACK BLACK BLACK")
+          this.prepareForRematchRequest()
           this.updateSelfScore('B')
           this.aSetWinner('B')
           this.aSetActiveGame(false)
           return
         } else if (blackStuck || data.black_count === 0) { // if only black is stuck or black has no more pieces, white wins
+          //console.log("WHITE WHITE WHITE")
+          this.prepareForRematchRequest()
           this.updateSelfScore('W')
           this.aSetWinner('W')
           this.aSetActiveGame(false)
@@ -227,11 +300,13 @@ export default {
 
         // Check for player resignation
         if (data.resign === "b") {
+          this.prepareForRematchRequest()
           this.updateSelfScore('W')
           this.aSetWinner('WR')
           this.aSetActiveGame(false)
           return
         } else if (data.resign === "w") {
+          this.prepareForRematchRequest()
           this.updateSelfScore('B')
           this.aSetWinner('BR')
           this.aSetActiveGame(false)
@@ -338,7 +413,8 @@ export default {
       isCaptureRequired: 'getIsCaptureRequired',
       prevDestSquare: 'getPrevDestSquare',
       activeGame: 'getActiveGame',
-      currentGame: 'getCurrentGame'
+      currentGame: 'getCurrentGame',
+      currentTimer: 'getCurrentTimer'
     }),
 
     isSelfHost() {
@@ -413,8 +489,17 @@ export default {
       'aSetPrevDestSquare',
       'aSetCaptureRequired',
       'aFlushStateAfterTurn',
-      'aSetActiveGame'
+      'aSetActiveGame',
+      'aResetGame'
     ]),
+
+    prepareForRematchRequest() {
+      gamesCollection
+        .doc(this.currentGame)
+        .update({
+          rematch_time_selected: false
+        })
+    },
 
     async setSelfUsername() {
       const currentUser = await this.currentUser.data 
