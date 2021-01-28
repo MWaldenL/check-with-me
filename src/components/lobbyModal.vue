@@ -34,28 +34,28 @@ export default {
       'aClearGameState'
     ]),
 
-    backToLobby() {
+    async backToLobby() {
       this.$router.push("/")
       this.aClearGameState()
 
       // delete game document, uncomment for deployment
-      // gamesCollection
-      //   .doc(this.currentGame)
-      //   .delete()
-      //   .then(() => {
-      //     console.log("Game " + this.currentGame + " successfully deleted")
-      //   }).catch(error => {
-      //     console.log(error)
-      //   })
+      await gamesCollection
+        .doc(this.currentGame)
+        .delete()
+        .then(() => {
+          console.log("Game " + this.currentGame + " successfully deleted")
+        }).catch(error => {
+          console.log(error)
+        })
 
-      // timersCollection
-      //   .doc(this.currentTimer)
-      //   .delete()
-      //   .then(() => {
-      //     console.log("Timer " + this.currentTimer + " successfully deleted")
-      //   }).catch(error => {
-      //     console.log(error)
-      //   })
+      await timersCollection
+        .doc(this.currentTimer)
+        .delete()
+        .then(() => {
+          console.log("Timer " + this.currentTimer + " successfully deleted")
+        }).catch(error => {
+          console.log(error)
+        })
     }
   }
 }
