@@ -219,7 +219,6 @@ export default {
           black: data.black_count
         })
 
-
         // Check for rematch 
         if (!this.activeGame) {
 
@@ -344,21 +343,13 @@ export default {
     timersCollection
       .doc(timerID)
       .onSnapshot(async doc => {
-        // Sync the other player's timer with the db
-        console.log(doc.data())
-
-        const data = doc.data()
-        const remoteEnemyTime = this.isSelfHost ? data.other_timeLeft : data.host_timeLeft
-        this.enemySeconds = remoteEnemyTime // might implement finer implementations but this one for now
-
         // Determine whose clock to run
         if (!this.bIsFirstRun) {
-          //console.log('snapshot() determine running clock')
           this.determineClockToRun()
         }
 
         // Check if someone has won on time
-        this.setWinnerFromTime()
+        this.checkIfWonOnTime()
       })
   },
 
@@ -571,7 +562,7 @@ export default {
         })
     },
 
-    async setWinnerFromTime() {
+    async checkIfWonOnTime() {
       if (this.didBlackWinOnTime) {
         this.endGameWithWinner('B')
       } else if (this.didWhiteWinOnTime) {
