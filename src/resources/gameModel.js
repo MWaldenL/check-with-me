@@ -93,13 +93,14 @@ export const addGameDoc = ((roomName, roomType, timerID) => {
     is_host_white: true,
     is_public: roomType === "true",
     is_first_run: true,
-    last_player_moved: "white",
+    last_player_moved: "",
     room_link: "link",
     room_name: roomName,
     room_name_lc: roomName.toLowerCase(),
     timer_id: db.doc('timers/' + timerID),
     white_count: 12,
     black_count: 12,
+    game_started: false,
     enemy_left: "none",
     enemy_left_confirmed: false,
     rematch_accepted: false,
@@ -161,6 +162,30 @@ export const removeGuest = (gameID => {
   .doc(gameID)
   .update({
     other_user:  db.doc('users/' + 'nil')
+  })
+})
+
+export const setWhitePlayer = (async (gameID, isHostWhite) => {
+  const game = await getSingleGame(gameID)
+  let lastPlayerMoved
+  if(isHostWhite)
+    lastPlayerMoved = game.other_user.id
+  else
+    lastPlayerMoved = game.host_user.id
+
+  gamesCollection
+  .doc(gameID)
+  .update({
+    is_host_white: isHostWhite,
+    last_player_moved: lastPlayerMoved
+  })
+})
+
+export const setGameStarted = ((gameID, gameStarted) => {
+  gamesCollection
+  .doc(gameID)
+  .update({
+    game_started: gameStarted
   })
 })
 

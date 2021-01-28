@@ -1,4 +1,6 @@
 import { auth, usersCollection, gamesCollection, timersCollection } from '@/firebase'
+import { getSingleGame } from '@/resources/gameModel.js'
+import { getSingleTimer } from '@/resources/timerModel.js'
 
 const actions = {
   /**
@@ -46,9 +48,7 @@ const actions = {
    * Sets the host's time left from the database
    */
   async aSetHostTimeLeft({ commit, state }) {      
-    const gameDoc = await gamesCollection.doc(state.currentGameID).get()
-    const timerID = gameDoc.data().timer_id.id
-    const timerDoc = await timersCollection.doc(timerID).get()
+    const timerDoc = await timersCollection.doc(state.timerID).get()
     const data = timerDoc.data()
     commit('mSetHostTimeLeft', data.host_timeLeft)
   },
@@ -57,9 +57,7 @@ const actions = {
    * Sets the other player's time left from the database
    */
   async aSetOtherTimeLeft({ commit, state }) {
-    const gameDoc = await gamesCollection.doc(state.currentGameID).get()
-    const timerID = gameDoc.data().timer_id.id
-    const timerDoc = await timersCollection.doc(timerID).get()
+    const timerDoc = await timersCollection.doc(state.timerID).get()
     const data = timerDoc.data()
     commit('mSetOtherTimeLeft', data.other_timeLeft)
   },
@@ -82,6 +80,33 @@ const actions = {
    */
   aClearGameState({ commit }) {
     commit('mClearGameState') 
+  },
+
+  async aInitGame({ commit }, roomID) {
+    const gameRef = gamesCollection.doc(roomID)
+    const game = await gameRef.get()
+    const gameDoc = game.data()
+
+    const timerID = gameDoc.timer_id.id
+    const timerRef = timersCollection.doc(timerID)
+    const timer = await timerRef.get()
+    const timerDoc = timer.data()
+
+    //game payload
+    const boardState = gameDoc.board_state
+    const hostUser = gameDoc.host_user.id
+    const otherUser = gameDoc.other_user.id
+    const isHostWhite = gameDoc.is_host_white
+    let lastPlayerMoved
+    if(isHostWhite)
+      lastPlayerMoved = otherUser
+    else
+      lastPlayerMoved = hostUser
+
+    //timer payload
+    const timeLeft = timerDoc.host_timeLeft
+
+    commit('mInitGame', { roomID, boardState, hostUser, otherUser, isHostWhite, lastPlayerMoved, timerID, timeLeft })
   }
 }
 

@@ -29,6 +29,7 @@ const mutations = {
 
   mClearGameState(state) {
     state.currentGameID = '',
+    state.timerID = '',
     state.boardState = '',
     state.hostUser = '',
     state.otherUser = '',
@@ -37,6 +38,20 @@ const mutations = {
     state.otherTimeLeft = 0,
     state.isHostWhite = true,
     state.lastPlayerMoved = '',
+    state.drawCounter = 0
+  },
+
+  mInitGame(state, { roomID, boardState, hostUser, otherUser, isHostWhite, lastPlayerMoved, timerID, timeLeft }) {
+    state.currentGameID = roomID,
+    state.timerID = timerID,
+    state.boardState = boardState,
+    state.hostUser = hostUser,
+    state.otherUser = otherUser,
+    state.enemyUsername = '',
+    state.hostTimeLeft = timeLeft,
+    state.otherTimeLeft = timeLeft,
+    state.isHostWhite = isHostWhite,
+    state.lastPlayerMoved = lastPlayerMoved,
     state.drawCounter = 0
   }
 }
