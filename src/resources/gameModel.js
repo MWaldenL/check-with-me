@@ -105,7 +105,9 @@ export const addGameDoc = ((roomName, roomType, timerID) => {
     rematch_accepted: false,
     rematch_requested: "none",
     rematch_time_selected: false,
-    resign: "none"
+    resign: "none",
+    draw: false,
+    draw_offered_by: ""
   })
 })
 
