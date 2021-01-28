@@ -68,8 +68,8 @@ router.beforeEach(async (to, from, next) => {
     console.log('guest to auth')
     next({ name: 'Login' })
   } else if (isInsideGameRoom) {
-    next({ name: from.name })
-    // console.log('inside game room')
+    console.log('inside game room')
+    // next({ name: from.name })
   } else {
     next()
   }

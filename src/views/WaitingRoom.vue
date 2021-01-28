@@ -307,12 +307,20 @@ export default {
     this.gameUnsubscribe = gamesCollection
     .doc(roomID)
     .onSnapshot(async doc => {
+      const gameStartedFirstTime = 
+        this.isOwner === 0 && 
+        doc.data().game_started &&
+        doc.data().is_first_run
+
+      console.log(doc.data().is_first_run)
+
       if (doc.exists) {
         if (this.isOwner == 0 && doc.data().other_user.id === "nil"){
           this.$router.push({ path: '/'})
-        } else if (this.isOwner === 0 && doc.data().game_started) {
+        } else if (gameStartedFirstTime) { // Route to the game proper when the other player has started 
           await this.aInitGame(roomID)
           this.$router.push({ path: `/play/${ roomID }`})
+          this.gameUnsubscribe()  // Make sure to unsubscribe the listener
         } else {
           const guest = await getSingleUser(doc.data().other_user.id)
           this.guest = guest

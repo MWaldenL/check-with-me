@@ -3,14 +3,6 @@ import { getSingleGame } from '@/resources/gameModel.js'
 import { getSingleTimer } from '@/resources/timerModel.js'
 
 const actions = {
-  
-  /**
-   * Sets the initial game data upon starting a game for the first time 
-   * @param gameDetails an object containing the necessary game details
-   */
-  aInitializeGame({ commit }, gameDetails) {
-    commit('mInitializeGame', gameDetails)
-  },
 
   /**
    * Sets the current game 

@@ -130,7 +130,7 @@ export default {
     const timerID = gameData.timer_id.id
     const timerDoc = timersCollection.doc(timerID)
     const timer = await timerDoc.get()
-    
+
     // Set the game data
     this.currentGameData = gameData
 
@@ -150,14 +150,15 @@ export default {
     // Set the last player moved from the timer document, since this is updated as well
     this.lastPlayerMoved = timer.data().last_player_moved
 
-    // Set usernames
-    await this.setSelfUsername()
-
     // Set timer data
     // If player time is not running, fetch from db else fetch from server
     // Handles cases where a player opens their side of the game when their time is already running
     await this.setSelfTimeFromServerOrDB()
     await this.setEnemyTimeFromServerOrDB()
+
+    // Set usernames
+    await this.setSelfUsername()
+    await this.aGetEnemyUsername()
 
     // Set the initial player to move
     const playerToMove = this.bIsFirstRun ? this.playerIfFirstRun : this.playerIfOngoingGame // if async playerIfOngoingGame bug make local again 
@@ -337,7 +338,10 @@ export default {
       .onSnapshot(async doc => {
         const data = doc.data()
         const remoteEnemyTime = this.isSelfHost ? data.other_timeLeft : data.host_timeLeft
-        this.enemySeconds = remoteEnemyTime
+        this.enemySeconds = 
+          this.enemySeconds === remoteEnemyTime ? 
+          this.enemySeconds :
+          remoteEnemyTime
 
         // Determine whose clock to run
         if (!this.bIsFirstRun) {
@@ -665,7 +669,7 @@ export default {
       this.drawCounter = 0
     },
 
-    setWinnerFromLogout(gameData) {
+    setWinnerFromLogout(gameData) { // TODO: Update
       const winnerFromLogout = gameData.winner_from_logout
       if (winnerFromLogout === auth.currentUser.uid) {
         const winnerColor = this.selfColor.toUpperCase()
