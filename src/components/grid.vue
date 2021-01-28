@@ -68,6 +68,13 @@
       v-b-modal.resign-modal>
       Resign</b-button>
     <ResignModal />
+    <RematchRequesteeModal />
+    <RematchRequestorModal />
+    <ChooseNewTimeModal />
+    <WaitForTimeModal />
+    <StartGameModal />
+    <ConfirmLeaveModal />
+    <LobbyModal />
   </div>
 </template>
 
@@ -88,6 +95,13 @@ import Sidebar from './sidebar'
 import ResultOverlay from './resultOverlay'
 import DrawModal from './drawModal'
 import ResignModal from './resignModal'
+import RematchRequesteeModal from './rematchRequesteeModal'
+import RematchRequestorModal from './rematchRequestorModal'
+import ChooseNewTimeModal from './chooseNewTimeModal'
+import WaitForTimeModal from './waitForTimeModal'
+import StartGameModal from './startGameModal'
+import ConfirmLeaveModal from './confirmLeaveModal'
+import LobbyModal from './lobbyModal'
 
 export default {
   name: 'Grid',
@@ -95,16 +109,23 @@ export default {
     Cell,
     Sidebar,
     ResultOverlay,
-    DrawModal,
-    ResignModal
+    ResignModal,
+    RematchRequesteeModal,
+    RematchRequestorModal,
+    ChooseNewTimeModal,
+    WaitForTimeModal,
+    StartGameModal,
+    ConfirmLeaveModal,
+    LobbyModal
   },
   
   // Called on refreshes or new loads 
   async created() {
-    const gameDoc = gamesCollection.doc('VUqGnWBLmgulz3X5O13h')   // hardcoded
-    const timerDoc = timersCollection.doc('t3HwE1ES1HAJy9c0lnoc') // hardcoded
+    const gameDoc = gamesCollection.doc(this.currentGame)   // hardcoded
     const game = await gameDoc.get()
+    const timerDoc = timersCollection.doc(this.currentTimer) // hardcoded
     const timer = await timerDoc.get()
+
 
     // Set the game data
     this.currentGameData = game.data()
@@ -146,7 +167,7 @@ export default {
   async mounted() {
     // Listen for board state changes
     gamesCollection
-      .doc('VUqGnWBLmgulz3X5O13h') // Obtain from state in the future when rooms are implemented
+      .doc(this.currentGame) // Obtain from state in the future when rooms are implemented
       .onSnapshot(async doc => {
         const data = await doc.data()
         const boardState = data.board_state
@@ -178,8 +199,53 @@ export default {
           black: data.black_count
         })
 
-        // Listen for and handle draw offers
+
+        // Check for rematch 
+        if (!this.activeGame) {
+
+          // Check for request
+          if (data.rematch_requested === "host" && this.isSelfHost ||
+              data.rematch_requested === "other" && !this.isSelfHost) {
+
+            this.$bvModal.show('rematch-requestor-modal')
+
+          } else if (data.rematch_requested === "host" && !this.isSelfHost ||
+                     data.rematch_requested === "other" && this.isSelfHost) {
+
+            this.$bvModal.show('rematch-requestee-modal')
+
+          }
+
+          // Check for accept
+          if (data.rematch_accepted && this.isSelfHost) {
+            this.$bvModal.hide('rematch-requestor-modal')
+            this.$bvModal.hide('rematch-requestee-modal')
+            this.$bvModal.show('choose-new-time-modal')
+          } else if (data.rematch_accepted && !this.isSelfHost) {
+            this.$bvModal.hide('rematch-requestor-modal')
+            this.$bvModal.hide('rematch-requestee-modal')
+            this.$bvModal.show('wait-for-time-modal')
+          }
+
+          // Check if new time has been selected already
+          if (data.rematch_time_selected && !this.isSelfHost) {
+            this.$bvModal.hide('wait-for-time-modal')
+            this.$bvModal.show('start-game-modal')
+          }
+
+          if (data.enemy_left === auth.currentUser.uid) {
+            this.$bvModal.show('confirm-leave-modal')
+          } 
+
+          if (data.enemy_left_confirmed) {
+            this.$bvModal.hide('confirm-leave-modal')
+            this.$bvModal.show('lobby-modal')
+          }
+        }
+
+        // ||| TODO: Check ||| Listen for and handle draw offers
         this.handleDrawOffer(this.drawOfferedBy)
+
 
         // Check for win
         // Check for stuck states
@@ -193,18 +259,24 @@ export default {
           whiteStuck = checkIfEnemyStuck(this.board, false)
           blackStuck = checkIfSelfStuck(this.board, false)
         }
-
+        
         if (whiteStuck && blackStuck) { // if both players are stuck, call a draw
+          //console.log("DRAW DRAW DRAW")
+          this.prepareForRematchRequest()
           this.updateSelfScore('D')
           this.aSetWinner('D')
           this.aSetActiveGame(false)
           return
         } else if (whiteStuck || data.white_count === 0) { // if only white is stuck or white has no more pieces, black wins
+          //console.log("BLACK BLACK BLACK")
+          this.prepareForRematchRequest()
           this.updateSelfScore('B')
           this.aSetWinner('B')
           this.aSetActiveGame(false)
           return
         } else if (blackStuck || data.black_count === 0) { // if only black is stuck or black has no more pieces, white wins
+          //console.log("WHITE WHITE WHITE")
+          this.prepareForRematchRequest()
           this.updateSelfScore('W')
           this.aSetWinner('W')
           this.aSetActiveGame(false)
@@ -213,11 +285,13 @@ export default {
 
         // Check for player resignation
         if (data.resign === "b") {
+          this.prepareForRematchRequest()
           this.updateSelfScore('W')
           this.aSetWinner('WR')
           this.aSetActiveGame(false)
           return
         } else if (data.resign === "w") {
+          this.prepareForRematchRequest()
           this.updateSelfScore('B')
           this.aSetWinner('BR')
           this.aSetActiveGame(false)
@@ -249,7 +323,7 @@ export default {
 
     // Listen for timer state changes
     timersCollection
-      .doc('t3HwE1ES1HAJy9c0lnoc')
+      .doc(this.currentTimer)
       .onSnapshot(async doc => {
         // Sync the other player's timer with the db
         const data = doc.data()
@@ -322,7 +396,8 @@ export default {
       isCaptureRequired: 'getIsCaptureRequired',
       prevDestSquare: 'getPrevDestSquare',
       activeGame: 'getActiveGame',
-      currentGame: 'getCurrentGame'
+      currentGame: 'getCurrentGame',
+      currentTimer: 'getCurrentTimer'
     }),
 
     isSelfHost() {
@@ -397,8 +472,17 @@ export default {
       'aSetPrevDestSquare',
       'aSetCaptureRequired',
       'aFlushStateAfterTurn',
-      'aSetActiveGame'
+      'aSetActiveGame',
+      'aResetGame'
     ]),
+
+    prepareForRematchRequest() {
+      gamesCollection
+        .doc(this.currentGame)
+        .update({
+          rematch_time_selected: false
+        })
+    },
 
     async setSelfUsername() {
       const currentUser = await this.currentUser.data 
