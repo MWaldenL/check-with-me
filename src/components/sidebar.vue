@@ -8,16 +8,16 @@
     <b-sidebar id="sidebar" title="Check with Me" bg-variant="dark" text-variant="light">
       <div id="s-contents" class="px-3 py-2"  @click="checkRoute">
         <button id="lobby" class="router-link route-button" :disabled="isLobby || isWaiting" @click="playCheck">
-          <h3 class="cursor-pointer text-white" :class="{disabled:isLobby || isWaiting}">Play</h3>
+          <h3 :class="inLobbyWaitingDisabledClass">Play</h3>
         </button>
-        <router-link to="/profile" id="profile" class="router-link">
-          <h3 class="cursor-pointer text-white">Profile</h3>
+        <router-link to="/profile" id="profile" class="router-link" :disabled="isInGame">
+          <h3 :class="inGameDisabledClass">Profile</h3>
         </router-link>
-        <router-link to="/leaderboard" id="leaderboard" class="router-link">
-          <h3 class="cursor-pointer text-white">Leaderboard</h3>
+        <router-link to="/leaderboard" id="leaderboard" class="router-link" :disabled="isInGame">
+          <h3 :class="inGameDisabledClass">Leaderboard</h3>
         </router-link>
-        <router-link to="/help" id="help" class="router-link">
-          <h3 class="cursor-pointer text-white">How to Play</h3>
+        <router-link to="/help" id="help" class="router-link" :disabled="isInGame">
+          <h3 :class="inGameDisabledClass">How to Play</h3>
         </router-link>
         <button id="logout" class="router-link route-button" @click="showLogout">
           <h3 class="cursor-pointer text-white">Logout</h3>
@@ -40,17 +40,57 @@ import {
 
 export default {
   name: 'Sidebar',
+
+  async created() {
+    // Check if user is in game and disable links as needed
+    const userID = firebase.auth().currentUser.uid
+    const roomID = await checkUserGame(userID)
+    this.isInGame = roomID && this.$route.name === "PlayBoard"
+  },
+
   computed: {
+    ...mapGetters({
+      activeGame: "getActiveGame",
+      currentGame: "getCurrentGame"
+    }),
+
     isLobby() {
       return this.$route.name === "GameLobby"
     },
+
     isWaiting() {
       return this.$route.name === "WaitingRoom"
+    },
+
+    inGameDisabledClass() {
+      return {
+        disabled: this.isInGame,
+        'text-white': !this.isInGame,
+        'cursor-pointer': !this.isInGame
+      }
+    },
+
+    inLobbyWaitingDisabledClass() {
+      const inLobbyWaiting = this.isLobby || this.isWaiting
+      return {
+        disabled: inLobbyWaiting,
+        'text-white': !inLobbyWaiting,
+        'cursor-pointer': !inLobbyWaiting
+      }
+    }
+  },
+
+  asyncComputed: {
+    async disableInGame () {
+      const userID = firebase.auth().currentUser.uid
+      const roomID = await checkUserGame(userID)
+      return roomID && this.$route.name === "PlayBoard"
     }
   },
   
   data() {
     return {
+      isInGame: false,
       inGameLogout: false
     }
   },
@@ -74,21 +114,30 @@ export default {
     },
 
     async logoutFromGame() {
-      const userID = firebase.auth().currentUser.uid
-      const roomID = await checkUserGame(userID)
-      const room = await getSingleGame(roomID)
-      const winnerFromLogout = 
-        room.host_user.id === userID ? 
-        room.other_user.id : 
-        room.host_user.id
-      
-      await this.setWinnerFromLogout(roomID, winnerFromLogout)
-      
-      // If host user logs out, delete the game, else simply remove the guest
-      if (room.host_user.id === userID) {
-        await deleteGame(roomID)
+      if (!this.activeGame) {
+        // logout handling during post-game
+        await gamesCollection
+          .doc(this.currentGame)
+          .update({
+            enemy_left_confirmed: true
+          })
       } else {
-        await removeGuest(roomID)
+        const userID = firebase.auth().currentUser.uid
+        const roomID = await checkUserGame(userID)
+        const room = await getSingleGame(roomID)
+        const winnerFromLogout = 
+          room.host_user.id === userID ? 
+          room.other_user.id : 
+          room.host_user.id
+        
+        await this.setWinnerFromLogout(roomID, winnerFromLogout)
+        
+        // If host user logs out, delete the game, else simply remove the guest
+        if (room.host_user.id === userID) {
+          await deleteGame(roomID)
+        } else {
+          await removeGuest(roomID)
+        }
       }
 
       // Logout after processing
@@ -136,6 +185,11 @@ export default {
   outline: none;
 }
 
+.disabled {
+  color: #888888;
+  cursor: default !important
+}
+
 #menu {
   position: absolute;
   left: 10px;
@@ -158,9 +212,5 @@ export default {
 }
 .route-button:active {
   outline: none;
-}
-
-.disabled {
-  color: gray;
 }
 </style>

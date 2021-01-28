@@ -107,7 +107,8 @@ export default {
         (this.selfColor === 'w' && bCurWhitePiece) || 
         (this.selfColor === 'b' && bCurBlackPiece) 
 
-      return this.firstClick === null && !isSelectingOwnPiece
+      // return this.firstClick === null && !isSelectingOwnPiece
+      return !isSelectingOwnPiece
     },
 
     canSelectedPieceCapture() { 
@@ -189,12 +190,19 @@ export default {
             }
           }
         } else {
-          this.aHighlight({
-            nRow: this.row, 
-            nCol: this.col, 
-            bHasBlackKing: this.hasBlackKing,
-            bHasWhiteKing: this.hasWhiteKing 
-          })
+          // Prevent selecting of enemy pieces
+          if (this.isSelectingEnemyPiece) {
+            this.aUnhighlight()
+          } else {
+            this.aHighlight({
+              nRow: this.row, 
+              nCol: this.col, 
+              bHasBlackChip: this.bHasBlackChip,
+              bHasWhiteChip: this.bHasWhiteChip,
+              bHasBlackKing: this.hasBlackKing,
+              bHasWhiteKing: this.hasWhiteKing 
+            })
+          }
         }
       } else { // Illegal move
         if (!this.isCapturing) {
@@ -282,7 +290,6 @@ export default {
                 }
                 willEmit = this.isLastMoveLegal && !this.isCaptureRequired
               } else {
-                //console.log('else block')
                 this.cancelCurrentMove(this.isCaptureRequired)
                 willEmit = false
               }
@@ -297,7 +304,7 @@ export default {
             if (this.bContainsPiece) {
               // Prevent a player from clicking on another player's piece
               if (this.isSelectingEnemyPiece) {
-                //console.log('select enemy')
+                console.log('select enemy')
                 return
               }
 
