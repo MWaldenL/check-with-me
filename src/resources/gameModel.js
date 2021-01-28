@@ -145,8 +145,7 @@ export const deleteGame = (async roomID => {
   const doc = await query.get()
   console.log(doc)
   const timerID = doc.docs[0].id
-
-
+  
   await timersCollection.doc(timerID).delete()
   await gamesCollection.doc(roomID).delete()
 })

@@ -173,16 +173,18 @@ export default {
         const data = await doc.data()
         const boardState = data.board_state
         const draw = data.draw
-        const winnerFromLogout = data.winner_from_logout
+        const enemyLeftConfirmed = data.enemy_left_confirmed
         const playerIsWhite = this.selfColor === 'w'
         const playerIsBlack = this.selfColor === 'b'
 
-        // Early returns 
+        /**
+         * Early returns
+         */
         // Check if someone has logged out while in game
-        // if (winnerFromLogout !== '') {
-        //   this.setWinnerFromLogout(data)
-        //   return
-        // }
+        if (enemyLeftConfirmed) {
+          this.setWinnerFromLogout(data)
+          return
+        }
 
         // Check if the game has ended in a draw
         if (draw) {
@@ -190,10 +192,13 @@ export default {
           return 
         }
 
+        /**
+         * Normal situations
+         */
         // Update the last player moved and the position
         this.bIsFirstRun = data.is_first_run
         this.lastPlayerMoved = data.last_player_moved
-        // this.drawOfferedBy = data.draw_offered_by
+        this.drawOfferedBy = data.draw_offered_by
         this.aUpdateBoard({ boardState, playerIsBlack })
         this.aUpdateCount({ 
           white: data.white_count, 

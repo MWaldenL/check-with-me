@@ -65,6 +65,7 @@ router.beforeEach(async (to, from, next) => {
     next({ name: 'Login' })
   } else if (isInsideGameRoom) {
     next({ name: from.name })
+    console.log('inside game room')
   } else {
     next()
   }
