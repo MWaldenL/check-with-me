@@ -21,6 +21,7 @@
 import { mapGetters } from 'vuex'
 import { 
   gamesCollection,
+  timersCollection
 } from '@/firebase'
 export default {
   name: 'ConfirmLeaveModal',
@@ -31,6 +32,31 @@ export default {
   },
   methods: {
     async handleConfirm () {
+
+
+
+
+       // TODO: Delete?
+      await gamesCollection
+        .doc(this.currentGame)
+        .delete()
+        .then(() => {
+          console.log("Game " + this.currentGame + " successfully deleted")
+        }).catch(error => {
+          console.log(error)
+        })
+
+      await timersCollection
+        .doc(this.currentTimer)
+        .delete()
+        .then(() => {
+          console.log("Timer " + this.currentTimer + " successfully deleted")
+        }).catch(error => {
+          console.log(error)
+        })
+
+
+
       this.$router.push('/') // Might wanna push to lobby
       await gamesCollection
           .doc(this.currentGame)
