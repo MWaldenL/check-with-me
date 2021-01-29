@@ -56,7 +56,9 @@ export default {
     ...mapActions([
       'aSetActiveGame', 
       'aResetGame',
-      'aSetWinner'
+      'aSetWinner',
+      'aDeleteGame',
+      'aDeleteTimer'
     ]),
 
     async requestRematch() {
@@ -85,17 +87,23 @@ export default {
     },
 
     async returnToLobby() {
-      const gameDoc = await gamesCollection.doc(this.currentGame).get()
-      const enemyLeft = gameDoc.data().enemy_left !== "none" || gameDoc.data().enemy_left_confirmed
+      if (this.didEnemyLogout) { // Coming from enemy premature logout
+        await this.aDeleteGame()
+        await this.aDeleteTimer()
+        this.$router.push('/')
+      } else { // Coming from the end of the game
+        const gameDoc = await gamesCollection.doc(this.currentGame).get()
+        const enemyLeft = gameDoc.data().enemy_left !== "none" || gameDoc.data().enemy_left_confirmed
 
-      if (enemyLeft) {
-        return
-      } else {
-        await gamesCollection
-          .doc(this.currentGame)
-          .update({
-            enemy_left: auth.currentUser.uid
-          })
+        if (enemyLeft) {
+          return
+        } else {
+          await gamesCollection
+            .doc(this.currentGame)
+            .update({
+              enemy_left: auth.currentUser.uid
+            })
+        }
       }
     }
   }
