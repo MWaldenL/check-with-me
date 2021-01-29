@@ -98,6 +98,8 @@ export default {
       const boardState = "[FEN \"O:W1,3,5,7,10,12,14,16,17,19,21,23:B42,44,46,48,49,51,53,55,58,60,62,64\"]"
       const playerIsBlack = !isHostWhite
 
+      console.log('last player moved ' + lastPlayerMoved)
+
       // update current game doc with new params
       await gamesCollection
             .doc(this.currentGame)
@@ -127,9 +129,10 @@ export default {
       
       this.aResetGame()
       this.aSetHostIsWhite(isHostWhite)
-      // this.aSetHostTimeLeft() // TODO: Suspicious hmmm
-      // this.aSetOtherTimeLeft()
-      
+      await this.aSetHostTimeLeft()
+      await this.aSetOtherTimeLeft()
+      this.$emit('resetTimers')
+
       if (!isHostWhite) {
         this.aUpdateBoard({ boardState, playerIsBlack })
       }
@@ -139,12 +142,12 @@ export default {
 
     async handleStartRematchWhite() {
       // handle state, db reset with host as white
-      this.updateDBAndState(this.otherUserID, true)
+      await this.updateDBAndState(this.otherUserID, true)
     },
-
+  
     async handleStartRematchBlack() {
       // handle state, db reset with other player as white
-      this.updateDBAndState(this.hostUserID, false)
+      await this.updateDBAndState(this.hostUserID, false)
     },
 
     async handleStartRematchRandom() {
@@ -153,7 +156,7 @@ export default {
       let color = Math.floor((Math.random() * 100) + 1) % 2 === 0
       let last = color ? this.otherUserID : this.hostUserID
 
-      this.updateDBAndState(last, color)
+      await this.updateDBAndState(last, color)
     }
   }
 }

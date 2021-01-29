@@ -70,9 +70,9 @@
     <ResignModal />
     <RematchRequesteeModal />
     <RematchRequestorModal />
-    <ChooseNewTimeModal />
+    <ChooseNewTimeModal @resetTimers="resetTimers" />
     <WaitForTimeModal />
-    <StartGameModal />
+    <StartGameModal @resetTimers="resetTimers" />
     <ConfirmLeaveModal />
     <LobbyModal />
   </div>
@@ -190,9 +190,10 @@ export default {
         const playerIsBlack = this.selfColor === 'b'
 
         if (this.activeGame) {
+          console.log('entering active game clause')
+
           // Check if someone has logged out while in game
           if (winnerFromLogout) {
-            console.log('enemy left confirmed from active game')
             this.setWinnerFromLogout(data)
 
             if (!this.isSelfHost) { // For the other player to show the modified overlay
@@ -208,6 +209,8 @@ export default {
           }
 
           // Update other important data
+          console.log('active game data: ')
+          console.log(data)
           this.bIsFirstRun = data.is_first_run
           this.lastPlayerMoved = data.last_player_moved
           this.drawOfferedBy = data.draw_offered_by
@@ -294,7 +297,6 @@ export default {
 
           // Check if the enemy has logged out
           const winnerFromLogout = data.winner_from_logout
-          console.log(winnerFromLogout)
           if (winnerFromLogout) {
             this.didEnemyLogout = true
           }
@@ -535,6 +537,12 @@ export default {
     prepareToStartGame() {
       this.$bvModal.hide('wait-for-time-modal')
       this.$bvModal.show('start-game-modal')
+    },
+
+    resetTimers() { // When coming from a rematch 
+      console.log('resetting timers')
+      this.selfSeconds = this.hostTimeLeft
+      this.enemySeconds = this.otherTimeLeft
     },
 
     /**
@@ -1003,8 +1011,20 @@ table {
 
   position: absolute;
   right: 3vw;
+  bottom: 60vh;
+}
+
+#resign {
+  font-family: 'Roboto', Helvetica, Arial, sans-serif;
+  font-weight: 100;
+  font-size: 20px;
+  padding: 10px 40px;
+
+  position: absolute;
+  right: 3vw;
   bottom: 40vh;
 }
+
 #box {
   position: relative;
   margin-top: 10px;

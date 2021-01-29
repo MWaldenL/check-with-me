@@ -45,13 +45,11 @@ export default {
 
       this.aResetGame() // Resets the board
       this.aSetHostIsWhite(isHostWhite)
-      //////// TODO: sdfasdfasldfjasjdflkj
       this.aUpdateBoard({ boardState, playerIsBlack })
+      await this.aSetHostTimeLeft()
+      await this.aSetOtherTimeLeft()
+      this.$emit('resetTimers')
       this.$bvModal.hide('start-game-modal')
-
-
-      // this.aSetHostTimeLeft() TODO: suspicious
-      // this.aSetOtherTimeLeft()
     }
   }
 }
