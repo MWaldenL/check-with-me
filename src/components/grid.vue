@@ -343,18 +343,15 @@ export default {
       .onSnapshot(async doc => {
         const data = doc.data()
         const remoteEnemyTime = this.isSelfHost ? data.other_timeLeft : data.host_timeLeft
-        
-        console.log('\n----' + 'calling' + '----\n')
-
+  
         // Prevent undefined setting of times in the middle of the game
-        // const x = this.enemySeconds === remoteEnemyTime
         if (this.lastPlayerMoved === auth.currentUser.uid) {
           this.enemySeconds = remoteEnemyTime
         }
 
         // Determine whose clock to run
-        // if (!this.bIsFirstRun) {
-        if (!this.bIsFirstRun && this.lastPlayerMoved !== auth.currentUser.uid) { // TODO: Try performing only when enemy has moved
+        const runningClockOnTurn = !this.bIsFirstRun && this.lastPlayerMoved !== auth.currentUser.uid
+        if (runningClockOnTurn) {
           this.determineClockToRun()
         }
 
@@ -364,6 +361,7 @@ export default {
   },
 
   updated() {
+    // Make sure to check each time whether a player's time has run out
     this.checkIfWonOnTime()
   },
 

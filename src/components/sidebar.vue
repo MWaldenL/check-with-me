@@ -7,8 +7,8 @@
     <b-button v-b-toggle.sidebar id="menu"><b-icon-caret-right-fill></b-icon-caret-right-fill></b-button>
     <b-sidebar id="sidebar" title="Check with Me" bg-variant="dark" text-variant="light">
       <div id="s-contents" class="px-3 py-2"  @click="checkRoute">
-        <button id="lobby" class="router-link route-button" :disabled="isLobby || isWaiting" @click="playCheck">
-          <h3 :class="inLobbyWaitingDisabledClass">Play</h3>
+        <button id="lobby" class="router-link route-button" :disabled="isPlayButtonDisabled" @click="playCheck">
+          <h3 :class="playButtonDisabledClass">Play</h3>
         </button>
         <router-link to="/profile" id="profile" class="router-link" :disabled="isInGame">
           <h3 :class="inGameDisabledClass">Profile</h3>
@@ -57,11 +57,19 @@ export default {
     }),
 
     isLobby() {
-      return this.$route.name === "GameLobby"
+      return this.$route.name === 'GameLobby'
     },
 
     isWaiting() {
-      return this.$route.name === "WaitingRoom"
+      return this.$route.name === 'WaitingRoom'
+    },
+
+    isInGame() {
+      return this.$route.name === 'PlayBoard'
+    },
+
+    isPlayButtonDisabled() {
+      return this.isLobby || this.isWaiting || this.isInGame
     },
 
     inGameDisabledClass() {
@@ -78,6 +86,14 @@ export default {
         disabled: inLobbyWaiting,
         'text-white': !inLobbyWaiting,
         'cursor-pointer': !inLobbyWaiting
+      }
+    },
+
+    playButtonDisabledClass() {
+      return {
+        disabled: this.isPlayButtonDisabled,
+        'text-white': !this.isPlayButtonDisabled,
+        'cursor-pointer': !this.isPlayButtonDisabled
       }
     }
   },
