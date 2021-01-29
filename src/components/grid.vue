@@ -4,14 +4,18 @@
 
     <!-- Opponent -->
     <div id="p1-details" class="details">
-      <h1> 
-        {{ enemyUsername }} 
-        <keep-alive>
-          <span class="time text-white" id="enemyTime">
-            {{ enemySeconds | minutes | formattedTime }}:{{ enemySeconds | seconds | formattedTime }}
-          </span>
-        </keep-alive>
-      </h1> 
+      <div class="d-flex">
+        <h1> 
+          {{ enemyUsername }} 
+          <keep-alive>
+            <span class="time text-white" id="enemyTime">
+              {{ enemySeconds | minutes | formattedTime }}:{{ enemySeconds | seconds | formattedTime }}
+            </span>
+          </keep-alive>
+        </h1>
+        <img src="../../public/assets/to-move.png" id="turn-icon" class="ml-5" v-if="!canMakeMove" />
+      </div>
+
       <h1 id="p1-count" class="pt-3"> Pieces left: {{ otherCount }} </h1>
     </div>
 
@@ -40,14 +44,17 @@
     <!-- Self -->
     <div id="p2-details" class="details">
       <h1 id="p2-count" class="pb-4"> Pieces left: {{ selfCount }} </h1>
-      <h1>
-        <keep-alive>
-          <span class="time text-white" id="selfTime">
-            {{ selfSeconds | minutes | formattedTime }}:{{ selfSeconds | seconds | formattedTime }}
-          </span>
-        </keep-alive>
-        {{ selfName }}
-      </h1>
+      <div class="d-flex justify-content-end">
+        <h1>
+          <img src="../../public/assets/to-move.png" id="turn-icon" class="mr-5" v-if="canMakeMove" />
+          <keep-alive>
+            <span class="time text-white" id="selfTime">
+              {{ selfSeconds | minutes | formattedTime }}:{{ selfSeconds | seconds | formattedTime }}
+            </span>
+          </keep-alive>
+          {{ selfName }}
+        </h1>
+      </div>
     </div>
     
     <!-- Buttons -->
@@ -189,8 +196,6 @@ export default {
         const playerIsWhite = this.selfColor === 'w'
         const playerIsBlack = this.selfColor === 'b'
 
-        console.log('active game data: ')
-        console.log(data)
         this.bIsFirstRun = data.is_first_run
         this.lastPlayerMoved = data.last_player_moved
         this.drawOfferedBy = data.draw_offered_by
@@ -397,7 +402,6 @@ export default {
       whiteCount: 'getWhiteCount',
       blackCount: 'getBlackCount',
       currentUser: 'getCurrentUser',
-      currentGameID: 'getCurrentGame',
       hostUserID: 'getHostUser',
       otherUserID: 'getOtherUser',
       enemyUsername: 'getEnemyUsername',
