@@ -39,13 +39,19 @@ router.beforeEach(async (to, from, next) => {
 })
 
 const handleGameEnterAttempt = async (roomID, next) => {
+  // Check if the game exists in the first place
+  const gameExists = await doesRoomExist(roomID)
+  if (!gameExists) {
+    alert('This game does not exist! Please select a vacant room.')
+    next({ name: 'GameLobby' })
+    return
+  } 
+  
   // Check whether the userID is present in the game
   const isUserInRoom = await isInGivenRoom(roomID)
-
-  // If present, enter. Else, redirect to game lobby
   if (isUserInRoom) {
     next()
-  } else {
+  } else { // Otherwise go to game lobby
     alert('This game is already full! Please select a vacant room.')
     next({ name: 'GameLobby' })
   }
