@@ -307,12 +307,12 @@ export default {
     this.gameUnsubscribe = gamesCollection
       .doc(roomID)
       .onSnapshot(async doc => {
-        const gameStartedFirstTime = 
-          this.isOwner === 0 && 
-          doc.data().game_started &&
-          doc.data().is_first_run
-
         if (doc.exists) {
+          const gameStartedFirstTime = 
+            this.isOwner === 0 && 
+            doc.data().game_started && 
+            doc.data().is_first_run
+
           if (this.isOwner == 0 && doc.data().other_user.id === "nil"){
             this.$router.push({ path: '/'})
           } else if (gameStartedFirstTime) { // Route to the game proper when the other player has started 
@@ -327,6 +327,7 @@ export default {
           if (this.isOwner == 0) {
             this.isKicked = true
           } else {
+            console.log('doc no exist')
             this.$router.push({ path: '/'})
           }
         }
