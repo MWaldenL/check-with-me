@@ -33,7 +33,7 @@
         </table>
       </div>
       <template #overlay>
-        <ResultOverlay />
+        <ResultOverlay :didEnemyLogout="didEnemyLogout" />
       </template>
     </b-overlay>
     
@@ -185,14 +185,15 @@ export default {
         const data = await doc.data()
         const boardState = data.board_state
         const draw = data.draw
-        const enemyLeftConfirmed = data.enemy_left_confirmed
+        const winnerFromLogout = data.winner_from_logout
         const playerIsWhite = this.selfColor === 'w'
         const playerIsBlack = this.selfColor === 'b'
 
         if (this.activeGame) {
+          
           // Check if someone has logged out while in game
-          if (enemyLeftConfirmed) {
-            console.log('enemy left confirmed in active game')
+          if (winnerFromLogout) {
+            console.log('enemy left confirmed from active game')
             this.setWinnerFromLogout(data)
             return
           }
@@ -285,9 +286,15 @@ export default {
             rematch_requested,
             rematch_time_selected, 
             enemy_left, 
-            enemy_left_confirmed 
+            enemy_left_confirmed
           } = data
-        
+
+          // Check if the enemy has logged out
+          const winnerFromLogout = data.winner_from_logout
+          if (winnerFromLogout) {
+            this.didEnemyLogout = true
+          }
+
           // Check for requests
           this.checkRematchRequests(rematch_requested)
 
@@ -373,7 +380,9 @@ export default {
       isCountingMovesForDraw: false,
       drawCounter: 0,
       drawOfferedBy: '',
-      burdenedColor: ''
+      burdenedColor: '',
+
+      didEnemyLogout: false 
     }
   },
 
@@ -617,12 +626,12 @@ export default {
     setWinnerFromLogout(gameData) {
       // Once the enemy has confirmed to leave the game, 
       // the game will end and the winner will be determined
-      const enemyLeft = gameData.enemy_left
-      if (enemyLeft !== 'none' && enemyLeft !== auth.currentUser.uid) {
+      const winnerFromLogout = gameData.winner_from_logout
+      if (winnerFromLogout === auth.currentUser.uid) {
         const winnerColor = this.selfColor.toUpperCase()
         this.endGameWithWinner(winnerColor)
       } 
-    },
+    },  
     
     /**
      * Draw methods

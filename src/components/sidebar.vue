@@ -29,7 +29,7 @@
 
 <script>
 import firebase from 'firebase'
-import { gamesCollection } from '@/firebase'
+import { auth, gamesCollection } from '@/firebase'
 import { mapGetters, mapActions } from 'vuex'
 import { 
   checkUserGame, 
@@ -126,11 +126,14 @@ export default {
             enemy_left_confirmed: true
           })
       } else {
-        const userID = firebase.auth().currentUser.uid
+        const userID = auth.currentUser.uid
         const roomID = await checkUserGame(userID)
         const room = await getSingleGame(roomID)
+        const winner = room.host_user.id === userID ? 
+          room.other_user.id : 
+          room.host_user.id
 
-        await this.setWinnerFromLogout(roomID, userID)
+        await this.setWinnerFromLogout(roomID, winner)
         
         // If host user logs out, delete the game, else simply remove the guest
         if (room.host_user.id === userID) {
@@ -153,13 +156,10 @@ export default {
       }
     },
 
-    async setWinnerFromLogout(gameID, player) {
+    async setWinnerFromLogout(gameID, winner) {
       await gamesCollection
         .doc(gameID)
-        .update({ 
-          enemy_left: player, 
-          enemy_left_confirmed: true
-        })
+        .update({ winner_from_logout: winner }, { merge: true })
     },
 
     checkRoute() {
