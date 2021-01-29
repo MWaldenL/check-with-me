@@ -8,10 +8,10 @@
         Please choose the new time control setting.
       </h5>
 
-      <b-button class="mr-2 mt-5 mb-2 w-25" :pressed.sync="toggle10" variant="success" @click="handleTimeToggle10">10 minutes</b-button>
-      <b-button class="ml-2 mt-5 mb-2 w-25" :pressed.sync="toggle5" variant="success" @click="handleTimeToggle5">5 minutes</b-button> <br>
-      <b-button class="mr-2 mt-2 w-25" :pressed.sync="toggle3" variant="success" @click="handleTimeToggle3">3 minutes</b-button>
-      <b-button class="ml-2 mt-2 w-25" :pressed.sync="toggle1" variant="success" @click="handleTimeToggle1">1 minute</b-button>
+      <b-button class="mr-2 mt-5 mb-2 w-25" :pressed.sync="toggle10" variant="warning" @click="handleTimeToggle10">10 minutes</b-button>
+      <b-button class="ml-2 mt-5 mb-2 w-25" :pressed.sync="toggle5" variant="warning" @click="handleTimeToggle5">5 minutes</b-button> <br>
+      <b-button class="mr-2 mt-2 w-25" :pressed.sync="toggle3" variant="warning" @click="handleTimeToggle3">3 minutes</b-button>
+      <b-button class="ml-2 mt-2 w-25" :pressed.sync="toggle1" variant="warning" @click="handleTimeToggle1">1 minute</b-button>
 
       <b-button block class="mt-5" :disabled="isTimeSelected" variant="success" @click="handleStartRematchWhite">Start Rematch as White</b-button>
       <b-button block class="mt-2" :disabled="isTimeSelected" variant="success" @click="handleStartRematchBlack">Start Rematch as Black</b-button>

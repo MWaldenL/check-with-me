@@ -35,8 +35,6 @@ export default {
     ]),
 
     async backToLobby() {
-      this.aClearGameState()
-
       // delete game document, uncomment for deployment
       await gamesCollection
         .doc(this.currentGame)
@@ -56,6 +54,7 @@ export default {
           console.log(error)
         })
 
+      this.aClearGameState()
       this.$router.push("/")
     }
   }
