@@ -271,22 +271,25 @@ export default {
           blackStuck = checkIfSelfStuck(this.board, false)
         }
         
-        if (whiteStuck && blackStuck) { // if both players are stuck, call a draw
-          //console.log("DRAW DRAW DRAW")
+        const bothStuck = whiteStuck && blackStuck
+        const whiteLost = whiteStuck || data.white_count === 0
+        const blackLost = blackStuck || data.black_count === 0
+        if (bothStuck) { // if both players are stuck, call a draw
+          this.stopClocks()
           this.prepareForRematchRequest()
           this.updateSelfScore('D')
           this.aSetWinner('D')
           this.aSetActiveGame(false)
           return
-        } else if (whiteStuck || data.white_count === 0) { // if only white is stuck or white has no more pieces, black wins
-          //console.log("BLACK BLACK BLACK")
+        } else if (whiteLost) { // if only white is stuck or white has no more pieces, black wins
+          this.stopClocks()
           this.prepareForRematchRequest()
           this.updateSelfScore('B')
           this.aSetWinner('B')
           this.aSetActiveGame(false)
           return
-        } else if (blackStuck || data.black_count === 0) { // if only black is stuck or black has no more pieces, white wins
-          //console.log("WHITE WHITE WHITE")
+        } else if (blackLost) { // if only black is stuck or black has no more pieces, white wins
+          this.stopClocks()
           this.prepareForRematchRequest()
           this.updateSelfScore('W')
           this.aSetWinner('W')
@@ -296,12 +299,14 @@ export default {
 
         // Check for player resignation
         if (data.resign === "b") {
+          this.stopClocks()
           this.prepareForRematchRequest()
           this.updateSelfScore('W')
           this.aSetWinner('WR')
           this.aSetActiveGame(false)
           return
         } else if (data.resign === "w") {
+          this.stopClocks()
           this.prepareForRematchRequest()
           this.updateSelfScore('B')
           this.aSetWinner('BR')
@@ -339,13 +344,17 @@ export default {
         const data = doc.data()
         const remoteEnemyTime = this.isSelfHost ? data.other_timeLeft : data.host_timeLeft
         
+        console.log('\n----' + 'calling' + '----\n')
+
         // Prevent undefined setting of times in the middle of the game
-        if (this.bIsFirstRun) {
+        // const x = this.enemySeconds === remoteEnemyTime
+        if (this.lastPlayerMoved === auth.currentUser.uid) {
           this.enemySeconds = remoteEnemyTime
         }
 
         // Determine whose clock to run
-        if (!this.bIsFirstRun) {
+        // if (!this.bIsFirstRun) {
+        if (!this.bIsFirstRun && this.lastPlayerMoved !== auth.currentUser.uid) { // TODO: Try performing only when enemy has moved
           this.determineClockToRun()
         }
 
@@ -644,7 +653,10 @@ export default {
     },
 
     async handleDrawReject() {
-      // Magic
+      // Handles situations when the other player offers a draw on their move.
+      // Idea is to offset the counter by 2:
+      // -1 for the initial listener call
+      // -1 to absorb the move the other player will play
       if (this.lastPlayerMoved === auth.currentUser.uid) {
         this.drawCounter -= 2
       }
@@ -668,6 +680,8 @@ export default {
     },
 
     setWinnerFromLogout(gameData) {
+      // Once the enemy has confirmed to leave the game, 
+      // the game will end and the winner will be determined
       const enemyLeftConfirmed = gameData.enemy_left_confirmed
       if (enemyLeftConfirmed === auth.currentUser.uid) {
         const winnerColor = this.selfColor.toUpperCase()
@@ -678,16 +692,17 @@ export default {
     },
 
     async determineClockToRun() {
+      // Stop clients and start server clocks
       if (this.lastPlayerMoved !== auth.currentUser.uid) { // opponent last move
         this.stopEnemyClientTime()
         this.startSelfClientTime()
+        await this.startSelfServerTime() // switch back if bad
         await this.stopEnemyServerTime()
-        await this.startSelfServerTime()
       } else { // self made last move
         this.stopSelfClientTime()
         this.startEnemyClientTime()
+        await this.startEnemyServerTime() // switch back if bad
         await this.stopSelfServerTime()
-        await this.startEnemyServerTime()
       }
     },
 
@@ -711,6 +726,7 @@ export default {
         bSourceHasWhiteKing(this.board, this.prevDestSquare) 
 
       this.lastPlayerMoved = (this.isHostWhite ^ isMoveWhite) ? this.otherUserID : this.hostUserID
+
       // Write last player moved to game doc 
       await this.currentGameDoc.update({ 
         last_player_moved: this.lastPlayerMoved 
@@ -725,13 +741,15 @@ export default {
       this.aFlushStateAfterTurn()
 
       // Stop self time and start enemy time
+      // TODO: These might be causing weird stuff to happen
       this.stopSelfClientTime() // switch them back if weird
       this.startEnemyClientTime()
-      await this.stopSelfServerTime()
-      await this.startEnemyServerTime()
 
       // Write the updated self time to db
       this.writeUpdatedTimeToDB() 
+
+      await this.startEnemyServerTime()
+      await this.stopSelfServerTime()
     },
 
     async updateLastPlayerMoved(coords) {
@@ -749,8 +767,6 @@ export default {
         await this.endPlayerTurn(this.prevSourceSquare)
       }
     },
-
-
 
     /**
      * Self timer methods
@@ -800,6 +816,13 @@ export default {
     /**
      * Enemy timer methods
      */
+    async stopClocks() {
+      this.stopSelfClientTime()
+      this.stopSelfServerTime()
+      await this.stopEnemyClientTime()
+      await this.stopEnemyServerTime()
+    },
+
     async startEnemyClientTime() {
       // this.isEnemyTimeRunning = true
       this.setPlayerToMove('enemy')
