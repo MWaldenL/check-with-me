@@ -190,11 +190,14 @@ export default {
         const playerIsBlack = this.selfColor === 'b'
 
         if (this.activeGame) {
-          
           // Check if someone has logged out while in game
           if (winnerFromLogout) {
             console.log('enemy left confirmed from active game')
             this.setWinnerFromLogout(data)
+
+            if (!this.isSelfHost) { // For the other player to show the modified overlay
+              this.didEnemyLogout = true
+            }
             return
           }
 
@@ -291,6 +294,7 @@ export default {
 
           // Check if the enemy has logged out
           const winnerFromLogout = data.winner_from_logout
+          console.log(winnerFromLogout)
           if (winnerFromLogout) {
             this.didEnemyLogout = true
           }
