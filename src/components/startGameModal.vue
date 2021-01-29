@@ -43,12 +43,15 @@ export default {
       let boardState = "[FEN \"O:W1,3,5,7,10,12,14,16,17,19,21,23:B42,44,46,48,49,51,53,55,58,60,62,64\"]"
       let playerIsBlack = isHostWhite
 
-      this.aResetGame()
+      this.aResetGame() // Resets the board
       this.aSetHostIsWhite(isHostWhite)
-      this.aSetHostTimeLeft()
-      this.aSetOtherTimeLeft()
+      //////// TODO: sdfasdfasldfjasjdflkj
       this.aUpdateBoard({ boardState, playerIsBlack })
       this.$bvModal.hide('start-game-modal')
+
+
+      // this.aSetHostTimeLeft() TODO: suspicious
+      // this.aSetOtherTimeLeft()
     }
   }
 }

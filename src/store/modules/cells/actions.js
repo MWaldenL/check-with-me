@@ -55,7 +55,6 @@ const actions = {
    * @param nDestCol - 1-based column of empty destination cell
    */
   async aMoveForward({ state, commit, rootState }, payload) {
-    console.log(rootState.currentGameID)
     const { coords, isPlayerBlack } = payload
     commit('mMoveForward', coords)
     writeBoardToDB(rootState.game.currentGameID, state.cells, isPlayerBlack)

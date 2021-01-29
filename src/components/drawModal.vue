@@ -42,13 +42,11 @@ export default {
     ]),
 
     async handleDrawConfirm() {
-      console.log(`draw confirmed`)
       this.$emit('acceptDraw')
       this.$bvModal.hide('draw-modal')
     },
 
     handleDrawReject() {
-      console.log('Draw rejected')
       this.$emit('rejectDraw')
       this.$bvModal.hide('draw-modal')
     }

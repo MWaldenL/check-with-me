@@ -175,7 +175,8 @@ export default {
 
     // Listen for board state changes
     gamesCollection
-      .doc(gameID) // Obtain from state in the future when rooms are implemented
+      // .doc(gameID) // Obtain from state in the future when rooms are implemented
+      .doc(this.currentGame) // TODO: Try try try 
       .onSnapshot(async doc => {
         const data = await doc.data()
         const boardState = data.board_state
@@ -206,7 +207,10 @@ export default {
         this.bIsFirstRun = data.is_first_run
         this.lastPlayerMoved = data.last_player_moved
         this.drawOfferedBy = data.draw_offered_by
-        this.aUpdateBoard({ boardState, playerIsBlack })
+        this.aUpdateBoard({ 
+          boardState, 
+          playerIsBlack 
+        })
         this.aUpdateCount({ 
           white: data.white_count, 
           black: data.black_count
@@ -214,37 +218,20 @@ export default {
 
         // Check for rematch 
         if (!this.activeGame) {
+          // Check for requests
+          this.checkRematchRequests(data.rematch_requested)
 
-          // Check for request
-          if (data.rematch_requested === "host" && this.isSelfHost ||
-              data.rematch_requested === "other" && !this.isSelfHost) {
-
-            this.$bvModal.show('rematch-requestor-modal')
-
-          } else if (data.rematch_requested === "host" && !this.isSelfHost ||
-                     data.rematch_requested === "other" && this.isSelfHost) {
-
-            this.$bvModal.show('rematch-requestee-modal')
-
+          // Check is the rematch request was accepted
+          if (data.rematch_accepted) {
+            this.handleAcceptRematch()
           }
 
-          // Check for accept
-          if (data.rematch_accepted && this.isSelfHost) {
-            this.$bvModal.hide('rematch-requestor-modal')
-            this.$bvModal.hide('rematch-requestee-modal')
-            this.$bvModal.show('choose-new-time-modal')
-          } else if (data.rematch_accepted && !this.isSelfHost) {
-            this.$bvModal.hide('rematch-requestor-modal')
-            this.$bvModal.hide('rematch-requestee-modal')
-            this.$bvModal.show('wait-for-time-modal')
-          }
-
-          // Check if new time has been selected already
+          // Prepare to start game if new time has been selected already
           if (data.rematch_time_selected && !this.isSelfHost) {
-            this.$bvModal.hide('wait-for-time-modal')
-            this.$bvModal.show('start-game-modal')
+            this.prepareToStartGame()
           }
 
+          // Handle current user wanting to leave
           if (data.enemy_left === auth.currentUser.uid) {
             this.$bvModal.show('confirm-leave-modal')
           } 
@@ -255,7 +242,7 @@ export default {
           }
         }
 
-        //Listen for and handle draw offers
+        // Listen for and handle draw offers
         this.handleDrawOffer(this.drawOfferedBy)
 
         // Check for win
@@ -319,7 +306,7 @@ export default {
           if (!this.isCapturing) {
             this.aHighlightBoardCaptures(playerIsWhite)
           } else {  
-            // Highlight the capture from the current sequence
+            // Highlight the available captures from the current sequence
             if (this.prevDestSquare) {
               this.aHighlightCaptureFromSequence({ 
                 coords: this.prevDestSquare, 
@@ -342,9 +329,19 @@ export default {
       .doc(timerID)
       .onSnapshot(async doc => {
         const data = doc.data()
+        const remoteSelfTime = this.isSelfHost ? data.host_timeLeft : data.other_timeLeft
         const remoteEnemyTime = this.isSelfHost ? data.other_timeLeft : data.host_timeLeft
-  
-        // Prevent undefined setting of times in the middle of the game
+
+        // If first run from rematch, set the timers
+        console.log('firebase baka')
+        console.log(this.bIsFirstRun)
+        console.log(data)
+        if (this.bIsFirstRun) {
+          this.selfSeconds = remoteSelfTime
+          this.enemySeconds = remoteEnemyTime
+        }
+
+        // Prevent undefined setting of timers in the middle of the game
         if (this.lastPlayerMoved === auth.currentUser.uid) {
           this.enemySeconds = remoteEnemyTime
         }
@@ -361,7 +358,7 @@ export default {
   },
 
   updated() {
-    // Make sure to check each time whether a player's time has run out
+    // Make sure to check on update whether a player's time has run out
     this.checkIfWonOnTime()
   },
 
@@ -498,21 +495,55 @@ export default {
       'aSetActiveGame',
       'aResetGame'
     ]),
-    
-    async endGameWithWinner(winner) {
-      this.updateSelfScore(winner)
-      this.aSetWinner(winner)
-      this.aSetActiveGame(false)
-    },
-  
+
     async setSelfUsername() {
       const currentUser = await this.currentUser.data 
       this.selfName = currentUser.username
     },
 
     /**
-     * Post-game methods
+     * Rematch 
      */
+    checkRematchRequests(rematchRequested) {
+      const selfRequested = 
+        rematchRequested === "host" && this.isSelfHost ||
+        rematchRequested === "other" && !this.isSelfHost
+
+      const enemyRequested = 
+        rematchRequested === "host" && !this.isSelfHost ||
+        rematchRequested === "other" && this.isSelfHost
+
+      if (selfRequested) {
+        this.$bvModal.show('rematch-requestor-modal')
+      } else if (enemyRequested) {
+        this.$bvModal.show('rematch-requestee-modal')
+      }
+    },
+
+    handleAcceptRematch() { 
+      // Hide the previous modals
+      this.$bvModal.hide('rematch-requestor-modal')
+      this.$bvModal.hide('rematch-requestee-modal')
+
+      // Show the time chooser modal
+      const modal = this.isSelfHost ? 'choose-new-time-modal' : 'wait-for-time-modal'
+      this.$bvModal.show(modal)
+    },
+
+    prepareToStartGame() {
+      this.$bvModal.hide('wait-for-time-modal')
+      this.$bvModal.show('start-game-modal')
+    },
+
+    /**
+     * Post-game methods
+     */  
+    async endGameWithWinner(winner) {
+      this.updateSelfScore(winner)
+      this.aSetWinner(winner)
+      this.aSetActiveGame(false)
+    },
+
     async updateSelfScore(winner) {
       // gets user documents for current player and opponent
       console.log(auth.currentUser)

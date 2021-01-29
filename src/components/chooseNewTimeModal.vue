@@ -127,8 +127,8 @@ export default {
       
       this.aResetGame()
       this.aSetHostIsWhite(isHostWhite)
-      this.aSetHostTimeLeft()
-      this.aSetOtherTimeLeft()
+      // this.aSetHostTimeLeft() // TODO: Suspicious hmmm
+      // this.aSetOtherTimeLeft()
       
       if (!isHostWhite) {
         this.aUpdateBoard({ boardState, playerIsBlack })
