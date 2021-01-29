@@ -1,6 +1,7 @@
 <template>
 <div>
   <h1 class="overlay-text" id="win-resign-message"> {{ winnerResignMessage }} </h1>
+  <h1 class="overlay-text" id="win-logout-message"> {{ winnerLogoutMessage }} </h1>
   <h1 class="overlay-text" id="win-message"> {{ winnerMessage }} </h1>
   <b-button @click="requestRematch" class="overlay-text overlay-button" id="request-rematch" v-if="!didEnemyLogout">
     New Game
@@ -46,6 +47,14 @@ export default {
         return 'White Resigned!'
       else
         return ''
+    },
+
+    winnerLogoutMessage() {
+      if (this.didEnemyLogout) {
+        return this.winner === 'B' ? 
+          'White has logged out from the game!' : 
+          'Black has logged out from the game!'
+      }
     },
 
     isSelfHost() {
@@ -126,6 +135,10 @@ export default {
   margin-bottom: 25px;
 }
 #win-resign-message {
+  font-size: 32px;
+  text-decoration: underline;
+}
+#win-logout-message {
   font-size: 32px;
   text-decoration: underline;
 }
