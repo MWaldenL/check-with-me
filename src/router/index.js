@@ -9,71 +9,87 @@ Vue.use(VueRouter)
 const router = new VueRouter({ routes })
 
 router.beforeEach(async (to, from, next) => {
-  const user = await firebase.getCurrentUser()
   const { requiresAuth, requiresNotAuth } = to.meta
+  const user = await firebase.getCurrentUser()
   const roomID = to.params.id
 
   const isDifferentRoute = to.name !== from.name
   const isGuestAccessingAuthRoute = requiresAuth && !user && isDifferentRoute
   const isAuthAccessingGuestRoute = requiresNotAuth && user && isDifferentRoute
-  const isInsideGameRoom = from.name === 'PlayBoard'
+  const isComingFromGame = from.name === 'PlayBoard'
   const isEnteringRoom = to.name === 'WaitingRoom'
+  const isEnteringGame = to.name === 'PlayBoard'
 
   // Handle routing
   if (isAuthAccessingGuestRoute) { // Prioritize
     console.log('auth to guest')
     next({ name: 'GameLobby' })
   } else if (isEnteringRoom) { // can happen on first load or joining new room
-
-    console.log('entering room')
-
-    // Set the current game id in the state
-    store.commit('mSetCurrentGame', roomID)
-
-    // Check if user is authenticated
-    const thisUser = auth.currentUser
-    if (!thisUser) {
-      next({ name: 'Login' })
-      return
-    }
-
-    // Redirect to Game Lobby if room does not exist
-    const roomExists = await doesRoomExist(roomID)
-    if (!roomExists) {
-      store.commit('mSetCurrentGame', '')
-      next({ name: 'GameLobby' })
-      return 
-    }
-
-    // Check if a room can be joined 
-    const isFull = await isRoomFull(roomID) 
-    let inGivenRoom = await isInGivenRoom(roomID) 
-    const alreadyInRoom = await isAlreadyInRoom()
-    const canJoinRoom = !isFull && !inGivenRoom && !alreadyInRoom
-
-    if (canJoinRoom) {
-      await joinRoom(roomID)
-    } 
-
-    // Only access a room if the given player is already inside
-    inGivenRoom = await isInGivenRoom(roomID) 
-    if (inGivenRoom) {
-      next()
-    } else {
-      store.commit('mSetCurrentGame', '')
-      alert('This room is already full! Please select a vacant room.')
-      next({ name: 'GameLobby' })
-    }
+    await handleRoomEnterAttempt(roomID, next)
+  } else if (isEnteringGame) {
+    await handleGameEnterAttempt(roomID, next)
   } else if (isGuestAccessingAuthRoute) {
     console.log('guest to auth')
     next({ name: 'Login' })
-  } else if (isInsideGameRoom) {
-    console.log('inside game room')
-    // next({ name: from.name })
+  } else if (isComingFromGame) {
+    next({ name: 'PlayBoard' })
   } else {
     next()
   }
 })
+
+const handleGameEnterAttempt = async (roomID, next) => {
+  // Check whether the userID is present in the game
+  const isUserInRoom = await isInGivenRoom(roomID)
+
+  // If present, enter. Else, redirect to game lobby
+  if (isUserInRoom) {
+    next()
+  } else {
+    alert('This game is already full! Please select a vacant room.')
+    next({ name: 'GameLobby' })
+  }
+}
+
+const handleRoomEnterAttempt = async (roomID, next) => {
+  // Set the current game id in the state
+  store.commit('mSetCurrentGame', roomID)
+
+  // Check if user is authenticated
+  const thisUser = auth.currentUser
+  if (!thisUser) {
+    next({ name: 'Login' })
+    return
+  }
+
+  // Redirect to Game Lobby if room does not exist
+  const roomExists = await doesRoomExist(roomID)
+  if (!roomExists) {
+    store.commit('mSetCurrentGame', '')
+    next({ name: 'GameLobby' })
+    return 
+  }
+
+  // Check if a room can be joined 
+  const isFull = await isRoomFull(roomID) 
+  let inGivenRoom = await isInGivenRoom(roomID) 
+  const alreadyInRoom = await isAlreadyInRoom()
+  const canJoinRoom = !isFull && !inGivenRoom && !alreadyInRoom
+
+  if (canJoinRoom) {
+    await joinRoom(roomID)
+  } 
+
+  // Only access a room if the given player is already inside
+  inGivenRoom = await isInGivenRoom(roomID) 
+  if (inGivenRoom) {
+    next()
+  } else {
+    store.commit('mSetCurrentGame', '')
+    alert('This room is already full! Please select a vacant room.')
+    next({ name: 'GameLobby' })
+  }
+}
 
 const joinRoom = async (roomID) => {
   const gameDoc = gamesCollection.doc(roomID)

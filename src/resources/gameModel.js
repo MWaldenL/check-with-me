@@ -120,14 +120,11 @@ export const checkNameUnique = (async roomName => {
 })
 
 export const checkUserGame = (async (userID) => {
-  console.log('checkUserGame')
-
   //build reference to user
   const userDocRef = usersCollection.doc(userID)
-  // console.log(userDocRef)
   const queryHost = gamesCollection.where("host_user", "==", userDocRef)
   const docHost = await queryHost.get()
-  // console.log(docHost)
+
   if (docHost.empty) {
     const queryGuest = gamesCollection.where("other_user", "==", userDocRef)
     const docGuest = await queryGuest.get()
@@ -143,10 +140,8 @@ export const checkUserGame = (async (userID) => {
 })
 
 export const deleteGame = (async roomID => {
-  console.log(roomID)
   const query = timersCollection.where("game_id", "==", roomID)
   const doc = await query.get()
-  console.log(doc)
   const timerID = doc.docs[0].id
   
   await timersCollection.doc(timerID).delete()

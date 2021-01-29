@@ -64,10 +64,6 @@ export default {
       return this.$route.name === 'WaitingRoom'
     },
 
-    isInGame() {
-      return this.$route.name === 'PlayBoard'
-    },
-
     isPlayButtonDisabled() {
       return this.isLobby || this.isWaiting || this.isInGame
     },
