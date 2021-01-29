@@ -118,6 +118,30 @@ const actions = {
     const timeLeft = timerDoc.host_timeLeft
 
     commit('mInitGame', { roomID, boardState, hostUser, otherUser, isHostWhite, lastPlayerMoved, timerID, timeLeft })
+  },
+
+  /**
+   * Deletes the game from the database
+   */
+  async aDeleteGame({ state }) {
+    await gamesCollection.doc(state.currentGameID).delete()
+      .then(() => {
+        console.log("Game " + state.currentGameID + " successfully deleted")
+      }).catch(error => {
+        console.log(error)
+      })
+  },
+
+  /**
+   * Deletes the current timer from the database
+   */
+  async aDeleteTimer({ state }) {
+    await timersCollection.doc(state.timerID).delete()
+      .then(() => {
+        console.log("Timer " + state.timerID + " successfully deleted")
+      }).catch(error => {
+        console.log(error)
+      })
   }
 }
 

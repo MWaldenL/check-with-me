@@ -44,8 +44,6 @@ export default {
   async created() {
     // Check if user is in game and disable links as needed
     const userID = firebase.auth().currentUser.uid
-      console.log('sidebarcreated')
-
     const roomID = await checkUserGame(userID)
     this.isInGame = roomID && this.$route.name === "PlayBoard"
   },
@@ -109,8 +107,6 @@ export default {
 
     async showLogout() {
       const userID = firebase.auth().currentUser.uid
-      console.log('showlogout')
-      
       const roomID = await checkUserGame(userID)
       
       // If coming from game room, show modal, else simply logout
@@ -131,16 +127,10 @@ export default {
           })
       } else {
         const userID = firebase.auth().currentUser.uid
-      console.log('logoutfromgame')
-
         const roomID = await checkUserGame(userID)
         const room = await getSingleGame(roomID)
-        const winnerFromLogout = 
-          room.host_user.id === userID ? 
-          room.other_user.id : 
-          room.host_user.id
-        
-        await this.setWinnerFromLogout(roomID, winnerFromLogout)
+
+        await this.setWinnerFromLogout(roomID, userID)
         
         // If host user logs out, delete the game, else simply remove the guest
         if (room.host_user.id === userID) {
@@ -155,13 +145,10 @@ export default {
     },
 
     async playCheck() {
-      console.log('playCheck')
       const gameID = await checkUserGame(firebase.auth().currentUser.uid)
-      console.log(gameID)
       if (gameID) {
         this.$router.push({ path: `/room/${gameID}` })
       } else {
-        console.log('ahu')
         this.$router.push({ name: 'GameLobby' })
       }
     },
@@ -169,7 +156,10 @@ export default {
     async setWinnerFromLogout(gameID, player) {
       await gamesCollection
         .doc(gameID)
-        .update({ winner_from_logout: player })
+        .update({ 
+          enemy_left: player, 
+          enemy_left_confirmed: true
+        })
     },
 
     checkRoute() {
@@ -177,7 +167,6 @@ export default {
     },
 
     logout() {
-      console.log("in logout")
       this.aClearGameState()
       firebase.auth().signOut()
         .then(() => {

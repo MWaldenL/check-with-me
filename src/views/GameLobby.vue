@@ -101,8 +101,6 @@ export default {
   },
   async created() {
     this.lastPageNum = getCount()
-    console.log('gamelobby created')
-
     const gameID = await checkUserGame(firebase.auth().currentUser.uid)
 
     if (gameID !== false)

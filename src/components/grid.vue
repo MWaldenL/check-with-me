@@ -177,6 +177,11 @@ export default {
     gamesCollection
       .doc(this.currentGame)
       .onSnapshot(async doc => {
+        // The listener will still be called even after the room has been deleted
+        if (!doc.exists) {
+          return 
+        }
+        
         const data = await doc.data()
         const boardState = data.board_state
         const draw = data.draw
@@ -229,78 +234,84 @@ export default {
               }
             }
           }
+
+          // Check for win
+          // Check for stuck states
+          let whiteStuck
+          let blackStuck
+
+          if (this.isSelfWhite) { 
+            whiteStuck = checkIfSelfStuck(this.board, true)
+            blackStuck = checkIfEnemyStuck(this.board, true)
+          } else {
+            whiteStuck = checkIfEnemyStuck(this.board, false)
+            blackStuck = checkIfSelfStuck(this.board, false)
+          }
+
+          // The player who has either their pieces stuck or no more pieces loses 
+          const bothStuck = whiteStuck && blackStuck
+          const whiteLost = whiteStuck || data.white_count === 0
+          const blackLost = blackStuck || data.black_count === 0
+          if (bothStuck) {
+            this.endGameWithWinner('D')
+            return
+          } else if (whiteLost) { 
+            this.endGameWithWinner('B')
+            return
+          } else if (blackLost) { 
+            this.endGameWithWinner('W')
+            return
+          }
+
+          // Check for player resignation
+          if (data.resign === "b") {
+            this.stopClocks()
+            this.prepareForRematchRequest()
+            this.updateSelfScore('W')
+            this.aSetWinner('WR')
+            this.aSetActiveGame(false)
+            return
+          } else if (data.resign === "w") {
+            this.stopClocks()
+            this.prepareForRematchRequest()
+            this.updateSelfScore('B')
+            this.aSetWinner('BR')
+            this.aSetActiveGame(false)
+            return
+          }
         } else {
+          const { 
+            rematch_accepted, 
+            rematch_requested,
+            rematch_time_selected, 
+            enemy_left, 
+            enemy_left_confirmed 
+          } = data
+        
           // Check for requests
-          this.checkRematchRequests(data.rematch_requested)
+          this.checkRematchRequests(rematch_requested)
 
           // Check is the rematch request was accepted
-          if (data.rematch_accepted) {
+          if (rematch_accepted) {
             this.handleAcceptRematch()
           }
 
           // Prepare to start game if new time has been selected already
-          if (data.rematch_time_selected && !this.isSelfHost) {
+          if (rematch_time_selected && !this.isSelfHost) {
             this.prepareToStartGame()
           }
 
           // Handle current user wanting to leave
-          if (data.enemy_left === auth.currentUser.uid) {
+          if (enemy_left === auth.currentUser.uid) {
             this.$bvModal.show('confirm-leave-modal')
-          } 
+          }
 
-          console.log('enemy left confirmed')
-          console.log(data.enemy_left_confirmed)
-
-          if (data.enemy_left_confirmed) {
+          // Send the currently present player to the lobby once the enemy has actually left
+          if (enemy_left_confirmed) {
             this.$bvModal.hide('confirm-leave-modal')
             this.$bvModal.show('lobby-modal')
           }
-        }
-
-        // Check for win
-        // Check for stuck states
-        let whiteStuck
-        let blackStuck
-
-        if (this.isSelfWhite) { 
-          whiteStuck = checkIfSelfStuck(this.board, true)
-          blackStuck = checkIfEnemyStuck(this.board, true)
-        } else {
-          whiteStuck = checkIfEnemyStuck(this.board, false)
-          blackStuck = checkIfSelfStuck(this.board, false)
-        }
-
-        // The player who has either their pieces stuck or no more pieces loses 
-        const bothStuck = whiteStuck && blackStuck
-        const whiteLost = whiteStuck || data.white_count === 0
-        const blackLost = blackStuck || data.black_count === 0
-        if (bothStuck) {
-          this.endGameWithWinner('D')
-          return
-        } else if (whiteLost) { 
-          this.endGameWithWinner('B')
-          return
-        } else if (blackLost) { 
-          this.endGameWithWinner('W')
-          return
-        }
-
-        // Check for player resignation
-        if (data.resign === "b") {
-          this.stopClocks()
-          this.prepareForRematchRequest()
-          this.updateSelfScore('W')
-          this.aSetWinner('WR')
-          this.aSetActiveGame(false)
-          return
-        } else if (data.resign === "w") {
-          this.stopClocks()
-          this.prepareForRematchRequest()
-          this.updateSelfScore('B')
-          this.aSetWinner('BR')
-          this.aSetActiveGame(false)
-          return
-        }
+        }        
       })
 
     // Listen for timer state changes
@@ -469,7 +480,9 @@ export default {
       'aSetCaptureRequired',
       'aFlushStateAfterTurn',
       'aSetActiveGame',
-      'aResetGame'
+      'aResetGame',
+      'aDeleteGame',
+      'aDeleteTimer'
     ]),
 
     async setSelfUsername() {
@@ -600,6 +613,16 @@ export default {
           rematch_time_selected: false
         })
     },
+
+    setWinnerFromLogout(gameData) {
+      // Once the enemy has confirmed to leave the game, 
+      // the game will end and the winner will be determined
+      const enemyLeft = gameData.enemy_left
+      if (enemyLeft !== 'none' && enemyLeft !== auth.currentUser.uid) {
+        const winnerColor = this.selfColor.toUpperCase()
+        this.endGameWithWinner(winnerColor)
+      } 
+    },
     
     /**
      * Draw methods
@@ -685,19 +708,6 @@ export default {
     resetDrawCounter() {
       this.drawCounter = 0
     },
-
-    setWinnerFromLogout(gameData) {
-      // Once the enemy has confirmed to leave the game, 
-      // the game will end and the winner will be determined
-      const enemyLeft = gameData.enemy_left
-      if (enemyLeft === auth.currentUser.uid) {
-        const winnerColor = this.selfColor.toUpperCase()
-        this.updateSelfScore(winnerColor)
-        this.aSetWinner(winnerColor)
-        this.aSetActiveGame(false)
-      } 
-    },
-
 
     /**
      * Turn methods

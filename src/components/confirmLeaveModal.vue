@@ -18,7 +18,7 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
+import { mapGetters, mapActions } from 'vuex'
 import { 
   gamesCollection,
   timersCollection
@@ -31,46 +31,22 @@ export default {
     })
   },
   methods: {
+    ...mapActions(['aDeleteGame', 'aDeleteTimer']),
+
     async handleConfirm () {
-
-
-
-
-       // TODO: Delete?
       await gamesCollection
         .doc(this.currentGame)
-        .delete()
-        .then(() => {
-          console.log("Game " + this.currentGame + " successfully deleted")
-        }).catch(error => {
-          console.log(error)
+        .update({
+          enemy_left_confirmed: true
         })
-
-      await timersCollection
-        .doc(this.currentTimer)
-        .delete()
-        .then(() => {
-          console.log("Timer " + this.currentTimer + " successfully deleted")
-        }).catch(error => {
-          console.log(error)
-        })
-
-
-
-      this.$router.push('/') // Might wanna push to lobby
-      await gamesCollection
-          .doc(this.currentGame)
-          .update({
-            enemy_left_confirmed: true
-          })
     },
 
     async handleNo () {
       await gamesCollection
-          .doc(this.currentGame)
-          .update({
-            enemy_left: "none"
-          })
+        .doc(this.currentGame)
+        .update({
+          enemy_left: "none"
+        })
       
       this.$bvModal.hide("confirm-leave-modal")
     }
