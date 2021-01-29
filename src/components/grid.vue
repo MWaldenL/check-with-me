@@ -189,6 +189,14 @@ export default {
         const playerIsWhite = this.selfColor === 'w'
         const playerIsBlack = this.selfColor === 'b'
 
+        console.log('active game data: ')
+        console.log(data)
+        this.bIsFirstRun = data.is_first_run
+        this.lastPlayerMoved = data.last_player_moved
+        this.drawOfferedBy = data.draw_offered_by
+        this.aUpdateBoard({ boardState, playerIsBlack })
+        this.aUpdateCount({ white: data.white_count, black: data.black_count })
+
         if (this.activeGame) {
           console.log('entering active game clause')
 
@@ -207,15 +215,6 @@ export default {
             this.endGameInDraw()
             return 
           }
-
-          // Update other important data
-          console.log('active game data: ')
-          console.log(data)
-          this.bIsFirstRun = data.is_first_run
-          this.lastPlayerMoved = data.last_player_moved
-          this.drawOfferedBy = data.draw_offered_by
-          this.aUpdateBoard({ boardState, playerIsBlack })
-          this.aUpdateCount({ white: data.white_count, black: data.black_count })
           
           // Listen for and handle draw offers
           this.handleDrawOffer(this.drawOfferedBy)
