@@ -32,11 +32,26 @@ router.beforeEach(async (to, from, next) => {
     console.log('guest to auth')
     next({ name: 'Login' })
   } else if (isComingFromGame) {
-    next({ name: 'PlayBoard' })
+    // next({ name: 'PlayBoard' })
+    handleGameExitAttempt(next)
   } else {
     next()
   }
 })
+
+const handleGameExitAttempt = (next) => {
+  // Check if the game is finished already 
+  // const game = await gamesCollection.doc(roomID).get()
+  // const { white_count, black_count, resign, draw } = game.data()
+  // const isGameFinished = 
+
+  console.log(store)
+  if (store.state.bActiveGame) {
+    next({ name: 'PlayBoard' })
+  } else {
+    next()
+  }
+}
 
 const handleGameEnterAttempt = async (roomID, next) => {
   // Check if the game exists in the first place

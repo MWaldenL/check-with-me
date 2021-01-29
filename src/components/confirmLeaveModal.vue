@@ -31,6 +31,7 @@ export default {
   },
   methods: {
     async handleConfirm () {
+      this.$router.push('/') // Might wanna push to lobby
       await gamesCollection
           .doc(this.currentGame)
           .update({

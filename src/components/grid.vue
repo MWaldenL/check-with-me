@@ -190,6 +190,7 @@ export default {
          */
         // Check if someone has logged out while in game
         if (enemyLeftConfirmed) {
+          console.log('enemy left confirmed regardless')
           this.setWinnerFromLogout(data)
           return
         }
@@ -333,9 +334,6 @@ export default {
         const remoteEnemyTime = this.isSelfHost ? data.other_timeLeft : data.host_timeLeft
 
         // If first run from rematch, set the timers
-        console.log('firebase baka')
-        console.log(this.bIsFirstRun)
-        console.log(data)
         if (this.bIsFirstRun) {
           this.selfSeconds = remoteSelfTime
           this.enemySeconds = remoteEnemyTime
