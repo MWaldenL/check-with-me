@@ -157,6 +157,9 @@ export default {
     // Set the last player moved from the timer document, since this is updated as well
     this.lastPlayerMoved = timer.data().last_player_moved
 
+    // Reset clocks
+    await this.resetClocks()
+
     // Set timer data
     // If player time is not running, fetch from db else fetch from server
     // Handles cases where a player opens their side of the game when their time is already running
@@ -943,6 +946,10 @@ export default {
         const enemyTimeQuery = await axios.get(`${this.SERVER_URL}/currentTimeLeft/${this.enemyPlayerType}`)
         this.enemySeconds = enemyTimeQuery.data.timeLeft
       }
+    },
+
+    async resetClocks() {
+      await axios.get(`${this.SERVER_URL}/resetClocks`)
     }
   }
 }

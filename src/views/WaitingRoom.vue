@@ -216,7 +216,7 @@ export default {
   async created() {
     const roomID = await this.$route.params.id
     this.roomID = roomID
-    this.roomLink = "https://check-with-me.web.app/" + roomID
+    this.roomLink = "https://check-with-me.web.app/#/room/" + roomID
     const room = await getSingleGame(roomID)
     this.room = room
 

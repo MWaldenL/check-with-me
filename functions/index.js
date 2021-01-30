@@ -126,8 +126,14 @@ app.get('/stopOtherTime', async (req, res) => {
  */
 app.get('/isTimeRunning/:player', (req, res) => {
   const { player } = req.params
-  //console.log('Current time running player: ' + currentTimeRunningPlayer)
   res.send({ isTimeRunning: player === currentTimeRunningPlayer })
+})
+
+
+app.get('/resetClocks', (req, res) => {
+  hostTimeLeft = 600
+  otherTimeLeft = 600
+  res.send('Resetting clocks')
 })
 
 app.listen(5000, () => console.log('Listening on port 5000'))

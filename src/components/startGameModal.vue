@@ -48,8 +48,13 @@ export default {
       this.aUpdateBoard({ boardState, playerIsBlack })
       await this.aSetHostTimeLeft()
       await this.aSetOtherTimeLeft()
+      await this.resetClocks()
       this.$emit('resetTimers')
       this.$bvModal.hide('start-game-modal')
+    },
+
+    async resetClocks() {
+      await axios.get(`${this.SERVER_URL}/resetClocks`)
     }
   }
 }
