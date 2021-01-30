@@ -17,15 +17,24 @@
 
 <script>
 import { mapActions, mapGetters } from 'vuex'
+import axios from 'axios'
 import { gamesCollection } from '@/firebase'
 export default {
   name: 'StartGameModal',
+  data() {
+    return {
+      SERVER_URL: 'https://us-central1-check-with-me.cloudfunctions.net/clock'
+    }
+  },
+
   computed: {
     ...mapGetters({
-      enemyUsername: "getEnemyUsername",
-      currentGame: "getCurrentGame"
+      enemyUsername: 'getEnemyUsername',
+      currentGame: 'getCurrentGame',
+      hostTimeLeft: 'getHostTimeLeft'
     })
   },
+
   methods: {
     ...mapActions([
       "aResetGame",
@@ -45,13 +54,16 @@ export default {
 
       this.aResetGame() // Resets the board
       this.aSetHostIsWhite(isHostWhite)
-      //////// TODO: sdfasdfasldfjasjdflkj
       this.aUpdateBoard({ boardState, playerIsBlack })
+      await this.aSetHostTimeLeft()
+      await this.aSetOtherTimeLeft()
+      await this.resetClocks()
+      this.$emit('resetTimers')
       this.$bvModal.hide('start-game-modal')
+    },
 
-
-      // this.aSetHostTimeLeft() TODO: suspicious
-      // this.aSetOtherTimeLeft()
+    async resetClocks() {
+      await axios.get(`${this.SERVER_URL}/resetClocks/${this.hostTimeLeft}`)
     }
   }
 }

@@ -1,15 +1,14 @@
 <template>
 <div>
   <h1 class="overlay-text" id="win-resign-message"> {{ winnerResignMessage }} </h1>
+  <h1 class="overlay-text" id="win-logout-message"> {{ winnerLogoutMessage }} </h1>
   <h1 class="overlay-text" id="win-message"> {{ winnerMessage }} </h1>
-  <b-button @click="requestRematch" class="overlay-text overlay-button" id="request-rematch">New Game</b-button>
-  <b-button @click="returnToLobby" class="overlay-text overlay-button" id="return-to-lobby">Return to Lobby</b-button>
-
-  <!-- <h5 class="overlay-text mt-5">these are for testing only, remove upon deployment</h5>
-  <b-button @click="startNewReg" class="overlay-text overlay-button" variant="success">Start new regular game</b-button>
-  <b-button @click="startNewWin" class="overlay-text overlay-button" variant="info">Start new winning game</b-button>
-  <b-button @click="startNewWinWhiteStuck" class="overlay-text overlay-button" variant="info">Start new winning game with white stuck</b-button>
-  <b-button @click="resetUserPoints" class="overlay-text overlay-button" variant="danger">Reset user points</b-button> -->
+  <b-button @click="requestRematch" class="overlay-text overlay-button" id="request-rematch" v-if="!didEnemyLogout">
+    New Game
+  </b-button>
+  <b-button @click="returnToLobby" class="overlay-text overlay-button" id="return-to-lobby">
+    Return to Lobby
+  </b-button>
 </div>
 </template>
 
@@ -22,6 +21,7 @@ import {
 
 export default {
   name: 'ResultOverlay',
+  props: ['didEnemyLogout'],
   computed: {
     ...mapGetters({
       winner: 'getWinner',
@@ -49,6 +49,14 @@ export default {
         return ''
     },
 
+    winnerLogoutMessage() {
+      if (this.didEnemyLogout) {
+        return this.winner === 'B' ? 
+          'White has logged out from the game!' : 
+          'Black has logged out from the game!'
+      }
+    },
+
     isSelfHost() {
       return auth.currentUser.uid === this.hostUserID
     }
@@ -57,10 +65,12 @@ export default {
     ...mapActions([
       'aSetActiveGame', 
       'aResetGame',
-      'aSetWinner'
+      'aSetWinner',
+      'aDeleteGame',
+      'aDeleteTimer'
     ]),
 
-    async requestRematch () {
+    async requestRematch() {
       const gameDoc = await gamesCollection.doc(this.currentGame).get()
       const bRematchIsRequested = gameDoc.data().rematch_requested !== "none"
       const rematchRequestedBy = this.isSelfHost ? "host" : "other"
@@ -85,48 +95,24 @@ export default {
         })
     },
 
-    async startNewWin () {
-      this.aSetActiveGame(true)
-      this.aSetWinner('N')
-      
-      await gamesCollection
+    async returnToLobby() {
+      if (this.didEnemyLogout) { // Coming from enemy premature logout
+        await this.aDeleteGame()
+        await this.aDeleteTimer()
+        this.$router.push('/')
+      } else { // Coming from the end of the game
+        const gameDoc = await gamesCollection.doc(this.currentGame).get()
+        const enemyLeft = gameDoc.data().enemy_left !== "none" || gameDoc.data().enemy_left_confirmed
+
+        if (enemyLeft) {
+          return
+        } else {
+          await gamesCollection
             .doc(this.currentGame)
             .update({
-              board_state: "[FEN \"X:W46:B55,58\"]",
-              black_count: 2,
-              white_count: 1,
-              last_player_moved: "LLyi0mw1IuaFX1AZeCYP0NcWdL83",
-              resign: "none"
+              enemy_left: auth.currentUser.uid
             })
-    },
-
-    async startNewWinWhiteStuck () {
-      this.aSetActiveGame(true)
-      this.aSetWinner('N')
-      
-      await gamesCollection
-            .doc(this.currentGame)
-            .update({
-              board_state: "[FEN \"X:W32,26:B64,62,60,55,46,42,39,37,K30\"]",
-              black_count: 9,
-              white_count: 2,
-              last_player_moved: "LLyi0mw1IuaFX1AZeCYP0NcWdL83",
-              resign: "none"
-            })
-    },
-
-    async returnToLobby () {
-      const gameDoc = await gamesCollection.doc(this.currentGame).get()
-      const enemyLeft = gameDoc.data().enemy_left !== "none" || gameDoc.data().enemy_left_confirmed
-
-      if (enemyLeft) {
-        return
-      } else {
-        await gamesCollection
-          .doc(this.currentGame)
-          .update({
-            enemy_left: auth.currentUser.uid
-          })
+        }
       }
     }
   }
@@ -149,6 +135,10 @@ export default {
   margin-bottom: 25px;
 }
 #win-resign-message {
+  font-size: 32px;
+  text-decoration: underline;
+}
+#win-logout-message {
   font-size: 32px;
   text-decoration: underline;
 }

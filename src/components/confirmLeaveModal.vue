@@ -18,9 +18,10 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
+import { mapGetters, mapActions } from 'vuex'
 import { 
   gamesCollection,
+  timersCollection
 } from '@/firebase'
 export default {
   name: 'ConfirmLeaveModal',
@@ -30,20 +31,22 @@ export default {
     })
   },
   methods: {
+    ...mapActions(['aDeleteGame', 'aDeleteTimer']),
+
     async handleConfirm () {
       await gamesCollection
-          .doc(this.currentGame)
-          .update({
-            enemy_left_confirmed: true
-          })
+        .doc(this.currentGame)
+        .update({
+          enemy_left_confirmed: true
+        })
     },
 
     async handleNo () {
       await gamesCollection
-          .doc(this.currentGame)
-          .update({
-            enemy_left: "none"
-          })
+        .doc(this.currentGame)
+        .update({
+          enemy_left: "none"
+        })
       
       this.$bvModal.hide("confirm-leave-modal")
     }

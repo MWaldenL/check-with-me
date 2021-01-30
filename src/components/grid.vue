@@ -1,17 +1,24 @@
 <template>
   <div id="box">
-    <Sidebar />
+    <Sidebar 
+      :selfColor="selfColor"
+      :finishedUpdatingScore="finishedUpdatingScore"
+      @logoutFromGame="updateSelfScore" />
 
     <!-- Opponent -->
     <div id="p1-details" class="details">
-      <h1> 
-        {{ enemyUsername }} 
-        <keep-alive>
-          <span class="time text-white" id="enemyTime">
-            {{ enemySeconds | minutes | formattedTime }}:{{ enemySeconds | seconds | formattedTime }}
-          </span>
-        </keep-alive>
-      </h1> 
+      <div class="d-flex">
+        <h1> 
+          {{ enemyUsername }} 
+          <keep-alive>
+            <span class="time text-white" id="enemyTime">
+              {{ enemySeconds | minutes | formattedTime }}:{{ enemySeconds | seconds | formattedTime }}
+            </span>
+          </keep-alive>
+        </h1>
+        <img src="../../public/assets/to-move.png" id="turn-icon-enemy" class="ml-5 turn-icon" v-show="!canMakeMove" />
+      </div>
+
       <h1 id="p1-count" class="pt-3"> Pieces left: {{ otherCount }} </h1>
     </div>
 
@@ -33,21 +40,24 @@
         </table>
       </div>
       <template #overlay>
-        <ResultOverlay />
+        <ResultOverlay :didEnemyLogout="didEnemyLogout" />
       </template>
     </b-overlay>
     
     <!-- Self -->
     <div id="p2-details" class="details">
       <h1 id="p2-count" class="pb-4"> Pieces left: {{ selfCount }} </h1>
-      <h1>
-        <keep-alive>
-          <span class="time text-white" id="selfTime">
-            {{ selfSeconds | minutes | formattedTime }}:{{ selfSeconds | seconds | formattedTime }}
-          </span>
-        </keep-alive>
-        {{ selfName }}
-      </h1>
+      <div class="d-flex justify-content-end">
+        <h1>
+          <img src="../../public/assets/to-move.png" id="turn-icon-self" class="mr-5 turn-icon" v-show="canMakeMove" />
+          <keep-alive>
+            <span class="time text-white" id="selfTime">
+              {{ selfSeconds | minutes | formattedTime }}:{{ selfSeconds | seconds | formattedTime }}
+            </span>
+          </keep-alive>
+          {{ selfName }}
+        </h1>
+      </div>
     </div>
     
     <!-- Buttons -->
@@ -70,9 +80,9 @@
     <ResignModal />
     <RematchRequesteeModal />
     <RematchRequestorModal />
-    <ChooseNewTimeModal />
+    <ChooseNewTimeModal @resetTimers="resetTimers" />
     <WaitForTimeModal />
-    <StartGameModal />
+    <StartGameModal @resetTimers="resetTimers" />
     <ConfirmLeaveModal />
     <LobbyModal />
   </div>
@@ -134,6 +144,9 @@ export default {
     // Set the game data
     this.currentGameData = gameData
 
+    // Set active game
+    this.aSetActiveGame(true)
+
     // Check if someone has won from a logout
     // The player present in the room will receive a modal, and
     // the player who logged out will know from their score that they lost
@@ -150,11 +163,16 @@ export default {
     // Set the last player moved from the timer document, since this is updated as well
     this.lastPlayerMoved = timer.data().last_player_moved
 
+    // Reset clocks
+    await this.resetClocks()
+
     // Set timer data
     // If player time is not running, fetch from db else fetch from server
     // Handles cases where a player opens their side of the game when their time is already running
-    await this.setSelfTimeFromServerOrDB()
-    await this.setEnemyTimeFromServerOrDB()
+    // await this.setSelfTimeFromServerOrDB()
+    // await this.setEnemyTimeFromServerOrDB()
+    await this.setSelfTimeFromDB()
+    await this.setEnemyTimeFromDB()
 
     // Set usernames
     await this.setSelfUsername()
@@ -174,154 +192,154 @@ export default {
     const timerID = game.timer_id.id
 
     // Listen for board state changes
-    gamesCollection
-      // .doc(gameID) // Obtain from state in the future when rooms are implemented
-      .doc(this.currentGame) // TODO: Try try try 
+    const gameUnsubscribe = gamesCollection
+      .doc(this.currentGame)
       .onSnapshot(async doc => {
+        // The listener will still be called even after the room has been deleted
+        if (!doc.exists) {
+          return 
+        }
+        
         const data = await doc.data()
         const boardState = data.board_state
         const draw = data.draw
-        const enemyLeftConfirmed = data.enemy_left_confirmed
+        const winnerFromLogout = data.winner_from_logout
         const playerIsWhite = this.selfColor === 'w'
         const playerIsBlack = this.selfColor === 'b'
 
-        /**
-         * Early returns
-         */
-        // Check if someone has logged out while in game
-        if (enemyLeftConfirmed) {
-          this.setWinnerFromLogout(data)
-          return
-        }
-
-        // Check if the game has ended in a draw
-        if (draw) {
-          this.endGameInDraw()
-          return 
-        }
-
-        /**
-         * Normal situations
-         */
-        // Update the last player moved and the position
         this.bIsFirstRun = data.is_first_run
         this.lastPlayerMoved = data.last_player_moved
         this.drawOfferedBy = data.draw_offered_by
-        this.aUpdateBoard({ 
-          boardState, 
-          playerIsBlack 
-        })
-        this.aUpdateCount({ 
-          white: data.white_count, 
-          black: data.black_count
-        })
+        this.aUpdateBoard({ boardState, playerIsBlack })
+        this.aUpdateCount({ white: data.white_count, black: data.black_count })
 
-        // Check for rematch 
-        if (!this.activeGame) {
+        if (this.activeGame) {
+          console.log('entering active game clause')
+
+          // Check if someone has logged out while in game
+          if (winnerFromLogout) {
+            this.setWinnerFromLogout(data)
+
+            if (!this.isSelfHost) { // For the other player to show the modified overlay
+              this.didEnemyLogout = true
+            }
+            return
+          }
+
+          // Check if the game has ended in a draw
+          if (draw) {
+            this.endGameInDraw()
+            return 
+          }
+          
+          // Listen for and handle draw offers
+          this.handleDrawOffer(this.drawOfferedBy)
+
+          // Highlight all possible captures when player is not in a capture sequence
+          if (this.lastPlayerMoved === auth.currentUser.uid) {
+            this.aFlushStateAfterTurn()
+          } else {
+            if (!this.isCapturing) {
+              this.aHighlightBoardCaptures(playerIsWhite)
+            } else {  
+              // Highlight the available captures from the current sequence
+              if (this.prevDestSquare) {
+                this.aHighlightCaptureFromSequence({ 
+                  coords: this.prevDestSquare, 
+                  playerIsWhite 
+                })
+
+                // Once a capture sequence has finished, end the player's turn
+                if (!this.isCapturing) {
+                  await this.endPlayerTurn()
+                }
+              }
+            }
+          }
+
+          // Check for win
+          // Check for stuck states
+          let whiteStuck
+          let blackStuck
+
+          if (this.isSelfWhite) { 
+            whiteStuck = checkIfSelfStuck(this.board, true)
+            blackStuck = checkIfEnemyStuck(this.board, true)
+          } else {
+            whiteStuck = checkIfEnemyStuck(this.board, false)
+            blackStuck = checkIfSelfStuck(this.board, false)
+          }
+
+          // The player who has either their pieces stuck or no more pieces loses 
+          const bothStuck = whiteStuck && blackStuck
+          const whiteLost = whiteStuck || data.white_count === 0
+          const blackLost = blackStuck || data.black_count === 0
+          if (bothStuck) {
+            this.endGameWithWinner('D')
+            return
+          } else if (whiteLost) { 
+            this.endGameWithWinner('B')
+            return
+          } else if (blackLost) { 
+            this.endGameWithWinner('W')
+            return
+          }
+
+          // Check for player resignation
+          if (data.resign === "b") {
+            this.stopClocks()
+            this.prepareForRematchRequest()
+            this.updateSelfScore({ winner: 'W', isLoggingOut: false })
+            this.aSetWinner('WR')
+            this.aSetActiveGame(false)
+            return
+          } else if (data.resign === "w") {
+            this.stopClocks()
+            this.prepareForRematchRequest()
+            this.updateSelfScore({ winner: 'B', isLoggingOut: false })
+            this.aSetWinner('BR')
+            this.aSetActiveGame(false)
+            return
+          }
+        } else {
+          const { 
+            rematch_accepted, 
+            rematch_requested,
+            rematch_time_selected, 
+            enemy_left, 
+            enemy_left_confirmed
+          } = data
+
+          // Check if the enemy has logged out
+          const winnerFromLogout = data.winner_from_logout
+          if (winnerFromLogout) {
+            this.didEnemyLogout = true
+          }
+
           // Check for requests
-          this.checkRematchRequests(data.rematch_requested)
+          this.checkRematchRequests(rematch_requested)
 
           // Check is the rematch request was accepted
-          if (data.rematch_accepted) {
+          if (rematch_accepted) {
             this.handleAcceptRematch()
           }
 
           // Prepare to start game if new time has been selected already
-          if (data.rematch_time_selected && !this.isSelfHost) {
+          if (rematch_time_selected && !this.isSelfHost) {
             this.prepareToStartGame()
           }
 
           // Handle current user wanting to leave
-          if (data.enemy_left === auth.currentUser.uid) {
+          if (enemy_left === auth.currentUser.uid) {
             this.$bvModal.show('confirm-leave-modal')
-          } 
+          }
 
-          if (data.enemy_left_confirmed) {
+          // Send the currently present player to the lobby once the enemy has actually left
+          if (enemy_left_confirmed) {
             this.$bvModal.hide('confirm-leave-modal')
             this.$bvModal.show('lobby-modal')
           }
-        }
-
-        // Listen for and handle draw offers
-        this.handleDrawOffer(this.drawOfferedBy)
-
-        // Check for win
-        // Check for stuck states
-        let whiteStuck
-        let blackStuck
-
-        if (this.isSelfWhite) { 
-          whiteStuck = checkIfSelfStuck(this.board, true)
-          blackStuck = checkIfEnemyStuck(this.board, true)
-        } else {
-          whiteStuck = checkIfEnemyStuck(this.board, false)
-          blackStuck = checkIfSelfStuck(this.board, false)
-        }
-        
-        const bothStuck = whiteStuck && blackStuck
-        const whiteLost = whiteStuck || data.white_count === 0
-        const blackLost = blackStuck || data.black_count === 0
-        if (bothStuck) { // if both players are stuck, call a draw
-          this.stopClocks()
-          this.prepareForRematchRequest()
-          this.updateSelfScore('D')
-          this.aSetWinner('D')
-          this.aSetActiveGame(false)
-          return
-        } else if (whiteLost) { // if only white is stuck or white has no more pieces, black wins
-          this.stopClocks()
-          this.prepareForRematchRequest()
-          this.updateSelfScore('B')
-          this.aSetWinner('B')
-          this.aSetActiveGame(false)
-          return
-        } else if (blackLost) { // if only black is stuck or black has no more pieces, white wins
-          this.stopClocks()
-          this.prepareForRematchRequest()
-          this.updateSelfScore('W')
-          this.aSetWinner('W')
-          this.aSetActiveGame(false)
-          return
-        }
-
-        // Check for player resignation
-        if (data.resign === "b") {
-          this.stopClocks()
-          this.prepareForRematchRequest()
-          this.updateSelfScore('W')
-          this.aSetWinner('WR')
-          this.aSetActiveGame(false)
-          return
-        } else if (data.resign === "w") {
-          this.stopClocks()
-          this.prepareForRematchRequest()
-          this.updateSelfScore('B')
-          this.aSetWinner('BR')
-          this.aSetActiveGame(false)
-          return
-        }
-
-        // Highlight all possible captures when player is not in a capture sequence
-        if (this.lastPlayerMoved !== auth.currentUser.uid) {
-          if (!this.isCapturing) {
-            this.aHighlightBoardCaptures(playerIsWhite)
-          } else {  
-            // Highlight the available captures from the current sequence
-            if (this.prevDestSquare) {
-              this.aHighlightCaptureFromSequence({ 
-                coords: this.prevDestSquare, 
-                playerIsWhite 
-              })
-
-              // Once a capture sequence has finished, end the player's turn
-              if (!this.isCapturing) {
-                await this.endPlayerTurn()
-              }
-            }
-          }
-        } else {
-          this.aFlushStateAfterTurn()
-        }
+        }        
       })
 
     // Listen for timer state changes
@@ -333,9 +351,6 @@ export default {
         const remoteEnemyTime = this.isSelfHost ? data.other_timeLeft : data.host_timeLeft
 
         // If first run from rematch, set the timers
-        console.log('firebase baka')
-        console.log(this.bIsFirstRun)
-        console.log(data)
         if (this.bIsFirstRun) {
           this.selfSeconds = remoteSelfTime
           this.enemySeconds = remoteEnemyTime
@@ -386,7 +401,10 @@ export default {
       isCountingMovesForDraw: false,
       drawCounter: 0,
       drawOfferedBy: '',
-      burdenedColor: ''
+      burdenedColor: '',
+
+      didEnemyLogout: false,
+      finishedUpdatingScore: false
     }
   },
 
@@ -396,7 +414,6 @@ export default {
       whiteCount: 'getWhiteCount',
       blackCount: 'getBlackCount',
       currentUser: 'getCurrentUser',
-      currentGameID: 'getCurrentGame',
       hostUserID: 'getHostUser',
       otherUserID: 'getOtherUser',
       enemyUsername: 'getEnemyUsername',
@@ -493,7 +510,9 @@ export default {
       'aSetCaptureRequired',
       'aFlushStateAfterTurn',
       'aSetActiveGame',
-      'aResetGame'
+      'aResetGame',
+      'aDeleteGame',
+      'aDeleteTimer'
     ]),
 
     async setSelfUsername() {
@@ -535,22 +554,27 @@ export default {
       this.$bvModal.show('start-game-modal')
     },
 
+    resetTimers() { // When coming from a rematch 
+      console.log('resetting timers')
+      this.selfSeconds = this.hostTimeLeft
+      this.enemySeconds = this.otherTimeLeft
+    },
+
     /**
      * Post-game methods
      */  
     async endGameWithWinner(winner) {
-      this.updateSelfScore(winner)
+      this.stopClocks()
+      this.prepareForRematchRequest()
+      this.updateSelfScore({ winner, isLoggingOut: false })
       this.aSetWinner(winner)
       this.aSetActiveGame(false)
     },
 
-    async updateSelfScore(winner) {
+    async updateSelfScore({ winner, isLoggingOut }) {
       // gets user documents for current player and opponent
-      console.log(auth.currentUser)
       const selfDoc = usersCollection.doc(auth.currentUser.uid)
       const otherDoc = this.isSelfHost ? usersCollection.doc(this.otherUserID) : usersCollection.doc(this.hostUserID)
-      console.log(otherDoc)
-
       const self = await selfDoc.get()
       const other = await otherDoc.get()
 
@@ -594,6 +618,7 @@ export default {
       }
 
       // Update self user document with new values
+      console.log('befoer update')
       await usersCollection
         .doc(auth.currentUser.uid)
         .update({
@@ -605,6 +630,13 @@ export default {
           draw_black: selfDrawBlack,
           draw_white: selfDrawWhite,
         })
+
+      // Update the score when user attempts to log out 
+      if (isLoggingOut) {
+        this.finishedUpdatingScore = true
+      }
+      console.log('after update')
+      
     },
 
     async checkIfWonOnTime() {
@@ -622,6 +654,16 @@ export default {
           rematch_time_selected: false
         })
     },
+
+    setWinnerFromLogout(gameData) {
+      // Once the enemy has confirmed to leave the game, 
+      // the game will end and the winner will be determined
+      const winnerFromLogout = gameData.winner_from_logout
+      if (winnerFromLogout === auth.currentUser.uid) {
+        const winnerColor = this.selfColor.toUpperCase()
+        this.endGameWithWinner(winnerColor)
+      } 
+    },  
     
     /**
      * Draw methods
@@ -706,40 +748,6 @@ export default {
 
     resetDrawCounter() {
       this.drawCounter = 0
-    },
-
-    setWinnerFromLogout(gameData) {
-      // Once the enemy has confirmed to leave the game, 
-      // the game will end and the winner will be determined
-      const enemyLeftConfirmed = gameData.enemy_left_confirmed
-      if (enemyLeftConfirmed === auth.currentUser.uid) {
-        const winnerColor = this.selfColor.toUpperCase()
-        this.updateSelfScore(winnerColor)
-        this.aSetWinner(winnerColor)
-        this.aSetActiveGame(false)
-      } 
-    },
-
-    async determineClockToRun() {
-      // Stop clients and start server clocks
-      if (this.lastPlayerMoved !== auth.currentUser.uid) { // opponent last move
-        this.stopEnemyClientTime()
-        this.startSelfClientTime()
-        await this.startSelfServerTime() // switch back if bad
-        await this.stopEnemyServerTime()
-      } else { // self made last move
-        this.stopSelfClientTime()
-        this.startEnemyClientTime()
-        await this.startEnemyServerTime() // switch back if bad
-        await this.stopSelfServerTime()
-      }
-    },
-
-    async writeUpdatedTimeToDB() {
-      const newTimeObj = this.isSelfHost ? 
-        { host_timeLeft: this.selfSeconds } : 
-        { other_timeLeft: this.selfSeconds } 
-      await this.currentTimerDoc.update(newTimeObj)   
     },
 
     /**
@@ -897,6 +905,44 @@ export default {
       }
     },
 
+    /**
+     * General Timer Methods
+     */
+    async determineClockToRun() {
+      // Stop clients and start server clocks
+      if (this.lastPlayerMoved !== auth.currentUser.uid) { // opponent last move
+        this.stopEnemyClientTime()
+        this.startSelfClientTime()
+        await this.startSelfServerTime() // switch back if bad
+        await this.stopEnemyServerTime()
+      } else { // self made last move
+        this.stopSelfClientTime()
+        this.startEnemyClientTime()
+        await this.startEnemyServerTime() // switch back if bad
+        await this.stopSelfServerTime()
+      }
+    },
+
+    async writeUpdatedTimeToDB() {
+      const newTimeObj = this.isSelfHost ? 
+        { host_timeLeft: this.selfSeconds } : 
+        { other_timeLeft: this.selfSeconds } 
+      await this.currentTimerDoc.update(newTimeObj)   
+    },
+
+    async setSelfTimeFromDB() {
+      const timerDB = await this.currentTimerDoc.get()
+      this.selfSeconds = this.isSelfHost ? 
+          timerDB.data().host_timeLeft : 
+          timerDB.data().other_timeLeft
+    },  
+
+    async setEnemyTimeFromDB() {
+      const timerDB = await this.currentTimerDoc.get()
+      this.enemySeconds = this.isSelfHost ? 
+        timerDB.data().other_timeLeft :        
+        timerDB.data().host_timeLeft 
+    },
 
     async setSelfTimeFromServerOrDB() {
       const timeRunningQuery = await axios.get(`${this.SERVER_URL}/isTimeRunning/${this.selfPlayerType}`)
@@ -928,6 +974,11 @@ export default {
         const enemyTimeQuery = await axios.get(`${this.SERVER_URL}/currentTimeLeft/${this.enemyPlayerType}`)
         this.enemySeconds = enemyTimeQuery.data.timeLeft
       }
+    },
+
+    async resetClocks() {
+      console.log('resetting clocks')
+      await axios.get(`${this.SERVER_URL}/resetClocks/${this.selfSeconds}`)
     }
   }
 }
@@ -958,6 +1009,9 @@ div#table {
 table {
   margin: 0;
   padding: 0;
+}
+.turn-icon {
+  height: 45px
 }
 #p1-details {
   text-align: left;
@@ -999,8 +1053,20 @@ table {
 
   position: absolute;
   right: 3vw;
+  bottom: 60vh;
+}
+
+#resign {
+  font-family: 'Roboto', Helvetica, Arial, sans-serif;
+  font-weight: 100;
+  font-size: 20px;
+  padding: 10px 40px;
+
+  position: absolute;
+  right: 3vw;
   bottom: 40vh;
 }
+
 #box {
   position: relative;
   margin-top: 10px;

@@ -4,7 +4,7 @@ import { db } from '@/firebase'
 class WinRateLeader {
   constructor (username, loss_white, loss_black, wins_white, wins_black, draw_white, draw_black, points) {
       this.username = username
-      this.win_rate = (wins_white + wins_black) / (wins_white + wins_black + loss_white + loss_black + draw_white + draw_black)
+      this.win_rate = (wins_white + wins_black) / (wins_white + wins_black + loss_white + loss_black)
       this.points = points
   }
   toString() {
@@ -64,7 +64,7 @@ export default {
         let leader = {
           rank: index + 1,
           username: doc.data().username,
-          points: doc.data().points
+          points: (doc.data().points).toFixed(2)
         }
         leaders.push(leader)
       })

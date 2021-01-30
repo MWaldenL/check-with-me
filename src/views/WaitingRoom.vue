@@ -216,7 +216,7 @@ export default {
   async created() {
     const roomID = await this.$route.params.id
     this.roomID = roomID
-    this.roomLink = "http://localhost:8080/#/room/" + roomID
+    this.roomLink = "https://check-with-me.web.app/#/room/" + roomID
     const room = await getSingleGame(roomID)
     this.room = room
 
@@ -245,11 +245,15 @@ export default {
 
     async destroyRoom() {
       await deleteGame(this.roomID)
+      this.gameUnsubscribe()
+      this.timeUnsubscribe()
       this.$router.push({ path: '/'})
     },
 
     async leaveRoom() {
       await removeGuest(this.roomID)
+      this.gameUnsubscribe()
+      this.timeUnsubscribe()
       this.$router.push({ path: '/'})
     },
 
@@ -305,34 +309,33 @@ export default {
     const timerID = game.timer_id.id
 
     this.gameUnsubscribe = gamesCollection
-    .doc(roomID)
-    .onSnapshot(async doc => {
-      const gameStartedFirstTime = 
-        this.isOwner === 0 && 
-        doc.data().game_started &&
-        doc.data().is_first_run
+      .doc(roomID)
+      .onSnapshot(async doc => {
+        if (doc.exists) {
+          const gameStartedFirstTime = 
+            this.isOwner === 0 && 
+            doc.data().game_started && 
+            doc.data().is_first_run
 
-      console.log(doc.data().is_first_run)
-
-      if (doc.exists) {
-        if (this.isOwner == 0 && doc.data().other_user.id === "nil"){
-          this.$router.push({ path: '/'})
-        } else if (gameStartedFirstTime) { // Route to the game proper when the other player has started 
-          await this.aInitGame(roomID)
-          this.$router.push({ path: `/play/${ roomID }`})
-          this.gameUnsubscribe()  // Make sure to unsubscribe the listener
+          if (this.isOwner == 0 && doc.data().other_user.id === "nil"){
+            this.$router.push({ path: '/'})
+          } else if (gameStartedFirstTime) { // Route to the game proper when the other player has started 
+            await this.aInitGame(roomID)
+            this.$router.push({ path: `/play/${ roomID }`})
+            this.gameUnsubscribe()  // Prevent rerouting to the same path every time
+          } else {
+            const guest = await getSingleUser(doc.data().other_user.id)
+            this.guest = guest
+          }
         } else {
-          const guest = await getSingleUser(doc.data().other_user.id)
-          this.guest = guest
+          if (this.isOwner == 0) {
+            this.isKicked = true
+          } else {
+            console.log('doc no exist')
+            // this.$router.push({ path: '/'})
+          }
         }
-      } else {
-        if (this.isOwner == 0) {
-          this.isKicked = true
-        } else {
-          this.$router.push({ path: '/'})
-        }
-      }
-    })
+      })
 
     this.timeUnsubscribe = timersCollection
       .doc(timerID)
