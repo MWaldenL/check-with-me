@@ -245,11 +245,15 @@ export default {
 
     async destroyRoom() {
       await deleteGame(this.roomID)
+      this.gameUnsubscribe()
+      this.timeUnsubscribe()
       this.$router.push({ path: '/'})
     },
 
     async leaveRoom() {
       await removeGuest(this.roomID)
+      this.gameUnsubscribe()
+      this.timeUnsubscribe()
       this.$router.push({ path: '/'})
     },
 
