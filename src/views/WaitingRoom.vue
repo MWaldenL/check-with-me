@@ -328,7 +328,7 @@ export default {
             this.isKicked = true
           } else {
             console.log('doc no exist')
-            this.$router.push({ path: '/'})
+            // this.$router.push({ path: '/'})
           }
         }
       })

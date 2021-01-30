@@ -1,6 +1,9 @@
 <template>
   <div id="box">
-    <Sidebar />
+    <Sidebar 
+      :selfColor="selfColor"
+      :finishedUpdatingScore="finishedUpdatingScore"
+      @logoutFromGame="updateSelfScore" />
 
     <!-- Opponent -->
     <div id="p1-details" class="details">
@@ -189,7 +192,7 @@ export default {
     const timerID = game.timer_id.id
 
     // Listen for board state changes
-    gamesCollection
+    const gameUnsubscribe = gamesCollection
       .doc(this.currentGame)
       .onSnapshot(async doc => {
         // The listener will still be called even after the room has been deleted
@@ -286,14 +289,14 @@ export default {
           if (data.resign === "b") {
             this.stopClocks()
             this.prepareForRematchRequest()
-            this.updateSelfScore('W')
+            this.updateSelfScore({ winner: 'W', isLoggingOut: false })
             this.aSetWinner('WR')
             this.aSetActiveGame(false)
             return
           } else if (data.resign === "w") {
             this.stopClocks()
             this.prepareForRematchRequest()
-            this.updateSelfScore('B')
+            this.updateSelfScore({ winner: 'B', isLoggingOut: false })
             this.aSetWinner('BR')
             this.aSetActiveGame(false)
             return
@@ -400,31 +403,10 @@ export default {
       drawOfferedBy: '',
       burdenedColor: '',
 
-      didEnemyLogout: false 
+      didEnemyLogout: false,
+      finishedUpdatingScore: false
     }
   },
-
-  // persist: [
-  //   'currentGameDoc',
-  //   'currentGameData',
-  //   'currentTimerDoc',
-  //   'currentRunningTimer',
-  //   'playerToMove',
-  //   'lastPlayerMoved',
-  //   // 'selfSeconds',      
-  //   // 'enemySeconds',
-  //   'isSelfTimeRunning',
-  //   'isEnemyTimeRunning',
-  //   'bIsFirstRun',
-  //   'prevSourceSquare',
-  //   'showingDrawModal',
-  //   'isLastMoveCapture',
-  //   'isCountingMovesForDraw',
-  //   'drawCounter',
-  //   'drawOfferedBy',
-  //   'burdenedColor',
-  //   'didEnemyLogout'
-  // ],
 
   computed: {
     ...mapGetters({
@@ -584,18 +566,15 @@ export default {
     async endGameWithWinner(winner) {
       this.stopClocks()
       this.prepareForRematchRequest()
-      this.updateSelfScore(winner)
+      this.updateSelfScore({ winner, isLoggingOut: false })
       this.aSetWinner(winner)
       this.aSetActiveGame(false)
     },
 
-    async updateSelfScore(winner) {
+    async updateSelfScore({ winner, isLoggingOut }) {
       // gets user documents for current player and opponent
-      console.log(auth.currentUser)
       const selfDoc = usersCollection.doc(auth.currentUser.uid)
       const otherDoc = this.isSelfHost ? usersCollection.doc(this.otherUserID) : usersCollection.doc(this.hostUserID)
-      console.log(otherDoc)
-
       const self = await selfDoc.get()
       const other = await otherDoc.get()
 
@@ -639,6 +618,7 @@ export default {
       }
 
       // Update self user document with new values
+      console.log('befoer update')
       await usersCollection
         .doc(auth.currentUser.uid)
         .update({
@@ -650,6 +630,13 @@ export default {
           draw_black: selfDrawBlack,
           draw_white: selfDrawWhite,
         })
+
+      // Update the score when user attempts to log out 
+      if (isLoggingOut) {
+        this.finishedUpdatingScore = true
+      }
+      console.log('after update')
+      
     },
 
     async checkIfWonOnTime() {

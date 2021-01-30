@@ -52,6 +52,8 @@ const handleGameExitAttempt = (to, next) => {
   if (bActiveGame) {
     next({ name: 'PlayBoard' })
   } else {
+    console.log('EXITING TO GAME LOBBY')
+
     next()
   }
 }

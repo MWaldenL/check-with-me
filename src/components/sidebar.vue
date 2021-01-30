@@ -40,12 +40,20 @@ import {
 
 export default {
   name: 'Sidebar',
-
+  props: ['selfColor', 'finishedUpdatingScore'],
   async created() {
     // Check if user is in game and disable links as needed
     const userID = firebase.auth().currentUser.uid
     const roomID = await checkUserGame(userID)
     this.isInGame = roomID && this.$route.name === "PlayBoard"
+  },
+
+  updated() {
+    console.log('updated score')
+    if (this.finishedUpdatingScore) {
+      console.log(this.finishedUpdatingScore)
+      this.logout()
+    }
   },
 
   computed: {
@@ -99,6 +107,16 @@ export default {
     }
   },
 
+  watch: {
+    finishedUpdatingScore(newVal, oldVal) {
+      console.log('newVal ' + newVal)
+      console.log('oldVal ' + oldVal)
+      if (newVal === true) {
+        this.logout()
+      }
+    }
+  },
+
   methods: {
     ...mapActions([
       'logoutUser',
@@ -129,12 +147,17 @@ export default {
         const userID = auth.currentUser.uid
         const roomID = await checkUserGame(userID)
         const room = await getSingleGame(roomID)
+        const winColor = this.selfColor === 'w' ? 'B' : 'W'
         const winner = room.host_user.id === userID ? 
           room.other_user.id : 
           room.host_user.id
 
         await this.setWinnerFromLogout(roomID, winner)
         
+        // Inform grid.vue that the player has logged out to compute the score
+        const isLoggingOut = true
+        this.$emit('logoutFromGame', { winner: winColor, isLoggingOut })
+
         // If host user logs out, delete the game, else simply remove the guest
         if (room.host_user.id === userID) {
           await deleteGame(roomID)
@@ -143,8 +166,10 @@ export default {
         }
       }
 
-      // Logout after processing
-      this.logout()
+      // // Logout after processing
+      // if (this.finishedUpdatingScore) {
+      //   this.logout()
+      // }
     },
 
     async playCheck() {
@@ -167,6 +192,7 @@ export default {
     },
 
     logout() {
+      console.log('logging out')
       this.aClearGameState()
       firebase.auth().signOut()
         .then(() => {
