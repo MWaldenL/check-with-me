@@ -29,8 +29,9 @@ export default {
 
   computed: {
     ...mapGetters({
-      enemyUsername: "getEnemyUsername",
-      currentGame: "getCurrentGame"
+      enemyUsername: 'getEnemyUsername',
+      currentGame: 'getCurrentGame',
+      hostTimeLeft: 'getHostTimeLeft'
     })
   },
 
@@ -62,7 +63,7 @@ export default {
     },
 
     async resetClocks() {
-      await axios.get(`${this.SERVER_URL}/resetClocks`)
+      await axios.get(`${this.SERVER_URL}/resetClocks/${this.hostTimeLeft}`)
     }
   }
 }
