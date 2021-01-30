@@ -103,14 +103,13 @@ export default {
   data() {
     return {
       isInGame: false,
-      inGameLogout: false
+      inGameLogout: false,
+      isLoggingOutFromWaitingRoom: false
     }
   },
 
   watch: {
     finishedUpdatingScore(newVal, oldVal) {
-      console.log('newVal ' + newVal)
-      console.log('oldVal ' + oldVal)
       if (newVal === true) {
         this.logout()
       }
@@ -126,12 +125,19 @@ export default {
     async showLogout() {
       const userID = firebase.auth().currentUser.uid
       const roomID = await checkUserGame(userID)
-      
+      const isNotInRoomOrGame = 
+        this.$route.name !== 'PlayBoard' && 
+        this.$route.name !== 'WaitingRoom'
+
+      console.log(isNotInRoomOrGame)
+
       // If coming from game room, show modal, else simply logout
-      if (this.$route.name !== 'PlayBoard') {
+      if (isNotInRoomOrGame) {
+        console.log('in room or game')
         this.logout()
       } else if (roomID) {
         this.inGameLogout = true
+        this.isLoggingOutFromWaitingRoom = true
       }
     },
 
@@ -166,10 +172,11 @@ export default {
         }
       }
 
-      // // Logout after processing
-      // if (this.finishedUpdatingScore) {
-      //   this.logout()
-      // }
+      // Ninja moves: logging out from a game is actually done in the watch method.
+      // Logging out here is caused by leaving the waiting room
+      if (this.isLoggingOutFromWaitingRoom) {
+        this.logout()
+      }
     },
 
     async playCheck() {
