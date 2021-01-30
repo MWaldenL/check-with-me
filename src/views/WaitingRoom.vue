@@ -173,7 +173,7 @@ export default {
         } else if (draws+losses === 0) {
           return "perfect"
         } else {
-          return (wins/(wins + losses + draws)*100).toFixed(2) + "%"
+          return (wins/(wins + losses)*100).toFixed(2) + "%"
         }
       }
     },
@@ -189,7 +189,7 @@ export default {
         } else if (draws+losses === 0) {
           return "perfect"
         } else {
-          return (wins/(wins + losses + draws)*100).toFixed(2) + "%"
+          return (wins/(wins + losses)*100).toFixed(2) + "%"
         }
       }
     },
