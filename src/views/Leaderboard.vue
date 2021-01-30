@@ -57,7 +57,7 @@ export default {
           let leader = {
             rank: index + 1,
             username: doc.data().username,
-            points: doc.data().points
+            points: (doc.data().points).toFixed(2)
           }
           this.leaders.push(leader)
         })
@@ -114,6 +114,7 @@ export default {
     font-size: 3em;
     color: #BCFC8A;
     padding-top: 10px;
+    font-weight: bold;
   }
 
   #LeaderboardRule {
@@ -177,8 +178,8 @@ export default {
   }
 
   #CriteriaSelect {
-    padding: 20px;
-    margin: 10px;
+    padding-top: 5px;
+    margin: 5px;
   }
 
   .triangle-left {
@@ -188,7 +189,7 @@ export default {
     border-top: 15px solid transparent;
     border-right: 30px solid #FFF;
     border-bottom: 15px solid transparent;
-    
+    cursor: pointer;
   }
 
   #criteriaLabel {
@@ -204,6 +205,7 @@ export default {
     border-top: 15px solid transparent;
     border-left: 30px solid #FFF;
     border-bottom: 15px solid transparent;
+    cursor: pointer;
   }
 
   .triangle-left:hover {

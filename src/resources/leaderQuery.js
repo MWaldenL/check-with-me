@@ -64,7 +64,7 @@ export default {
         let leader = {
           rank: index + 1,
           username: doc.data().username,
-          points: doc.data().points
+          points: (doc.data().points).toFixed(2)
         }
         leaders.push(leader)
       })
