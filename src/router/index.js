@@ -33,7 +33,6 @@ router.beforeEach(async (to, from, next) => {
     next({ name: 'Login' })
   } else if (isComingFromGame) {
     console.log('coming from game')
-    // next({ name: 'PlayBoard' })
     handleGameExitAttempt(next)
   } else {
     next()
