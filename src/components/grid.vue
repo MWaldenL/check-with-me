@@ -399,6 +399,28 @@ export default {
     }
   },
 
+  // persist: [
+  //   'currentGameDoc',
+  //   'currentGameData',
+  //   'currentTimerDoc',
+  //   'currentRunningTimer',
+  //   'playerToMove',
+  //   'lastPlayerMoved',
+  //   'selfSeconds',      
+  //   'enemySeconds',
+  //   'isSelfTimeRunning',
+  //   'isEnemyTimeRunning',
+  //   'bIsFirstRun',
+  //   'prevSourceSquare',
+  //   'showingDrawModal',
+  //   'isLastMoveCapture',
+  //   'isCountingMovesForDraw',
+  //   'drawCounter',
+  //   'drawOfferedBy',
+  //   'burdenedColor',
+  //   'didEnemyLogout'
+  // ],
+
   computed: {
     ...mapGetters({
       board: 'getEntireBoard',

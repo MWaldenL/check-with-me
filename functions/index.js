@@ -133,6 +133,9 @@ app.get('/isTimeRunning/:player', (req, res) => {
 app.get('/resetClocks', (req, res) => {
   hostTimeLeft = 600
   otherTimeLeft = 600
+  clearInterval(hostCountDown)
+  clearInterval(otherCountDown)
+
   res.send('Resetting clocks')
 })
 

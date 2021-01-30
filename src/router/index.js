@@ -41,9 +41,7 @@ router.beforeEach(async (to, from, next) => {
 
 const handleGameExitAttempt = (next) => {
   // Check if the game is finished already
-  console.log('active game? ')
-  console.log(store.state.bActiveGame) 
-  if (store.state.bActiveGame) {
+  if (store.state.cells.bActiveGame) {
     next({ name: 'PlayBoard' })
   } else {
     next()
