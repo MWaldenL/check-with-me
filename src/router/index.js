@@ -33,14 +33,15 @@ router.beforeEach(async (to, from, next) => {
     next({ name: 'Login' })
   } else if (isComingFromGame) {
     console.log('coming from game')
-    handleGameExitAttempt(to, next)
+    handleGameExitAttempt(to, next, from.params.id)
   } else {
     next()
   }
 })
 
-const handleGameExitAttempt = (to, next) => {
-  // Check if the game is finished already
+const handleGameExitAttempt = async (to, next, roomID) => {
+  // Check if the game is finished already and does not exist
+  const gameExists = await doesRoomExist(roomID)
   const { bActiveGame } = store.state.cells
   
   // If logging out, proceed regardless
@@ -49,11 +50,9 @@ const handleGameExitAttempt = (to, next) => {
     return
   }
 
-  if (bActiveGame) {
+  if (bActiveGame || gameExists) {
     next({ name: 'PlayBoard' })
   } else {
-    console.log('EXITING TO GAME LOBBY')
-
     next()
   }
 }

@@ -1,6 +1,6 @@
 <template>
   <div>
-    <b-modal v-model="inGameLogout" id="game-logout-modal" @ok="logoutFromGame" hide-header no-close-on-esc no-close-on-backdrop>
+    <b-modal v-model="isLoggingOutFromWaitingRoomOrGame" id="game-logout-modal" @ok="logoutFromGame" hide-header no-close-on-esc no-close-on-backdrop>
       <div>Logging out will remove you from your current room. Proceed?</div>
     </b-modal>
 
@@ -41,17 +41,16 @@ import {
 export default {
   name: 'Sidebar',
   props: ['selfColor', 'finishedUpdatingScore'],
+
   async created() {
     // Check if user is in game and disable links as needed
-    const userID = firebase.auth().currentUser.uid
+    const userID = auth.currentUser.uid
     const roomID = await checkUserGame(userID)
     this.isInGame = roomID && this.$route.name === "PlayBoard"
   },
 
   updated() {
-    console.log('updated score')
     if (this.finishedUpdatingScore) {
-      console.log(this.finishedUpdatingScore)
       this.logout()
     }
   },
@@ -104,7 +103,8 @@ export default {
     return {
       isInGame: false,
       inGameLogout: false,
-      isLoggingOutFromWaitingRoom: false
+      isLoggingOutFromWaitingRoom: false,
+      isLoggingOutFromWaitingRoomOrGame: false
     }
   },
 
@@ -123,26 +123,53 @@ export default {
     ]),
 
     async showLogout() {
-      const userID = firebase.auth().currentUser.uid
+      const userID = auth.currentUser.uid
       const roomID = await checkUserGame(userID)
+      const isInWaitingRoom = this.$route.name === 'WaitingRoom'
+      const isInDeletedRoom = this.$route.name === 'PlayBoard' && !roomID
       const isNotInRoomOrGame = 
         this.$route.name !== 'PlayBoard' && 
         this.$route.name !== 'WaitingRoom'
 
-      console.log(isNotInRoomOrGame)
-
       // If coming from game room, show modal, else simply logout
-      if (isNotInRoomOrGame) {
-        console.log('in room or game')
+      if (isNotInRoomOrGame || isInDeletedRoom) {
         this.logout()
-      } else if (roomID) {
-        this.inGameLogout = true
+      } else if (isInWaitingRoom) {
         this.isLoggingOutFromWaitingRoom = true
+        this.isLoggingOutFromWaitingRoomOrGame = true
+      } else if (roomID) {
+        console.log('in room')
+        this.inGameLogout = true
+        this.isLoggingOutFromWaitingRoomOrGame = true
+      } else {
+        console.log('else block')
+        console.log(roomID)
       }
     },
 
     async logoutFromGame() {
+      const userID = auth.currentUser.uid
+      const roomID = await checkUserGame(userID)
+      const room = await getSingleGame(roomID)
+
+      // Ninja moves: logging out from a game is actually done in the watch method.
+      // Logging out in the waiting room is done here
+      // If host user logs out, delete the game, else simply remove the guest
+      if (this.isLoggingOutFromWaitingRoom) {
+        console.log('logout from waiting room')
+        if (room.host_user.id === userID) {
+          await deleteGame(roomID)
+        } else {
+          await removeGuest(roomID)
+        }
+
+        this.logout()
+        return
+      }
+
       if (!this.activeGame) {
+        console.log('not active game')
+
         // logout handling during post-game
         await gamesCollection
           .doc(this.currentGame)
@@ -150,9 +177,7 @@ export default {
             enemy_left_confirmed: true
           })
       } else {
-        const userID = auth.currentUser.uid
-        const roomID = await checkUserGame(userID)
-        const room = await getSingleGame(roomID)
+        // For logging out from games
         const winColor = this.selfColor === 'w' ? 'B' : 'W'
         const winner = room.host_user.id === userID ? 
           room.other_user.id : 
@@ -161,8 +186,7 @@ export default {
         await this.setWinnerFromLogout(roomID, winner)
         
         // Inform grid.vue that the player has logged out to compute the score
-        const isLoggingOut = true
-        this.$emit('logoutFromGame', { winner: winColor, isLoggingOut })
+        this.$emit('logoutFromGame', { winner: winColor, isLoggingOut: true })
 
         // If host user logs out, delete the game, else simply remove the guest
         if (room.host_user.id === userID) {
@@ -170,12 +194,6 @@ export default {
         } else {
           await removeGuest(roomID)
         }
-      }
-
-      // Ninja moves: logging out from a game is actually done in the watch method.
-      // Logging out here is caused by leaving the waiting room
-      if (this.isLoggingOutFromWaitingRoom) {
-        this.logout()
       }
     },
 
