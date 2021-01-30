@@ -17,15 +17,23 @@
 
 <script>
 import { mapActions, mapGetters } from 'vuex'
+import axios from 'axios'
 import { gamesCollection } from '@/firebase'
 export default {
   name: 'StartGameModal',
+  data() {
+    return {
+      SERVER_URL: 'https://us-central1-check-with-me.cloudfunctions.net/clock'
+    }
+  },
+
   computed: {
     ...mapGetters({
       enemyUsername: "getEnemyUsername",
       currentGame: "getCurrentGame"
     })
   },
+
   methods: {
     ...mapActions([
       "aResetGame",

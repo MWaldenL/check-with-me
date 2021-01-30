@@ -141,6 +141,9 @@ export default {
     // Set the game data
     this.currentGameData = gameData
 
+    // Set active game
+    this.aSetActiveGame(true)
+
     // Check if someone has won from a logout
     // The player present in the room will receive a modal, and
     // the player who logged out will know from their score that they lost
@@ -163,8 +166,10 @@ export default {
     // Set timer data
     // If player time is not running, fetch from db else fetch from server
     // Handles cases where a player opens their side of the game when their time is already running
-    await this.setSelfTimeFromServerOrDB()
-    await this.setEnemyTimeFromServerOrDB()
+    // await this.setSelfTimeFromServerOrDB()
+    // await this.setEnemyTimeFromServerOrDB()
+    await this.setSelfTimeFromDB()
+    await this.setEnemyTimeFromDB()
 
     // Set usernames
     await this.setSelfUsername()
@@ -938,6 +943,20 @@ export default {
       await this.currentTimerDoc.update(newTimeObj)   
     },
 
+    async setSelfTimeFromDB() {
+      const timerDB = await this.currentTimerDoc.get()
+      this.selfSeconds = this.isSelfHost ? 
+          timerDB.data().host_timeLeft : 
+          timerDB.data().other_timeLeft
+    },  
+
+    async setEnemyTimeFromDB() {
+      const timerDB = await this.currentTimerDoc.get()
+      this.enemySeconds = this.isSelfHost ? 
+        timerDB.data().other_timeLeft :        
+        timerDB.data().host_timeLeft 
+    },
+
     async setSelfTimeFromServerOrDB() {
       const timeRunningQuery = await axios.get(`${this.SERVER_URL}/isTimeRunning/${this.selfPlayerType}`)
       this.isSelfTimeRunning = timeRunningQuery.data.isTimeRunning
@@ -971,6 +990,7 @@ export default {
     },
 
     async resetClocks() {
+      console.log('resetting clocks')
       await axios.get(`${this.SERVER_URL}/resetClocks`)
     }
   }

@@ -117,6 +117,7 @@ const actions = {
     //timer payload
     const timeLeft = timerDoc.host_timeLeft
 
+    commit('mSetWinner', 'N')
     commit('mInitGame', { roomID, boardState, hostUser, otherUser, isHostWhite, lastPlayerMoved, timerID, timeLeft })
   },
 

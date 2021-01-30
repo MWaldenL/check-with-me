@@ -33,15 +33,23 @@ router.beforeEach(async (to, from, next) => {
     next({ name: 'Login' })
   } else if (isComingFromGame) {
     console.log('coming from game')
-    handleGameExitAttempt(next)
+    handleGameExitAttempt(to, next)
   } else {
     next()
   }
 })
 
-const handleGameExitAttempt = (next) => {
+const handleGameExitAttempt = (to, next) => {
   // Check if the game is finished already
-  if (store.state.cells.bActiveGame) {
+  const { bActiveGame } = store.state.cells
+  
+  // If logging out, proceed regardless
+  if (to.name === 'Login') {
+    next()
+    return
+  }
+
+  if (bActiveGame) {
     next({ name: 'PlayBoard' })
   } else {
     next()
