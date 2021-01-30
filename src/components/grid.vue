@@ -16,7 +16,7 @@
             </span>
           </keep-alive>
         </h1>
-        <img src="../../public/assets/to-move.png" id="turn-icon" class="ml-5" v-show="!canMakeMove" />
+        <img src="../../public/assets/to-move.png" id="turn-icon-enemy" class="ml-5 turn-icon" v-show="!canMakeMove" />
       </div>
 
       <h1 id="p1-count" class="pt-3"> Pieces left: {{ otherCount }} </h1>
@@ -49,7 +49,7 @@
       <h1 id="p2-count" class="pb-4"> Pieces left: {{ selfCount }} </h1>
       <div class="d-flex justify-content-end">
         <h1>
-          <img src="../../public/assets/to-move.png" id="turn-icon" class="mr-5" v-show="canMakeMove" />
+          <img src="../../public/assets/to-move.png" id="turn-icon-self" class="mr-5 turn-icon" v-show="canMakeMove" />
           <keep-alive>
             <span class="time text-white" id="selfTime">
               {{ selfSeconds | minutes | formattedTime }}:{{ selfSeconds | seconds | formattedTime }}
@@ -1009,6 +1009,9 @@ div#table {
 table {
   margin: 0;
   padding: 0;
+}
+.turn-icon {
+  height: 45px
 }
 #p1-details {
   text-align: left;
