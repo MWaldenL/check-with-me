@@ -3,13 +3,13 @@
   <Sidebar />
   <h1 id="title">Profile</h1>
   <div id="user-details">
-    <h1 id="hello">Hello, <span id="username">{{ user.data.username }}</span></h1>
+    <h1 id="hello">Hello, <span id="username">{{ username }}</span></h1>
     <b-row style="margin-bottom: 30px">
       <b-col>
         <h2 class="col-header">Your information</h2>
-        <h2 class="col-content">First name: <span class="col-details">{{ user.data.first_name }}</span></h2>
-        <h2 class="col-content">Last name: <span class="col-details">{{ user.data.last_name }}</span></h2>
-        <h2 class="col-content">Email: <span class="col-details">{{ getEmail }}</span></h2>
+        <h2 class="col-content">First name: <span class="col-details">{{ firstName }}</span></h2>
+        <h2 class="col-content">Last name: <span class="col-details">{{ lastName }}</span></h2>
+        <h2 class="col-content">Email: <span class="col-details">{{ email }}</span></h2>
       </b-col>
       <b-col></b-col>
       <b-col>
@@ -21,22 +21,25 @@
     </b-row>
     <h2 class="col-header">Your statistics</h2>
     <b-row>
-      <b-col><Statistic title="Total Wins" :value="getTotalWins" /></b-col>
-      <b-col><Statistic title="Wins on White" :value="user.data.wins_white" /></b-col>
-      <b-col><Statistic title="Wins on Black" :value="user.data.wins_black" /></b-col>
+      <b-col><Statistic title="Total Wins" :value="totalWins" /></b-col>
+      <b-col><Statistic title="Wins on White" :value="winsOnWhite" /></b-col>
+      <b-col><Statistic title="Wins on Black" :value="winsOnBlack" /></b-col>
     </b-row>
     <h2 class="col-header"></h2>
     <b-row>
-      <b-col><Statistic title="Win Rate" :value="getWinRate" /></b-col>
-      <b-col><Statistic title="Points" :value="getPoints" /></b-col>
-      <b-col><Statistic title="Total Games" :value="getTotalGames" /></b-col>
+      <b-col><Statistic title="Win Rate" :value="winRate" /></b-col>
+      <b-col><Statistic title="Points" :value="points" /></b-col>
+      <b-col><Statistic title="Total Games" :value="totalGames" /></b-col>
     </b-row>
   </div>
 </div>
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
+import {
+  auth,
+  usersCollection
+} from '@/firebase'
 import Sidebar from '@/components/sidebar.vue'
 import Statistic from '@/components/statistic.vue'
 
@@ -46,53 +49,59 @@ export default {
     Sidebar,
     Statistic
   },
-  computed: {
-    ...mapGetters({
-      user: 'getCurrentUser'
-    }),
-
-    getEmail () {
-      const email = this.user.data.email
-      const length = email.length - 5
-
-      let string = email.substring(0, 2);
-      for (let i = 0; i < length; i++)
-        string = string.concat("*")
-      string = string.concat(email.substring(length + 2, length + 5))
-
-      return string
-    },
-
-    getTotalWins () {
-      return this.user.data.wins_white + this.user.data.wins_black
-    },
-
-    getTotalGames () {
-      return this.user.data.wins_white + this.user.data.wins_black +
-        this.user.data.draw_white + this.user.data.draw_black +
-        this.user.data.loss_white + this.user.data.loss_black
-    },
-
-    getWinRate () {
-      const nWins = this.user.data.wins_white + this.user.data.wins_black
-      const nDraw = this.user.data.draw_white + this.user.data.draw_black
-      const nLoss = this.user.data.loss_white + this.user.data.loss_black
-
-      const nCounted = nWins + nLoss
-
-      if (nCounted === 0 && nDraw !== 0) {
-        return "0.00%"
-      } else if (nCounted === 0 && nDraw === 0) {
-        return "N/A"
-      } else {
-        const nRate = nWins / nCounted * 100
-        return nRate.toFixed(2) + "%"
-      }
-    },
-
-    getPoints () {
-      return this.user.data.points.toFixed(2)
+  data() {
+    return {
+      username: null,
+      firstName: null,
+      lastName: null,
+      email: null,
+      totalWins: 0,
+      winsOnBlack: 0,
+      winsOnWhite: 0,
+      totalGames: 0,
+      winRate: 0,
+      points: 0
     }
+  },
+  async created() {
+    const selfID = auth.currentUser.uid;
+    const user = await usersCollection.doc(selfID).get()
+
+    this.username = user.data().username
+    this.firstName = user.data().first_name
+    this.lastName = user.data().last_name
+    
+    const rawEmail = user.data().email
+    const length = rawEmail.length - 5
+
+    let string = rawEmail.substring(0, 2);
+    for (let i = 0; i < length; i++)
+      string = string.concat("*")
+    string = string.concat(rawEmail.substring(length + 2, length + 5))
+
+    this.email = string
+
+    this.winsOnBlack = user.data().wins_black
+    this.winsOnWhite = user.data().wins_white
+    this.totalWins = this.winsOnBlack + this.winsOnWhite
+
+    const totalDraw = user.data().draw_white + user.data().draw_white
+    const totalLoss = user.data().loss_white + user.data().loss_white
+
+    this.totalGames = this.totalWins + totalDraw + totalLoss
+
+    const totalCounted = this.totalWins + totalLoss
+
+    if (totalCounted === 0 && totalDraw !== 0) {
+      this.winRate = "0.00%"
+    } else if (totalCounted === 0 && totalDraw === 0) {
+      this.winRate = "N/A"
+    } else {
+      const rate = this.totalWins / totalCounted * 100
+      this.winRate = rate.toFixed(2) + "%"
+    }
+
+    this.points = user.data().points
   }
 }
 </script>
