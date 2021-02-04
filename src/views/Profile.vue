@@ -101,7 +101,7 @@ export default {
       this.winRate = rate.toFixed(2) + "%"
     }
 
-    this.points = user.data().points
+    this.points = user.data().points.toFixed(2)
   }
 }
 </script>
